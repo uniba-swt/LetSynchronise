@@ -1,2 +1,2 @@
 # LetSynchronise
-Interactive simulator for LET systems
+Interactive simulator for scheduling the tasks of a LET system.
