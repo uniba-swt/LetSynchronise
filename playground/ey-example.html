@@ -1,32 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Bootstrap Example</title>
+    <title>LetSynchronise: LET Task Simulator</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- Base URL for all links on this page -->
     <base href="../dependencies/">
+    
+    <!-- CSS to use for this page -->
     <link rel="stylesheet" href="bootstrap-4.5.2/css/bootstrap.css">
+    
+    <!-- Our own CSS -->
+    <link rel="stylesheet" href="../playground/ey-example.css">
+    
+    <!-- JavaScript frameworks/libraries this page depends on -->
     <script src="jquery-3.5.1.js"></script>
     <script src="bootstrap-4.5.2/js/bootstrap.js"></script>
+    
+    <!-- Our own JavaScript code/library/framework. Execution is deferred until the page has loaded -->
+    <script defer src="../playground/ey-example.js"></script>
 </head>
 <body>
 
     <h1>LetSynchronise: LET Task Simulator</h1>
 
+    <!-- This page has different tab views -->
+    <!-- Buttons for the tab views defined below -->
     <nav>
         <div class="nav nav-tabs" id="nav-tab" role="tablist">
-            <a class="nav-item nav-link active" id="nav-design-tab" data-toggle="tab" href="#nav-design" role="tab" aria-controls="nav-design" aria-selected="true">Design</a>
-            <a class="nav-item nav-link" id="nav-analyse-tab" data-toggle="tab" href="#nav-analyse" role="tab" aria-controls="nav-analyse" aria-selected="false">Analyse</a>
+            <a class="nav-item nav-link" id="nav-design-tab" data-toggle="tab" href="#nav-design" role="tab" aria-controls="nav-design" aria-selected="true">Design</a>
+            <a class="nav-item nav-link active" id="nav-analyse-tab" data-toggle="tab" href="#nav-analyse" role="tab" aria-controls="nav-analyse" aria-selected="false">Analyse</a>
         </div>
     </nav>
 
+    <!-- Content for the tab views defined below -->
     <div class="tab-content" id="nav-tabContent">
-        <div class="tab-pane fade show active" id="nav-design" role="tabpanel" aria-labelledby="nav-design-tab">
-            Specify LET tasks and their data dependencies.
+        <div class="tab-pane fade" id="nav-design" role="tabpanel" aria-labelledby="nav-design-tab">
+            <p>Specify LET tasks and their data dependencies.</p>
+            <p id="current-time">Current time</p>
+            <button>Set information</button>
+            <h2></h2>
         </div>
         
-        <div class="tab-pane fade" id="nav-analyse" role="tabpanel" aria-labelledby="nav-analyse-tab">
-            Specify constraints and analyse them.
+        <div class="tab-pane fade show active" id="nav-analyse" role="tabpanel" aria-labelledby="nav-analyse-tab">
+            <p>Specify constraints and analyse them.</p>
+            <p id="time-delta">Time delta</p>
+            <canvas></canvas>
         </div>
     </div>
 

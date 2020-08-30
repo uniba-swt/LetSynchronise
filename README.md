@@ -9,7 +9,7 @@ Interactive simulator for the scheduling of LET tasks.
    * [Popper v2.4.4](https://popper.js.org): Tooltip and popover positioning engine
 
 ## Directory Layout
-* dependencies: JavaScript libraries
+* dependencies: JavaScript frameworks and libraries
 * docs: Documentation
    * Architecture and class diagrams
    * Algorithms
