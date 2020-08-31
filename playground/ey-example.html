@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="../playground/ey-example.css">
     
     <!-- JavaScript frameworks/libraries this page depends on -->
+    <script src="d3-5.16.0/d3.js"></script>
     <script src="jquery-3.5.1.js"></script>
     <script src="bootstrap-4.5.2/js/bootstrap.js"></script>
     
@@ -29,21 +30,23 @@
     <!-- Buttons for the tab views defined below -->
     <nav>
         <div class="nav nav-tabs" id="nav-tab" role="tablist">
-            <a class="nav-item nav-link" id="nav-design-tab" data-toggle="tab" href="#nav-design" role="tab" aria-controls="nav-design" aria-selected="true">Design</a>
-            <a class="nav-item nav-link active" id="nav-analyse-tab" data-toggle="tab" href="#nav-analyse" role="tab" aria-controls="nav-analyse" aria-selected="false">Analyse</a>
+            <a class="nav-item nav-link active" id="nav-design-tab" data-toggle="tab" href="#nav-design" role="tab" aria-controls="nav-design" aria-selected="true">Design</a>
+            <a class="nav-item nav-link" id="nav-analyse-tab" data-toggle="tab" href="#nav-analyse" role="tab" aria-controls="nav-analyse" aria-selected="false">Analyse</a>
         </div>
     </nav>
 
     <!-- Content for the tab views defined below -->
     <div class="tab-content" id="nav-tabContent">
-        <div class="tab-pane fade" id="nav-design" role="tabpanel" aria-labelledby="nav-design-tab">
+        <div class="tab-pane fade show active" id="nav-design" role="tabpanel" aria-labelledby="nav-design-tab">
             <p>Specify LET tasks and their data dependencies.</p>
             <p id="current-time">Current time</p>
             <button>Set information</button>
             <h2></h2>
+            <ul></ul>
+            <svg id="d3-example"></svg>
         </div>
         
-        <div class="tab-pane fade show active" id="nav-analyse" role="tabpanel" aria-labelledby="nav-analyse-tab">
+        <div class="tab-pane fade" id="nav-analyse" role="tabpanel" aria-labelledby="nav-analyse-tab">
             <p>Specify constraints and analyse them.</p>
             <p id="time-delta">Time delta</p>
             <canvas></canvas>

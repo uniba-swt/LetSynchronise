@@ -236,3 +236,31 @@ function loop(timeStamp) {
 }
 
 loop(null);
+
+
+// -----------------------------------------------------
+// D3
+// -----------------------------------------------------
+
+let fruits = ['apple', 'mango', 'banana', 'orange'];
+d3.select('ul').selectAll('li').data(fruits).enter().append('li').text(function(d) { 
+	return d;
+});
+
+let data = [60, 80, 120, 150, 200];
+
+let barHeight = 20;
+
+let bar = d3.select('#d3-example').selectAll('rect').data(data).enter().append('rect').attr('width', function(d) {
+	return d;
+}).attr('height', barHeight - 1).attr('transform', function(d, i) {
+	return `translate(0, ${i * barHeight})`;
+}).on("mouseover", function() {
+	d3.select(this).transition().ease(d3.easeLinear).style('fill', 'green');
+}).on("mouseout", function() {
+	d3.select(this).transition().ease(d3.easeExpInOut).style('fill', 'black');
+});
+
+
+
+
