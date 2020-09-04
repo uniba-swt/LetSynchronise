@@ -242,25 +242,62 @@ loop(null);
 // D3
 // -----------------------------------------------------
 
-let fruits = ['apple', 'mango', 'banana', 'orange'];
-d3.select('ul').selectAll('li').data(fruits).enter().append('li').text(function(d) { 
-	return d;
-});
+function randomLetters() {
+    return d3.shuffle("abcdefghijklmnopqrstuvwxyz".split(""))
+    .slice(0, Math.floor(6 + Math.random() * 20))
+    .sort();
+}
 
-let data = [60, 80, 120, 150, 200];
+const letters1 = randomLetters();
+const letters2 = randomLetters();
+console.log(letters1);
+console.log(letters2);
 
-let barHeight = 20;
+d3.select('ul')
+  .selectAll('li')
+  .data(letters1)
+  .enter()
+  .append('li')
+    .text(d => d);
 
-let bar = d3.select('#d3-example').selectAll('rect').data(data).enter().append('rect').attr('width', function(d) {
-	return d;
-}).attr('height', barHeight - 1).attr('transform', function(d, i) {
-	return `translate(0, ${i * barHeight})`;
-}).on("mouseover", function() {
-	d3.select(this).transition().ease(d3.easeLinear).style('fill', 'green');
-}).on("mouseout", function() {
-	d3.select(this).transition().ease(d3.easeExpInOut).style('fill', 'black');
-});
+const textUpdate =
+d3.select('ul')
+  .selectAll('li')
+  .data(letters2)
+    .text(d => d);
+
+const textEnter = textUpdate.enter().append('li').text(d => d);
+const textExit = textUpdate.exit().remove();
+// textEnter.merge(textUpdate).text(d => d);
 
 
+const data3 = [60, 80, 120, 150, 200];
 
+const barHeight = 20;
+
+const bar =
+d3.select('#d3-example')
+  .selectAll('rect')
+  .data(data3)
+  .enter()
+  .append('rect')
+    .attr('width', function(d) {
+        return d;
+    })
+    .attr('height', barHeight - 1)
+    .attr('transform', function(d, i) {
+        return `translate(0, ${i * barHeight})`;
+    })
+    .on("mouseover", function() {
+        d3.select(this)
+            .transition()
+            .ease(d3.easeLinear)
+            .style('fill', 'green');
+    })
+    .on("mouseout", function() {
+        d3.select(this)
+            .transition()
+            .ease(d3.easeExpInOut)
+            .style('fill', 'black');
+    });
 
