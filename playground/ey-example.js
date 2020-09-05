@@ -301,3 +301,55 @@ d3.select('#d3-example')
             .style('fill', 'black');
     });
 
+document.querySelector("#read-button").onclick = function () {
+    if(document.querySelector("#file-input").files.length == 0) {
+        alert('Error : No file selected');
+        return;
+    }
+    
+    // first file selected by user
+    const file = document.querySelector("#file-input").files[0];
+    
+    // perform validation on file type & size if required
+    
+    // read the file
+    const reader = new FileReader();
+    reader.readAsText(file);
+    
+    // file reading started
+    reader.addEventListener('loadstart', function() {
+        console.log('File reading started');
+    });
+    
+    // file reading finished successfully
+    reader.addEventListener('load', function(e) {
+        // contents of file in variable
+        const text = e.target.result;
+        const json = JSON.parse(text);
+        
+        console.log(json);
+        
+        const textUpdate =
+        d3.select('ul')
+        .selectAll('li')
+        .data(json)
+        
+        const textEnter = textUpdate.enter().append('li');
+        const textExit = textUpdate.exit().remove();
+        textEnter.merge(textUpdate).text(d => `${d.Name} is ${d.Age} years old`);
+    });
+    
+    // file reading failed
+    reader.addEventListener('error', function() {
+        alert('Error : Failed to read file');
+    });
+    
+    // file read progress
+    reader.addEventListener('progress', function(e) {
+        if (e.lengthComputable == true) {
+            var percent_read = Math.floor((e.loaded/e.total)*100);
+            console.log(percent_read + '% read');
+        }
+    });
+    
+};
