@@ -243,8 +243,8 @@ loop(null);
 // -----------------------------------------------------
 
 function randomLetters() {
-    return d3.shuffle("abcdefghijklmnopqrstuvwxyz".split(""))
-    .slice(0, Math.floor(6 + Math.random() * 20))
+    return d3.shuffle('abcdefghijklmnopqrstuvwxyz'.split(''))
+    .slice(0, Math.floor(1 + Math.random() * 5))
     .sort();
 }
 
@@ -273,33 +273,57 @@ const textExit = textUpdate.exit().remove();
 
 const data3 = [60, 80, 120, 150, 200];
 
+const scale =
+d3.scaleLinear()
+  .domain([0, d3.max(data3)])
+  .range([0, 600]);
+
+// Add scales to axis
+const x_axis =
+d3.axisBottom()
+  .scale(scale);
+
 const barHeight = 20;
+const barMargin = 2;
 
 const bar =
 d3.select('#d3-example')
-  .selectAll('rect')
-  .data(data3)
-  .enter()
-  .append('rect')
-    .attr('width', function(d) {
-        return d;
-    })
-    .attr('height', barHeight - 1)
-    .attr('transform', function(d, i) {
-        return `translate(0, ${i * barHeight})`;
-    })
-    .on("mouseover", function() {
-        d3.select(this)
-            .transition()
-            .ease(d3.easeLinear)
-            .style('fill', 'green');
-    })
-    .on("mouseout", function() {
-        d3.select(this)
-            .transition()
-            .ease(d3.easeExpInOut)
-            .style('fill', 'black');
-    });
+  .append('g')
+  .attr('transform', `translate(50, 10)`);
+
+const group =
+bar.selectAll('g')
+   .data(data3)
+   .enter()
+   .append('g')
+     .attr('transform', (d, i) => `translate(0, ${i * (barHeight + barMargin)})`);
+
+group.append('rect')
+     .attr('width', d => scale(d))
+     .attr('height', barHeight)
+     .on('mouseover', function() {
+         d3.select(this)
+           .transition()
+             .ease(d3.easeLinear)
+             .style('fill', 'green');
+     })
+     .on('mouseout', function() {
+         d3.select(this)
+           .transition()
+             .ease(d3.easeExpInOut)
+             .style('fill', 'grey');
+     });
+
+group.append('text')
+     .attr('x', 10)
+     .attr('y', barHeight * 0.5)
+     .attr('dy', '0.35em')
+     .text(d => `Value: ${d}`);
+
+bar.append('g')
+   .attr('transform', (d, i) => `translate(0, ${data3.length * (barHeight + barMargin)})`)
+   .call(x_axis);
+
 
 document.querySelector("#read-button").onclick = function () {
     if(document.querySelector("#file-input").files.length == 0) {
