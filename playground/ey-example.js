@@ -1,3 +1,5 @@
+"use strict";
+
 // -----------------------------------------------------
 // DOM modification
 // -----------------------------------------------------
@@ -29,7 +31,7 @@ window.onload = function() {
     // Open our database; it is created if it doesn't already exist
     // (see onupgradeneeded below)
     let request = window.indexedDB.open('info_db', 1);
-    
+
     // Setup the database tables if this has not already been done
     request.onupgradeneeded = function(event) {
         // Grab a reference to the opened database
