@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>LetSynchronise: LET Task Simulator</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- Base URL for all links on this page -->
+    <base href="../">
+    
+    <!-- CSS to use for this page -->
+    <link rel="stylesheet" href="dependencies/bootstrap-4.5.2/css/bootstrap.css">
+    
+    <!-- Our own CSS -->
+    <link rel="stylesheet" href="sources/ls.main.css">
+    
+    <!-- JavaScript frameworks/libraries this page depends on -->
+    <script src="dependencies/d3-5.16.0/d3.js"></script>
+    <script src="dependencies/jquery-3.5.1.js"></script>
+    <script src="dependencies/bootstrap-4.5.2/js/bootstrap.js"></script>
+    
+    <!-- Our own JavaScript code/library/framework. Execution is deferred until the page has loaded -->
+    <!-- <script type="module"> does not work when executed locally -->
+    <script src="sources/model/ls.model.js"></script>
+    <script src="sources/model/ls.model.let.js"></script>
+    <script src="sources/model/ls.model.schedule.abstract.js"></script>
+    <script src="sources/model/ls.model.schedule.concrete.js"></script>
+
+    <script src="sources/view/ls.view.js"></script>
+    <script src="sources/view/ls.view.let.js"></script>
+
+    <script src="sources/controller/ls.controller.js"></script>
+    <script src="sources/controller/ls.controller.let.js"></script>
+
+    <script defer src="sources/ls.main.js"></script>
+</head>
+<body>
+
+    <h1>LetSynchronise: LET Task Simulator</h1>
+
+    <!-- This page has different tab views -->
+    <!-- Buttons for the tab views defined below -->
+    <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <a class="nav-item nav-link active" id="nav-design-tab" data-toggle="tab" href="#nav-design" role="tab" aria-controls="nav-design" aria-selected="true">Design</a>
+            <a class="nav-item nav-link" id="nav-analyse-tab" data-toggle="tab" href="#nav-analyse" role="tab" aria-controls="nav-analyse" aria-selected="false">Analyse</a>
+        </div>
+    </nav>
+
+    <!-- Content for the tab views defined below -->
+    <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane fade show active" id="nav-design" role="tabpanel" aria-labelledby="nav-design-tab">
+            <p>Specify LET tasks and their data dependencies.</p>
+
+            <h2></h2>
+
+            <input type="file" id="file-input" />
+            <button id="read-button">Read File</button>
+        </div>
+        
+        <div class="tab-pane fade" id="nav-analyse" role="tabpanel" aria-labelledby="nav-analyse-tab">
+            <p>Specify constraints and analyse them.</p>
+        </div>
+    </div>
+
+</body>
+</html>
+

@@ -1,5 +1,6 @@
 'use strict';
 
-class ModelLet {
+class View {
     constructor() {}
 }
+

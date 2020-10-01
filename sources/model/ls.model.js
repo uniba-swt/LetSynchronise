@@ -1,5 +1,5 @@
 'use strict';
 
-class ModelLet {
+class Model {
     constructor() {}
 }
