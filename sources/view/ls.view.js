@@ -2,5 +2,9 @@
 
 class View {
     constructor() {}
+    
+    toString() {
+    	return "View";
+    }
 }
 

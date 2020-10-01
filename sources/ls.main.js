@@ -1,5 +1,7 @@
 'use strict';
 
-const app = new Controller(new Model(), new View());
+const app = new Controller();
+app.setView(new View());
+app.setModel(new Model());
 
-console.log("done");
+console.log(app.toString());
