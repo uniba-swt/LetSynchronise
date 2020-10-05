@@ -1,21 +1,17 @@
 'use strict';
 
 class Controller {
-	model = null;
-	view = null;
-	
+    controllerTask = null;
+    controllerDependencies = null;
+    controllerSchedule = null;
+
     constructor() { }
     
-    setView(view) {
-    	this.view = view;
-    }
-    
-    setModel(model) {
-    	this.model = model;
-    }
-    
     toString() {
-    	return `Controller has ${this.view.toString()} and ${this.model}`;
+    	return ['Controller contains ...',
+    	        `  ${this.controllerTask}, `,
+                `  ${this.controllerDependencies}, and`,
+                `  ${this.controllerSchedule}`].join('\n');
     }
     
 }

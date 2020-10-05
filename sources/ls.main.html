@@ -22,15 +22,19 @@
     <!-- Our own JavaScript code/library/framework. Execution is deferred until the page has loaded -->
     <!-- <script type="module"> does not work when executed locally -->
     <script src="sources/model/ls.model.js"></script>
-    <script src="sources/model/ls.model.let.js"></script>
-    <script src="sources/model/ls.model.schedule.abstract.js"></script>
-    <script src="sources/model/ls.model.schedule.concrete.js"></script>
+    <script src="sources/model/ls.model.dependencies.js"></script>
+    <script src="sources/model/ls.model.schedule.js"></script>
+    <script src="sources/model/ls.model.task.js"></script>
 
     <script src="sources/view/ls.view.js"></script>
-    <script src="sources/view/ls.view.let.js"></script>
+    <script src="sources/view/ls.view.dependencies.js"></script>
+    <script src="sources/view/ls.view.schedule.js"></script>
+    <script src="sources/view/ls.view.task.js"></script>
 
     <script src="sources/controller/ls.controller.js"></script>
-    <script src="sources/controller/ls.controller.let.js"></script>
+    <script src="sources/controller/ls.controller.dependencies.js"></script>
+    <script src="sources/controller/ls.controller.schedule.js"></script>
+    <script src="sources/controller/ls.controller.task.js"></script>
 
     <script defer src="sources/ls.main.js"></script>
 </head>
@@ -50,12 +54,19 @@
     <!-- Content for the tab views defined below -->
     <div class="tab-content" id="nav-tabContent">
         <div class="tab-pane fade show active" id="nav-design" role="tabpanel" aria-labelledby="nav-design-tab">
-            <p>Specify LET tasks and their data dependencies.</p>
+            <p>Define or edit a LET task.</p>
 
-            <h2></h2>
+            <form id="view-task">
+                <p>
+                    <label for="name">Name: </label>
+                    <input type="text" id="name">
+                </p>
+                <p>
+                    <button id="submit">Create</button>
+                </p>
+            </form>
 
-            <input type="file" id="file-input" />
-            <button id="read-button">Read File</button>
+            <p>Define task dependencies.</p>
         </div>
         
         <div class="tab-pane fade" id="nav-analyse" role="tabpanel" aria-labelledby="nav-analyse-tab">
