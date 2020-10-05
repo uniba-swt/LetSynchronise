@@ -25,3 +25,7 @@ Interactive simulator for the scheduling of LET tasks.
 
 
 ## Usage
+
+## Code Style
+* Indentation: 4 spaces
+* Names: camel casing
