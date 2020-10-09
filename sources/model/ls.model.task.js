@@ -19,7 +19,9 @@ class ModelTask {
 
     createTask(taskParameters) {
         alert(`ModelTask.createTask(${JSON.stringify(taskParameters)})`);
+		// Store taskParameters into Database
         
+		// Return tasks to updateTasks
         this.updateTasks([taskParameters]);   // Replace [taskParameters] with the actual list of tasks
     }
     

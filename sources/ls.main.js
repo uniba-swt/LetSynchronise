@@ -5,6 +5,7 @@ let model = new Model();
 model.modelTask = new ModelTask();
 model.modelDependencies = new ModelDependencies();
 model.modelSchedule = new ModelSchedule();
+//model.modelDatabase = new ModelDatabase(); //mk: todo
 
 // Define the view implementations
 let view = new View();
@@ -25,5 +26,6 @@ controller.controllerDependencies.view = view.viewDependencies;
 controller.controllerDependencies.model = model.modelDependencies;
 controller.controllerSchedule.view = view.viewSchedule;
 controller.controllerSchedule.model = model.modelSchedule;
+
 
 console.log(controller.toString());
