@@ -6,11 +6,12 @@ class ViewTask {
     nameField = null;
     initialOffsetField = null;
     activationOffsetField = null;
-    periodField = null;
     durationField = null;
+    periodField = null;
     inputsField = null;
     outputsField = null;
     
+    previewButton = null;
     submitButton = null;
     
     taskSet = null;
@@ -21,17 +22,18 @@ class ViewTask {
         this.nameField = this.root.querySelector('#name');
         this.initialOffsetField = this.root.querySelector('#initial-offset');
         this.activationOffsetField = this.root.querySelector('#activation-offset');
-        this.periodField = this.root.querySelector('#period');
         this.durationField = this.root.querySelector('#duration');
+        this.periodField = this.root.querySelector('#period');
         this.inputsField = this.root.querySelector('#inputs');
         this.outputsField = this.root.querySelector('#outputs');
         
+        this.previewButton = this.root.querySelector('#preview');
         this.submitButton = this.root.querySelector('#submit');
         
         this.taskPreview = d3.select('#view-task-preview');
         this.taskSet = d3.select('#view-task-set');
         
-        this.updatePreview();
+        this.setupPreviewButtonListener();
     }
     
     get name() {
@@ -46,12 +48,12 @@ class ViewTask {
     	return this.activationOffsetField.value;
     }
     
-    get period() {
-    	return this.periodField.value;
-    }
-    
     get duration() {
     	return this.durationField.value;
+    }
+    
+    get period() {
+    	return this.periodField.value;
     }
     
     get inputs() {
@@ -62,6 +64,45 @@ class ViewTask {
     	return this.outputsField.value;
     }
     
+    // -----------------------------------------------------
+    // Setup listeners
+    
+    setupPreviewButtonListener() {
+        this.previewButton.addEventListener('click', event => {
+            // Prevent the default behaviour of submitting the form and the reloading of the webpage.
+            event.preventDefault();
+            
+            // Package all the task paramters into an object.
+            // Parameters are strings.
+            let taskParametersRaw = {
+            	'name': this.name, 
+            	'initialOffset': this.initialOffset,
+            	'activationOffset': this.activationOffset,
+            	'duration': this.duration,
+            	'period': this.period,
+            	'inputs': this.inputs,
+            	'outputs': this.outputs
+            };
+			
+            // Validate the inputs.            
+            if (this.validateTaskParameters(taskParametersRaw)) {
+            	// Package all the task parameters into an object.
+            	// Parameters are converted into proper types.
+				let taskParameters = {
+					'name': this.name, 
+					'initialOffset': parseFloat(this.initialOffset),
+					'activationOffset': parseFloat(this.activationOffset),
+					'duration': parseFloat(this.duration),
+					'period': parseFloat(this.period),
+					'inputs': this.inputs.split(',').map(item => item.trim()).filter(Boolean),
+					'outputs': this.outputs.split(',').map(item => item.trim()).filter(Boolean)
+				};
+            
+                // Call the handler.
+            	this.updatePreview(taskParameters);
+            }
+        });
+    }
     
     // -----------------------------------------------------
     // Registration of handlers from the controller
@@ -72,56 +113,83 @@ class ViewTask {
             event.preventDefault();
             
             // Package all the task paramters into an object.
-            let taskParameters = {
+            // Parameters are strings.
+            let taskParametersRaw = {
             	'name': this.name, 
             	'initialOffset': this.initialOffset,
             	'activationOffset': this.activationOffset,
-            	'period': this.period,
             	'duration': this.duration,
+            	'period': this.period,
             	'inputs': this.inputs,
             	'outputs': this.outputs
             };
-
+			
             // Validate the inputs.            
-            if (ViewTask.validateTaskParameters(taskParameters)) {
+            if (this.validateTaskParameters(taskParametersRaw)) {
+            	// Package all the task parameters into an object.
+            	// Parameters are converted into proper types.
+				let taskParameters = {
+					'name': this.name, 
+					'initialOffset': parseFloat(this.initialOffset),
+					'activationOffset': parseFloat(this.activationOffset),
+					'duration': parseFloat(this.duration),
+					'period': parseFloat(this.period),
+					'inputs': this.inputs.split(',').map(item => item.trim()).filter(Boolean),
+					'outputs': this.outputs.split(',').map(item => item.trim()).filter(Boolean)
+				};
+            
                 // Call the handler.
             	handler(taskParameters);
             }
         });
     }
     
-    static validateTaskParameters(task) {
-		if (task.name == null || task.name == '') {
-			alert('Task name cannot be blank.');
+    validateTaskParameters(taskParameters) {
+		if (taskParameters.name == null || taskParameters.name == '') {
+			alert('taskParameters name cannot be blank.');
 			return false;
 		}
 		
-		if (task.initialOffset == null || !$.isNumeric(task.initialOffset)) {
+		if (taskParameters.initialOffset == null || !$.isNumeric(taskParameters.initialOffset)) {
 			alert('Initial offset has to be a decimal number.');
 			return false;
 		}
 		
-		if (task.activationOffset == null || !$.isNumeric(task.activationOffset)) {
+		if (taskParameters.activationOffset == null || !$.isNumeric(taskParameters.activationOffset)) {
 			alert('Activation offset has to be a decimal number.');
 			return false;
 		}
-		
-		if (task.period == null || !$.isNumeric(task.period)) {
-			alert('Period offset has to be a decimal number.');
+
+		if (taskParameters.duration == null || !$.isNumeric(taskParameters.duration)) {
+			alert('Duration offset has to be a decimal number.');
+			return false;
+		} else if (parseFloat(taskParameters.duration) == 0) {
+			alert('Duration has to be greater than 0.');
 			return false;
 		}
 		
-		if (task.duration == null || !$.isNumeric(task.duration)) {
+		if (taskParameters.period == null || !$.isNumeric(taskParameters.period)) {
 			alert('Period offset has to be a decimal number.');
+			return false;
+		} else if (parseFloat(taskParameters.period) == 0) {
+			alert('Period has to be greater than 0.');
 			return false;
 		}
 		
-		if (task.inputs == null || task.inputs == '') {
+		let activationOffset = parseFloat(taskParameters.activationOffset);
+		let duration = parseFloat(taskParameters.duration);
+		let period = parseFloat(taskParameters.period);
+		if ((activationOffset + duration) > period) {
+			alert('Period is shorter than the combined activation offset and LET duration.');
+			return false;
+		}
+		
+		if (taskParameters.inputs == null || taskParameters.inputs == '') {
 			alert('Specify at least one input.');
 			return false;
 		}
 		
-		if (task.outputs == null || task.outputs == '') {
+		if (taskParameters.outputs == null || taskParameters.outputs == '') {
 			alert('Specify at least one output.');
 			return false;
 		}
@@ -133,15 +201,17 @@ class ViewTask {
     // -----------------------------------------------------
     // Class methods
 
-	updatePreview() {
-		const data3 = [60];
-
+	updatePreview(taskParameters) {
+		// Delete the existing preview, if it exists
+		this.taskPreview.selectAll("*").remove();
+		
+		// Create function to scale the data along the x-axis of fixed-length
 		const scale =
 		d3.scaleLinear()
-		  .domain([0, d3.max(data3)])
+		  .domain([0, taskParameters.initialOffset + taskParameters.period])
 		  .range([0, 600]);
 
-		// Add scales to axis
+		// Create x-axis with correct scale. Will be added to the chart later
 		const x_axis =
 		d3.axisBottom()
 		  .scale(scale);
@@ -149,46 +219,69 @@ class ViewTask {
 		const barHeight = 20;
 		const barMargin = 2;
 
+        // Set up the canvas
 		const bar =
 		this.taskPreview
-		  .attr('width', 700)
-		  .attr('height', 50)
-		  .append('g')
-		  .attr('transform', `translate(50, 10)`);
+		    .append('svg')
+		      .attr('width', 700)
+		      .attr('height', 60)
+		    .append('g')
+		      .attr('transform', `translate(10, 0)`);
 
+        // Create a new SVG group for each task, and populate with its data
 		const group =
 		bar.selectAll('g')
-		   .data(data3)
+		   .data([taskParameters])
 		   .enter()
 		   .append('g')
 			 .attr('transform', (d, i) => `translate(0, ${i * (barHeight + barMargin)})`);
 
+        // Add each task's LET duration
 		group.append('rect')
-			 .attr('width', d => scale(d))
-			 .attr('height', barHeight)
-			 .on('mouseover', function() {
-				 d3.select(this)
-				   .transition()
-					 .ease(d3.easeLinear)
-					 .style('fill', 'green');
-			 })
-			 .on('mouseout', function() {
-				 d3.select(this)
-				   .transition()
-					 .ease(d3.easeExpInOut)
-					 .style('fill', 'grey');
-			 });
+             .attr('x', d => scale(d.initialOffset + d.activationOffset))
+			 .attr('width', d => scale(d.duration))
+			 .attr('height', barHeight);
+		
+		// Add horizontal line to indicate each task's initial offset
+		group.append('line')
+		     .attr('x1', 0)
+		     .attr('x2', d =>scale(d.initialOffset))
+		     .attr('y1', (d, i) => `${(i + 1) * (barHeight + barMargin)}`)
+		     .attr('y2', (d, i) => `${(i + 1) * (barHeight + barMargin)}`)
+		     .attr('class', 'initialOffset');
 
-		group.append('text')
-			 .attr('x', 10)
-			 .attr('y', barHeight * 0.5)
-			 .attr('dy', '0.35em')
-			 .text(d => `Preview: ${d}`);
+        // Add horizontal line to indicate each task's period
+		group.append('line')
+		     .attr('x1', d =>scale(d.initialOffset))
+		     .attr('x2', d =>scale(d.initialOffset + d.period))
+		     .attr('y1', (d, i) => `${(i + 1) * (barHeight + barMargin)}`)
+		     .attr('y2', (d, i) => `${(i + 1) * (barHeight + barMargin)}`)
+		     .attr('class', 'period');
 
+        // Add vertical lines around the initial offset and period
+		group.append('line')
+		     .attr('x1', 0)
+		     .attr('x2', 0)
+		     .attr('y1', (d, i) => `${(i + 1) * (barHeight + barMargin) + 3*barMargin}`)
+		     .attr('y2', (d, i) => `${(i + 1) * (barHeight + barMargin) - 3*barMargin}`)
+		     .attr('class', 'boundary');
+		group.append('line')
+		     .attr('x1', d =>scale(d.initialOffset))
+		     .attr('x2', d =>scale(d.initialOffset))
+		     .attr('y1', (d, i) => `${(i + 1) * (barHeight + barMargin) + 3*barMargin}`)
+		     .attr('y2', (d, i) => `${(i + 1) * (barHeight + barMargin) - 3*barMargin}`)
+		     .attr('class', 'boundary');
+		group.append('line')
+		     .attr('x1', d =>scale(d.initialOffset + d.period))
+		     .attr('x2', d =>scale(d.initialOffset + d.period))
+		     .attr('y1', (d, i) => `${(i + 1) * (barHeight + barMargin) + 3*barMargin}`)
+		     .attr('y2', (d, i) => `${(i + 1) * (barHeight + barMargin) - 3*barMargin}`)
+		     .attr('class', 'boundary');
+		     
 		bar.append('g')
-		   .attr('transform', (d, i) => `translate(0, ${data3.length * (barHeight + barMargin)})`)
-		   .call(x_axis);
-
+		   .attr('transform', (d, i) => `translate(0, ${[taskParameters].length * (barHeight + 7 * barMargin)})`)
+		   .call(x_axis)
+		   .call(g => g.select(".domain").remove());
 	}
 
     updateTasks(tasks) {
@@ -204,7 +297,7 @@ class ViewTask {
     }
     
     formatTaskInfo(task) {
-        return `${task.name}: initial offset = ${task.initialOffset}, activation offset = ${task.activationOffset}, period = ${task.period}, duration = ${task.duration}, inputs = ${task.inputs}, outputs = ${task.outputs}`;
+        return `${task.name}: initial offset = ${task.initialOffset}, activation offset = ${task.activationOffset}, duration = ${task.duration}, period = ${task.period}, inputs = ${task.inputs}, outputs = ${task.outputs}`;
     }
     
     toString() {

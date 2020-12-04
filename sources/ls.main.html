@@ -62,47 +62,46 @@
             <form id="view-task-define">
                 <div class="form-group row">
                     <label for="name" class="col-sm-2 col-form-label">Name</label>
-                    <input required type="text" class="form-control col-sm-2" id="name"/>
+                    <input required type="text" class="form-control col-sm-2" id="name" value="t1"/>
                 </div>
 
                 <div class="form-group row">
                     <label for="initial-offset" class="col-sm-2 col-form-label">Initial Offset</label>
-                    <input required type="number" min="0" step="0.01" class="form-control col-sm-2" id="initial-offset"/>
+                    <input required type="number" min="0" step="0.01" class="form-control col-sm-2" id="initial-offset" value="1"/>
                     <span class="input-group-text">ms</span>
                 </div>
                 
                 <div class="form-group row">
                     <label for="activation-offset" class="col-sm-2 col-form-label">Activation Offset</label>
-                    <input required type="number" min="0" step="0.01" class="form-control col-sm-2" id="activation-offset"/>
+                    <input required type="number" min="0" step="0.01" class="form-control col-sm-2" id="activation-offset" value="1"/>
                     <span class="input-group-text">ms</span>
                 </div>
 
                 <div class="form-group row">
-                    <label for="period" class="col-sm-2 col-form-label">Period</label>
-                    <input required type="number" min="0" step="0.01" class="form-control col-sm-2" id="period"/>
+                    <label for="duration" class="col-sm-2 col-form-label">Duration</label>
+                    <input required type="number" min="0" step="0.01" class="form-control col-sm-2" id="duration" value="1"/>
                     <span class="input-group-text">ms</span>
                 </div>
                 
                 <div class="form-group row">
-                    <label for="duration" class="col-sm-2 col-form-label">Duration</label>
-                    <input required type="number" min="0" step="0.01" class="form-control col-sm-2" id="duration"/>
+                    <label for="period" class="col-sm-2 col-form-label">Period</label>
+                    <input required type="number" min="0" step="0.01" class="form-control col-sm-2" id="period" value="2"/>
                     <span class="input-group-text">ms</span>
                 </div>
-                
+
                 <div class="form-group row">
                     <label for="inputs" class="col-sm-2 col-form-label">Inputs</label>
-                    <input required type="text" class="form-control col-sm-2" id="inputs" placeholder="E.g., a, b, c"/>
+                    <input required type="text" class="form-control col-sm-2" id="inputs" placeholder="E.g., a, b, c" value="a,b"/>
                 </div>
                 
                 <div class="form-group row">
                     <label for="outputs" class="col-sm-2 col-form-label">Outputs</label>
-                    <input required type="text" class="form-control col-sm-2" id="outputs" placeholder="E.g., a, b, c"/>
+                    <input required type="text" class="form-control col-sm-2" id="outputs" placeholder="E.g., a, b, c" value="a,c"/>
                 </div>
 
-                <div class="form-group row">
-                <svg id="view-task-preview"></svg>
-                </div>
+                <div class="form-group row" id="view-task-preview"></div>
                 
+                <button id="preview" type="submit" class="btn btn-primary">Preview</button>
                 <button id="submit" type="submit" class="btn btn-primary">Save</button>
                 <button id="clear" type="reset" class="btn btn-outline-secondary">Clear</button>
             </form>
@@ -111,16 +110,28 @@
             <div class="m-5"></div>
             
             <h3>Current Task Set</h3>
+            
             <ul id="view-task-set"></ul>
             
-
             <div class="m-5"></div>
             
+            
             <h3>Define Task Dependencies</h3>
+            
         </div>
         
         <div class="tab-pane fade" id="nav-analyse" role="tabpanel" aria-labelledby="nav-analyse-tab">
-            <p>Specify constraints and analyse them.</p>
+            <h3>LET Task Schedule</h3>
+            
+            <button id="update" type="submit" class="btn btn-primary">Update</button>
+            
+            <div class="form-group row" id="view-schedule"></div>
+
+            <div class="m-5"></div>
+
+            
+            <h3>Specify constraints and analyse them.</h3>
+
         </div>
     </div>
 
