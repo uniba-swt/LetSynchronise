@@ -1,5 +1,10 @@
 # LetSynchronise
-Interactive simulator for the scheduling of LET tasks.
+LetSynchronise is an interactive tool for defining a set of LET tasks and analysing their data-flow dependencies.
+* Define and edit LET tasks
+* Define data-dependencies between LET tasks
+* View a static schedule of the LET tasks, including their data-flow
+* Interactively analyse input/output response times 
+* Calculate schedulability and view over-utilisations
 
 
 ## Dependencies

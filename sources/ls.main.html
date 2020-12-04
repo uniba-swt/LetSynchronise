@@ -1,23 +1,24 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
     <title>LetSynchronise: LET Task Simulator</title>
     <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <!-- Base URL for all links on this page -->
     <base href="../">
-    
+
+    <!-- JavaScript frameworks/libraries this page depends on -->
+    <script src="dependencies/d3-5.16.0/d3.js"></script>
+    <script src="dependencies/jquery-3.5.1.js"></script>
+    <script src="dependencies/bootstrap-4.5.2/js/bootstrap.js"></script>
+        
     <!-- CSS to use for this page -->
     <link rel="stylesheet" href="dependencies/bootstrap-4.5.2/css/bootstrap.css">
     
     <!-- Our own CSS -->
     <link rel="stylesheet" href="sources/ls.main.css">
-    
-    <!-- JavaScript frameworks/libraries this page depends on -->
-    <script src="dependencies/d3-5.16.0/d3.js"></script>
-    <script src="dependencies/jquery-3.5.1.js"></script>
-    <script src="dependencies/bootstrap-4.5.2/js/bootstrap.js"></script>
     
     <!-- Our own JavaScript code/library/framework. Execution is deferred until the page has loaded -->
     <!-- <script type="module"> does not work when executed locally -->
@@ -41,6 +42,8 @@
 <body>
 
     <h1>LetSynchronise: LET Task Simulator</h1>
+    
+    <p>LetSynchronise is an interactive tool for defining a set of LET tasks and analysing their data-flow dependencies.</p>
 
     <!-- This page has different tab views -->
     <!-- Buttons for the tab views defined below -->
@@ -54,24 +57,66 @@
     <!-- Content for the tab views defined below -->
     <div class="tab-content" id="nav-tabContent">
         <div class="tab-pane fade show active" id="nav-design" role="tabpanel" aria-labelledby="nav-design-tab">
-            <p>Define or edit a LET task.</p>
+            <h3>Define or Edit a LET Task</h3>
+            
+            <form id="view-task-define">
+                <div class="form-group row">
+                    <label for="name" class="col-sm-2 col-form-label">Name</label>
+                    <input required type="text" class="form-control col-sm-2" id="name"/>
+                </div>
 
-            <form id="view-task">
-                <p>
-                    <label for="name">Name: </label>
-                    <input type="text" id="name">
-                </p>
-                <p>
-                    <button id="submit">Create</button>
-                </p>
+                <div class="form-group row">
+                    <label for="initial-offset" class="col-sm-2 col-form-label">Initial Offset</label>
+                    <input required type="number" min="0" step="0.01" class="form-control col-sm-2" id="initial-offset"/>
+                    <span class="input-group-text">ms</span>
+                </div>
+                
+                <div class="form-group row">
+                    <label for="activation-offset" class="col-sm-2 col-form-label">Activation Offset</label>
+                    <input required type="number" min="0" step="0.01" class="form-control col-sm-2" id="activation-offset"/>
+                    <span class="input-group-text">ms</span>
+                </div>
+
+                <div class="form-group row">
+                    <label for="period" class="col-sm-2 col-form-label">Period</label>
+                    <input required type="number" min="0" step="0.01" class="form-control col-sm-2" id="period"/>
+                    <span class="input-group-text">ms</span>
+                </div>
+                
+                <div class="form-group row">
+                    <label for="duration" class="col-sm-2 col-form-label">Duration</label>
+                    <input required type="number" min="0" step="0.01" class="form-control col-sm-2" id="duration"/>
+                    <span class="input-group-text">ms</span>
+                </div>
+                
+                <div class="form-group row">
+                    <label for="inputs" class="col-sm-2 col-form-label">Inputs</label>
+                    <input required type="text" class="form-control col-sm-2" id="inputs" placeholder="E.g., a, b, c"/>
+                </div>
+                
+                <div class="form-group row">
+                    <label for="outputs" class="col-sm-2 col-form-label">Outputs</label>
+                    <input required type="text" class="form-control col-sm-2" id="outputs" placeholder="E.g., a, b, c"/>
+                </div>
+
+                <div class="form-group row">
+                <svg id="view-task-preview"></svg>
+                </div>
+                
+                <button id="submit" type="submit" class="btn btn-primary">Save</button>
+                <button id="clear" type="reset" class="btn btn-outline-secondary">Clear</button>
             </form>
             
-            <p>
-                Tasks:
-                <ul id="tasks"></ul>
-            </p>
+            
+            <div class="m-5"></div>
+            
+            <h3>Current Task Set</h3>
+            <ul id="view-task-set"></ul>
+            
 
-            <p>Define task dependencies.</p>
+            <div class="m-5"></div>
+            
+            <h3>Define Task Dependencies</h3>
         </div>
         
         <div class="tab-pane fade" id="nav-analyse" role="tabpanel" aria-labelledby="nav-analyse-tab">
