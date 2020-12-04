@@ -154,16 +154,29 @@ class ViewTask {
 			alert('Initial offset has to be a decimal number.');
 			return false;
 		}
-		
+		let initialOffset = parseFloat(taskParameters.initialOffset);
+		if (initialOffset < 0) {
+			alert('Initial offset cannot be negative');
+			return false;
+		}
+
 		if (taskParameters.activationOffset == null || !$.isNumeric(taskParameters.activationOffset)) {
 			alert('Activation offset has to be a decimal number.');
+			return false;
+		}
+		let activationOffset = parseFloat(taskParameters.activationOffset);
+		if (activationOffset < 0) {
+			alert('Activation offset cannot be negative');
 			return false;
 		}
 
 		if (taskParameters.duration == null || !$.isNumeric(taskParameters.duration)) {
 			alert('Duration offset has to be a decimal number.');
 			return false;
-		} else if (parseFloat(taskParameters.duration) == 0) {
+		}
+		
+		let duration = parseFloat(taskParameters.duration);
+		if (duration <= 0) {
 			alert('Duration has to be greater than 0.');
 			return false;
 		}
@@ -171,14 +184,14 @@ class ViewTask {
 		if (taskParameters.period == null || !$.isNumeric(taskParameters.period)) {
 			alert('Period offset has to be a decimal number.');
 			return false;
-		} else if (parseFloat(taskParameters.period) == 0) {
+		}
+		
+		let period = parseFloat(taskParameters.period);
+		if (period <= 0) {
 			alert('Period has to be greater than 0.');
 			return false;
 		}
 		
-		let activationOffset = parseFloat(taskParameters.activationOffset);
-		let duration = parseFloat(taskParameters.duration);
-		let period = parseFloat(taskParameters.period);
 		if ((activationOffset + duration) > period) {
 			alert('Period is shorter than the combined activation offset and LET duration.');
 			return false;
