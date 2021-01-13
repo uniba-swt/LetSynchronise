@@ -3,8 +3,6 @@
 class ViewDependencies {
     constructor() {
         this.root = document.querySelector('#view-dependencies');
-        
-        
     }
     
     toString() {
