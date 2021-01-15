@@ -7,7 +7,7 @@ class ModelDatabase {
         if (!('indexedDB' in window)) {
             alert('This browser doesn\'t support IndexedDB');
             return;
-        }else{
+        } else {
             //alert('ok');
         }
         this.request = window.indexedDB.open("letDatabase", 1);
@@ -33,7 +33,7 @@ class ModelDatabase {
         let tx = db.transaction("TaskStore", "readwrite");
         let store = tx.objectStore("TaskStore");
         //let index = store.index("name");
-        store.put(task.getTaskParameters());
+        store.put(task.taskParameters);
 
         //Error handeller
         db.onerror = function(e) {
@@ -46,19 +46,20 @@ class ModelDatabase {
         }*/
     }
 
-    getTask = function(name) {
+    getTask = function(callback, name) {
         let db = this.request.result;
         let tx = db.transaction("TaskStore", "readwrite");
         let store = tx.objectStore("TaskStore");
-        let t = store.get("t1"); // Get using the index
+        const task = store.get(name); // Get using the index
 
         //async so need handlers
-        t.onsuccess = function() {
-            console.log(t.result)
+        task.onsuccess = function() {
+        	callback(task.result);
+            console.log(task.result)
         }
     }
 
-    getAllTasks = function() {
+    getAllTasks = function(callback) {
         let db = this.request.result;
         let tx = db.transaction("TaskStore", "readwrite");
         let store = tx.objectStore("TaskStore");
@@ -66,7 +67,8 @@ class ModelDatabase {
 
         //async so need handlers
         tasks.onsuccess = function() {
-            console.log(tasks.result)
+        	callback(tasks.result);
+            console.log(tasks.result);
         }
     }
 

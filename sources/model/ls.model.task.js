@@ -2,7 +2,7 @@
 
 class ModelTask {
     updateTasks = null;
-    tasks = [];
+    //tasks = [];
     constructor() {    }
     
     
@@ -22,11 +22,11 @@ class ModelTask {
         // Store taskParameters into Database
 
         let t = ModelLogicalTask.CreateWithTaskParameters(taskParameters);
-        this.tasks.push(t);
+        //this.tasks.push(t);
         model.modelDatabase.storeTask(t);
-        model.modelDatabase.getAllTasks();
+        model.modelDatabase.getAllTasks(this.updateTasks);
         // Return tasks to updateTasks
-        this.updateTasks(this.tasks);   // Replace [taskParameters] with the actual list of tasks
+        //this.updateTasks(this.tasks);   // Replace [taskParameters] with the actual list of tasks
         
     }
     
