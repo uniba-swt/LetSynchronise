@@ -5,7 +5,7 @@ let model = new Model();
 model.modelTask = new ModelTask();
 model.modelDependencies = new ModelDependencies();
 model.modelSchedule = new ModelSchedule();
-model.modelDatabase = new ModelDatabase(); 
+//model.modelDatabase = new ModelDatabase(); //mk: todo
 
 // Define the view implementations
 let view = new View();
