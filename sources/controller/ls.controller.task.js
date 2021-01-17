@@ -22,6 +22,11 @@ class ControllerTask {
         
         // Register the handlers when setting the model.
         this._model.registerUpdateTaskCallback(this.callbackUpdateTasks);
+        
+        // Hack to populate the View with tasks once the database is ready
+        window.addEventListener('DatabaseReady', (event) => {
+            this._model.getAllTasks();
+        });
     }
     
     get model() {

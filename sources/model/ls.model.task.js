@@ -1,9 +1,10 @@
 'use strict';
 
 class ModelTask {
-    updateTasks = null;
-    tasks = [];
-    constructor() {    }
+    updateTasks = null;     // Callback to function in ls.view.task
+    database = null;
+    
+    constructor() { }
     
     
     // -----------------------------------------------------
@@ -15,19 +16,25 @@ class ModelTask {
     
     
     // -----------------------------------------------------
+    // Registration of model database
+    registerModelDatabase(database) {
+        this.database = database;
+    }
+    
+    
+    // -----------------------------------------------------
     // Class methods
 
-    createTask(taskParameters) {
-        //alert(`ModelTask.createTask(${JSON.stringify(taskParameters)})`);
-        // Store taskParameters into Database
+    getAllTasks() {
+        this.database.getAllTasks(this.updateTasks);
+    }
 
-        let t = ModelLogicalTask.CreateWithTaskParameters(taskParameters);
-        this.tasks.push(t);
-        model.modelDatabase.storeTask(t);
-        model.modelDatabase.getAllTasks();
-        // Return tasks to updateTasks
-        this.updateTasks(this.tasks);   // Replace [taskParameters] with the actual list of tasks
+    createTask(taskParameters) {
+        // Store taskParameters into Database
+        const task = ModelLogicalTask.CreateWithTaskParameters(taskParameters);
+        this.database.storeTask(this.updateTasks, task);
         
+        this.getAllTasks();
     }
     
     toString() {

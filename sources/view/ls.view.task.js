@@ -13,11 +13,14 @@ class ViewTask {
     
     previewButton = null;
     submitButton = null;
+    clearButton = null;
     
+    taskPreview = null;
     taskSet = null;
+    taskDependencies = null;
     
     constructor() {
-        this.root = document.querySelector('#view-task-define');
+        this.root = document.querySelector('#nav-design');
         
         this.nameField = this.root.querySelector('#name');
         this.initialOffsetField = this.root.querySelector('#initial-offset');
@@ -29,40 +32,97 @@ class ViewTask {
         
         this.previewButton = this.root.querySelector('#preview');
         this.submitButton = this.root.querySelector('#submit');
+        this.clearButton = this.root.querySelector('#clear');
         
         this.taskPreview = d3.select('#view-task-preview');
         this.taskSet = d3.select('#view-task-set');
+        this.taskDependencies = d3.select('#view-task-dependencies');
         
         this.setupPreviewButtonListener();
+        this.setupClearButtonListener();
     }
     
     get name() {
         return this.nameField.value;
     }
     
+    set name(name) {
+    	this.nameField.value = name;
+    }
+    
     get initialOffset() {
     	return this.initialOffsetField.value;
+    }
+
+    set initialOffset(initialOffset) {
+    	return this.initialOffsetField.value = initialOffset;
     }
     
     get activationOffset() {
     	return this.activationOffsetField.value;
+    }
+
+    set activationOffset(activationOffset) {
+    	return this.activationOffsetField.value = activationOffset;
     }
     
     get duration() {
     	return this.durationField.value;
     }
     
+    set duration(duration) {
+    	return this.durationField.value = duration;
+    }
+    
     get period() {
     	return this.periodField.value;
+    }
+    
+    set period(period) {
+    	return this.periodField.value = period;
     }
     
     get inputs() {
     	return this.inputsField.value;
     }
     
+    set inputs(inputs) {
+    	return this.inputsField.value = inputs;
+    }
+    
     get outputs() {
     	return this.outputsField.value;
     }
+    
+    set outputs(outputs) {
+    	return this.outputsField.value = outputs;
+    }
+    
+    get taskParametersRaw() {
+		// Package all the task paramters as is into an object.
+		return {
+			'name': this.name, 
+			'initialOffset': this.initialOffset,
+			'activationOffset': this.activationOffset,
+			'duration': this.duration,
+			'period': this.period,
+			'inputs': this.inputs,
+			'outputs': this.outputs
+		};
+    }
+    
+    get taskParametersClean() {
+    	// Package all the task paramters in their correct types into an object.
+		return {
+			'name': this.name, 
+			'initialOffset': parseFloat(this.initialOffset),
+			'activationOffset': parseFloat(this.activationOffset),
+			'duration': parseFloat(this.duration),
+			'period': parseFloat(this.period),
+			'inputs': this.inputs.split(',').map(item => item.trim()).filter(Boolean),
+			'outputs': this.outputs.split(',').map(item => item.trim()).filter(Boolean)
+		};
+	}
     
     // -----------------------------------------------------
     // Setup listeners
@@ -72,35 +132,30 @@ class ViewTask {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
             event.preventDefault();
             
-            // Package all the task paramters into an object.
-            // Parameters are strings.
-            let taskParametersRaw = {
-            	'name': this.name, 
-            	'initialOffset': this.initialOffset,
-            	'activationOffset': this.activationOffset,
-            	'duration': this.duration,
-            	'period': this.period,
-            	'inputs': this.inputs,
-            	'outputs': this.outputs
-            };
-			
             // Validate the inputs.            
-            if (this.validateTaskParameters(taskParametersRaw)) {
-            	// Package all the task parameters into an object.
-            	// Parameters are converted into proper types.
-				let taskParameters = {
-					'name': this.name, 
-					'initialOffset': parseFloat(this.initialOffset),
-					'activationOffset': parseFloat(this.activationOffset),
-					'duration': parseFloat(this.duration),
-					'period': parseFloat(this.period),
-					'inputs': this.inputs.split(',').map(item => item.trim()).filter(Boolean),
-					'outputs': this.outputs.split(',').map(item => item.trim()).filter(Boolean)
-				};
-            
+            if (this.validateTaskParameters(this.taskParametersRaw)) {
                 // Call the handler.
-            	this.updatePreview(taskParameters);
+            	this.updatePreview(this.taskParametersClean);
             }
+        });
+    }
+    
+    setupClearButtonListener() {
+        this.clearButton.addEventListener('click', event => {
+            // Prevent the default behaviour of submitting the form and the reloading of the webpage.
+            event.preventDefault();
+            
+            // Clear all the task parameters in the view.
+            this.name = '';
+            this.initialOffset = '';
+            this.activationOffset = '';
+            this.duration = '';
+            this.period = '';
+            this.inputs = '';
+            this.outputs = '';
+            
+			// Clear the preview.
+			this.clearPreview();
         });
     }
     
@@ -111,42 +166,18 @@ class ViewTask {
         this.submitButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
             event.preventDefault();
-            
-            // Package all the task paramters into an object.
-            // Parameters are strings.
-            let taskParametersRaw = {
-            	'name': this.name, 
-            	'initialOffset': this.initialOffset,
-            	'activationOffset': this.activationOffset,
-            	'duration': this.duration,
-            	'period': this.period,
-            	'inputs': this.inputs,
-            	'outputs': this.outputs
-            };
 			
             // Validate the inputs.            
-            if (this.validateTaskParameters(taskParametersRaw)) {
-            	// Package all the task parameters into an object.
-            	// Parameters are converted into proper types.
-				let taskParameters = {
-					'name': this.name, 
-					'initialOffset': parseFloat(this.initialOffset),
-					'activationOffset': parseFloat(this.activationOffset),
-					'duration': parseFloat(this.duration),
-					'period': parseFloat(this.period),
-					'inputs': this.inputs.split(',').map(item => item.trim()).filter(Boolean),
-					'outputs': this.outputs.split(',').map(item => item.trim()).filter(Boolean)
-				};
-            
+            if (this.validateTaskParameters(this.taskParametersRaw)) {
                 // Call the handler.
-            	handler(taskParameters);
+            	handler(this.taskParametersClean);
             }
         });
     }
     
     validateTaskParameters(taskParameters) {
 		if (taskParameters.name == null || taskParameters.name == '') {
-			alert('taskParameters name cannot be blank.');
+			alert('Name cannot be blank.');
 			return false;
 		}
 		
@@ -213,6 +244,11 @@ class ViewTask {
     
     // -----------------------------------------------------
     // Class methods
+    
+    clearPreview() {
+        // Delete the existing preview, if it exists
+		this.taskPreview.selectAll("*").remove();
+    }
 
 	updatePreview(taskParameters) {
 		// Delete the existing preview, if it exists
@@ -298,15 +334,25 @@ class ViewTask {
 	}
 
     updateTasks(tasks) {
-        alert(`ViewTask.updateTasks(${JSON.stringify(tasks)})`);
+        // alert(`ViewTask.updateTasks(${JSON.stringify(tasks)})`);
         
-        const tasksUpdate = this.taskSet
+        // Update taskSet
+        const tasksUpdate1 = this.taskSet
           .selectAll('li')
-          .data(tasks)
+          .data(tasks);
         
-        const tasksEnter = tasksUpdate.enter().append('li');
-        const tasksExit = tasksUpdate.exit().remove();
-        tasksEnter.merge(tasksUpdate).text(task => this.formatTaskInfo(task));
+        const tasksEnter1 = tasksUpdate1.enter().append('li');
+        const tasksExit1 = tasksUpdate1.exit().remove();
+        tasksEnter1.merge(tasksUpdate1).text(task => this.formatTaskInfo(task));
+        
+        // Update taskDependencies
+        const tasksUpdate2 = this.taskDependencies
+          .selectAll('li')
+          .data(tasks);
+
+        const tasksEnter2 = tasksUpdate2.enter().append('li');
+        const tasksExit2 = tasksUpdate2.exit().remove();
+        tasksEnter2.merge(tasksUpdate2).text(task => `${task.inputs},${task.outputs}`);
     }
     
     formatTaskInfo(task) {
