@@ -1,7 +1,14 @@
 'use strict';
 
 class ModelLogicalTask {
-    /// -----------------------------------------------------
+    name = null;
+    initialOffset = null;
+    activationOffset = null;
+    period = null;
+    duration = null;
+    inputs = null;
+    outputs = null;
+
     constructor(name, initialOffset, activationOffset, period, duration, inputs, outputs) {
         this.name = name;
         this.initialOffset = initialOffset;

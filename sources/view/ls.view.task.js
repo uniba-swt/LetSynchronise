@@ -46,56 +46,56 @@ class ViewTask {
         return this.nameField.value;
     }
     
-    set name(newValue) {
-    	this.nameField.value = newValue;
+    set name(name) {
+    	this.nameField.value = name;
     }
     
     get initialOffset() {
     	return this.initialOffsetField.value;
     }
 
-    set initialOffset(newValue) {
-    	return this.initialOffsetField.value = newValue;
+    set initialOffset(initialOffset) {
+    	return this.initialOffsetField.value = initialOffset;
     }
     
     get activationOffset() {
     	return this.activationOffsetField.value;
     }
 
-    set activationOffset(newValue) {
-    	return this.activationOffsetField.value = newValue;
+    set activationOffset(activationOffset) {
+    	return this.activationOffsetField.value = activationOffset;
     }
     
     get duration() {
     	return this.durationField.value;
     }
     
-    set duration(newValue) {
-    	return this.durationField.value = newValue;
+    set duration(duration) {
+    	return this.durationField.value = duration;
     }
     
     get period() {
     	return this.periodField.value;
     }
     
-    set period(newValue) {
-    	return this.periodField.value = newValue;
+    set period(period) {
+    	return this.periodField.value = period;
     }
     
     get inputs() {
     	return this.inputsField.value;
     }
     
-    set inputs(newValue) {
-    	return this.inputsField.value = newValue;
+    set inputs(inputs) {
+    	return this.inputsField.value = inputs;
     }
     
     get outputs() {
     	return this.outputsField.value;
     }
     
-    set outputs(newValue) {
-    	return this.outputsField.value = newValue;
+    set outputs(outputs) {
+    	return this.outputsField.value = outputs;
     }
     
     get taskParametersRaw() {
@@ -334,7 +334,7 @@ class ViewTask {
 	}
 
     updateTasks(tasks) {
-        alert(`ViewTask.updateTasks(${JSON.stringify(tasks)})`);
+        // alert(`ViewTask.updateTasks(${JSON.stringify(tasks)})`);
         
         // Update taskSet
         const tasksUpdate1 = this.taskSet
