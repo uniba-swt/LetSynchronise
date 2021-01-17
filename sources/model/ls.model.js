@@ -1,34 +1,44 @@
 'use strict';
 
 class Model {
-    modelTask = null;
-    modelDependencies = null;
-    modelSchedule = null;
+    _modelTask = null;
+    _modelDependencies = null;
+    _modelSchedule = null;
+    _modelDatabase = null;
     
     constructor() { }
     
-    set modelTask(modelTask) {
-        this.modelTask;
-    }
-    
-    set modelDependencies(modelDependencies) {
-        this.modelDependencies = modelDependencies;
-    }
-    
-    set modelSchedule(modelSchedule) {
-        this.modelSchedule = modelSchedule;
-    }
-    
     get modelTask() {
-        return this.modelTask;
+        return this._modelTask;
+    }
+    
+    set modelTask(modelTask) {
+        this._modelTask = modelTask;
     }
     
     get modelDependencies() {
-        return this.modelDependencies;
+        return this._modelDependencies;
+    }
+    
+    set modelDependencies(modelDependencies) {
+        this._modelDependencies = modelDependencies;
     }
     
     get modelSchedule() {
-        return this.modelSchedule;
+        return this._modelSchedule;
+    }
+    
+    set modelSchedule(modelSchedule) {
+        this._modelSchedule = modelSchedule;
+    }
+    
+    get modelDatabase() {
+        return this._modelDatabase;
+    }
+    
+    set modelDatabase(modelDatabase) {
+        this._modelDatabase = modelDatabase;
+        this._modelTask.registerModelDatabase(this.modelDatabase);
     }
     
     toString() {

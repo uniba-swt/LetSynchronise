@@ -3,72 +3,85 @@
 'use strict';
 
 class ModelDatabase {
+    db = null;
+    
     constructor() { 
         if (!('indexedDB' in window)) {
-            alert('This browser doesn\'t support IndexedDB');
+            alert('This browser does not support IndexedDB');
             return;
-        } else {
-            //alert('ok');
         }
-        this.request = window.indexedDB.open("letDatabase", 1);
+        
+        const dbOpenRequest = window.indexedDB.open('letDatabase', 1);
 
-        this.request.onupgradeneeded = function(e) {
-            let db = e.target.result;
-            let store = db.createObjectStore("TaskStore", {keyPath: "name", unique: true});
+        // Upgrade old database schemas.
+        dbOpenRequest.onupgradeneeded = function(event) {
+            this.db = event.target.result;
+            const store = db.createObjectStore('TaskStore', {keyPath: 'name', unique: true});
             //let index = store.createIndex("name","name",{unique: true});
         }
 
-        this.request.onerror = function(e) {
+        dbOpenRequest.onerror = function(event) {
             // Do something with request.errorCode!
-            console.log("There was an error: " + e.target.errorCode);
+            console.error('ModelDatabase error: ' + event.target.errorCode);
         }
 
-        this.request.onsuccess = function(e) {
-            //alert("Database success:" + e);
-        }
+        dbOpenRequest.onsuccess = (event) => {
+            this.db = event.target.result;
+
+            this.db.onerror = function(event) {
+                // Generic error handler for all errors targeted at this database's requests.
+                console.error('ModelDatabase error: ' + event.target.errorCode);
+            };
+            
+            // Hack to populate the View with tasks once the database is ready
+            const databaseReadyEvent = new Event('DatabaseReady');
+            window.dispatchEvent(databaseReadyEvent);
+        };
     }
+    
+    storeTask = function(callback, task) {
+        const transaction = this.db.transaction('TaskStore', 'readwrite');
 
-    storeTask = function(task) {
-        let db = this.request.result;
-        let tx = db.transaction("TaskStore", "readwrite");
-        let store = tx.objectStore("TaskStore");
-        //let index = store.index("name");
-        store.put(task.taskParameters);
-
-        //Error handeller
-        db.onerror = function(e) {
-            console.log("ERROR"+e.target.errorCode);
+        // Error handeller
+        transaction.onerror = function(event) {
+            console.log('ModelDatabase store error: ' + event.target.errorCode);
         }
-        
 
-        /*tx.oncomplete = function() {
-            db.close(); //if closed no further transections
-        }*/
+        const objectStore = transaction.objectStore('TaskStore');
+        const putTask = objectStore.put(task.taskParameters);
     }
 
     getTask = function(callback, name) {
-        let db = this.request.result;
-        let tx = db.transaction("TaskStore", "readwrite");
-        let store = tx.objectStore("TaskStore");
-        const task = store.get(name); // Get using the index
+        const transaction = this.db.transaction('TaskStore', 'readonly');
+        
+        // Error handeller
+        transaction.onerror = function(event) {
+            console.log('ModelDatabase store error: ' + event.target.errorCode);
+        }
+        
+        const objectStore = transaction.objectStore('TaskStore');
+        const getTask = objectStore.get(name); // Get using the index
 
-        //async so need handlers
-        task.onsuccess = function() {
-        	callback(task.result);
-            console.log(task.result)
+        getTask.onsuccess = function(event) {
+            callback(event.target.result);
+            console.log(event.target.result)
         }
     }
 
     getAllTasks = function(callback) {
-        let db = this.request.result;
-        let tx = db.transaction("TaskStore", "readwrite");
-        let store = tx.objectStore("TaskStore");
-        let tasks = store.getAll(); // Get using the index
-
-        //async so need handlers
-        tasks.onsuccess = function() {
-        	callback(tasks.result);
-            console.log(tasks.result);
+        const transaction = this.db.transaction('TaskStore', 'readonly');
+        
+        // Error handeller
+        transaction.onerror = function(event) {
+            console.log('ModelDatabase store error: ' + event.target.errorCode);
+        }
+        
+        const objectStore = transaction.objectStore('TaskStore');
+        const getTask = objectStore.getAll(); // Get using the index
+        
+        getTask.onsuccess = function(event) {
+            callback(event.target.result);
+            console.log(event.target.result)
         }
     }
 
