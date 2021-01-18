@@ -158,6 +158,7 @@ class ViewTask {
 			this.clearPreview();
         });
     }
+
     
     // -----------------------------------------------------
     // Registration of handlers from the controller
@@ -249,11 +250,17 @@ class ViewTask {
         // Delete the existing preview, if it exists
 		this.taskPreview.selectAll("*").remove();
     }
+    
+    updatePreview(taskParameters) {
+        // Delete the existing task preview, if it exists
+        this.taskPreview.selectAll("*").remove();
+        
+        // Draw the task preview
+        this.draw(this.taskPreview, taskParameters);
+        
+    }
 
-	updatePreview(taskParameters) {
-		// Delete the existing preview, if it exists
-		this.taskPreview.selectAll("*").remove();
-		
+	draw(parentElement, taskParameters) {
 		// Create function to scale the data along the x-axis of fixed-length
 		const scale =
 		d3.scaleLinear()
@@ -270,14 +277,12 @@ class ViewTask {
 
         // Set up the canvas
 		const bar =
-		this.taskPreview
+        parentElement
 		    .append('svg')
-		      .attr('width', 700)
-		      .attr('height', 60)
 		    .append('g')
-		      .attr('transform', `translate(10, 0)`);
+		      .attr('transform', `translate(10, 10)`);
 
-        // Create a new SVG group for each task, and populate with its data
+        // Create a new SVG group for the task and populate with its data
 		const group =
 		bar.selectAll('g')
 		   .data([taskParameters])
@@ -285,13 +290,13 @@ class ViewTask {
 		   .append('g')
 			 .attr('transform', (d, i) => `translate(0, ${i * (barHeight + barMargin)})`);
 
-        // Add each task's LET duration
+        // Add the task's LET duration
 		group.append('rect')
              .attr('x', d => scale(d.initialOffset + d.activationOffset))
 			 .attr('width', d => scale(d.duration))
 			 .attr('height', barHeight);
 		
-		// Add horizontal line to indicate each task's initial offset
+		// Add horizontal line to indicate the task's initial offset
 		group.append('line')
 		     .attr('x1', 0)
 		     .attr('x2', d =>scale(d.initialOffset))
@@ -299,7 +304,7 @@ class ViewTask {
 		     .attr('y2', (d, i) => `${(i + 1) * (barHeight + barMargin)}`)
 		     .attr('class', 'initialOffset');
 
-        // Add horizontal line to indicate each task's period
+        // Add horizontal line to indicate the task's period
 		group.append('line')
 		     .attr('x1', d =>scale(d.initialOffset))
 		     .attr('x2', d =>scale(d.initialOffset + d.period))
@@ -333,30 +338,47 @@ class ViewTask {
 		   .call(g => g.select(".domain").remove());
 	}
 
-    updateTasks(tasks) {
-        // alert(`ViewTask.updateTasks(${JSON.stringify(tasks)})`);
-        
+    updateTasks(taskParametersSet) {
         // Update taskSet
-        const tasksUpdate1 = this.taskSet
-          .selectAll('li')
-          .data(tasks);
-        
-        const tasksEnter1 = tasksUpdate1.enter().append('li');
-        const tasksExit1 = tasksUpdate1.exit().remove();
-        tasksEnter1.merge(tasksUpdate1).text(task => this.formatTaskInfo(task));
-        
-        // Update taskDependencies
-        const tasksUpdate2 = this.taskDependencies
-          .selectAll('li')
-          .data(tasks);
+        this.updateTaskSet(taskParametersSet);
 
-        const tasksEnter2 = tasksUpdate2.enter().append('li');
-        const tasksExit2 = tasksUpdate2.exit().remove();
-        tasksEnter2.merge(tasksUpdate2).text(task => `${task.inputs},${task.outputs}`);
+        // Update taskDependencies
+        this.updateTaskDependencies(taskParametersSet);
     }
     
-    formatTaskInfo(task) {
-        return `${task.name}: initial offset = ${task.initialOffset}, activation offset = ${task.activationOffset}, duration = ${task.duration}, period = ${task.period}, inputs = ${task.inputs}, outputs = ${task.outputs}`;
+    updateTaskSet(taskParametersSet) {
+        // Delete the existing task previews, if they exist
+        this.taskSet.selectAll("*").remove();
+        
+        for (const taskParameters of taskParametersSet) {
+            const taskListItem = this.taskSet.append('li');
+            this.draw(taskListItem, taskParameters);
+            
+            // Click listener
+            taskListItem.on('click', function() {
+                taskListItem.node().parentNode.querySelectorAll('li')
+                .forEach(function(item) {
+                    if (item !== taskListItem.node()) { item.classList.remove('taskSelected'); }
+                }
+                         );
+                taskListItem.node().classList.toggle('taskSelected');
+            });
+        }
+    }
+    
+    updateTaskDependencies(taskParametersSet) {
+        const tasksUpdate2 =
+        this.taskDependencies
+        .selectAll('li')
+        .data(taskParametersSet);
+        
+        const tasksEnter2 = tasksUpdate2.enter().append('li');
+        const tasksExit2 = tasksUpdate2.exit().remove();
+        tasksEnter2.merge(tasksUpdate2).text(taskParameters => `${taskParameters.name}.${taskParameters.inputs}, ${taskParameters.name}.${taskParameters.outputs}`);
+    }
+    
+    formatTaskParametersInfo(taskParameters) {
+        return `${taskParameters.name}: initial offset = ${taskParameters.initialOffset}, activation offset = ${taskParameters.activationOffset}, duration = ${taskParameters.duration}, period = ${taskParameters.period}, inputs = ${taskParameters.inputs}, outputs = ${taskParameters.outputs}`;
     }
     
     toString() {
