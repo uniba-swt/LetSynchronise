@@ -17,6 +17,8 @@ class ViewTask {
     
     taskPreview = null;
     taskSet = null;
+    taskDependenciesInput = null;
+    taskDependenciesOutput = null;
     taskDependencies = null;
     
     constructor() {
@@ -36,6 +38,8 @@ class ViewTask {
         
         this.taskPreview = d3.select('#view-task-preview');
         this.taskSet = d3.select('#view-task-set');
+        this.taskDependenciesInput = d3.select('#view-task-dependencies-input');
+        this.taskDependenciesOutput = d3.select('#view-task-dependencies-output');
         this.taskDependencies = d3.select('#view-task-dependencies');
         
         this.setupPreviewButtonListener();
@@ -251,6 +255,13 @@ class ViewTask {
             return false;
         }
 		
+        const inputsOutputs = inputs.concat(outputs);
+        const duplicatePortNames = inputsOutputs.filter((port, index, self) => self.indexOf(port) !== index);
+        if (duplicatePortNames.length != 0) {
+            alert(`Remove input and output ports with same names: ${duplicatePortNames.join(', ')}.`);
+            return false;
+        }
+        
     	return true;
     }
     
@@ -401,14 +412,39 @@ class ViewTask {
     updateTaskDependencies(taskParametersSet) {
         const inputs = taskParametersSet.map(taskParameters => this.taskPorts(taskParameters.name, taskParameters.inputs)).flat();
         const outputs = taskParametersSet.map(taskParameters => this.taskPorts(taskParameters.name, taskParameters.outputs)).flat();
-        console.log(inputs);
 
+        // Create list of available inputs and outputs
+        this.updateTaskDependenciesPorts(this.taskDependenciesInput, inputs);
+        this.updateTaskDependenciesPorts(this.taskDependenciesOutput, outputs);
+
+        // Display existing task dependencies
         this.taskDependencies.selectAll('*').remove();
 
+        const dummyDependencies = [{'input': 't1.in1', 'output': 't3.out1'}, {'input': 't1.in2', 'output': 't3.out2'}];
         this.taskDependencies
-            .data(inputs.concat(outputs))
+            .selectAll('li')
+            .data(dummyDependencies)
             .enter()
             .append('li')
+                .text(dependency => `${dependency.output} --> ${dependency.input}`);
+
+    }
+    
+    updateTaskDependenciesPorts(parentElement, ports) {
+        // Create list of available ports
+        parentElement.selectAll('*').remove();
+        parentElement
+            .append('option')
+                .property('disabled', true)
+                .property('selected', true)
+                .property('hidden', true)
+                .text('Choose...');
+        
+        parentElement.selectAll('option')
+            .data(ports)
+            .enter()
+            .append('option')
+                .attr('value', port => `${port}`)
                 .text(port => `${port}`);
     }
     
