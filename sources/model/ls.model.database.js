@@ -39,7 +39,7 @@ class ModelDatabase {
         };
     }
     
-    storeTask = function(callbacks, task) {
+    storeTask = function(task) {
         const transaction = this.db.transaction('TaskStore', 'readwrite');
 
         // Error handeller
