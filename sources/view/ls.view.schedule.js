@@ -25,13 +25,12 @@ class ViewSchedule {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
             event.preventDefault();
             
-            this.schedule.text('Schedule to be added.');
             handler(this.updateSchedule);
         });
     }
     
     updateSchedule(taskParametersSet) {
-        console.log('here');
+        this.schedule.text(taskParametersSet);
     }
 
     toString() {
