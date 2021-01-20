@@ -296,38 +296,33 @@ class ViewTask {
 		d3.axisBottom()
 		  .scale(scale);
 
-		const barHeight = 20;
-		const barMargin = 2;
+        const barHeight = 20;
+        const barMargin = 1;
+        const tickHeight = 6;
 
         // Set up the canvas
-		const bar =
+		const group =
         parentElement
 		    .append('svg')
 		    .append('g')
 		      .attr('transform', `translate(10, 10)`);
-
-        // Create a new SVG group for the task and populate with its data
-		const group =
-		bar.selectAll('g')
-		   .data([taskParameters])
-		   .enter()
         
         // -----------------------------
         // Group for textual information
         const textInfo =
         group.append('g')
-                .attr('transform', `translate(0, 10)`);
+             .attr('transform', `translate(0, 10)`);
         
         // Add the task's name, inputs, and outputs
         textInfo.append('text')
                 .attr('dy', '0em')
-                .text(taskParameters => `Task: ${taskParameters.name}`);
+                .text(`Task: ${taskParameters.name}`);
         textInfo.append('text')
                 .attr('dy', '1.3em')
-                .text(taskParameters => `Inputs: ${this.formatTaskPorts(taskParameters.name, taskParameters.inputs)}`);
+                .text(`Inputs: ${this.formatTaskPorts(taskParameters.name, taskParameters.inputs)}`);
         textInfo.append('text')
                 .attr('dy', '2.6em')
-                .text(taskParameters => `Outputs: ${this.formatTaskPorts(taskParameters.name, taskParameters.outputs)}`);
+                .text(`Outputs: ${this.formatTaskPorts(taskParameters.name, taskParameters.outputs)}`);
 
         // -----------------------------
         // Group for graphical information
@@ -337,22 +332,22 @@ class ViewTask {
         
         // Add the task's LET duration
         graphInfo.append('rect')
-                 .attr('x', d => scale(d.initialOffset + d.activationOffset))
-                 .attr('width', d => scale(d.duration))
+                 .attr('x', scale(taskParameters.initialOffset + taskParameters.activationOffset))
+                 .attr('width', scale(taskParameters.duration))
                  .attr('height', barHeight);
 		
 		// Add horizontal line to indicate the task's initial offset
         graphInfo.append('line')
                  .attr('x1', 0)
-                 .attr('x2', d =>scale(d.initialOffset))
+                 .attr('x2', scale(taskParameters.initialOffset))
                  .attr('y1', `${barHeight + barMargin}`)
                  .attr('y2', `${barHeight + barMargin}`)
                  .attr('class', 'initialOffset');
 
         // Add horizontal line to indicate the task's period
         graphInfo.append('line')
-                 .attr('x1', d =>scale(d.initialOffset))
-                 .attr('x2', d =>scale(d.initialOffset + d.period))
+                 .attr('x1', scale(taskParameters.initialOffset))
+                 .attr('x2', scale(taskParameters.initialOffset + taskParameters.period))
                  .attr('y1', `${barHeight + barMargin}`)
                  .attr('y2', `${barHeight + barMargin}`)
                  .attr('class', 'period');
@@ -361,24 +356,24 @@ class ViewTask {
         graphInfo.append('line')
                  .attr('x1', 0)
                  .attr('x2', 0)
-                 .attr('y1', `${barHeight + barMargin + 3*barMargin}`)
-                 .attr('y2', `${barHeight + barMargin - 3*barMargin}`)
+                 .attr('y1', `${barHeight + tickHeight}`)
+                 .attr('y2', `${barHeight - tickHeight}`)
                  .attr('class', 'boundary');
         graphInfo.append('line')
-                 .attr('x1', d =>scale(d.initialOffset))
-                 .attr('x2', d =>scale(d.initialOffset))
-                 .attr('y1', `${barHeight + barMargin + 3*barMargin}`)
-                 .attr('y2', `${barHeight + barMargin - 3*barMargin}`)
+                 .attr('x1', scale(taskParameters.initialOffset))
+                 .attr('x2', scale(taskParameters.initialOffset))
+                 .attr('y1', `${barHeight + tickHeight}`)
+                 .attr('y2', `${barHeight - tickHeight}`)
                  .attr('class', 'boundary');
         graphInfo.append('line')
-                 .attr('x1', d =>scale(d.initialOffset + d.period))
-                 .attr('x2', d =>scale(d.initialOffset + d.period))
-                 .attr('y1', `${barHeight + barMargin + 3*barMargin}`)
-                 .attr('y2', `${barHeight + barMargin - 3*barMargin}`)
+                 .attr('x1', scale(taskParameters.initialOffset + taskParameters.period))
+                 .attr('x2', scale(taskParameters.initialOffset + taskParameters.period))
+                 .attr('y1', `${barHeight + tickHeight}`)
+                 .attr('y2', `${barHeight - tickHeight}`)
                  .attr('class', 'boundary');
-		     
+        
         graphInfo.append('g')
-                 .attr('transform', `translate(0, ${barHeight + 7*barMargin})`)
+                 .attr('transform', `translate(0, ${barHeight + 2*tickHeight})`)
                  .call(x_axis)
                  .call(g => g.select('.domain').remove());
 	}

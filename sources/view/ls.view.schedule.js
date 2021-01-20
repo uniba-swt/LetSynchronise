@@ -5,6 +5,7 @@ class ViewSchedule {
     
     updateButton = null;
     
+    hyperPeriodText = null;
     schedule = null;
     
     
@@ -12,9 +13,19 @@ class ViewSchedule {
         this.root = document.querySelector('#nav-analyse');
         
         // Update the static schedule
+        this.hyperPeriodText = this.root.querySelector('#view-schedule-hyperperiod');
+        
         this.updateButton = this.root.querySelector('#update');
         
         this.schedule = d3.select('#view-schedule');
+    }
+    
+    get hyperPeriod() {
+        return this.hyperPeriodText.textContent;
+    }
+    
+    set hyperPeriod(hyperPeriod) {
+        this.hyperPeriodText.textContent = hyperPeriod;
     }
 
     // -----------------------------------------------------
@@ -31,108 +42,17 @@ class ViewSchedule {
     }
     
     updateSchedule(taskParametersSet) {
+        this.updateHyperPeriod(taskParametersSet);
         this.updateTasks(taskParametersSet);
     }
-
-    draw(parentElement, taskParameters) {
-		// Create function to scale the data along the x-axis of fixed-length
-		const scale =
-		d3.scaleLinear()
-		  .domain([0, taskParameters.initialOffset + taskParameters.period])
-		  .range([0, 600]);
-
-		// Create x-axis with correct scale. Will be added to the chart later
-		const x_axis =
-		d3.axisBottom()
-		  .scale(scale);
-
-		const barHeight = 20;
-		const barMargin = 2;
-
-        // Set up the canvas
-		const bar =
-        parentElement
-		    .append('svg')
-		    .append('g')
-		      .attr('transform', `translate(10, 10)`);
-
-        // Create a new SVG group for the task and populate with its data
-		const group =
-		bar.selectAll('g')
-		   .data([taskParameters])
-		   .enter()
-        
-        // -----------------------------
-        // Group for textual information
-        const textInfo =
-        group.append('g')
-                .attr('transform', `translate(0, 10)`);
-        
-        // Add the task's name, inputs, and outputs
-        textInfo.append('text')
-                .attr('dy', '0em')
-                .text(taskParameters => `Task: ${taskParameters.name}`);
-        textInfo.append('text')
-                .attr('dy', '1.3em')
-                .text(taskParameters => `Inputs: ${this.formatTaskPorts(taskParameters.name, taskParameters.inputs)}`);
-        textInfo.append('text')
-                .attr('dy', '2.6em')
-                .text(taskParameters => `Outputs: ${this.formatTaskPorts(taskParameters.name, taskParameters.outputs)}`);
-
-        // -----------------------------
-        // Group for graphical information
-        const graphInfo =
-        group.append('g')
-             .attr('transform', `translate(0, 60)`);
-        
-        // Add the task's LET duration
-        graphInfo.append('rect')
-                 .attr('x', d => scale(d.initialOffset + d.activationOffset))
-                 .attr('width', d => scale(d.duration))
-                 .attr('height', barHeight);
-		
-		// Add horizontal line to indicate the task's initial offset
-        graphInfo.append('line')
-                 .attr('x1', 0)
-                 .attr('x2', d =>scale(d.initialOffset))
-                 .attr('y1', `${barHeight + barMargin}`)
-                 .attr('y2', `${barHeight + barMargin}`)
-                 .attr('class', 'initialOffset');
-
-        // Add horizontal line to indicate the task's period
-        graphInfo.append('line')
-                 .attr('x1', d =>scale(d.initialOffset))
-                 .attr('x2', d =>scale(d.initialOffset + d.period))
-                 .attr('y1', `${barHeight + barMargin}`)
-                 .attr('y2', `${barHeight + barMargin}`)
-                 .attr('class', 'period');
-
-        // Add vertical lines around the initial offset and period
-        graphInfo.append('line')
-                 .attr('x1', 0)
-                 .attr('x2', 0)
-                 .attr('y1', `${barHeight + barMargin + 3*barMargin}`)
-                 .attr('y2', `${barHeight + barMargin - 3*barMargin}`)
-                 .attr('class', 'boundary');
-        graphInfo.append('line')
-                 .attr('x1', d =>scale(d.initialOffset))
-                 .attr('x2', d =>scale(d.initialOffset))
-                 .attr('y1', `${barHeight + barMargin + 3*barMargin}`)
-                 .attr('y2', `${barHeight + barMargin - 3*barMargin}`)
-                 .attr('class', 'boundary');
-        graphInfo.append('line')
-                 .attr('x1', d =>scale(d.initialOffset + d.period))
-                 .attr('x2', d =>scale(d.initialOffset + d.period))
-                 .attr('y1', `${barHeight + barMargin + 3*barMargin}`)
-                 .attr('y2', `${barHeight + barMargin - 3*barMargin}`)
-                 .attr('class', 'boundary');
-		     
-        graphInfo.append('g')
-                 .attr('transform', `translate(0, ${barHeight + 7*barMargin})`)
-                 .call(x_axis)
-                 .call(g => g.select('.domain').remove());
-	}
     
+    updateHyperPeriod(taskParametersSet) {
+        const activationOffsets = taskParametersSet.map(taskParameters => taskParameters.activationOffset).flat();
+        const periods = taskParametersSet.map(taskParameters => taskParameters.period).flat();
+
+        this.hyperPeriod = `Activation offsets: ${activationOffsets}, Periods: ${periods}`;
+    }
+
     updateTasks(taskParametersSet) {
         // Delete the existing task previews, if they exist
         this.schedule.selectAll('*').remove();
@@ -142,6 +62,95 @@ class ViewSchedule {
             this.draw(taskListItem, taskParameters);
         }
     }
+    
+    draw(parentElement, taskParameters) {
+        // Dummy data
+        const hyperPeriod = 10;
+        
+		// Create function to scale the data along the x-axis of fixed-length
+		const scale =
+		d3.scaleLinear()
+		  .domain([0, hyperPeriod])
+		  .range([0, 600]);
+
+		// Create x-axis with correct scale. Will be added to the chart later
+		const x_axis =
+		d3.axisBottom()
+		  .scale(scale);
+
+		const barHeight = 20;
+		const barMargin = 1;
+        const tickHeight = 6;
+
+        // Set up the canvas
+		const group =
+        parentElement
+		    .append('svg')
+		    .append('g')
+		      .attr('transform', `translate(10, 10)`);
+        
+        // -----------------------------
+        // Group for textual information
+        const textInfo =
+        group.append('g')
+             .attr('transform', `translate(0, 10)`);
+
+        // Add the task's name, inputs, and outputs
+        textInfo.append('text')
+                .text(`Task: ${taskParameters.name}`);
+
+        // -----------------------------
+        // Group for graphical information
+        const graphInfo =
+        group.append('g')
+             .attr('transform', `translate(0, 30)`);
+        
+        let periodStart = taskParameters.initialOffset;
+
+        // Add horizontal line to indicate the task's initial offset
+        graphInfo.append('line')
+                 .attr('x1', 0)
+                 .attr('x2', scale(periodStart))
+                 .attr('y1', `${barHeight + barMargin}`)
+                 .attr('y2', `${barHeight + barMargin}`)
+                 .attr('class', 'initialOffset');
+        // Add vertical line at the start of the initial offset
+        graphInfo.append('line')
+                 .attr('x1', 0)
+                 .attr('x2', 0)
+                 .attr('y1', `${barHeight + tickHeight}`)
+                 .attr('y2', `${barHeight - tickHeight}`)
+                 .attr('class', 'boundary');
+        
+        // Add horizontal line to indicate the task's period
+        graphInfo.append('line')
+                 .attr('x1', scale(periodStart))
+                 .attr('x2', scale(hyperPeriod))
+                 .attr('y1', `${barHeight + barMargin}`)
+                 .attr('y2', `${barHeight + barMargin}`)
+                 .attr('class', 'period');
+
+        for (null ; periodStart < hyperPeriod; periodStart += taskParameters.period) {
+            // Add the task's LET duration
+            graphInfo.append('rect')
+                     .attr('x', scale(periodStart + taskParameters.activationOffset))
+                     .attr('width', scale(taskParameters.duration))
+                     .attr('height', barHeight);
+
+            // Add vertical line at the start of the period
+            graphInfo.append('line')
+                     .attr('x1', scale(periodStart))
+                     .attr('x2', scale(periodStart))
+                     .attr('y1', `${barHeight + tickHeight}`)
+                     .attr('y2', `${barHeight - tickHeight}`)
+                     .attr('class', 'boundary');
+            }
+            
+            graphInfo.append('g')
+                     .attr('transform', `translate(0, ${barHeight + 2*tickHeight})`)
+                     .call(x_axis)
+                     .call(g => g.select('.domain').remove());
+	}
     
     taskPorts(taskName, taskPorts) {
         return taskPorts.map(port => `${taskName}.${port}`);
