@@ -25,7 +25,8 @@ class ControllerTask {
         
         // Hack to populate the View with tasks once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
-            this._model.getAllTasks();
+            const callbacks = [this.callbackUpdateTasks];
+            this._model.getAllTasks(callbacks);
         });
     }
     

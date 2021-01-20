@@ -16,14 +16,14 @@ class ViewTask {
     clearButton = null;
     
     taskPreview = null;
+
     taskSet = null;
-    taskDependenciesInput = null;
-    taskDependenciesOutput = null;
-    taskDependencies = null;
+
     
     constructor() {
         this.root = document.querySelector('#nav-design');
         
+        // Define or edit task
         this.nameField = this.root.querySelector('#name');
         this.initialOffsetField = this.root.querySelector('#initial-offset');
         this.activationOffsetField = this.root.querySelector('#activation-offset');
@@ -35,13 +35,13 @@ class ViewTask {
         this.previewButton = this.root.querySelector('#preview');
         this.submitButton = this.root.querySelector('#submit');
         this.clearButton = this.root.querySelector('#clear');
-        
+
         this.taskPreview = d3.select('#view-task-preview');
+
+        // Current task set
         this.taskSet = d3.select('#view-task-set');
-        this.taskDependenciesInput = d3.select('#view-task-dependencies-input');
-        this.taskDependenciesOutput = d3.select('#view-task-dependencies-output');
-        this.taskDependencies = d3.select('#view-task-dependencies');
-        
+
+        // Listeners
         this.setupPreviewButtonListener();
         this.setupClearButtonListener();
     }
@@ -128,6 +128,7 @@ class ViewTask {
 		};
 	}
     
+   
     // -----------------------------------------------------
     // Setup listeners
     
@@ -271,12 +272,12 @@ class ViewTask {
     
     clearPreview() {
         // Delete the existing preview, if it exists
-		this.taskPreview.selectAll("*").remove();
+		this.taskPreview.selectAll('*').remove();
     }
     
     updatePreview(taskParameters) {
         // Delete the existing task preview, if it exists
-        this.taskPreview.selectAll("*").remove();
+        this.clearPreview();
         
         // Draw the task preview
         this.draw(this.taskPreview, taskParameters);
@@ -379,20 +380,12 @@ class ViewTask {
         graphInfo.append('g')
                  .attr('transform', `translate(0, ${barHeight + 7*barMargin})`)
                  .call(x_axis)
-                 .call(g => g.select(".domain").remove());
+                 .call(g => g.select('.domain').remove());
 	}
-
-    updateTasks(taskParametersSet) {
-        // Update taskSet
-        this.updateTaskSet(taskParametersSet);
-
-        // Update taskDependencies
-        this.updateTaskDependencies(taskParametersSet);
-    }
     
-    updateTaskSet(taskParametersSet) {
+    updateTasks(taskParametersSet) {
         // Delete the existing task previews, if they exist
-        this.taskSet.selectAll("*").remove();
+        this.taskSet.selectAll('*').remove();
         
         for (const taskParameters of taskParametersSet) {
             const taskListItem = this.taskSet.append('li');
@@ -407,45 +400,6 @@ class ViewTask {
                 taskListItem.node().classList.toggle('taskSelected');
             });
         }
-    }
-    
-    updateTaskDependencies(taskParametersSet) {
-        const inputs = taskParametersSet.map(taskParameters => this.taskPorts(taskParameters.name, taskParameters.inputs)).flat();
-        const outputs = taskParametersSet.map(taskParameters => this.taskPorts(taskParameters.name, taskParameters.outputs)).flat();
-
-        // Create list of available inputs and outputs
-        this.updateTaskDependenciesPorts(this.taskDependenciesInput, inputs);
-        this.updateTaskDependenciesPorts(this.taskDependenciesOutput, outputs);
-
-        // Display existing task dependencies
-        this.taskDependencies.selectAll('*').remove();
-
-        const dummyDependencies = [{'input': 't1.in1', 'output': 't3.out1'}, {'input': 't1.in2', 'output': 't3.out2'}];
-        this.taskDependencies
-            .selectAll('li')
-            .data(dummyDependencies)
-            .enter()
-            .append('li')
-                .text(dependency => `${dependency.output} --> ${dependency.input}`);
-
-    }
-    
-    updateTaskDependenciesPorts(parentElement, ports) {
-        // Create list of available ports
-        parentElement.selectAll('*').remove();
-        parentElement
-            .append('option')
-                .property('disabled', true)
-                .property('selected', true)
-                .property('hidden', true)
-                .text('Choose...');
-        
-        parentElement.selectAll('option')
-            .data(ports)
-            .enter()
-            .append('option')
-                .attr('value', port => `${port}`)
-                .text(port => `${port}`);
     }
     
     taskPorts(taskName, taskPorts) {

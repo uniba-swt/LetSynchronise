@@ -1,7 +1,9 @@
 'use strict';
 
 class ModelTask {
-    updateTasks = null;     // Callback to function in ls.view.task
+    updateTasks = null;                 // Callback to function in ls.view.task
+    updateDependencySelectors = null;   // Callback to function in ls.view.dependencies
+    updateSchedule = null;              // Callback to function in ls.view.schedule
     database = null;
     
     constructor() { }
@@ -14,6 +16,13 @@ class ModelTask {
         this.updateTasks = callback;
     }
     
+    registerUpdateDependencySelectorsCallback(callback) {
+        this.updateDependencySelectors = callback;
+    }
+    
+    registerUpdateScheduleCallback(callback) {
+        this.updateSchedule = callback;
+    }
     
     // -----------------------------------------------------
     // Registration of model database
@@ -24,17 +33,18 @@ class ModelTask {
     
     // -----------------------------------------------------
     // Class methods
-
-    getAllTasks() {
-        this.database.getAllTasks(this.updateTasks);
+    
+    getAllTasks(callbacks) {
+        this.database.getAllTasks(callbacks);
     }
 
     createTask(taskParameters) {
         // Store taskParameters into Database
-        const task = ModelLogicalTask.CreateWithTaskParameters(taskParameters);
-        this.database.storeTask(this.updateTasks, task);
+        const logicalTask = ModelLogicalTask.CreateWithTaskParameters(taskParameters);
+        this.database.storeTask([this.updateTasks, this.updateDependencySelectors], logicalTask);
         
-        this.getAllTasks();
+        const callbacks = [this.updateTasks, this.updateDependencySelectors];
+        this.getAllTasks(callbacks);
     }
     
     toString() {
