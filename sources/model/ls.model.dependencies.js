@@ -27,7 +27,7 @@ class ModelDependencies {
     
     getAllDependencies(callbacks) {
     //    this.database.getAllDependencies(this.updateDependencies);
-        const dummyDependencies = [{'input': 't1.in1', 'output': 't3.out1'}, {'input': 't1.in2', 'output': 't3.out2'}];
+        const dummyDependencies = [{'name': 'sensorDataflow', 'destination': 't1.in1', 'source': 't3.out1'}, {'name': 'actuatorDataflow', 'destination': 't1.in2', 'source': 't3.out2'}];
 
         callbacks.forEach(callback => callback(dummyDependencies));
     }

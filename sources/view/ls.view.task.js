@@ -105,7 +105,7 @@ class ViewTask {
     get taskParametersRaw() {
 		// Package all the task paramters as is into an object.
 		return {
-			'name': this.name, 
+			'name': this.name,
 			'initialOffset': this.initialOffset,
 			'activationOffset': this.activationOffset,
 			'duration': this.duration,
@@ -118,7 +118,7 @@ class ViewTask {
     get taskParametersClean() {
     	// Package all the task paramters in their correct types into an object.
 		return {
-			'name': this.name, 
+			'name': this.name.trim(),
 			'initialOffset': parseFloat(this.initialOffset),
 			'activationOffset': parseFloat(this.activationOffset),
 			'duration': parseFloat(this.duration),
@@ -182,7 +182,7 @@ class ViewTask {
     }
     
     validateTaskParameters(taskParameters) {
-		if (taskParameters.name == null || taskParameters.name == '') {
+		if (taskParameters.name == null || taskParameters.name.trim() == '') {
 			alert('Name cannot be blank.');
 			return false;
 		}
