@@ -16,12 +16,14 @@ class ViewTask {
     clearButton = null;
     
     taskPreview = null;
+
     taskSet = null;
-    taskDependencies = null;
+
     
     constructor() {
         this.root = document.querySelector('#nav-design');
         
+        // Define or edit task
         this.nameField = this.root.querySelector('#name');
         this.initialOffsetField = this.root.querySelector('#initial-offset');
         this.activationOffsetField = this.root.querySelector('#activation-offset');
@@ -33,11 +35,13 @@ class ViewTask {
         this.previewButton = this.root.querySelector('#preview');
         this.submitButton = this.root.querySelector('#submit');
         this.clearButton = this.root.querySelector('#clear');
-        
+
         this.taskPreview = d3.select('#view-task-preview');
+
+        // Current task set
         this.taskSet = d3.select('#view-task-set');
-        this.taskDependencies = d3.select('#view-task-dependencies');
-        
+
+        // Listeners
         this.setupPreviewButtonListener();
         this.setupClearButtonListener();
     }
@@ -124,6 +128,7 @@ class ViewTask {
 		};
 	}
     
+   
     // -----------------------------------------------------
     // Setup listeners
     
@@ -158,6 +163,7 @@ class ViewTask {
 			this.clearPreview();
         });
     }
+
     
     // -----------------------------------------------------
     // Registration of handlers from the controller
@@ -185,7 +191,7 @@ class ViewTask {
 			alert('Initial offset has to be a decimal number.');
 			return false;
 		}
-		let initialOffset = parseFloat(taskParameters.initialOffset);
+		const initialOffset = parseFloat(taskParameters.initialOffset);
 		if (initialOffset < 0) {
 			alert('Initial offset cannot be negative');
 			return false;
@@ -195,7 +201,7 @@ class ViewTask {
 			alert('Activation offset has to be a decimal number.');
 			return false;
 		}
-		let activationOffset = parseFloat(taskParameters.activationOffset);
+		const activationOffset = parseFloat(taskParameters.activationOffset);
 		if (activationOffset < 0) {
 			alert('Activation offset cannot be negative');
 			return false;
@@ -206,7 +212,7 @@ class ViewTask {
 			return false;
 		}
 		
-		let duration = parseFloat(taskParameters.duration);
+		const duration = parseFloat(taskParameters.duration);
 		if (duration <= 0) {
 			alert('Duration has to be greater than 0.');
 			return false;
@@ -217,7 +223,7 @@ class ViewTask {
 			return false;
 		}
 		
-		let period = parseFloat(taskParameters.period);
+		const period = parseFloat(taskParameters.period);
 		if (period <= 0) {
 			alert('Period has to be greater than 0.');
 			return false;
@@ -232,12 +238,31 @@ class ViewTask {
 			alert('Specify at least one input.');
 			return false;
 		}
+        const inputs = taskParameters.inputs.split(',').map(item => item.trim()).filter(Boolean)
+        const duplicateInputs = inputs.filter((port, index, self) => self.indexOf(port) !== index);
+        if (duplicateInputs.length != 0) {
+            alert(`Remove duplicate input ports: ${duplicateInputs.join(', ')}.`);
+            return false;
+        }
 		
 		if (taskParameters.outputs == null || taskParameters.outputs == '') {
 			alert('Specify at least one output.');
 			return false;
 		}
+        const outputs = taskParameters.outputs.split(',').map(item => item.trim()).filter(Boolean)
+        const duplicateOutputs = outputs.filter((port, index, self) => self.indexOf(port) !== index);
+        if (duplicateOutputs.length != 0) {
+            alert(`Remove duplicate output ports: ${duplicateOutputs.join(', ')}.`);
+            return false;
+        }
 		
+        const inputsOutputs = inputs.concat(outputs);
+        const duplicatePortNames = inputsOutputs.filter((port, index, self) => self.indexOf(port) !== index);
+        if (duplicatePortNames.length != 0) {
+            alert(`Remove input and output ports with same names: ${duplicatePortNames.join(', ')}.`);
+            return false;
+        }
+        
     	return true;
     }
     
@@ -247,13 +272,19 @@ class ViewTask {
     
     clearPreview() {
         // Delete the existing preview, if it exists
-		this.taskPreview.selectAll("*").remove();
+		this.taskPreview.selectAll('*').remove();
+    }
+    
+    updatePreview(taskParameters) {
+        // Delete the existing task preview, if it exists
+        this.clearPreview();
+        
+        // Draw the task preview
+        this.draw(this.taskPreview, taskParameters);
+        
     }
 
-	updatePreview(taskParameters) {
-		// Delete the existing preview, if it exists
-		this.taskPreview.selectAll("*").remove();
-		
+	draw(parentElement, taskParameters) {
 		// Create function to scale the data along the x-axis of fixed-length
 		const scale =
 		d3.scaleLinear()
@@ -270,93 +301,117 @@ class ViewTask {
 
         // Set up the canvas
 		const bar =
-		this.taskPreview
+        parentElement
 		    .append('svg')
-		      .attr('width', 700)
-		      .attr('height', 60)
 		    .append('g')
-		      .attr('transform', `translate(10, 0)`);
+		      .attr('transform', `translate(10, 10)`);
 
-        // Create a new SVG group for each task, and populate with its data
+        // Create a new SVG group for the task and populate with its data
 		const group =
 		bar.selectAll('g')
 		   .data([taskParameters])
 		   .enter()
-		   .append('g')
-			 .attr('transform', (d, i) => `translate(0, ${i * (barHeight + barMargin)})`);
+        
+        // -----------------------------
+        // Group for textual information
+        const textInfo =
+        group.append('g')
+                .attr('transform', `translate(0, 10)`);
+        
+        // Add the task's name, inputs, and outputs
+        textInfo.append('text')
+                .attr('dy', '0em')
+                .text(taskParameters => `Task: ${taskParameters.name}`);
+        textInfo.append('text')
+                .attr('dy', '1.3em')
+                .text(taskParameters => `Inputs: ${this.formatTaskPorts(taskParameters.name, taskParameters.inputs)}`);
+        textInfo.append('text')
+                .attr('dy', '2.6em')
+                .text(taskParameters => `Outputs: ${this.formatTaskPorts(taskParameters.name, taskParameters.outputs)}`);
 
-        // Add each task's LET duration
-		group.append('rect')
-             .attr('x', d => scale(d.initialOffset + d.activationOffset))
-			 .attr('width', d => scale(d.duration))
-			 .attr('height', barHeight);
+        // -----------------------------
+        // Group for graphical information
+        const graphInfo =
+        group.append('g')
+             .attr('transform', `translate(0, 60)`);
+        
+        // Add the task's LET duration
+        graphInfo.append('rect')
+                 .attr('x', d => scale(d.initialOffset + d.activationOffset))
+                 .attr('width', d => scale(d.duration))
+                 .attr('height', barHeight);
 		
-		// Add horizontal line to indicate each task's initial offset
-		group.append('line')
-		     .attr('x1', 0)
-		     .attr('x2', d =>scale(d.initialOffset))
-		     .attr('y1', (d, i) => `${(i + 1) * (barHeight + barMargin)}`)
-		     .attr('y2', (d, i) => `${(i + 1) * (barHeight + barMargin)}`)
-		     .attr('class', 'initialOffset');
+		// Add horizontal line to indicate the task's initial offset
+        graphInfo.append('line')
+                 .attr('x1', 0)
+                 .attr('x2', d =>scale(d.initialOffset))
+                 .attr('y1', `${barHeight + barMargin}`)
+                 .attr('y2', `${barHeight + barMargin}`)
+                 .attr('class', 'initialOffset');
 
-        // Add horizontal line to indicate each task's period
-		group.append('line')
-		     .attr('x1', d =>scale(d.initialOffset))
-		     .attr('x2', d =>scale(d.initialOffset + d.period))
-		     .attr('y1', (d, i) => `${(i + 1) * (barHeight + barMargin)}`)
-		     .attr('y2', (d, i) => `${(i + 1) * (barHeight + barMargin)}`)
-		     .attr('class', 'period');
+        // Add horizontal line to indicate the task's period
+        graphInfo.append('line')
+                 .attr('x1', d =>scale(d.initialOffset))
+                 .attr('x2', d =>scale(d.initialOffset + d.period))
+                 .attr('y1', `${barHeight + barMargin}`)
+                 .attr('y2', `${barHeight + barMargin}`)
+                 .attr('class', 'period');
 
         // Add vertical lines around the initial offset and period
-		group.append('line')
-		     .attr('x1', 0)
-		     .attr('x2', 0)
-		     .attr('y1', (d, i) => `${(i + 1) * (barHeight + barMargin) + 3*barMargin}`)
-		     .attr('y2', (d, i) => `${(i + 1) * (barHeight + barMargin) - 3*barMargin}`)
-		     .attr('class', 'boundary');
-		group.append('line')
-		     .attr('x1', d =>scale(d.initialOffset))
-		     .attr('x2', d =>scale(d.initialOffset))
-		     .attr('y1', (d, i) => `${(i + 1) * (barHeight + barMargin) + 3*barMargin}`)
-		     .attr('y2', (d, i) => `${(i + 1) * (barHeight + barMargin) - 3*barMargin}`)
-		     .attr('class', 'boundary');
-		group.append('line')
-		     .attr('x1', d =>scale(d.initialOffset + d.period))
-		     .attr('x2', d =>scale(d.initialOffset + d.period))
-		     .attr('y1', (d, i) => `${(i + 1) * (barHeight + barMargin) + 3*barMargin}`)
-		     .attr('y2', (d, i) => `${(i + 1) * (barHeight + barMargin) - 3*barMargin}`)
-		     .attr('class', 'boundary');
+        graphInfo.append('line')
+                 .attr('x1', 0)
+                 .attr('x2', 0)
+                 .attr('y1', `${barHeight + barMargin + 3*barMargin}`)
+                 .attr('y2', `${barHeight + barMargin - 3*barMargin}`)
+                 .attr('class', 'boundary');
+        graphInfo.append('line')
+                 .attr('x1', d =>scale(d.initialOffset))
+                 .attr('x2', d =>scale(d.initialOffset))
+                 .attr('y1', `${barHeight + barMargin + 3*barMargin}`)
+                 .attr('y2', `${barHeight + barMargin - 3*barMargin}`)
+                 .attr('class', 'boundary');
+        graphInfo.append('line')
+                 .attr('x1', d =>scale(d.initialOffset + d.period))
+                 .attr('x2', d =>scale(d.initialOffset + d.period))
+                 .attr('y1', `${barHeight + barMargin + 3*barMargin}`)
+                 .attr('y2', `${barHeight + barMargin - 3*barMargin}`)
+                 .attr('class', 'boundary');
 		     
-		bar.append('g')
-		   .attr('transform', (d, i) => `translate(0, ${[taskParameters].length * (barHeight + 7 * barMargin)})`)
-		   .call(x_axis)
-		   .call(g => g.select(".domain").remove());
+        graphInfo.append('g')
+                 .attr('transform', `translate(0, ${barHeight + 7*barMargin})`)
+                 .call(x_axis)
+                 .call(g => g.select('.domain').remove());
 	}
-
-    updateTasks(tasks) {
-        // alert(`ViewTask.updateTasks(${JSON.stringify(tasks)})`);
+    
+    updateTasks(taskParametersSet) {
+        // Delete the existing task previews, if they exist
+        this.taskSet.selectAll('*').remove();
         
-        // Update taskSet
-        const tasksUpdate1 = this.taskSet
-          .selectAll('li')
-          .data(tasks);
-        
-        const tasksEnter1 = tasksUpdate1.enter().append('li');
-        const tasksExit1 = tasksUpdate1.exit().remove();
-        tasksEnter1.merge(tasksUpdate1).text(task => this.formatTaskInfo(task));
-        
-        // Update taskDependencies
-        const tasksUpdate2 = this.taskDependencies
-          .selectAll('li')
-          .data(tasks);
-
-        const tasksEnter2 = tasksUpdate2.enter().append('li');
-        const tasksExit2 = tasksUpdate2.exit().remove();
-        tasksEnter2.merge(tasksUpdate2).text(task => `${task.inputs},${task.outputs}`);
+        for (const taskParameters of taskParametersSet) {
+            const taskListItem = this.taskSet.append('li');
+            this.draw(taskListItem, taskParameters);
+            
+            // Click listener
+            taskListItem.on('click', function() {
+                taskListItem.node().parentNode.querySelectorAll('li')
+                    .forEach(function(item) {
+                        if (item !== taskListItem.node()) { item.classList.remove('taskSelected'); }
+                    });
+                taskListItem.node().classList.toggle('taskSelected');
+            });
+        }
     }
     
-    formatTaskInfo(task) {
-        return `${task.name}: initial offset = ${task.initialOffset}, activation offset = ${task.activationOffset}, duration = ${task.duration}, period = ${task.period}, inputs = ${task.inputs}, outputs = ${task.outputs}`;
+    taskPorts(taskName, taskPorts) {
+        return taskPorts.map(port => `${taskName}.${port}`);
+    }
+    
+    formatTaskPorts(taskName, taskPorts) {
+        return this.taskPorts(taskName, taskPorts).join(', ');
+    }
+    
+    formatTaskParametersInfo(taskParameters) {
+        return `${taskParameters.name}: initial offset = ${taskParameters.initialOffset}, activation offset = ${taskParameters.activationOffset}, duration = ${taskParameters.duration}, period = ${taskParameters.period}, inputs = ${formatTaskPorts(taskParameters.name, taskParameters.inputs)}, outputs = ${formatTaskPorts(taskParameters.name, taskParameters.outputs)}`;
     }
     
     toString() {

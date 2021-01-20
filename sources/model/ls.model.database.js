@@ -39,7 +39,7 @@ class ModelDatabase {
         };
     }
     
-    storeTask = function(callback, task) {
+    storeTask = function(callbacks, task) {
         const transaction = this.db.transaction('TaskStore', 'readwrite');
 
         // Error handeller
@@ -63,12 +63,11 @@ class ModelDatabase {
         const getTask = objectStore.get(name); // Get using the index
 
         getTask.onsuccess = function(event) {
-            callback(event.target.result);
-            console.log(event.target.result)
+            callbacks.forEach(callback => callback(event.target.result));
         }
     }
 
-    getAllTasks = function(callback) {
+    getAllTasks = function(callbacks) {
         const transaction = this.db.transaction('TaskStore', 'readonly');
         
         // Error handeller
@@ -80,8 +79,7 @@ class ModelDatabase {
         const getTask = objectStore.getAll(); // Get using the index
         
         getTask.onsuccess = function(event) {
-            callback(event.target.result);
-            console.log(event.target.result)
+            callbacks.forEach(callback => callback(event.target.result));
         }
     }
 
