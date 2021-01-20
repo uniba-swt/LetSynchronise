@@ -3,8 +3,9 @@
 class ViewDependencies {
     root = null;
     
-    taskDependencyInput = null;
-    taskDependencyOutput = null;
+    taskDependencyName = null;
+    taskDependencySource = null;
+    taskDependencyDestination = null;
     
     addButton = null;
     
@@ -15,8 +16,9 @@ class ViewDependencies {
         this.root = document.querySelector('#nav-design');
         
         // Define or edit task dependencies
-        this.taskDependencyInput = this.root.querySelector('#view-task-dependencies-input');
-        this.taskDependencyOutput = this.root.querySelector('#view-task-dependencies-output');
+        this.taskDependencyName = this.root.querySelector('#view-task-dependencies-name');
+        this.taskDependencySource = this.root.querySelector('#view-task-dependencies-source');
+        this.taskDependencyDestination = this.root.querySelector('#view-task-dependencies-destination');
         
         this.addButton = this.root.querySelector('#add');
         
@@ -24,32 +26,39 @@ class ViewDependencies {
     }
     
     
-    get dependencyInput() {
-        return this.taskDependencyInput.value;
+    get dependencyName() {
+        return this.taskDependencyName.value;
     }
     
-    get dependencyOutput() {
-        return this.taskDependencyOutput.value;
+    get dependencySource() {
+        return this.taskDependencySource.value;
     }
+    
+    get dependencyDestination() {
+        return this.taskDependencyDestination.value;
+    }
+    
     
     get taskDependencyRaw() {
         return {
-            'input': this.dependencyInput,
-            'output': this.dependencyOutput
+            'name': this.dependencyName,
+            'source': this.dependencySource,
+            'destination': this.dependencyDestination
         };
     }
     
     get taskDependencyClean() {
-        const input = this.dependencyInput.split('.');
-        const output = this.dependencyOutput.split('.');
+        const source = this.dependencySource.split('.');
+        const destination = this.dependencyDestination.split('.');
         return {
-            'input': {
-                'task': input[0],
-                'port': input[1]
+            'name': this.dependencyName.trim(),
+            'source': {
+                'task': source[0],
+                'port': source[1]
             },
-            'output': {
-                'task': output[0],
-                'port': output[1]
+            'destination': {
+                'task': destination[0],
+                'port': destination[1]
             }
         };
     }
@@ -60,7 +69,7 @@ class ViewDependencies {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
             event.preventDefault();
             
-            // Validate the inputs.
+            // Validate the destinations.
             if (this.validateTaskDependency(this.taskDependencyRaw)) {
                 // Call the handler.
                 handler(this.taskDependencyClean);
@@ -69,26 +78,31 @@ class ViewDependencies {
     }
     
     validateTaskDependency(taskDependency) {
-        if (taskDependency.input == 'null ') {
-            alert(`Choose an input dependency.`);
+        if (taskDependency.name == null || taskDependency.name.trim() == '') {
+            alert('Name cannot be blank.');
             return false;
         }
-        
-        if (taskDependency.output == 'null ') {
-            alert(`Choose an output dependency.`);
+
+        if (taskDependency.source == 'null ') {
+            alert(`Choose source of dependency.`);
             return false;
         }
-        
+
+        if (taskDependency.destination == 'null ') {
+            alert(`Choose destination of dependency.`);
+            return false;
+        }
+                
         return true;
     }
     
     updateDependencySelectors(taskParametersSet) {
-        const inputs = taskParametersSet.map(taskParameters => this.taskPorts(taskParameters.name, taskParameters.inputs)).flat();
-        const outputs = taskParametersSet.map(taskParameters => this.taskPorts(taskParameters.name, taskParameters.outputs)).flat();
+        const sources = taskParametersSet.map(taskParameters => this.taskPorts(taskParameters.name, taskParameters.outputs)).flat();
+        const destinations = taskParametersSet.map(taskParameters => this.taskPorts(taskParameters.name, taskParameters.inputs)).flat();
         
-        // Create list of available inputs and outputs
-        this.updateTaskDependencyPorts(d3.select(this.taskDependencyInput), inputs);
-        this.updateTaskDependencyPorts(d3.select(this.taskDependencyOutput), outputs);
+        // Create list of available sources and destinations
+        this.updateTaskDependencyPorts(d3.select(this.taskDependencySource), sources);
+        this.updateTaskDependencyPorts(d3.select(this.taskDependencyDestination), destinations);
     }
         
     updateTaskDependencyPorts(parentElement, ports) {
@@ -119,7 +133,7 @@ class ViewDependencies {
             .data(dependencies)
             .enter()
             .append('li')
-                .text(dependency => `${dependency.output} --> ${dependency.input}`);
+                .text(dependency => `${dependency.name}: ${dependency.source} --> ${dependency.destination}`);
     }
 
     taskPorts(taskName, taskPorts) {
