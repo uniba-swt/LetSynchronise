@@ -11,7 +11,7 @@ class ControllerSchedule {
         this._view = view;
         
         // Register the handlers when setting the view.
-        this._view.registerUpdateHandler(this.handleUpdateSchedule);
+        this._view.registerUpdateHandler(this.handleGetAllTasks);
     }
 
     get view() {
@@ -30,7 +30,7 @@ class ControllerSchedule {
         this._modelTask = modelTask;
         
         // Register the handlers when setting the model.
-        this._modelTask.registerUpdateScheduleCallback([this.callbackUpdateSchedule]);
+        this._modelTask.registerUpdateScheduleCallback(this.callbackUpdateSchedule);
 
         // Hack to populate the View with dependencies once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
@@ -48,7 +48,7 @@ class ControllerSchedule {
     
     // Handler for updaing the task schedule.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
-    handleUpdateSchedule = (callback) => {
+    handleGetAllTasks = (callback) => {
         this.modelTask.getAllTasks([callback]);
     }
     
