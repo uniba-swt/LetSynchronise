@@ -5,6 +5,9 @@ class ViewSchedule {
     
     updateButton = null;
     
+    makespan = null;
+    
+    prologueText = null;
     hyperPeriodText = null;
     schedule = null;
     
@@ -13,11 +16,23 @@ class ViewSchedule {
         this.root = document.querySelector('#nav-analyse');
         
         // Update the static schedule
+        this.prologueText = this.root.querySelector('#view-schedule-prologue');
         this.hyperPeriodText = this.root.querySelector('#view-schedule-hyperperiod');
         
         this.updateButton = this.root.querySelector('#update');
         
         this.schedule = d3.select('#view-schedule');
+        
+        // Set the default makespan
+        this.makespan = 10;
+    }
+    
+    get prologue() {
+        return this.prologueText.textContent;
+    }
+    
+    set prologue(prologue) {
+        this.prologueText.textContent = prologue;
     }
     
     get hyperPeriod() {
@@ -42,15 +57,19 @@ class ViewSchedule {
     }
     
     updateSchedule(taskParametersSet) {
+        this.updatePrologue(taskParametersSet);
         this.updateHyperPeriod(taskParametersSet);
         this.updateTasks(taskParametersSet);
     }
     
+    updatePrologue(taskParametersSet) {
+        const initialOffsets = taskParametersSet.map(taskParameters => taskParameters.initialOffset).flat();
+        this.prologue = Utility.MaxOfArray(initialOffsets);
+    }
+    
     updateHyperPeriod(taskParametersSet) {
-        const activationOffsets = taskParametersSet.map(taskParameters => taskParameters.activationOffset).flat();
         const periods = taskParametersSet.map(taskParameters => taskParameters.period).flat();
-
-        this.hyperPeriod = `Activation offsets: ${activationOffsets}, Periods: ${periods}`;
+        this.hyperPeriod = Utility.LeastCommonMultipleOfArray(periods);
     }
 
     updateTasks(taskParametersSet) {
@@ -63,14 +82,11 @@ class ViewSchedule {
         }
     }
     
-    draw(parentElement, taskParameters) {
-        // Dummy data
-        const hyperPeriod = 10;
-        
+    draw(parentElement, taskParameters, makespan) {
 		// Create function to scale the data along the x-axis of fixed-length
 		const scale =
 		d3.scaleLinear()
-		  .domain([0, hyperPeriod])
+		  .domain([0, this.makespan])
 		  .range([0, 600]);
 
 		// Create x-axis with correct scale. Will be added to the chart later
@@ -85,9 +101,9 @@ class ViewSchedule {
         // Set up the canvas
 		const group =
         parentElement
-		    .append('svg')
-		    .append('g')
-		      .attr('transform', `translate(10, 10)`);
+          .append('svg')
+          .append('g')
+            .attr('transform', `translate(10, 10)`);
         
         // -----------------------------
         // Group for textual information
@@ -125,12 +141,13 @@ class ViewSchedule {
         // Add horizontal line to indicate the task's period
         graphInfo.append('line')
                  .attr('x1', scale(periodStart))
-                 .attr('x2', scale(hyperPeriod))
+                 .attr('x2', scale(this.makespan))
                  .attr('y1', `${barHeight + barMargin}`)
                  .attr('y2', `${barHeight + barMargin}`)
                  .attr('class', 'period');
 
-        for (null ; periodStart < hyperPeriod; periodStart += taskParameters.period) {
+        // Replace with pre-computed values from ls.model.schedule
+        for (null ; periodStart < this.makespan; periodStart += taskParameters.period) {
             // Add the task's LET duration
             graphInfo.append('rect')
                      .attr('x', scale(periodStart + taskParameters.activationOffset))
@@ -144,12 +161,12 @@ class ViewSchedule {
                      .attr('y1', `${barHeight + tickHeight}`)
                      .attr('y2', `${barHeight - tickHeight}`)
                      .attr('class', 'boundary');
-            }
+        }
             
-            graphInfo.append('g')
-                     .attr('transform', `translate(0, ${barHeight + 2*tickHeight})`)
-                     .call(x_axis)
-                     .call(g => g.select('.domain').remove());
+        graphInfo.append('g')
+                 .attr('transform', `translate(0, ${barHeight + 2*tickHeight})`)
+                 .call(x_axis)
+                 .call(g => g.select('.domain').remove());
 	}
     
     taskPorts(taskName, taskPorts) {
