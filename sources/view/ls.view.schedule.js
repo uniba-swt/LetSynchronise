@@ -70,6 +70,7 @@ class ViewSchedule {
     updateHyperPeriod(taskParametersSet) {
         const periods = taskParametersSet.map(taskParameters => taskParameters.period).flat();
         this.hyperPeriod = Utility.LeastCommonMultipleOfArray(periods);
+        console.log(Utility.LeastCommonMultipleOfArray([0.3, 0.2]));
     }
 
     updateTasks(taskParametersSet) {

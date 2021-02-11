@@ -38,8 +38,12 @@ class Utility {
     }
     
     static LeastCommonMultipleOfArray(array) {
-        return array.reduce(function(a, b) {
+        const decimalPlaces = Utility.MaxOfArray(array.map(element => Utility.DecimalPlaces(element)));
+        const scaling = Math.pow(10, decimalPlaces);
+        const arrayScaled = array.map(element => element*scaling);
+                
+        return arrayScaled.reduce(function(a, b) {
             return Utility.LeastCommonMultiple(a, b);
-        });
+        }) / scaling;
     }
 }
