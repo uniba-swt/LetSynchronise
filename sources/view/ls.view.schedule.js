@@ -2,13 +2,13 @@
 
 class ViewSchedule {
     root = null;
-    
+        
+    prologueField = null;
+    hyperPeriodField = null;
+    makespanField = null;
+
     updateButton = null;
-    
-    makespan = null;
-    
-    prologueText = null;
-    hyperPeriodText = null;
+
     schedule = null;
     
     
@@ -16,11 +16,12 @@ class ViewSchedule {
         this.root = document.querySelector('#nav-analyse');
         
         // Update the static schedule
-        this.prologueText = this.root.querySelector('#view-schedule-prologue');
-        this.hyperPeriodText = this.root.querySelector('#view-schedule-hyperperiod');
-        
+        this.prologueField = this.root.querySelector('#prologue');
+        this.hyperPeriodField = this.root.querySelector('#hyperperiod');
+        this.makespanField = this.root.querySelector('#makespan');
+
         this.updateButton = this.root.querySelector('#update');
-        
+
         this.schedule = d3.select('#view-schedule');
         
         // Set the default makespan
@@ -28,21 +29,33 @@ class ViewSchedule {
     }
     
     get prologue() {
-        return this.prologueText.textContent;
+        return this.prologueField.value;
     }
     
     set prologue(prologue) {
-        this.prologueText.textContent = prologue;
+        this.prologueField.value = prologue;
     }
     
     get hyperPeriod() {
-        return this.hyperPeriodText.textContent;
+        return this.hyperPeriodField.value;
     }
     
     set hyperPeriod(hyperPeriod) {
-        this.hyperPeriodText.textContent = hyperPeriod;
+        this.hyperPeriodField.value = hyperPeriod;
     }
 
+    get makespan() {
+        return this.makespanField.value;
+    }
+    
+    set makespan(makespan) {
+        this.makespanField.value = makespan;
+    }
+    
+    get viewableWidth() {
+        return window.innerWidth - 40;
+    }
+    
     // -----------------------------------------------------
     // Setup listeners
     
@@ -70,7 +83,6 @@ class ViewSchedule {
     updateHyperPeriod(taskParametersSet) {
         const periods = taskParametersSet.map(taskParameters => taskParameters.period).flat();
         this.hyperPeriod = Utility.LeastCommonMultipleOfArray(periods);
-        console.log(Utility.LeastCommonMultipleOfArray([0.3, 0.2]));
     }
 
     updateTasks(taskParametersSet) {
@@ -84,33 +96,37 @@ class ViewSchedule {
     }
     
     draw(parentElement, taskParameters, makespan) {
+        const barHeight = 20;
+        const barMargin = 1;
+        const tickHeight = 6;
+        const taskHeight = 100;
+        const svgPadding = 10;
+        
 		// Create function to scale the data along the x-axis of fixed-length
 		const scale =
 		d3.scaleLinear()
 		  .domain([0, this.makespan])
-		  .range([0, 600]);
+		  .range([0, this.viewableWidth - 2*svgPadding]);
 
 		// Create x-axis with correct scale. Will be added to the chart later
 		const x_axis =
 		d3.axisBottom()
 		  .scale(scale);
 
-		const barHeight = 20;
-		const barMargin = 1;
-        const tickHeight = 6;
-
         // Set up the canvas
 		const group =
         parentElement
           .append('svg')
+            .attr('width', `${this.viewableWidth}px`)
+            .attr('height', `${taskHeight}px`)
           .append('g')
-            .attr('transform', `translate(10, 10)`);
+            .attr('transform', `translate(${svgPadding}, ${svgPadding})`);
         
         // -----------------------------
         // Group for textual information
         const textInfo =
         group.append('g')
-             .attr('transform', `translate(0, 10)`);
+             .attr('transform', `translate(0, ${svgPadding})`);
 
         // Add the task's name, inputs, and outputs
         textInfo.append('text')
@@ -120,7 +136,7 @@ class ViewSchedule {
         // Group for graphical information
         const graphInfo =
         group.append('g')
-             .attr('transform', `translate(0, 30)`);
+             .attr('transform', `translate(0, ${3*svgPadding})`);
         
         let periodStart = taskParameters.initialOffset;
 
