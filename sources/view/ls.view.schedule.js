@@ -89,17 +89,11 @@ class ViewSchedule {
         // Delete the existing task previews, if they exist
         this.schedule.selectAll('*').remove();
         
-        for (const taskParameters of taskParametersSet) {
-            const taskListItem = this.schedule.append('li');
-            this.draw(taskListItem, taskParameters);
-        }
+        this.drawSchedule(this.schedule, taskParametersSet);
     }
     
-    draw(parentElement, taskParameters, makespan) {
-        const barHeight = 20;
-        const barMargin = 1;
-        const tickHeight = 6;
-        const taskHeight = 100;
+    drawSchedule(parentElement, taskParametersSet) {
+        const taskHeight = 110;
         const svgPadding = 10;
         
 		// Create function to scale the data along the x-axis of fixed-length
@@ -108,25 +102,34 @@ class ViewSchedule {
 		  .domain([0, this.makespan])
 		  .range([0, this.viewableWidth - 2*svgPadding]);
 
-		// Create x-axis with correct scale. Will be added to the chart later
-		const x_axis =
-		d3.axisBottom()
-		  .scale(scale);
-
         // Set up the canvas
-		const group =
-        parentElement
-          .append('svg')
-            .attr('width', `${this.viewableWidth}px`)
-            .attr('height', `${taskHeight}px`)
-          .append('g')
-            .attr('transform', `translate(${svgPadding}, ${svgPadding})`);
+		const svgElement = parentElement.append('svg');
+        
+        var yOffset = 0;
+        for (const taskParameters of taskParametersSet) {
+            this.drawTask(taskParameters, svgElement, scale, svgPadding, yOffset);
+            yOffset += taskHeight;
+        }
+        
+        svgElement
+          .attr('width', `${this.viewableWidth}px`)
+          .attr('height', `${yOffset + taskHeight}px`);
+    }
+    
+    drawTask(taskParameters, svgElement, scale, svgPadding, yOffset) {
+        const barHeight = 20;
+        const barMargin = 1;
+        const tickHeight = 6;
+        
+        const group =
+        svgElement.append('g')
+                    .attr('transform', `translate(${svgPadding}, ${svgPadding})`);
         
         // -----------------------------
         // Group for textual information
         const textInfo =
         group.append('g')
-             .attr('transform', `translate(0, ${svgPadding})`);
+             .attr('transform', `translate(0, ${yOffset + svgPadding})`);
 
         // Add the task's name, inputs, and outputs
         textInfo.append('text')
@@ -136,7 +139,7 @@ class ViewSchedule {
         // Group for graphical information
         const graphInfo =
         group.append('g')
-             .attr('transform', `translate(0, ${3*svgPadding})`);
+             .attr('transform', `translate(0, ${yOffset + 2.5*svgPadding})`);
         
         let periodStart = taskParameters.initialOffset;
 
@@ -179,10 +182,13 @@ class ViewSchedule {
                      .attr('y2', `${barHeight - tickHeight}`)
                      .attr('class', 'boundary');
         }
-            
+        
+        // Create x-axis with correct scale.
+        const xAxis = d3.axisBottom().scale(scale);
+        
         graphInfo.append('g')
                  .attr('transform', `translate(0, ${barHeight + 2*tickHeight})`)
-                 .call(x_axis)
+                 .call(xAxis)
                  .call(g => g.select('.domain').remove());
 	}
     
