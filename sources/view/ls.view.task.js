@@ -331,7 +331,7 @@ class ViewTask {
                  .attr('width', scale(taskParameters.duration))
                  .attr('height', View.BarHeight);
 		
-		// Add horizontal line to indicate the task's initial offset
+		// Add horizontal line for the task's initial offset
         graphInfo.append('line')
                  .attr('x1', 0)
                  .attr('x2', scale(taskParameters.initialOffset))
@@ -339,7 +339,7 @@ class ViewTask {
                  .attr('y2', `${View.BarHeight + View.BarMargin}`)
                  .attr('class', 'initialOffset');
 
-        // Add horizontal line to indicate the task's period
+        // Add horizontal line for the task's period
         graphInfo.append('line')
                  .attr('x1', scale(taskParameters.initialOffset))
                  .attr('x2', scale(taskParameters.initialOffset + taskParameters.period))
@@ -351,19 +351,19 @@ class ViewTask {
         graphInfo.append('line')
                  .attr('x1', 0)
                  .attr('x2', 0)
-                 .attr('y1', `${View.BarHeight + View.TickHeight}`)
+                 .attr('y1', `${View.BarHeight + View.TickHeight + View.BarMargin}`)
                  .attr('y2', `${View.BarHeight - View.TickHeight}`)
                  .attr('class', 'boundary');
         graphInfo.append('line')
                  .attr('x1', scale(taskParameters.initialOffset))
                  .attr('x2', scale(taskParameters.initialOffset))
-                 .attr('y1', `${View.BarHeight + View.TickHeight}`)
+                 .attr('y1', `${View.BarHeight + View.TickHeight + View.BarMargin}`)
                  .attr('y2', `${View.BarHeight - View.TickHeight}`)
                  .attr('class', 'boundary');
         graphInfo.append('line')
                  .attr('x1', scale(taskParameters.initialOffset + taskParameters.period))
                  .attr('x2', scale(taskParameters.initialOffset + taskParameters.period))
-                 .attr('y1', `${View.BarHeight + View.TickHeight}`)
+                 .attr('y1', `${View.BarHeight + View.TickHeight + View.BarMargin}`)
                  .attr('y2', `${View.BarHeight - View.TickHeight}`)
                  .attr('class', 'boundary');
         

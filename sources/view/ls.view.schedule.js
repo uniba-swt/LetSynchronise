@@ -53,10 +53,6 @@ class ViewSchedule {
         this.makespanField.value = makespan;
     }
     
-    get viewableWidth() {
-        return window.innerWidth - 40;
-    }
-    
     
     // -----------------------------------------------------
     // Registration of handlers from the controller
@@ -104,14 +100,11 @@ class ViewSchedule {
     }
     
     drawSchedule(taskParametersSet) {
-        const taskHeight = 110;
-        const svgPadding = 10;
-        
 		// Create function to scale the data along the x-axis of fixed-length
 		const scale =
 		d3.scaleLinear()
 		  .domain([0, this.makespan])
-		  .range([0, this.viewableWidth - 2*svgPadding]);
+		  .range([0, View.Width - 2 * View.SvgPadding]);
 
         // Delete the existing task previews, if they exist
         // and set up the canvas.
@@ -122,19 +115,19 @@ class ViewSchedule {
         var index = 0;
         var taskIndices = {};
         for (const taskParameters of taskParametersSet) {
-            this.drawTask(taskParameters, svgElement, scale, svgPadding, index * taskHeight);
+            this.drawTask(taskParameters, svgElement, scale, index);
             taskIndices[taskParameters.name] = index;
             index++;
         }
         
         svgElement
-          .attr('width', `${this.viewableWidth}px`)
-          .attr('height', `${index * taskHeight}px`);
+          .attr('width', `${View.Width}px`)
+          .attr('height', `${index * View.TaskHeight}px`);
         
         return {svgElement: svgElement, scale: scale, taskIndices: taskIndices};
     }
     
-    drawTask(taskParameters, svgElement, scale, svgPadding, yOffset) {
+    drawTask(taskParameters, svgElement, scale, index) {
         const group =
         svgElement.append('g')
                     .attr('transform', `translate(${View.SvgPadding}, ${View.SvgPadding})`);
@@ -143,7 +136,7 @@ class ViewSchedule {
         // Group for textual information
         const textInfo =
         group.append('g')
-               .attr('transform', `translate(0, ${yOffset + View.SvgPadding})`);
+               .attr('transform', `translate(0, ${index * View.TaskHeight + View.SvgPadding})`);
 
         // Add the task's name, inputs, and outputs
         textInfo.append('text')
@@ -153,7 +146,7 @@ class ViewSchedule {
         // Group for graphical information
         const graphInfo =
         group.append('g')
-               .attr('transform', `translate(0, ${yOffset + 2.5 * View.SvgPadding})`);
+               .attr('transform', `translate(0, ${index * View.TaskHeight + 2.5 * View.SvgPadding})`);
         
         let periodStart = taskParameters.initialOffset;
 
@@ -169,7 +162,7 @@ class ViewSchedule {
         graphInfo.append('line')
                    .attr('x1', 0)
                    .attr('x2', 0)
-                   .attr('y1', `${View.BarHeight + View.TickHeight}`)
+                   .attr('y1', `${View.BarHeight + View.TickHeight + View.BarMargin}`)
                    .attr('y2', `${View.BarHeight - View.TickHeight}`)
                    .attr('class', 'boundary');
         
@@ -205,8 +198,8 @@ class ViewSchedule {
             graphInfo.append('line')
                      .attr('x1', scale(periodStart))
                      .attr('x2', scale(periodStart))
-                     .attr('y1', `${View.BarHeight + View.TickHeight}`)
-                     .attr('y2', `${View.BarHeight - View.TickHeight - View.BarMargin}`)
+                     .attr('y1', `${View.BarHeight + View.TickHeight + View.BarMargin}`)
+                     .attr('y2', `${View.BarHeight - View.TickHeight}`)
                      .attr('class', 'boundary');
         }
         
