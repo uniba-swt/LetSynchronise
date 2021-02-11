@@ -26,7 +26,7 @@ class ControllerDependencies {
         
         // Hack to populate the View with dependencies once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
-            this._model.getAllDependencies([this.callbackUpdateDependencies]);
+            this._model.getAllLogical([this.callbackUpdateDependencies]);
         });
     }
     

@@ -38,7 +38,6 @@ class ViewDependencies {
         return this.taskDependencyDestination.value;
     }
     
-    
     get taskDependencyRaw() {
         return {
             'name': this.dependencyName,
@@ -64,6 +63,9 @@ class ViewDependencies {
     }
     
     
+    // -----------------------------------------------------
+    // Registration of handlers from the controller
+
     registerAddHandler(handler) {
         this.addButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.

@@ -28,6 +28,7 @@ controller.controllerDependencies.modelTask = model.modelTask;
 controller.controllerSchedule.view = view.viewSchedule;
 controller.controllerSchedule.model = model.modelSchedule;
 controller.controllerSchedule.modelTask = model.modelTask;
+controller.controllerSchedule.modelDependencies = model.modelDependencies;
 
 
 console.log(controller.toString());

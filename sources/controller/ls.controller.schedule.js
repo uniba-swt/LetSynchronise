@@ -4,6 +4,7 @@ class ControllerSchedule {
     _view = null;
     _model = null;
     _modelTask = null;
+    _modelDependencies = null;
     
     constructor() { }
 
@@ -40,6 +41,17 @@ class ControllerSchedule {
     
     get modelTask() {
         return this._modelTask;
+    }
+    
+    set modelDependencies(modelDependencies) {
+        this._modelDependencies = modelDependencies;
+        
+        // Register the model dependency with the view.
+        this._view.registerModelDependencies(this._modelDependencies);
+    }
+    
+    get modelDependencies() {
+        return this._modelDependencies;
     }
     
     

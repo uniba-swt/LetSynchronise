@@ -46,4 +46,21 @@ class Utility {
             return Utility.LeastCommonMultiple(a, b);
         }) / scaling;
     }
+                             
+
+    static TaskPorts(taskName, taskPorts) {
+        return taskPorts.map(port => `${taskName}.${port}`);
+    }
+
+    static FormatTaskPorts(taskName, taskPorts) {
+        return Utility.TaskPorts(taskName, taskPorts).join(', ');
+    }
+                             
+    static GetTask(taskPort) {
+        return taskPort.split('.')[0];
+    }
+                             
+    static GetPort(taskPort) {
+        return taskPort.split('.')[1];
+    }
 }
