@@ -2,7 +2,8 @@
 
 class ViewSchedule {
     root = null;
-        
+    modelDependencies = null;
+
     prologueField = null;
     hyperPeriodField = null;
     makespanField = null;
@@ -10,9 +11,9 @@ class ViewSchedule {
     updateButton = null;
 
     schedule = null;
-    
-    modelDependencies = null;
-    
+    scheduleTooltip = null;
+    dataflowTooltip = null;
+
     constructor() {
         this.root = document.querySelector('#nav-analyse');
         
@@ -24,7 +25,9 @@ class ViewSchedule {
         this.updateButton = this.root.querySelector('#update');
 
         this.schedule = d3.select('#view-schedule');
-        
+        this.scheduleTooltip = this.root.querySelector('#view-schedule-tooltip');
+        this.dataflowTooltip = this.root.querySelector('#view-dataflow-tooltip');
+
         // Set the default makespan
         this.makespan = 10;
     }
@@ -128,6 +131,8 @@ class ViewSchedule {
     }
     
     drawTask(taskParameters, svgElement, scale, index) {
+        const tooltip = this.scheduleTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
+
         const group =
         svgElement.append('g')
                     .attr('transform', `translate(${View.SvgPadding}, ${View.SvgPadding})`);
@@ -186,12 +191,19 @@ class ViewSchedule {
                             .transition()
                             .ease(d3.easeLinear)
                             .style('fill', 'var(--blue)');
+                          tooltip.textContent = `${taskParameters.name}`;
+                          tooltip.style.visibility = 'visible';
+                      })
+                      .on('mousemove', function() {
+                          tooltip.style.top = `${d3.event.pageY - 2 * View.BarHeight}px`;
+                          tooltip.style.left = `${d3.event.pageX}px`;
                       })
                       .on('mouseout', function() {
                           d3.select(this)
                             .transition()
                             .ease(d3.easeLinear)
                             .style('fill', 'var(--gray)');
+                          tooltip.style.visibility = 'hidden';
                       });
             
             // Add vertical line at the start of the period
@@ -236,7 +248,9 @@ class ViewSchedule {
     drawDataflow(svgElement, scale, taskIndices, dataflow) {
         const yOffset = 0.5 * View.BarHeight + 2.5 * View.SvgPadding;
         const xOffset = 20;
-
+        
+        const tooltip = this.dataflowTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
+        
         const dependencyName = dataflow.name;
         
         const sourceTask = Utility.GetTask(dataflow.sendEvent.source);
@@ -266,20 +280,27 @@ class ViewSchedule {
                .attr('d', line(points))
                .attr('marker-end', 'url(#arrow)')
              .on('mouseover', function() {
-                d3.select(this)
-                  .transition()
-                  .ease(d3.easeLinear)
-                  .style('stroke', 'var(--orange)');
+               d3.select(this)
+                 .transition()
+                 .ease(d3.easeLinear)
+                 .style('stroke', 'var(--orange)');
+               tooltip.textContent = `${dependencyName}: ${dataflow.sendEvent.source} --> ${dataflow.receiveEvent.destination}`;
+               tooltip.style.visibility = 'visible';
+             })
+             .on('mousemove', function() {
+               tooltip.style.top = `${d3.event.pageY - View.SvgPadding}px`;
+               tooltip.style.left = `${d3.event.pageX + 2 * View.SvgPadding}px`;
              })
              .on('mouseout', function() {
                d3.select(this)
                  .transition()
                  .ease(d3.easeLinear)
                  .style('stroke', 'var(--red)');
+               tooltip.style.visibility = 'hidden';
              });
     }
     
     toString() {
-        return "ViewSchedule";
+        return 'ViewSchedule';
     }
 }
