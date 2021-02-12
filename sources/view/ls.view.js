@@ -7,6 +7,20 @@ class View {
     
     constructor() { }
     
+    // -----------------------------------------------------
+    // Static constants.
+    
+    static get Width()      { return window.innerWidth - 40; }
+    static get SvgPadding() { return 10; }
+    static get TaskHeight() { return 110; }
+    static get BarHeight()  { return 20; }
+    static get BarMargin()  { return 1; }
+    static get TickHeight() { return 6; }
+
+    
+    // -----------------------------------------------------
+    // Normal getters and setters
+    
     set viewTask(viewTask) {
         this._viewTask = viewTask;
     }

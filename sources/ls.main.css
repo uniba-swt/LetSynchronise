@@ -33,7 +33,7 @@ html {
 #view-task-preview .initialOffset, .period, .boundary,
 #view-task-set .initialOffset, .period, .boundary {
     stroke: black;
-    stroke-width: 3px;
+    stroke-width: 2px;
 }
 
 #view-task-preview .initialOffset,
@@ -58,31 +58,52 @@ html {
 
 
 /* Analyse tab */
-#view-schedule li,
-#view-schedule li svg {
-    width: 620px;
-    height: 130px;
-}
-
-#view-schedule li {
-    margin: 20px 0px 20px 0px;
-}
-
 #view-schedule rect {
-    fill: var(--blue);
+    fill: var(--gray);
 }
 
 #view-schedule .initialOffset, .period, .boundary {
     stroke: black;
-    stroke-width: 3px;
+    stroke-width: 2px;
 }
 
 #view-schedule .initialOffset {
     stroke-dasharray: 4;
 }
 
+#view-schedule .dependency {
+    stroke: var(--red);
+    stroke-width: 2px;
+    fill: none;
+}
+
+#view-schedule .arrowHead {
+    fill: var(--red);
+}
+
 #view-schedule {
     list-style: none;
     margin: 0px;
     padding: 0px;
+}
+
+#view-schedule-tooltip,
+#view-dataflow-tooltip {
+    position: absolute;
+    z-index: 999;
+    visibility: hidden;
+    padding: 5px;
+    border: 1px solid;
+    border-radius: 5px;
+    background-color: white;
+}
+
+#view-schedule-tooltip {
+    color: var(--blue);
+    border-color: var(--blue);
+}
+
+#view-dataflow-tooltip {
+    color: var(--orange);
+    border-color: var(--orange);
 }

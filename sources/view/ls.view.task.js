@@ -116,19 +116,19 @@ class ViewTask {
     }
     
     get taskParametersClean() {
-    	// Package all the task paramters in their correct types into an object.
-		return {
-			'name': this.name.trim(),
-			'initialOffset': parseFloat(this.initialOffset),
-			'activationOffset': parseFloat(this.activationOffset),
-			'duration': parseFloat(this.duration),
-			'period': parseFloat(this.period),
-			'inputs': this.inputs.split(',').map(item => item.trim()).filter(Boolean),
-			'outputs': this.outputs.split(',').map(item => item.trim()).filter(Boolean)
-		};
-	}
+        // Package all the task paramters in their correct types into an object.
+        return {
+            'name': this.name.trim(),
+            'initialOffset': parseFloat(this.initialOffset),
+            'activationOffset': parseFloat(this.activationOffset),
+            'duration': parseFloat(this.duration),
+            'period': parseFloat(this.period),
+            'inputs': this.inputs.split(',').map(item => item.trim()).filter(Boolean),
+            'outputs': this.outputs.split(',').map(item => item.trim()).filter(Boolean)
+        };
+    }
     
-   
+    
     // -----------------------------------------------------
     // Setup listeners
     
@@ -281,7 +281,6 @@ class ViewTask {
         
         // Draw the task preview
         this.draw(this.taskPreview, taskParameters);
-        
     }
 
 	draw(parentElement, taskParameters) {
@@ -296,38 +295,29 @@ class ViewTask {
 		d3.axisBottom()
 		  .scale(scale);
 
-		const barHeight = 20;
-		const barMargin = 2;
-
         // Set up the canvas
-		const bar =
+		const group =
         parentElement
 		    .append('svg')
 		    .append('g')
-		      .attr('transform', `translate(10, 10)`);
-
-        // Create a new SVG group for the task and populate with its data
-		const group =
-		bar.selectAll('g')
-		   .data([taskParameters])
-		   .enter()
+		      .attr('transform', `translate(View.SvgPadding, View.SvgPadding)`);
         
         // -----------------------------
         // Group for textual information
         const textInfo =
         group.append('g')
-                .attr('transform', `translate(0, 10)`);
+             .attr('transform', `translate(0, View.SvgPadding)`);
         
         // Add the task's name, inputs, and outputs
         textInfo.append('text')
                 .attr('dy', '0em')
-                .text(taskParameters => `Task: ${taskParameters.name}`);
+                .text(`Task: ${taskParameters.name}`);
         textInfo.append('text')
                 .attr('dy', '1.3em')
-                .text(taskParameters => `Inputs: ${this.formatTaskPorts(taskParameters.name, taskParameters.inputs)}`);
+                .text(`Inputs: ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.inputs)}`);
         textInfo.append('text')
                 .attr('dy', '2.6em')
-                .text(taskParameters => `Outputs: ${this.formatTaskPorts(taskParameters.name, taskParameters.outputs)}`);
+                .text(`Outputs: ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.outputs)}`);
 
         // -----------------------------
         // Group for graphical information
@@ -337,48 +327,48 @@ class ViewTask {
         
         // Add the task's LET duration
         graphInfo.append('rect')
-                 .attr('x', d => scale(d.initialOffset + d.activationOffset))
-                 .attr('width', d => scale(d.duration))
-                 .attr('height', barHeight);
+                 .attr('x', scale(taskParameters.initialOffset + taskParameters.activationOffset))
+                 .attr('width', scale(taskParameters.duration))
+                 .attr('height', View.BarHeight);
 		
-		// Add horizontal line to indicate the task's initial offset
+		// Add horizontal line for the task's initial offset
         graphInfo.append('line')
                  .attr('x1', 0)
-                 .attr('x2', d =>scale(d.initialOffset))
-                 .attr('y1', `${barHeight + barMargin}`)
-                 .attr('y2', `${barHeight + barMargin}`)
+                 .attr('x2', scale(taskParameters.initialOffset))
+                 .attr('y1', `${View.BarHeight + View.BarMargin}`)
+                 .attr('y2', `${View.BarHeight + View.BarMargin}`)
                  .attr('class', 'initialOffset');
 
-        // Add horizontal line to indicate the task's period
+        // Add horizontal line for the task's period
         graphInfo.append('line')
-                 .attr('x1', d =>scale(d.initialOffset))
-                 .attr('x2', d =>scale(d.initialOffset + d.period))
-                 .attr('y1', `${barHeight + barMargin}`)
-                 .attr('y2', `${barHeight + barMargin}`)
+                 .attr('x1', scale(taskParameters.initialOffset))
+                 .attr('x2', scale(taskParameters.initialOffset + taskParameters.period))
+                 .attr('y1', `${View.BarHeight + View.BarMargin}`)
+                 .attr('y2', `${View.BarHeight + View.BarMargin}`)
                  .attr('class', 'period');
 
         // Add vertical lines around the initial offset and period
         graphInfo.append('line')
                  .attr('x1', 0)
                  .attr('x2', 0)
-                 .attr('y1', `${barHeight + barMargin + 3*barMargin}`)
-                 .attr('y2', `${barHeight + barMargin - 3*barMargin}`)
+                 .attr('y1', `${View.BarHeight + View.TickHeight + View.BarMargin}`)
+                 .attr('y2', `${View.BarHeight - View.TickHeight}`)
                  .attr('class', 'boundary');
         graphInfo.append('line')
-                 .attr('x1', d =>scale(d.initialOffset))
-                 .attr('x2', d =>scale(d.initialOffset))
-                 .attr('y1', `${barHeight + barMargin + 3*barMargin}`)
-                 .attr('y2', `${barHeight + barMargin - 3*barMargin}`)
+                 .attr('x1', scale(taskParameters.initialOffset))
+                 .attr('x2', scale(taskParameters.initialOffset))
+                 .attr('y1', `${View.BarHeight + View.TickHeight + View.BarMargin}`)
+                 .attr('y2', `${View.BarHeight - View.TickHeight}`)
                  .attr('class', 'boundary');
         graphInfo.append('line')
-                 .attr('x1', d =>scale(d.initialOffset + d.period))
-                 .attr('x2', d =>scale(d.initialOffset + d.period))
-                 .attr('y1', `${barHeight + barMargin + 3*barMargin}`)
-                 .attr('y2', `${barHeight + barMargin - 3*barMargin}`)
+                 .attr('x1', scale(taskParameters.initialOffset + taskParameters.period))
+                 .attr('x2', scale(taskParameters.initialOffset + taskParameters.period))
+                 .attr('y1', `${View.BarHeight + View.TickHeight + View.BarMargin}`)
+                 .attr('y2', `${View.BarHeight - View.TickHeight}`)
                  .attr('class', 'boundary');
-		     
+        
         graphInfo.append('g')
-                 .attr('transform', `translate(0, ${barHeight + 7*barMargin})`)
+                 .attr('transform', `translate(0, ${View.BarHeight + 2 * View.TickHeight})`)
                  .call(x_axis)
                  .call(g => g.select('.domain').remove());
 	}
@@ -401,17 +391,9 @@ class ViewTask {
             });
         }
     }
-    
-    taskPorts(taskName, taskPorts) {
-        return taskPorts.map(port => `${taskName}.${port}`);
-    }
-    
-    formatTaskPorts(taskName, taskPorts) {
-        return this.taskPorts(taskName, taskPorts).join(', ');
-    }
-    
+        
     formatTaskParametersInfo(taskParameters) {
-        return `${taskParameters.name}: initial offset = ${taskParameters.initialOffset}, activation offset = ${taskParameters.activationOffset}, duration = ${taskParameters.duration}, period = ${taskParameters.period}, inputs = ${formatTaskPorts(taskParameters.name, taskParameters.inputs)}, outputs = ${formatTaskPorts(taskParameters.name, taskParameters.outputs)}`;
+        return `${taskParameters.name}: initial offset = ${taskParameters.initialOffset}, activation offset = ${taskParameters.activationOffset}, duration = ${taskParameters.duration}, period = ${taskParameters.period}, inputs = ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.inputs)}, outputs = ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.outputs)}`;
     }
     
     toString() {
