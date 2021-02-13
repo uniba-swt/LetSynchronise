@@ -180,8 +180,9 @@ class ViewSchedule {
                    .attr('class', 'period');
 
         // Replace with pre-computed values from ls.model.schedule
-        for (null ; periodStart < this.makespan; periodStart += taskParameters.period) {
+        for (var instance = 1; periodStart < this.makespan; periodStart += taskParameters.period, instance++) {
             // Add the task's LET duration
+            const instanceCopy = instance;
             graphInfo.append('rect')
                        .attr('x', scale(periodStart + taskParameters.activationOffset))
                        .attr('width', scale(taskParameters.duration))
@@ -191,7 +192,7 @@ class ViewSchedule {
                             .transition()
                             .ease(d3.easeLinear)
                             .style('fill', 'var(--blue)');
-                          tooltip.textContent = `${taskParameters.name}`;
+                          tooltip.innerHTML = `${taskParameters.name} instance ${instanceCopy}`;
                           tooltip.style.visibility = 'visible';
                       })
                       .on('mousemove', function() {
@@ -284,7 +285,7 @@ class ViewSchedule {
                  .transition()
                  .ease(d3.easeLinear)
                  .style('stroke', 'var(--orange)');
-               tooltip.textContent = `${dependencyName}: ${dataflow.sendEvent.source} --> ${dataflow.receiveEvent.destination}`;
+               tooltip.innerHTML = `${dependencyName}:<br/>${dataflow.sendEvent.source} &rarr; ${dataflow.receiveEvent.destination}`;
                tooltip.style.visibility = 'visible';
              })
              .on('mousemove', function() {
