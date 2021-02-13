@@ -99,8 +99,8 @@ class ViewDependencies {
     }
     
     updateDependencySelectors(taskParametersSet) {
-        const sources = taskParametersSet.map(taskParameters => this.taskPorts(taskParameters.name, taskParameters.outputs)).flat();
-        const destinations = taskParametersSet.map(taskParameters => this.taskPorts(taskParameters.name, taskParameters.inputs)).flat();
+        const sources = taskParametersSet.map(taskParameters => Utility.TaskPorts(taskParameters.name, taskParameters.outputs)).flat();
+        const destinations = taskParametersSet.map(taskParameters => Utility.TaskPorts(taskParameters.name, taskParameters.inputs)).flat();
         
         // Create list of available sources and destinations
         this.updateTaskDependencyPorts(d3.select(this.taskDependencySource), sources);
@@ -135,11 +135,11 @@ class ViewDependencies {
             .data(dependencies)
             .enter()
             .append('li')
-                .text(dependency => `${dependency.name}: ${dependency.source} --> ${dependency.destination}`);
+                .html(dependency => `${dependency.name}: ${dependency.source} &rarr; ${dependency.destination} ${this.deleteButton()}`);
     }
-
-    taskPorts(taskName, taskPorts) {
-        return taskPorts.map(port => `${taskName}.${port}`);
+    
+    deleteButton() {
+        return '<button id="delete" type="submit" class="btn btn-danger btn-sm">Delete</button>';
     }
     
     toString() {

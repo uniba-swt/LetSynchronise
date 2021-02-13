@@ -374,12 +374,15 @@ class ViewTask {
 	}
     
     updateTasks(taskParametersSet) {
-        // Delete the existing task previews, if they exist
+        // Delete the existing preview of the task set, if it exists
         this.taskSet.selectAll('*').remove();
         
         for (const taskParameters of taskParametersSet) {
             const taskListItem = this.taskSet.append('li');
             this.draw(taskListItem, taskParameters);
+            taskListItem.append('span')
+                        .html(dependency => `${this.deleteButton()}`);
+
             
             // Click listener
             taskListItem.on('click', function() {
@@ -394,6 +397,10 @@ class ViewTask {
         
     formatTaskParametersInfo(taskParameters) {
         return `${taskParameters.name}: initial offset = ${taskParameters.initialOffset}, activation offset = ${taskParameters.activationOffset}, duration = ${taskParameters.duration}, period = ${taskParameters.period}, inputs = ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.inputs)}, outputs = ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.outputs)}`;
+    }
+    
+    deleteButton() {
+        return '<button id="delete" type="submit" class="btn btn-danger btn-sm">Delete</button>';
     }
     
     toString() {

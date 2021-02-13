@@ -14,7 +14,6 @@ html {
 /* Design tab */
 #view-task-preview,
 #view-task-preview svg,
-#view-task-set li,
 #view-task-set li svg {
     width: 620px;
     height: 130px;
@@ -23,6 +22,7 @@ html {
 #view-task-preview,
 #view-task-set li {
     margin: 20px 0px 20px 0px;
+    cursor: pointer;
 }
 
 #view-task-preview rect,
@@ -56,10 +56,28 @@ html {
     background-color: lightgrey;
 }
 
+#view-task-dependencies li {
+    float: left;
+    clear: both;
+    line-height: 3;
+    cursor: pointer;
+}
+
+#view-task-set li #delete,
+#view-task-dependencies li #delete {
+    visibility: hidden;
+}
+
+#view-task-set li:hover #delete,
+#view-task-dependencies li:hover #delete {
+    visibility: visible;
+}
+
 
 /* Analyse tab */
 #view-schedule rect {
     fill: var(--gray);
+    cursor: pointer;
 }
 
 #view-schedule .initialOffset, .period, .boundary {
@@ -75,6 +93,7 @@ html {
     stroke: var(--red);
     stroke-width: 2px;
     fill: none;
+    cursor: pointer;
 }
 
 #view-schedule .arrowHead {
