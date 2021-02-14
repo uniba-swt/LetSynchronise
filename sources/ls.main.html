@@ -12,8 +12,8 @@
     <!-- JavaScript frameworks/libraries this page depends on -->
     <script src="dependencies/d3-5.16.0/d3.js"></script>
     <script src="dependencies/jquery-3.5.1.js"></script>
-    <script src="dependencies/bootstrap-4.5.2/js/bootstrap.js"></script>
-        
+    <script src="dependencies/bootstrap-4.5.2/js/bootstrap.bundle.js"></script>
+    
     <!-- CSS to use for this page -->
     <link rel="stylesheet" href="dependencies/bootstrap-4.5.2/css/bootstrap.css">
     
@@ -38,6 +38,8 @@
     <script src="sources/controller/ls.controller.dependencies.js"></script>
     <script src="sources/controller/ls.controller.schedule.js"></script>
     <script src="sources/controller/ls.controller.task.js"></script>
+    
+    <script src="sources/ls.utility.js"></script>
 
     <script defer src="sources/ls.main.js"></script>
 </head>
@@ -48,11 +50,11 @@
     <p>LetSynchronise is an interactive tool for defining a set of LET tasks and analysing their data-flow dependencies.</p>
 
     <!-- This page has different tab views -->
-    <!-- Buttons for the tab views defined below -->
     <nav>
+        <!-- Buttons for the tab views defined below -->
         <div class="nav nav-tabs" id="nav-tab" role="tablist">
-            <a class="nav-item nav-link active" id="nav-design-tab" data-toggle="tab" href="#nav-design" role="tab" aria-controls="nav-design" aria-selected="true">Design</a>
-            <a class="nav-item nav-link" id="nav-analyse-tab" data-toggle="tab" href="#nav-analyse" role="tab" aria-controls="nav-analyse" aria-selected="false">Analyse</a>
+            <a class="nav-item nav-link active" id="nav-design-tab" data-toggle="tab" href="#nav-design" role="tab" aria-controls="nav-design">Design</a>
+            <a class="nav-item nav-link" id="nav-analyse-tab" data-toggle="tab" href="#nav-analyse" role="tab" aria-controls="nav-analyse">Analyse</a>
         </div>
     </nav>
 
@@ -119,9 +121,9 @@
 
                 <div class="form-group row" id="view-task-preview"></div>
                 
-                <button id="preview" type="submit" class="btn btn-primary">Preview</button>
-                <button id="submit" type="submit" class="btn btn-primary">Save</button>
-                <button id="clear" type="reset" class="btn btn-outline-secondary">Clear</button>
+                <button id="previewTask" type="submit" class="btn btn-primary">Preview</button>
+                <button id="submitTask" type="submit" class="btn btn-primary">Save</button>
+                <button id="clearTask" type="reset" class="btn btn-outline-secondary">Clear</button>
             </form>
             
             <div class="m-5"></div>
@@ -139,48 +141,86 @@
             <div class="input-group row mb-1">
                 <div class="input-group col-sm-3">
                     <div class="input-group-prepend">
-                        <label class="input-group-text" for="view-task-dependencies-name">Name</label>
+                        <label class="input-group-text" for="view-task-dependency-name">Name</label>
                     </div>
-                    <input required type="text" id="view-task-dependencies-name" class="form-control"/>
+                    <input required type="text" id="view-task-dependency-name" class="form-control"/>
                 </div>
                 
                 <div class="input-group col-sm-3">
                     <div class="input-group-prepend">
-                        <label class="input-group-text" for="view-task-dependencies-source">Source</label>
+                        <label class="input-group-text" for="view-task-dependency-source">Source</label>
                     </div>
-                    <select id="view-task-dependencies-source" class="custom-select">
+                    <select id="view-task-dependency-source" class="custom-select">
                         <option disabled>Choose...</option>
                     </select>
                 </div>
                 
                 <div class="input-group col-sm-3">
                     <div class="input-group-prepend">
-                        <label class="input-group-text" for="view-task-dependencies-destination">Destination</label>
+                        <label class="input-group-text" for="view-task-dependency-destination">Destination</label>
                     </div>
-                    <select id="view-task-dependencies-destination" class="custom-select">
+                    <select id="view-task-dependency-destination" class="custom-select">
                         <option disabled>Choose...</option>
                     </select>
                 </div>
                 
                 <div class="input-group col-sm-3">
-                    <button id="add" type="submit" class="btn btn-primary">Add</button>
+                    <button id="submitDependency" type="submit" class="btn btn-primary">Save</button>
                 </div>
             </div>
-            
+
+            <div class="m-3"></div>
+
+            <ul id="view-task-dependencies"></ul>
+
             <div class="m-5"></div>
 
-            
-            <ul id="view-task-dependencies"></ul>
-            
         </div>
         
         
         <div class="tab-pane fade" id="nav-analyse" role="tabpanel" aria-labelledby="nav-analyse-tab">
             <h3>LET Task Schedule</h3>
+
+            <form id="view-schedule-details">
+                <div class="form-group row mb-1">
+                    <label for="prologue" class="col-sm-2 col-form-label">Prologue</label>
+                    <div class="input-group col-sm-2 p-0">
+                        <input required type="text" class="form-control" id="prologue" readonly/>
+                        <div class="input-group-append">
+                            <span class="input-group-text">ms</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row mb-1">
+                    <label for="hyperperiod" class="col-sm-2 col-form-label">Hyper-period</label>
+                    <div class="input-group col-sm-2 p-0">
+                        <input required type="text" class="form-control" id="hyperperiod" readonly/>
+                        <div class="input-group-append">
+                            <span class="input-group-text">ms</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group row mb-1">
+                    <label for="makespan" class="col-sm-2 col-form-label">Makespan</label>
+                    <div class="input-group col-sm-2 p-0">
+                        <input required type="text" class="form-control" id="makespan" value="10"/>
+                        <div class="input-group-append">
+                            <span class="input-group-text">ms</span>
+                        </div>
+                    </div>
+                </div>
+            </form>
             
             <button id="update" type="submit" class="btn btn-primary">Update</button>
             
-            <ul id="view-schedule"></ul>
+            <div class="m-3"></div>
+            
+            <div id="view-schedule"></div>
+            
+            <div id="view-schedule-tooltip"></div>
+            <div id="view-dataflow-tooltip"></div>
 
             <div class="m-5"></div>
 
@@ -188,6 +228,8 @@
             <h3>Define Constraints</h3>
             
             <button id="analyse" type="submit" class="btn btn-primary">Analyse</button>
+            
+            <div class="m-5"></div>
 
         </div>
     </div>

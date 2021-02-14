@@ -51,7 +51,7 @@ class ModelDatabase {
         const putTask = objectStore.put(task.taskParameters);
     }
 
-    getTask = function(callback, name) {
+    getTask = function(callbacks, name) {
         const transaction = this.db.transaction('TaskStore', 'readonly');
         
         // Error handeller
@@ -76,9 +76,9 @@ class ModelDatabase {
         }
         
         const objectStore = transaction.objectStore('TaskStore');
-        const getTask = objectStore.getAll(); // Get using the index
+        const getTasks = objectStore.getAll(); // Get using the index
         
-        getTask.onsuccess = function(event) {
+        getTasks.onsuccess = function(event) {
             callbacks.forEach(callback => callback(event.target.result));
         }
     }

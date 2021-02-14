@@ -14,7 +14,6 @@ html {
 /* Design tab */
 #view-task-preview,
 #view-task-preview svg,
-#view-task-set li,
 #view-task-set li svg {
     width: 620px;
     height: 130px;
@@ -22,7 +21,7 @@ html {
 
 #view-task-preview,
 #view-task-set li {
-    margin: 20px 0px 20px 0px;
+    margin: 20px 0px;
 }
 
 #view-task-preview rect,
@@ -33,7 +32,7 @@ html {
 #view-task-preview .initialOffset, .period, .boundary,
 #view-task-set .initialOffset, .period, .boundary {
     stroke: black;
-    stroke-width: 3px;
+    stroke-width: 2px;
 }
 
 #view-task-preview .initialOffset,
@@ -45,44 +44,103 @@ html {
     list-style: none;
     margin: 0px;
     padding: 0px;
+    display: inline-block;
 }
 
-#view-task-set li:hover {
+#view-task-set li {
+    float: left;
+    clear: both;
+}
+
+#view-task-set li svg:hover {
+    background-color: whitesmoke;
+    cursor: pointer;
+}
+
+#view-task-set li.taskSelected svg,
+#view-task-set li.taskSelected svg:hover {
+    background-color: lightgrey;
+}
+
+#view-task-dependencies li {
+    float: left;
+    clear: both;
+    line-height: 3;
+    cursor: pointer;
+}
+
+#view-task-dependencies li span {
+    display: inline-block;
+}
+
+#view-task-dependencies li span:hover {
     background-color: whitesmoke;
 }
 
-#view-task-set .taskSelected,
-#view-task-set li.taskSelected:hover {
+#view-task-dependencies li.dependencySelected span,
+#view-task-dependencies li.dependencySelected span:hover {
     background-color: lightgrey;
+}
+
+#view-task-set li .delete,
+#view-task-dependencies li .delete {
+    visibility: hidden;
+}
+
+#view-task-set li:hover .delete,
+#view-task-dependencies li:hover .delete {
+    visibility: visible;
 }
 
 
 /* Analyse tab */
-#view-schedule li,
-#view-schedule li svg {
-    width: 620px;
-    height: 130px;
-}
-
-#view-schedule li {
-    margin: 20px 0px 20px 0px;
-}
-
 #view-schedule rect {
-    fill: var(--blue);
+    fill: var(--gray);
+    cursor: pointer;
 }
 
 #view-schedule .initialOffset, .period, .boundary {
     stroke: black;
-    stroke-width: 3px;
+    stroke-width: 2px;
 }
 
 #view-schedule .initialOffset {
     stroke-dasharray: 4;
 }
 
+#view-schedule .dependency {
+    stroke: var(--red);
+    stroke-width: 2px;
+    fill: none;
+    cursor: pointer;
+}
+
+#view-schedule .arrowHead {
+    fill: var(--red);
+}
+
 #view-schedule {
-    list-style: none;
     margin: 0px;
     padding: 0px;
+}
+
+#view-schedule-tooltip,
+#view-dataflow-tooltip {
+    position: absolute;
+    z-index: 999;
+    visibility: hidden;
+    padding: 0px 5px;
+    border: 1px solid;
+    border-radius: 5px;
+    background-color: white;
+}
+
+#view-schedule-tooltip {
+    color: var(--blue);
+    border-color: var(--blue);
+}
+
+#view-dataflow-tooltip {
+    color: var(--orange);
+    border-color: var(--orange);
 }
