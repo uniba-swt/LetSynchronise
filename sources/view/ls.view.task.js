@@ -19,6 +19,8 @@ class ViewTask {
 
     taskSet = null;
 
+    deleteHandler = null;
+    
     
     constructor() {
         this.root = document.querySelector('#nav-design');
@@ -32,9 +34,9 @@ class ViewTask {
         this.inputsField = this.root.querySelector('#inputs');
         this.outputsField = this.root.querySelector('#outputs');
         
-        this.previewButton = this.root.querySelector('#preview');
-        this.submitButton = this.root.querySelector('#submit');
-        this.clearButton = this.root.querySelector('#clear');
+        this.previewButton = this.root.querySelector('#previewTask');
+        this.submitButton = this.root.querySelector('#submitTask');
+        this.clearButton = this.root.querySelector('#clearTask');
 
         this.taskPreview = d3.select('#view-task-preview');
 
@@ -161,9 +163,22 @@ class ViewTask {
             
 			// Clear the preview.
 			this.clearPreview();
+            this.clearSelected();
         });
     }
 
+    setupDeleteButtonListener(elementId) {
+        const deleteButton = this.root.querySelector(`#${elementId}`);
+        
+        deleteButton.addEventListener('click', event => {
+            // Prevent the default behaviour of submitting the form and the reloading of the webpage.
+            event.preventDefault();
+            
+            // Call the handler.
+            this.deleteHandler(elementId);
+        });
+    }
+    
     
     // -----------------------------------------------------
     // Registration of handlers from the controller
@@ -180,6 +195,11 @@ class ViewTask {
             }
         });
     }
+    
+    registerDeleteHandler(handler) {
+        this.deleteHandler = handler;
+    }
+    
     
     validateTaskParameters(taskParameters) {
 		if (taskParameters.name == null || taskParameters.name.trim() == '') {
@@ -275,6 +295,11 @@ class ViewTask {
 		this.taskPreview.selectAll('*').remove();
     }
     
+    clearSelected() {
+        this.taskSet.node().querySelectorAll('li')
+            .forEach((item) => { item.classList.remove('taskSelected') });
+    }
+    
     updatePreview(taskParameters) {
         // Delete the existing task preview, if it exists
         this.clearPreview();
@@ -296,17 +321,21 @@ class ViewTask {
 		  .scale(scale);
 
         // Set up the canvas
-		const group =
+        const anchor =
         parentElement
+            .append('a')
+
+		const group =
+        anchor
 		    .append('svg')
 		    .append('g')
-		      .attr('transform', `translate(View.SvgPadding, View.SvgPadding)`);
+		      .attr('transform', `translate(${View.SvgPadding}, ${View.SvgPadding})`);
         
         // -----------------------------
         // Group for textual information
         const textInfo =
         group.append('g')
-             .attr('transform', `translate(0, View.SvgPadding)`);
+             .attr('transform', `translate(0, ${View.SvgPadding})`);
         
         // Add the task's name, inputs, and outputs
         textInfo.append('text')
@@ -371,25 +400,41 @@ class ViewTask {
                  .attr('transform', `translate(0, ${View.BarHeight + 2 * View.TickHeight})`)
                  .call(x_axis)
                  .call(g => g.select('.domain').remove());
+        
+        return anchor;
 	}
     
     updateTasks(taskParametersSet) {
-        // Delete the existing task previews, if they exist
+        // Delete the existing preview of the task set, if it exists
         this.taskSet.selectAll('*').remove();
         
         for (const taskParameters of taskParametersSet) {
             const taskListItem = this.taskSet.append('li');
-            this.draw(taskListItem, taskParameters);
+            const anchor = this.draw(taskListItem, taskParameters);
+            taskListItem.append('span')
+                        .html(dependency => `${Utility.AddDeleteButton(taskParameters.name)}`);
+            this.setupDeleteButtonListener(`${taskParameters.name}`);
             
             // Click listener
-            taskListItem.on('click', function() {
+            anchor.on('click', () => {
                 taskListItem.node().parentNode.querySelectorAll('li')
-                    .forEach(function(item) {
+                    .forEach((item) => {
                         if (item !== taskListItem.node()) { item.classList.remove('taskSelected'); }
                     });
                 taskListItem.node().classList.toggle('taskSelected');
+                this.populateParameterForm(taskParameters);
             });
         }
+    }
+    
+    populateParameterForm(taskParameters) {
+        this.name = taskParameters.name;
+        this.initialOffset = taskParameters.initialOffset;
+        this.activationOffset = taskParameters.activationOffset;
+        this.duration = taskParameters.duration;
+        this.period = taskParameters.period;
+        this.inputs = taskParameters.inputs;
+        this.outputs = taskParameters.outputs;
     }
         
     formatTaskParametersInfo(taskParameters) {

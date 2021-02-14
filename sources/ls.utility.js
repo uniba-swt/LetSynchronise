@@ -63,4 +63,9 @@ class Utility {
     static GetPort(taskPort) {
         return taskPort.split('.')[1];
     }
+                             
+    static AddDeleteButton(id) {
+        return `<button id="${id}" type="submit" class="btn btn-danger btn-sm delete">Delete</button>`;
+    }
+    
 }

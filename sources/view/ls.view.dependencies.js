@@ -3,54 +3,68 @@
 class ViewDependencies {
     root = null;
     
-    taskDependencyName = null;
-    taskDependencySource = null;
-    taskDependencyDestination = null;
+    nameField = null;
+    sourceField = null;
+    destinationField = null;
     
-    addButton = null;
+    submitButton = null;
     
     taskDependencies = null;
+    
+    deleteHandler = null;
     
     
     constructor() {
         this.root = document.querySelector('#nav-design');
         
         // Define or edit task dependencies
-        this.taskDependencyName = this.root.querySelector('#view-task-dependencies-name');
-        this.taskDependencySource = this.root.querySelector('#view-task-dependencies-source');
-        this.taskDependencyDestination = this.root.querySelector('#view-task-dependencies-destination');
+        this.nameField = this.root.querySelector('#view-task-dependency-name');
+        this.sourceField = this.root.querySelector('#view-task-dependency-source');
+        this.destinationField = this.root.querySelector('#view-task-dependency-destination');
         
-        this.addButton = this.root.querySelector('#add');
+        this.submitButton = this.root.querySelector('#submitDependency');
         
         this.taskDependencies = d3.select('#view-task-dependencies');
     }
     
     
-    get dependencyName() {
-        return this.taskDependencyName.value;
+    get name() {
+        return this.nameField.value;
     }
     
-    get dependencySource() {
-        return this.taskDependencySource.value;
+    set name(name) {
+        this.nameField.value = name;
     }
     
-    get dependencyDestination() {
-        return this.taskDependencyDestination.value;
+    get source() {
+        return this.sourceField.value;
     }
     
-    get taskDependencyRaw() {
+    set source(source) {
+        this.sourceField.value = source;
+    }
+    
+    get destination() {
+        return this.destinationField.value;
+    }
+    
+    set destination(destination) {
+        this.destinationField.value = destination;
+    }
+    
+    get dependencyRaw() {
         return {
-            'name': this.dependencyName,
-            'source': this.dependencySource,
-            'destination': this.dependencyDestination
+            'name': this.name,
+            'source': this.source,
+            'destination': this.destination
         };
     }
     
-    get taskDependencyClean() {
-        const source = this.dependencySource.split('.');
-        const destination = this.dependencyDestination.split('.');
+    get dependencyClean() {
+        const source = this.source.split('.');
+        const destination = this.destination.split('.');
         return {
-            'name': this.dependencyName.trim(),
+            'name': this.name.trim(),
             'source': {
                 'task': source[0],
                 'port': source[1]
@@ -64,20 +78,41 @@ class ViewDependencies {
     
     
     // -----------------------------------------------------
+    // Setup listeners
+    
+    setupDeleteButtonListener(elementId) {
+        const deleteButton = this.root.querySelector(`#${elementId}`);
+        
+        deleteButton.addEventListener('click', event => {
+            // Prevent the default behaviour of submitting the form and the reloading of the webpage.
+            event.preventDefault();
+            
+            // Call the handler.
+            this.deleteHandler(elementId);
+        });
+    }
+    
+    
+    // -----------------------------------------------------
     // Registration of handlers from the controller
 
-    registerAddHandler(handler) {
-        this.addButton.addEventListener('click', event => {
+    registerSubmitHandler(handler) {
+        this.submitButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
             event.preventDefault();
             
             // Validate the destinations.
-            if (this.validateTaskDependency(this.taskDependencyRaw)) {
+            if (this.validateTaskDependency(this.dependencyRaw)) {
                 // Call the handler.
-                handler(this.taskDependencyClean);
+                handler(this.dependencyClean);
             }
         });
     }
+    
+    registerDeleteHandler(handler) {
+        this.deleteHandler = handler;
+    }
+    
     
     validateTaskDependency(taskDependency) {
         if (taskDependency.name == null || taskDependency.name.trim() == '') {
@@ -99,12 +134,12 @@ class ViewDependencies {
     }
     
     updateDependencySelectors(taskParametersSet) {
-        const sources = taskParametersSet.map(taskParameters => this.taskPorts(taskParameters.name, taskParameters.outputs)).flat();
-        const destinations = taskParametersSet.map(taskParameters => this.taskPorts(taskParameters.name, taskParameters.inputs)).flat();
+        const sources = taskParametersSet.map(taskParameters => Utility.TaskPorts(taskParameters.name, taskParameters.outputs)).flat();
+        const destinations = taskParametersSet.map(taskParameters => Utility.TaskPorts(taskParameters.name, taskParameters.inputs)).flat();
         
         // Create list of available sources and destinations
-        this.updateTaskDependencyPorts(d3.select(this.taskDependencySource), sources);
-        this.updateTaskDependencyPorts(d3.select(this.taskDependencyDestination), destinations);
+        this.updateTaskDependencyPorts(d3.select(this.sourceField), sources);
+        this.updateTaskDependencyPorts(d3.select(this.destinationField), destinations);
     }
         
     updateTaskDependencyPorts(parentElement, ports) {
@@ -127,19 +162,35 @@ class ViewDependencies {
     }
     
     updateDependencies(dependencies) {
-        // Display existing task dependencies
+        // Display task dependencies
         this.taskDependencies.selectAll('*').remove();
+        
+        const thisRef = this;
         
         this.taskDependencies
             .selectAll('li')
             .data(dependencies)
             .enter()
             .append('li')
-                .text(dependency => `${dependency.name}: ${dependency.source} --> ${dependency.destination}`);
-    }
+                .html(dependency => `<span>${dependency.name}: ${dependency.source} &rarr; ${dependency.destination}</span> ${Utility.AddDeleteButton(dependency.name)}`)
+            .on('click', function(data) {
+                thisRef.taskDependencies.node().querySelectorAll('li')
+                    .forEach((dependency) => {
+                        if (dependency !== this) { dependency.classList.remove('dependencySelected'); }
+                    });
+                this.classList.toggle('dependencySelected');
+                thisRef.populateParameterForm.bind(thisRef)(data);
+            });
 
-    taskPorts(taskName, taskPorts) {
-        return taskPorts.map(port => `${taskName}.${port}`);
+        for (const dependency of dependencies) {
+            this.setupDeleteButtonListener(`${dependency.name}`);
+        }
+    }
+    
+    populateParameterForm(dependency) {
+        this.name = dependency.name;
+        this.source = dependency.source;
+        this.destination = dependency.destination;
     }
     
     toString() {

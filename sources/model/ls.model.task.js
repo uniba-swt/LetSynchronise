@@ -47,6 +47,13 @@ class ModelTask {
         this.getAllTasks(callbacks);
     }
     
+    deleteTask(name) {
+        alert(`Delete task ${name}`);
+        
+        const callbacks = [this.updateTasks, this.updateDependencySelectors, this.updateSchedule];
+        this.getAllTasks(callbacks);
+    }
+    
     toString() {
         return "ModelTask";
     }

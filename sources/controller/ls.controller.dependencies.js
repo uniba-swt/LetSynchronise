@@ -11,7 +11,8 @@ class ControllerDependencies {
         this._view = view;
         
         // Register the handlers when setting the view.
-        this._view.registerAddHandler(this.handleCreateDependency);
+        this._view.registerSubmitHandler(this.handleCreateDependency);
+        this._view.registerDeleteHandler(this.handleDeleteDependency);
     }
 
     get view() {
@@ -26,7 +27,7 @@ class ControllerDependencies {
         
         // Hack to populate the View with dependencies once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
-            this._model.getAllLogical([this.callbackUpdateDependencies]);
+            this._model.getAllDependencyDefinitions([this.callbackUpdateDependencies]);
         });
     }
     
@@ -58,6 +59,12 @@ class ControllerDependencies {
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleCreateDependency = (taskDependency) => {
         this.model.createDependency(taskDependency);
+    }
+    
+    // Handler for creating input/output dependencies.
+    // Arrow function is used so that 'this' is accessible when the handler is called within the view.
+    handleDeleteDependency = (name) => {
+        this.model.deleteDependency(name);
     }
     
     

@@ -53,14 +53,14 @@
     <nav>
         <!-- Buttons for the tab views defined below -->
         <div class="nav nav-tabs" id="nav-tab" role="tablist">
-            <a class="nav-item nav-link" id="nav-design-tab" data-toggle="tab" href="#nav-design" role="tab" aria-controls="nav-design">Design</a>
-            <a class="nav-item nav-link active" id="nav-analyse-tab" data-toggle="tab" href="#nav-analyse" role="tab" aria-controls="nav-analyse">Analyse</a>
+            <a class="nav-item nav-link active" id="nav-design-tab" data-toggle="tab" href="#nav-design" role="tab" aria-controls="nav-design">Design</a>
+            <a class="nav-item nav-link" id="nav-analyse-tab" data-toggle="tab" href="#nav-analyse" role="tab" aria-controls="nav-analyse">Analyse</a>
         </div>
     </nav>
 
     <!-- Content for the tab views defined below -->
     <div class="tab-content" id="nav-tabContent">
-        <div class="tab-pane fade" id="nav-design" role="tabpanel" aria-labelledby="nav-design-tab">
+        <div class="tab-pane fade show active" id="nav-design" role="tabpanel" aria-labelledby="nav-design-tab">
             <h3>Define or Edit a LET Task</h3>
             
             <form id="view-task-define">
@@ -121,9 +121,9 @@
 
                 <div class="form-group row" id="view-task-preview"></div>
                 
-                <button id="preview" type="submit" class="btn btn-primary">Preview</button>
-                <button id="submit" type="submit" class="btn btn-primary">Save</button>
-                <button id="clear" type="reset" class="btn btn-outline-secondary">Clear</button>
+                <button id="previewTask" type="submit" class="btn btn-primary">Preview</button>
+                <button id="submitTask" type="submit" class="btn btn-primary">Save</button>
+                <button id="clearTask" type="reset" class="btn btn-outline-secondary">Clear</button>
             </form>
             
             <div class="m-5"></div>
@@ -141,43 +141,44 @@
             <div class="input-group row mb-1">
                 <div class="input-group col-sm-3">
                     <div class="input-group-prepend">
-                        <label class="input-group-text" for="view-task-dependencies-name">Name</label>
+                        <label class="input-group-text" for="view-task-dependency-name">Name</label>
                     </div>
-                    <input required type="text" id="view-task-dependencies-name" class="form-control"/>
+                    <input required type="text" id="view-task-dependency-name" class="form-control"/>
                 </div>
                 
                 <div class="input-group col-sm-3">
                     <div class="input-group-prepend">
-                        <label class="input-group-text" for="view-task-dependencies-source">Source</label>
+                        <label class="input-group-text" for="view-task-dependency-source">Source</label>
                     </div>
-                    <select id="view-task-dependencies-source" class="custom-select">
+                    <select id="view-task-dependency-source" class="custom-select">
                         <option disabled>Choose...</option>
                     </select>
                 </div>
                 
                 <div class="input-group col-sm-3">
                     <div class="input-group-prepend">
-                        <label class="input-group-text" for="view-task-dependencies-destination">Destination</label>
+                        <label class="input-group-text" for="view-task-dependency-destination">Destination</label>
                     </div>
-                    <select id="view-task-dependencies-destination" class="custom-select">
+                    <select id="view-task-dependency-destination" class="custom-select">
                         <option disabled>Choose...</option>
                     </select>
                 </div>
                 
                 <div class="input-group col-sm-3">
-                    <button id="add" type="submit" class="btn btn-primary">Add</button>
+                    <button id="submitDependency" type="submit" class="btn btn-primary">Save</button>
                 </div>
             </div>
-            
+
+            <div class="m-3"></div>
+
+            <ul id="view-task-dependencies"></ul>
+
             <div class="m-5"></div>
 
-            
-            <ul id="view-task-dependencies"></ul>
-            
         </div>
         
         
-        <div class="tab-pane fade show active" id="nav-analyse" role="tabpanel" aria-labelledby="nav-analyse-tab">
+        <div class="tab-pane fade" id="nav-analyse" role="tabpanel" aria-labelledby="nav-analyse-tab">
             <h3>LET Task Schedule</h3>
 
             <form id="view-schedule-details">
