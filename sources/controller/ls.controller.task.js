@@ -11,6 +11,7 @@ class ControllerTask {
 
         // Register the handlers when setting the view.
         this._view.registerSubmitHandler(this.handleCreateTask);
+        this._view.registerDeleteHandler(this.handleDeleteTask);
     }
     
     get view() {
@@ -42,6 +43,11 @@ class ControllerTask {
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleCreateTask = (taskParameters) => {
         this.model.createTask(taskParameters);
+    }
+    
+    // Handler for deleting a task.
+    handleDeleteTask = (name) => {
+        this.model.deleteTask(name);
     }
     
     

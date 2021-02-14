@@ -25,23 +25,30 @@ class ModelDependencies {
     // -----------------------------------------------------
     // Class methods
 
-    create(dependency) {
+    createDependency(dependency) {
         // Store dependencies into Database
         //    const logicalDependency = ModelLogicalDependency.CreateWithDependency(dependency);
         //    this.database.storeDependency(this.updateDependencies, logicalDependency);
         console.log(`Created dependency: ${JSON.stringify(dependency)}`);
         const callbacks = [this.updateDependencies];
-        this.getAllLogical(callbacks);
+        this.getAllDependencyDefinitions(callbacks);
     }
     
-    getAllLogical(callbacks) {
-    //    this.database.getAllDependencies(this.updateDependencies);
+    deleteDependency(name) {
+        alert(`Delete dependency ${name}`);
+        
+        const callbacks = [this.updateDependencies];
+        this.getAllDependencyDefinitions(callbacks);
+    }
+    
+    getAllDependencyDefinitions(callbacks) {
+    //    this.database.getAllDependencies(callbacks);
         
         const dummyDependencies = [{'name': 'sensorDataflow', 'destination': 't1.in1', 'source': 't3.out1'}, {'name': 'actuatorDataflow', 'destination': 't1.in2', 'source': 't3.out2'}];
         callbacks.forEach(callback => callback(dummyDependencies));
     }
     
-    getAllInstances() {
+    getAllDependencyInstances() {
         const dummyDataflows = [
             {
                 'id': 1,                      // ID of dataflow instance

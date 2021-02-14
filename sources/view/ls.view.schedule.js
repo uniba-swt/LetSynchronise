@@ -88,7 +88,7 @@ class ViewSchedule {
         
         // Draw communication dependencies.
         // TODO: Get communication dependencies.
-        const dataflows = this.modelDependencies.getAllInstances();
+        const dataflows = this.modelDependencies.getAllDependencyInstances();
         this.drawDataflows(svgElement, scale, taskIndices, dataflows);
     }
     
