@@ -16,7 +16,7 @@ class ModelDatabase {
         // Upgrade old database schemas.
         dbOpenRequest.onupgradeneeded = function(event) {
             this.db = event.target.result;
-            const store = db.createObjectStore('TaskStore', {keyPath: 'name', unique: true});
+            const store = this.db.createObjectStore('TaskStore', {keyPath: 'name', unique: true});
             //let index = store.createIndex("name","name",{unique: true});
         }
 

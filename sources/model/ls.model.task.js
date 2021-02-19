@@ -3,7 +3,6 @@
 class ModelTask {
     updateTasks = null;                 // Callback to function in ls.view.task
     updateDependencySelectors = null;   // Callback to function in ls.view.dependencies
-    updateSchedule = null;              // Callback to function in ls.view.schedule
     database = null;
     
     constructor() { }
@@ -20,9 +19,6 @@ class ModelTask {
         this.updateDependencySelectors = callback;
     }
     
-    registerUpdateScheduleCallback(callback) {
-        this.updateSchedule = callback;
-    }
     
     // -----------------------------------------------------
     // Registration of model database
@@ -33,24 +29,28 @@ class ModelTask {
     
     // -----------------------------------------------------
     // Class methods
-    
-    getAllTasks(callbacks) {
-        this.database.getAllTasks(callbacks);
-    }
 
     createTask(taskParameters) {
         // Store taskParameters into Database
         const logicalTask = ModelLogicalTask.CreateWithTaskParameters(taskParameters);
         this.database.storeTask(logicalTask);
         
-        const callbacks = [this.updateTasks, this.updateDependencySelectors, this.updateSchedule];
+        const callbacks = [this.updateTasks, this.updateDependencySelectors];
         this.getAllTasks(callbacks);
+    }
+    
+    getAllTasks(callbacks) {
+        this.database.getAllTasks(callbacks);
+    }
+
+    getAllTaskInstances(callbacks, makespan) {
+        alert("hello");
     }
     
     deleteTask(name) {
         alert(`Delete task ${name}`);
         
-        const callbacks = [this.updateTasks, this.updateDependencySelectors, this.updateSchedule];
+        const callbacks = [this.updateTasks, this.updateDependencySelectors];
         this.getAllTasks(callbacks);
     }
     
