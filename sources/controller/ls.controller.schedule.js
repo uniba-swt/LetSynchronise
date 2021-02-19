@@ -3,7 +3,6 @@
 class ControllerSchedule {
     _view = null;
     _model = null;
-    _modelTask = null;
     _modelDependencies = null;
     
     constructor() { }
@@ -12,7 +11,7 @@ class ControllerSchedule {
         this._view = view;
         
         // Register the handlers when setting the view.
-        this._view.registerUpdateHandler(this.handleGetAllTasks);
+        this._view.registerUpdateHandler(this.handleGetSchedule);
     }
 
     get view() {
@@ -21,26 +20,15 @@ class ControllerSchedule {
     
     set model(model) {
         this._model = model;
+                
+        // Hack to populate the View with dependencies once the database is ready
+        window.addEventListener('DatabaseReady', (event) => {
+            this._model.getSchedule([this.callbackGetSchedule]);
+        });
     }
     
     get model() {
         return this._model;
-    }
-    
-    set modelTask(modelTask) {
-        this._modelTask = modelTask;
-        
-        // Register the handlers when setting the model.
-        this._modelTask.registerUpdateScheduleCallback(this.callbackUpdateSchedule);
-
-        // Hack to populate the View with dependencies once the database is ready
-        window.addEventListener('DatabaseReady', (event) => {
-            this._modelTask.getAllTasks([this.callbackUpdateSchedule]);
-        });
-    }
-    
-    get modelTask() {
-        return this._modelTask;
     }
     
     set modelDependencies(modelDependencies) {
@@ -58,10 +46,10 @@ class ControllerSchedule {
     // -----------------------------------------------------
     // Handlers for events from the view to the model
     
-    // Handler for updaing the task schedule.
+    // Handler for updating the task schedule.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
-    handleGetAllTasks = (callback) => {
-        this.modelTask.getAllTasks([callback]);
+    handleGetSchedule = (callback, makespan) => {
+        this.model.getSchedule([callback], makespan);
     }
     
     
@@ -69,8 +57,8 @@ class ControllerSchedule {
     // Callbacks for events from the model to the view
     
     // Callback for updating the task schedule.
-    callbackUpdateSchedule = (taskParametersSet) => {
-        this.view.updateSchedule(taskParametersSet);
+    callbackGetSchedule = (schedule) => {
+        this.view.updateSchedule(schedule);
     }
 
     toString() {
