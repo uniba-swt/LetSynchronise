@@ -39,6 +39,7 @@ class Model {
     set modelDatabase(modelDatabase) {
         this._modelDatabase = modelDatabase;
         this._modelTask.registerModelDatabase(this._modelDatabase);
+        this._modelSchedule.registerModelDatabase(this._modelDatabase);
         this._modelDependencies.registerModelDatabase(this._modelDatabase);
     }
     

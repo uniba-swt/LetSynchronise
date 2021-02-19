@@ -29,7 +29,7 @@ class ModelDependencies {
         // Store dependencies into Database
         //    const logicalDependency = ModelLogicalDependency.CreateWithDependency(dependency);
         //    this.database.storeDependency(this.updateDependencies, logicalDependency);
-        console.log(`Created dependency: ${JSON.stringify(dependency)}`);
+        alert(`Created dependency: ${JSON.stringify(dependency)}`);
         const callbacks = [this.updateDependencies];
         this.getAllDependencyDefinitions(callbacks);
     }
@@ -44,6 +44,7 @@ class ModelDependencies {
     getAllDependencyDefinitions(callbacks) {
     //    this.database.getAllDependencies(callbacks);
         
+        // TODO: Destination and Source values could be a string "task.port" or "task" and "port" separately.
         const dummyDependencies = [{'name': 'sensorDataflow', 'destination': 't1.in1', 'source': 't3.out1'}, {'name': 'actuatorDataflow', 'destination': 't1.in2', 'source': 't3.out2'}];
         callbacks.forEach(callback => callback(dummyDependencies));
     }
@@ -54,13 +55,13 @@ class ModelDependencies {
                 'id': 1,                      // ID of dataflow instance
                 'name': 'sensorDataflow',     // Original name of dependency
                 'receiveEvent': {
-                    'destination': 't1.in1',  // Original destination of dependency
-                    'instance': 3,            // Instance of destination task (1 indexing)
+                    'port': 't1.in1',         // Original destination of dependency
+                    'taskInstance': 3,        // Instance of destination task (1 indexing)
                     'timestamp': 4            // Timestamp of receive event (LET start of task's instance)
                 },
                 'sendEvent': {
-                    'source': 't3.out1',      // Original source of dependency
-                    'instance': 1,            // Instance of source task (1 indexing)
+                    'port': 't3.out1',        // Original source of dependency
+                    'taskInstance': 1,        // Instance of source task (1 indexing)
                     'timestamp': 3.2          // Timestamp of send event (LET end of task's instance)
                 }
             },
@@ -68,13 +69,13 @@ class ModelDependencies {
                 'id': 2,
                 'name': 'actuatorDataflow',
                 'receiveEvent': {
-                    'destination': 't1.in2',
-                    'instance': 3,
+                    'port': 't1.in2',
+                    'taskInstance': 3,
                     'timestamp': 4
                 },
                 'sendEvent': {
-                    'source': 't3.out2',
-                    'instance': 1,
+                    'port': 't3.out2',
+                    'taskInstance': 1,
                     'timestamp': 3.2
                 }
             },
@@ -82,13 +83,13 @@ class ModelDependencies {
                 'id': 3,
                 'name': 'actuatorDataflow',
                 'receiveEvent': {
-                    'destination': 't1.in2',
-                    'instance': 4,
+                    'port': 't1.in2',
+                    'taskInstance': 4,
                     'timestamp': 6
                 },
                 'sendEvent': {
-                    'source': 't3.out2',
-                    'instance': 2,
+                    'port': 't3.out2',
+                    'taskInstance': 2,
                     'timestamp': 5.7
                 }
             },
@@ -96,13 +97,13 @@ class ModelDependencies {
                 'id': 4,
                 'name': 'actuatorDataflow',
                 'receiveEvent': {
-                    'destination': 't1.in2',
-                    'instance': 5,
+                    'port': 't1.in2',
+                    'taskInstance': 5,
                     'timestamp': 8
                 },
                 'sendEvent': {
-                    'source': 't3.out2',
-                    'instance': 2,
+                    'port': 't3.out2',
+                    'taskInstance': 2,
                     'timestamp': 5.7
                 }
             }

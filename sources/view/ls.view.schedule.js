@@ -60,13 +60,13 @@ class ViewSchedule {
     // -----------------------------------------------------
     // Registration of handlers from the controller
 
-    registerUpdateHandler(getAllTasksHandler) {
+    registerUpdateHandler(getScheduleHandler) {
         this.updateButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
             event.preventDefault();
             
             // Ask the model to give us the current task set via a callback.
-            getAllTasksHandler(this.updateSchedule.bind(this));
+            getScheduleHandler(this.updateSchedule.bind(this), this.makespan);
         });
     }
     
@@ -254,10 +254,10 @@ class ViewSchedule {
         
         const dependencyName = dataflow.name;
         
-        const sourceTask = Utility.GetTask(dataflow.sendEvent.source);
+        const sourceTask = Utility.GetTask(dataflow.sendEvent.port);
         const sourceTimestamp = scale(dataflow.sendEvent.timestamp);
         
-        const destinationTask = Utility.GetTask(dataflow.receiveEvent.destination);
+        const destinationTask = Utility.GetTask(dataflow.receiveEvent.port);
         const destinationTimestamp = scale(dataflow.receiveEvent.timestamp);
 
         const points = [
@@ -285,7 +285,7 @@ class ViewSchedule {
                  .transition()
                  .ease(d3.easeLinear)
                  .style('stroke', 'var(--orange)');
-               tooltip.innerHTML = `${dependencyName}:<br/>${dataflow.sendEvent.source} &rarr; ${dataflow.receiveEvent.destination}`;
+               tooltip.innerHTML = `${dependencyName}:<br/>${dataflow.sendEvent.port} &rarr; ${dataflow.receiveEvent.port}`;
                tooltip.style.visibility = 'visible';
              })
              .on('mousemove', function() {
