@@ -61,7 +61,7 @@ class ControllerDependencies {
         this.model.createDependency(taskDependency);
     }
     
-    // Handler for creating input/output dependencies.
+    // Handler for deleting input/output dependencies.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleDeleteDependency = (name) => {
         this.model.deleteDependency(name);
@@ -76,7 +76,7 @@ class ControllerDependencies {
         this.view.updateDependencies(dependencies);
     }
     
-    // Callback for updating the displayed task dependencies.
+    // Callback for updating the displayed task dependency selectors.
     callbackUpdateDependencySelectors = (taskParametersSet) => {
         this.view.updateDependencySelectors(taskParametersSet);
     }

@@ -4,6 +4,7 @@ class Model {
     _modelTask = null;
     _modelDependencies = null;
     _modelSchedule = null;
+    _modelConstraints = null;
     _modelDatabase = null;
     
     constructor() { }
@@ -32,6 +33,14 @@ class Model {
         this._modelSchedule = modelSchedule;
     }
     
+    get modelConstraints() {
+        return this._modelConstraints;
+    }
+    
+    set modelConstraints(modelConstraints) {
+        this._modelConstraints = modelConstraints;
+    }
+    
     get modelDatabase() {
         return this._modelDatabase;
     }
@@ -41,6 +50,7 @@ class Model {
         this._modelTask.registerModelDatabase(this._modelDatabase);
         this._modelSchedule.registerModelDatabase(this._modelDatabase);
         this._modelDependencies.registerModelDatabase(this._modelDatabase);
+        this._modelConstraints.registerModelDatabase(this._modelDatabase);
     }
     
     toString() {

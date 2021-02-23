@@ -3,6 +3,7 @@
 class ModelTask {
     updateTasks = null;                 // Callback to function in ls.view.task
     updateDependencySelectors = null;   // Callback to function in ls.view.dependencies
+    updateConstraintSelectors = null;   // Callback to function in ls.view.constraints
     database = null;
     
     constructor() { }
@@ -17,6 +18,10 @@ class ModelTask {
     
     registerUpdateDependencySelectorsCallback(callback) {
         this.updateDependencySelectors = callback;
+    }
+    
+    registerUpdateConstraintSelectorsCallback(callback) {
+        this.updateConstraintSelectors = callback;
     }
     
     

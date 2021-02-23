@@ -4,6 +4,7 @@ class View {
     _viewTask = null;
     _viewDependencies = null;
     _viewSchedule = null;
+    _viewConstraints = null;
     
     constructor() { }
     
@@ -33,6 +34,10 @@ class View {
         this._viewSchedule = viewSchedule;
     }
     
+    set viewConstraints(viewConstraints) {
+        this._viewConstraints = viewConstraints;
+    }
+    
     get viewTask() {
         return this._viewTask;
     }
@@ -43,6 +48,10 @@ class View {
     
     get viewSchedule() {
         return this._viewSchedule;
+    }
+    
+    get viewConstraints() {
+        return this._viewConstraints;
     }
     
     toString() {
