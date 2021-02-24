@@ -5,6 +5,7 @@ let model = new Model();
 model.modelTask = new ModelTask();
 model.modelDependencies = new ModelDependencies();
 model.modelSchedule = new ModelSchedule();
+model.modelConstraints = new ModelConstraints();
 model.modelDatabase = new ModelDatabase();
 
 // Define the view implementations
@@ -12,12 +13,14 @@ let view = new View();
 view.viewTask = new ViewTask();
 view.viewDependencies = new ViewDependencies();
 view.viewSchedule = new ViewSchedule();
+view.viewConstraints = new ViewConstraints();
 
 // Define the controller implementations
 let controller = new Controller();
 controller.controllerTask = new ControllerTask();
 controller.controllerDependencies = new ControllerDependencies();
 controller.controllerSchedule = new ControllerSchedule();
+controller.controllerConstraints = new ControllerConstraints();
 
 // Link the models and views to their respective controllers
 controller.controllerTask.view = view.viewTask;
@@ -28,6 +31,9 @@ controller.controllerDependencies.modelTask = model.modelTask;
 controller.controllerSchedule.view = view.viewSchedule;
 controller.controllerSchedule.model = model.modelSchedule;
 controller.controllerSchedule.modelDependencies = model.modelDependencies;
+controller.controllerConstraints.view = view.viewConstraints;
+controller.controllerConstraints.model = model.modelConstraints;
+controller.controllerConstraints.modelTask = model.modelTask;
 
 
 console.log(controller.toString());

@@ -1,7 +1,7 @@
 'use strict';
 
 class ModelDependencies {
-    updateDependencies = null;      // Callback to function in ls.view.task
+    updateDependencies = null;      // Callback to function in ls.view.dependencies
     database = null;
 
     constructor() { }
