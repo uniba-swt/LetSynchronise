@@ -26,19 +26,22 @@
     <script src="sources/model/ls.model.dependencies.js"></script>
     <script src="sources/model/ls.model.schedule.js"></script>
     <script src="sources/model/ls.model.task.js"></script>
-    <script src="sources/model/ls.model.database.js"></script>
     <script src="sources/model/ls.model.logical.task.js"></script>
+    <script src="sources/model/ls.model.constraints.js"></script>
+    <script src="sources/model/ls.model.database.js"></script>
 
     <script src="sources/view/ls.view.js"></script>
     <script src="sources/view/ls.view.dependencies.js"></script>
     <script src="sources/view/ls.view.schedule.js"></script>
     <script src="sources/view/ls.view.task.js"></script>
+    <script src="sources/view/ls.view.constraints.js"></script>
 
     <script src="sources/controller/ls.controller.js"></script>
     <script src="sources/controller/ls.controller.dependencies.js"></script>
     <script src="sources/controller/ls.controller.schedule.js"></script>
     <script src="sources/controller/ls.controller.task.js"></script>
-    
+    <script src="sources/controller/ls.controller.constraints.js"></script>
+
     <script src="sources/ls.utility.js"></script>
 
     <script defer src="sources/ls.main.js"></script>
@@ -173,7 +176,7 @@
 
             <ul id="view-task-dependencies"></ul>
 
-            <div class="m-5"></div>
+            <div class="m-3"></div>
 
         </div>
         
@@ -214,7 +217,8 @@
             </form>
             
             <button id="update" type="submit" class="btn btn-primary">Update</button>
-            
+            <button id="analyse" type="submit" class="btn btn-primary">Analyse</button>
+
             <div class="m-3"></div>
             
             <div id="view-schedule"></div>
@@ -225,11 +229,70 @@
             <div class="m-5"></div>
 
             
-            <h3>Define Constraints</h3>
+            <h3>Define Timing Constraints</h3>
             
-            <button id="analyse" type="submit" class="btn btn-primary">Analyse</button>
+            <div class="input-group row mb-1">
+                <div class="input-group col-sm-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="view-analyse-constraint-name">Name</label>
+                    </div>
+                    <input required type="text" id="view-analyse-constraint-name" class="form-control"/>
+                </div>
+                
+                <div class="input-group col-sm-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="view-analyse-constraint-source">Source</label>
+                    </div>
+                    <select id="view-analyse-constraint-source" class="custom-select">
+                        <option disabled>Choose...</option>
+                    </select>
+                </div>
+                
+                <div class="input-group col-sm-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="view-analyse-constraint-destination">Destination</label>
+                    </div>
+                    <select id="view-analyse-constraint-destination" class="custom-select">
+                        <option disabled>Choose...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="input-group row mb-1">
+                <div class="input-group col-sm-2">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="view-analyse-constraint-relation">Relation</label>
+                    </div>
+                    <select id="view-analyse-constraint-relation" class="custom-select">
+                        <option value="null " disabled>Choose...</option>
+                        <option value="<">&lt;</option>
+                        <option value="<=">&le;</option>
+                        <option vlaue="=">&equals;</option>
+                        <option value=">=">&ge;</option>
+                        <option value=">">&ge;</option>
+                    </select>
+                </div>
+                
+                <div class="input-group col-sm-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="view-analyse-constraint-time">Time</label>
+                    </div>
+                    <input required type="text" class="form-control" id="view-analyse-constraint-time"/>
+                    <div class="input-group-append">
+                        <span class="input-group-text">ms</span>
+                    </div>
+                </div>
+                
+                <div class="input-group col-sm-3">
+                    <button id="submitConstraint" type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </div>
             
-            <div class="m-5"></div>
+            <div class="m-3"></div>
+            
+            <ul id="view-analyse-constraints"></ul>
+            
+            <div class="m-3"></div>
 
         </div>
     </div>

@@ -30,13 +30,15 @@ html {
 }
 
 #view-task-preview .initialOffset, .period, .boundary,
-#view-task-set .initialOffset, .period, .boundary {
+#view-task-set .initialOffset, .period, .boundary,
+#view-schedule .initialOffset, .period, .boundary {
     stroke: black;
     stroke-width: 2px;
 }
 
 #view-task-preview .initialOffset,
-#view-task-set .initialOffset {
+#view-task-set .initialOffset,
+#view-schedule .initialOffset {
     stroke-dasharray: 4;
 }
 
@@ -62,33 +64,45 @@ html {
     background-color: lightgrey;
 }
 
-#view-task-dependencies li {
+#view-task-dependencies,
+#view-analyse-constraints {
+    display: inline-block;
+}
+
+#view-task-dependencies li,
+#view-analyse-constraints li {
     float: left;
     clear: both;
     line-height: 3;
     cursor: pointer;
 }
 
-#view-task-dependencies li span {
+#view-task-dependencies li span,
+#view-analyse-constraints li span {
     display: inline-block;
 }
 
-#view-task-dependencies li span:hover {
+#view-task-dependencies li span:hover,
+#view-analyse-constraints li span:hover {
     background-color: whitesmoke;
 }
 
 #view-task-dependencies li.dependencySelected span,
-#view-task-dependencies li.dependencySelected span:hover {
+#view-task-dependencies li.dependencySelected span:hover,
+#view-analyse-constraints li.constraintSelected span,
+#view-analyse-constraints li.constraintSelected span:hover {
     background-color: lightgrey;
 }
 
 #view-task-set li .delete,
-#view-task-dependencies li .delete {
+#view-task-dependencies li .delete,
+#view-analyse-constraints li .delete {
     visibility: hidden;
 }
 
 #view-task-set li:hover .delete,
-#view-task-dependencies li:hover .delete {
+#view-task-dependencies li:hover .delete,
+#view-analyse-constraints li:hover .delete {
     visibility: visible;
 }
 
@@ -97,15 +111,6 @@ html {
 #view-schedule rect {
     fill: var(--gray);
     cursor: pointer;
-}
-
-#view-schedule .initialOffset, .period, .boundary {
-    stroke: black;
-    stroke-width: 2px;
-}
-
-#view-schedule .initialOffset {
-    stroke-dasharray: 4;
 }
 
 #view-schedule .dependency {
