@@ -59,7 +59,7 @@ class ModelConstraints {
                 'destination': 't1.in2',
                 'source': 't3.out2',
                 'relation': '<=',
-                'time': '15]'
+                'time': '15'
                 
             }
         ];

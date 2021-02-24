@@ -6,6 +6,8 @@ class ViewConstraints {
     nameField = null;
     sourceField = null;
     destinationField = null;
+    relationField = null;
+    timeField = null;
     
     submitButton = null;
     
@@ -21,7 +23,9 @@ class ViewConstraints {
         this.nameField = this.root.querySelector('#view-analyse-constraint-name');
         this.sourceField = this.root.querySelector('#view-analyse-constraint-source');
         this.destinationField = this.root.querySelector('#view-analyse-constraint-destination');
-        
+        this.relationField = this.root.querySelector('#view-analyse-constraint-relation');
+        this.timeField = this.root.querySelector('#view-analyse-constraint-time');
+
         this.submitButton = this.root.querySelector('#submitConstraint');
         
         this.constraints = d3.select('#view-analyse-constraints');
@@ -52,11 +56,29 @@ class ViewConstraints {
         this.destinationField.value = destination;
     }
     
+    get relation() {
+        return this.relationField.value;
+    }
+    
+    set relation(relation) {
+        this.relationField.value = relation;
+    }
+    
+    get time() {
+        return this.timeField.value;
+    }
+
+    set time(time) {
+        this.timeField.value = time;
+    }
+    
     get constraintRaw() {
         return {
             'name': this.name,
             'source': this.source,
-            'destination': this.destination
+            'destination': this.destination,
+            'relation': this.relation,
+            'time': this.time
         };
     }
     
@@ -72,7 +94,9 @@ class ViewConstraints {
             'destination': {
                 'task': destination[0],
                 'port': destination[1]
-            }
+            },
+            'relation': this.relation.trim(),
+            'time': parseFloat(this.time)
         };
     }
     
@@ -121,12 +145,22 @@ class ViewConstraints {
         }
 
         if (constraint.source == 'null ') {
-            alert(`Choose source of constraint.`);
+            alert('Choose source of constraint.');
             return false;
         }
 
         if (constraint.destination == 'null ') {
-            alert(`Choose destination of constraint.`);
+            alert('Choose destination of constraint.');
+            return false;
+        }
+        
+        if (constraint.relation == 'null ') {
+            alert('Choose relation of constraint.');
+            return false;
+        }
+        
+        if (constraint.time == null || constraint.time.trim() == '') {
+            alert('Time cannot be blank.');
             return false;
         }
                 
@@ -172,7 +206,7 @@ class ViewConstraints {
             .data(constraints)
             .enter()
             .append('li')
-                .html(constraint => `<span>${constraint.name}: ${constraint.source} &rarr; ${constraint.destination}</span> ${Utility.AddDeleteButton(constraint.name)}`)
+                .html(constraint => `<span>${constraint.name}: ${constraint.source} &rarr; ${constraint.destination} ${constraint.relation} ${constraint.time}</span> ${Utility.AddDeleteButton(constraint.name)}`)
             .on('click', function(data) {
                 thisRef.constraints.node().querySelectorAll('li')
                     .forEach((constraint) => {
@@ -191,6 +225,8 @@ class ViewConstraints {
         this.name = constraint.name;
         this.source = constraint.source;
         this.destination = constraint.destination;
+        this.relation = constraint.relation;
+        this.time = constraint.time;
     }
     
     toString() {
