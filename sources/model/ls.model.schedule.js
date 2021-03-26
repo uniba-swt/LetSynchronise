@@ -23,7 +23,6 @@ class ModelSchedule {
     
     
     getSchedule(callbacks, makespan) {
-    //    alert("ls.model.schedule.getSchedule");
         console.log("ls.model.schedule.getSchedule");
         this.database.getAllTasks(callbacks);
     }

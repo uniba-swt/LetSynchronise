@@ -30,7 +30,6 @@ class ModelDependencies {
         //    const logicalDependency = ModelLogicalDependency.CreateWithDependency(dependency);
         //this.database.storeDependency(this.updateDependencies, logicalDependency);
         this.database.storeDependency(dependency);
-        alert(`Created dependency: ${JSON.stringify(dependency)}`);
         const callbacks = [this.updateDependencies];
         this.getAllDependencyDefinitions(callbacks);
     }
@@ -43,19 +42,13 @@ class ModelDependencies {
     }
     */
     deleteDependency(name) {
-        alert(`Delete dependency ${name}`);
         const callbacks = [this.getAllDependencyDefinitions.bind(this)];
         const args = [this.updateDependencies];
         this.database.deleteDependency(callbacks, args, name);
     }
     
     getAllDependencyDefinitions(callbacks) {
-    //    this.database.getAllDependencies(callbacks);
-        
-        // TODO: Destination and Source values could be a string "task.port" or "task" and "port" separately.
-        //const dummyDependencies = [{'name': 'sensorDataflow', 'destination': 't1.in1', 'source': 't3.out1'}, {'name': 'actuatorDataflow', 'destination': 't1.in2', 'source': 't3.out2'}];
         this.database.getAllDependenciesFormatted(callbacks);
-        //callbacks.forEach(callback => callback(dummyDependencies));
     }
     
     getAllDependencyInstances() {

@@ -49,12 +49,10 @@ class ModelTask {
     }
 
     getAllTaskInstances(callbacks, makespan) {
-        alert("hello");
+        alert("ToDo");
     }
     
     deleteTask(name) {
-        alert(`Delete task ${name}`);
-        
         const args = [this.updateTasks, this.updateDependencySelectors];
         const callbacks = [this.getAllTasks.bind(this)];
         this.database.deleteTask(callbacks, args, name);

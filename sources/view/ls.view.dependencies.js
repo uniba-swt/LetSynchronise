@@ -81,7 +81,7 @@ class ViewDependencies {
     // Setup listeners
     
     setupDeleteButtonListener(elementId) {
-        const deleteButton = this.root.querySelector(`#${elementId}`);
+        const deleteButton = this.root.querySelector(`[id='${elementId}']`);
         
         deleteButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
