@@ -90,6 +90,23 @@ class ModelDatabase {
         }
     }
 
+    deleteTask = function(callbacks, args, name) {
+        const transaction = this.db.transaction('TaskStore', 'readwrite');
+        
+        // Error handeller
+        transaction.onerror = function(event) {
+            console.log('ModelDatabase store error: ' + event.target.errorCode);
+        }
+        
+        const objectStore = transaction.objectStore('TaskStore');
+        const request = objectStore.delete(name); // Get using the index
+
+        request.onsuccess = function(event) {
+            //console.log(event);
+            callbacks.forEach(callback => callback(args));
+        }
+    }
+
     storeDependency = function(dependency) {
         const transaction = this.db.transaction('DependencyStore', 'readwrite');
 
