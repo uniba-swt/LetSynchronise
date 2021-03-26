@@ -11,12 +11,18 @@ class ModelDatabase {
             return;
         }
         
-        const dbOpenRequest = window.indexedDB.open('letDatabase', 1);
+        const dbOpenRequest = window.indexedDB.open('letDatabase', 2);
 
         // Upgrade old database schemas.
         dbOpenRequest.onupgradeneeded = function(event) {
             this.db = event.target.result;
-            const store = this.db.createObjectStore('TaskStore', {keyPath: 'name', unique: true});
+            if (event.oldVersion < 2) {
+                if (event.oldVersion < 1) {
+                    const taskStore = this.db.createObjectStore('TaskStore', {keyPath: 'name', unique: true});
+                }
+                const dependencyStore = this.db.createObjectStore('DependencyStore', {keyPath: 'name', unique: true});
+            }
+            
             //let index = store.createIndex("name","name",{unique: true});
         }
 
@@ -51,6 +57,7 @@ class ModelDatabase {
         const putTask = objectStore.put(task.taskParameters);
     }
 
+
     getTask = function(callbacks, name) {
         const transaction = this.db.transaction('TaskStore', 'readonly');
         
@@ -80,6 +87,81 @@ class ModelDatabase {
         
         getTasks.onsuccess = function(event) {
             callbacks.forEach(callback => callback(event.target.result));
+        }
+    }
+
+    storeDependency = function(dependency) {
+        const transaction = this.db.transaction('DependencyStore', 'readwrite');
+
+        // Error handeller
+        transaction.onerror = function(event) {
+            console.log('ModelDatabase store error: ' + event.target.errorCode);
+        }
+
+        const objectStore = transaction.objectStore('DependencyStore');
+        const putTask = objectStore.put(dependency);
+    }
+
+    getAllDependenciesFormatted = function(callbacks) {
+        const formatDependencies = function(dependencies) {
+            //console.log(dependencies);
+            let formatted = [];
+            for (const i in dependencies) {
+                let d = dependencies[i];
+                let df = {'name': d.name, 'destination': d.destination.task+'.'+d.destination.port , 'source': d.source.task+'.'+d.source.port};
+                formatted[i] = df;
+            }
+            callbacks.forEach(callback => callback(formatted));
+        }
+        this.getAllDependencies([formatDependencies]);
+    }
+
+    getAllDependencies = function(callbacks) {
+        const transaction = this.db.transaction('DependencyStore', 'readonly');
+        
+        // Error handeller
+        transaction.onerror = function(event) {
+            console.log('ModelDatabase store error: ' + event.target.errorCode);
+        }
+        
+        const objectStore = transaction.objectStore('DependencyStore');
+        const getTasks = objectStore.getAll(); // Get using the index
+        
+        getTasks.onsuccess = function(event) {
+            callbacks.forEach(callback => callback(event.target.result));
+        }
+    }
+
+    getDependency  = function(callbacks, name) {
+        const transaction = this.db.transaction('DependencyStore', 'readonly');
+        
+        // Error handeller
+        transaction.onerror = function(event) {
+            console.log('ModelDatabase store error: ' + event.target.errorCode);
+        }
+        
+        const objectStore = transaction.objectStore('DependencyStore');
+        const getTask = objectStore.get(name); // Get using the index
+
+        getTask.onsuccess = function(event) {
+            callbacks.forEach(callback => callback(event.target.result));
+        }
+    }
+
+    deleteDependency = function(callbacks, args, name) {
+        const transaction = this.db.transaction('DependencyStore', 'readwrite');
+        
+        // Error handeller
+        transaction.onerror = function(event) {
+            console.log('ModelDatabase store error: ' + event.target.errorCode);
+        }
+        
+        const objectStore = transaction.objectStore('DependencyStore');
+        const request = objectStore.delete(name); // Get using the index
+
+        request.onsuccess = function(event) {
+            //console.log(event);
+            callbacks.forEach(callback => callback(args));
         }
     }
 
