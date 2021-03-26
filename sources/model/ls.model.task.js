@@ -55,8 +55,9 @@ class ModelTask {
     deleteTask(name) {
         alert(`Delete task ${name}`);
         
-        const callbacks = [this.updateTasks, this.updateDependencySelectors];
-        this.getAllTasks(callbacks);
+        const args = [this.updateTasks, this.updateDependencySelectors];
+        const callbacks = [this.getAllTasks.bind(this)];
+        this.database.deleteTask(callbacks, args, name);
     }
     
     toString() {
