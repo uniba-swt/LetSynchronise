@@ -2,7 +2,7 @@
 
 class ViewSchedule {
     root = null;
-    modelDependencies = null;
+    modelDependency = null;
 
     prologueField = null;
     hyperPeriodField = null;
@@ -72,10 +72,10 @@ class ViewSchedule {
     
     
     // -----------------------------------------------------
-    // Registration of model dependencies
+    // Registration of model dependency
     
-    registerModelDependencies(modelDependencies) {
-        this.modelDependencies = modelDependencies;
+    registerModelDependency(modelDependency) {
+        this.modelDependency = modelDependency;
     }
     
     
@@ -88,7 +88,7 @@ class ViewSchedule {
         
         // Draw communication dependencies.
         // TODO: Get communication dependencies.
-        const dataflows = this.modelDependencies.getAllDependencyInstances();
+        const dataflows = this.modelDependency.getAllDependencyInstances();
         this.drawDataflows(svgElement, scale, taskIndices, dataflows);
     }
     

@@ -3,37 +3,37 @@
 // Define the model implementations
 let model = new Model();
 model.modelTask = new ModelTask();
-model.modelDependencies = new ModelDependencies();
+model.modelDependency = new ModelDependency();
 model.modelSchedule = new ModelSchedule();
-model.modelConstraints = new ModelConstraints();
+model.modelConstraint = new ModelConstraint();
 model.modelDatabase = new ModelDatabase();
 
 // Define the view implementations
 let view = new View();
 view.viewTask = new ViewTask();
-view.viewDependencies = new ViewDependencies();
+view.viewDependency = new ViewDependency();
 view.viewSchedule = new ViewSchedule();
-view.viewConstraints = new ViewConstraints();
+view.viewConstraint = new ViewConstraint();
 
 // Define the controller implementations
 let controller = new Controller();
 controller.controllerTask = new ControllerTask();
-controller.controllerDependencies = new ControllerDependencies();
+controller.controllerDependency = new ControllerDependency();
 controller.controllerSchedule = new ControllerSchedule();
-controller.controllerConstraints = new ControllerConstraints();
+controller.controllerConstraint = new ControllerConstraint();
 
 // Link the models and views to their respective controllers
 controller.controllerTask.view = view.viewTask;
 controller.controllerTask.model = model.modelTask;
-controller.controllerDependencies.view = view.viewDependencies;
-controller.controllerDependencies.model = model.modelDependencies;
-controller.controllerDependencies.modelTask = model.modelTask;
+controller.controllerDependency.view = view.viewDependency;
+controller.controllerDependency.model = model.modelDependency;
+controller.controllerDependency.modelTask = model.modelTask;
 controller.controllerSchedule.view = view.viewSchedule;
 controller.controllerSchedule.model = model.modelSchedule;
-controller.controllerSchedule.modelDependencies = model.modelDependencies;
-controller.controllerConstraints.view = view.viewConstraints;
-controller.controllerConstraints.model = model.modelConstraints;
-controller.controllerConstraints.modelTask = model.modelTask;
+controller.controllerSchedule.modelDependency = model.modelDependency;
+controller.controllerConstraint.view = view.viewConstraint;
+controller.controllerConstraint.model = model.modelConstraint;
+controller.controllerConstraint.modelTask = model.modelTask;
 
 
 console.log(controller.toString());

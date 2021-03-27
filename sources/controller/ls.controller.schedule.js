@@ -3,7 +3,7 @@
 class ControllerSchedule {
     _view = null;
     _model = null;
-    _modelDependencies = null;
+    _modelDependency = null;
     
     constructor() { }
 
@@ -21,7 +21,7 @@ class ControllerSchedule {
     set model(model) {
         this._model = model;
                 
-        // Hack to populate the View with dependencies once the database is ready
+        // Hack to populate the View with the schedule once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
             this._model.getSchedule([this.callbackGetSchedule]);
         });
@@ -31,15 +31,15 @@ class ControllerSchedule {
         return this._model;
     }
     
-    set modelDependencies(modelDependencies) {
-        this._modelDependencies = modelDependencies;
+    set modelDependency(modelDependency) {
+        this._modelDependency = modelDependency;
         
         // Register the model dependency with the view.
-        this._view.registerModelDependencies(this._modelDependencies);
+        this._view.registerModelDependency(this._modelDependency);
     }
     
-    get modelDependencies() {
-        return this._modelDependencies;
+    get modelDependency() {
+        return this._modelDependency;
     }
     
     

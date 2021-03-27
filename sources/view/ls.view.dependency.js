@@ -1,6 +1,6 @@
 'use strict';
 
-class ViewDependencies {
+class ViewDependency {
     root = null;
     
     nameField = null;
@@ -17,7 +17,7 @@ class ViewDependencies {
     constructor() {
         this.root = document.querySelector('#nav-design');
         
-        // Define or edit task dependencies
+        // Define or edit task dependency
         this.nameField = this.root.querySelector('#view-task-dependency-name');
         this.sourceField = this.root.querySelector('#view-task-dependency-source');
         this.destinationField = this.root.querySelector('#view-task-dependency-destination');
@@ -194,6 +194,6 @@ class ViewDependencies {
     }
     
     toString() {
-        return "ViewDependencies";
+        return "ViewDependency";
     }
 }

@@ -83,7 +83,7 @@ class ModelDatabase {
         }
         
         const objectStore = transaction.objectStore('TaskStore');
-        const getTasks = objectStore.getAll(); // Get using the index
+        const getTasks = objectStore.getAll(); 
         
         getTasks.onsuccess = function(event) {
             callbacks.forEach(callback => callback(event.target.result));
@@ -99,7 +99,7 @@ class ModelDatabase {
         }
         
         const objectStore = transaction.objectStore('TaskStore');
-        const request = objectStore.delete(name); // Get using the index
+        const request = objectStore.delete(name); // Delete using the index
 
         request.onsuccess = function(event) {
             //console.log(event);
@@ -121,14 +121,16 @@ class ModelDatabase {
 
     getAllDependenciesFormatted = function(callbacks) {
         const formatDependencies = function(dependencies) {
-            //console.log(dependencies);
-            let formatted = [];
-            for (const i in dependencies) {
-                let d = dependencies[i];
-                let df = {'name': d.name, 'destination': d.destination.task+'.'+d.destination.port , 'source': d.source.task+'.'+d.source.port};
-                formatted[i] = df;
+            let dependenciesFormatted = [];
+            for (const dependency of dependencies) {
+                let dependencyFormatted = {
+                		'name': dependency.name, 
+						'destination': `${dependency.destination.task}.${dependency.destination.port}`,
+						'source': `${dependency.source.task}.${dependency.source.port}`
+                	};
+                dependenciesFormatted.push(dependencyFormatted);
             }
-            callbacks.forEach(callback => callback(formatted));
+            callbacks.forEach(callback => callback(dependenciesFormatted));
         }
         this.getAllDependencies([formatDependencies]);
     }
@@ -142,7 +144,7 @@ class ModelDatabase {
         }
         
         const objectStore = transaction.objectStore('DependencyStore');
-        const getTasks = objectStore.getAll(); // Get using the index
+        const getTasks = objectStore.getAll(); 
         
         getTasks.onsuccess = function(event) {
             callbacks.forEach(callback => callback(event.target.result));
@@ -174,7 +176,7 @@ class ModelDatabase {
         }
         
         const objectStore = transaction.objectStore('DependencyStore');
-        const request = objectStore.delete(name); // Get using the index
+        const request = objectStore.delete(name); // Delete using the index
 
         request.onsuccess = function(event) {
             //console.log(event);

@@ -2,18 +2,18 @@
 
 class Controller {
     controllerTask = null;
-    controllerDependencies = null;
+    controllerDependency = null;
     controllerSchedule = null;
-    controllerConstraints = null;
+    controllerConstraint = null;
 
     constructor() { }
     
     toString() {
     	return ['Controller contains ...',
     	        `  ${this.controllerTask}, `,
-                `  ${this.controllerDependencies}`,
+                `  ${this.controllerDependency}`,
                 `  ${this.controllerSchedule}, and`,
-                `  ${this.controllerConstraints}`].join('\n');
+                `  ${this.controllerConstraint}`].join('\n');
     }
     
 }

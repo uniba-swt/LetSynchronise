@@ -1,6 +1,6 @@
 'use strict';
 
-class ControllerDependencies {
+class ControllerDependency {
     _view = null;
     _model = null;
     _modelTask = null;      // Hack to allow new inputs/outputs to be displayed in the View's dependency selection when a task is added
@@ -55,13 +55,13 @@ class ControllerDependencies {
     // -----------------------------------------------------
     // Handlers for events from the view to the model
     
-    // Handler for creating input/output dependencies.
+    // Handler for creating input/output dependency.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleCreateDependency = (taskDependency) => {
         this.model.createDependency(taskDependency);
     }
     
-    // Handler for deleting input/output dependencies.
+    // Handler for deleting input/output dependency.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleDeleteDependency = (name) => {
         this.model.deleteDependency(name);
@@ -82,6 +82,6 @@ class ControllerDependencies {
     }
     
     toString() {
-    	return `ControllerDependencies with ${this.view} and ${this.model}`;
+    	return `ControllerDependency with ${this.view} and ${this.model}`;
     }
 }

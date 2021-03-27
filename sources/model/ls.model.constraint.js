@@ -1,7 +1,7 @@
 'use strict';
 
-class ModelConstraints {
-    updateConstraints = null;      // Callback to function in ls.view.constraints
+class ModelConstraint {
+    updateConstraints = null;      // Callback to function in ls.view.constraint
     database = null;
 
     constructor() { }

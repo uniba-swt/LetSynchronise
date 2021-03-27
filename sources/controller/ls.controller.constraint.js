@@ -1,6 +1,6 @@
 'use strict';
 
-class ControllerConstraints {
+class ControllerConstraint {
     _view = null;
     _model = null;
     _modelTask = null;      // Hack to allow new inputs/outputs to be displayed in the View's constraint selection when a task is added
@@ -55,13 +55,13 @@ class ControllerConstraints {
     // -----------------------------------------------------
     // Handlers for events from the view to the model
     
-    // Handler for creating constraints.
+    // Handler for creating constraint.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleCreateConstraint = (constraint) => {
         this.model.createConstraint(constraint);
     }
     
-    // Handler for deleting constraints.
+    // Handler for deleting constraint.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleDeleteConstraint = (name) => {
         this.model.deleteConstraint(name);
@@ -82,6 +82,6 @@ class ControllerConstraints {
     }
     
     toString() {
-    	return `ControllerConstraints with ${this.view} and ${this.model}`;
+    	return `ControllerConstraint with ${this.view} and ${this.model}`;
     }
 }

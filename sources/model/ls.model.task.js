@@ -2,8 +2,8 @@
 
 class ModelTask {
     updateTasks = null;                 // Callback to function in ls.view.task
-    updateDependencySelectors = null;   // Callback to function in ls.view.dependencies
-    updateConstraintSelectors = null;   // Callback to function in ls.view.constraints
+    updateDependencySelectors = null;   // Callback to function in ls.view.dependency
+    updateConstraintSelectors = null;   // Callback to function in ls.view.constraint
     database = null;
     
     constructor() { }

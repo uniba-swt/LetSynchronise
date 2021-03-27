@@ -1,7 +1,7 @@
 'use strict';
 
-class ModelDependencies {
-    updateDependencies = null;      // Callback to function in ls.view.dependencies
+class ModelDependency {
+    updateDependencies = null;      // Callback to function in ls.view.dependency
     database = null;
 
     constructor() { }
@@ -26,18 +26,18 @@ class ModelDependencies {
     // Class methods
 
     createDependency(dependency) {
-        // Store dependencies into Database
+        // Store dependency in Database
         //    const logicalDependency = ModelLogicalDependency.CreateWithDependency(dependency);
-        //this.database.storeDependency(this.updateDependencies, logicalDependency);
+        //this.database.storeDependency(this.updateDependency, logicalDependency);
         this.database.storeDependency(dependency);
         const callbacks = [this.updateDependencies];
         this.getAllDependencyDefinitions(callbacks);
     }
     /*
     deleteUpdateCallback() {
-        //console.log(this.updateDependencies);
-        //this.updateDependencies is not in the scope of the callback
-        const callbacks = [this.updateDependencies];
+        //console.log(this.updateDependency);
+        //this.updateDependency is not in the scope of the callback
+        const callbacks = [this.updateDependency];
         this.getAllDependencyDefinitions(callbacks);
     }
     */
@@ -118,6 +118,6 @@ class ModelDependencies {
     }
     
     toString() {
-        return "ModelDependencies";
+        return "ModelDependency";
     }
 }

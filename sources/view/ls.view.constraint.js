@@ -1,6 +1,6 @@
 'use strict';
 
-class ViewConstraints {
+class ViewConstraint {
     root = null;
     
     nameField = null;
@@ -19,7 +19,7 @@ class ViewConstraints {
     constructor() {
         this.root = document.querySelector('#nav-analyse');
         
-        // Define or edit constraints
+        // Define or edit constraint
         this.nameField = this.root.querySelector('#view-analyse-constraint-name');
         this.sourceField = this.root.querySelector('#view-analyse-constraint-source');
         this.destinationField = this.root.querySelector('#view-analyse-constraint-destination');
@@ -230,6 +230,6 @@ class ViewConstraints {
     }
     
     toString() {
-        return "ViewConstraints";
+        return "ViewConstraint";
     }
 }
