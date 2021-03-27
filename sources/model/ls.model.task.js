@@ -35,9 +35,9 @@ class ModelTask {
     // -----------------------------------------------------
     // Class methods
 
-    createTask(taskParameters) {
+    createTask(parameters) {
         // Store taskParameters into Database
-        const logicalTask = ModelLogicalTask.CreateWithTaskParameters(taskParameters);
+        const logicalTask = ModelLogicalTask.CreateWithParameters(parameters);
         this.database.storeTask(logicalTask);
         
         const callbacks = [this.updateTasks, this.updateDependencySelectors];

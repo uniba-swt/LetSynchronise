@@ -11,19 +11,20 @@ class ModelDatabase {
             return;
         }
         
-        const dbOpenRequest = window.indexedDB.open('letDatabase', 2);
+        const dbOpenRequest = window.indexedDB.open('letDatabase', 3);
 
         // Upgrade old database schemas.
         dbOpenRequest.onupgradeneeded = function(event) {
             this.db = event.target.result;
-            if (event.oldVersion < 2) {
-                if (event.oldVersion < 1) {
-                    const taskStore = this.db.createObjectStore('TaskStore', {keyPath: 'name', unique: true});
-                }
-                const dependencyStore = this.db.createObjectStore('DependencyStore', {keyPath: 'name', unique: true});
+            if (event.oldVersion < 3) {
+                if (event.oldVersion < 2) {
+					if (event.oldVersion < 1) {
+						const taskStore = this.db.createObjectStore('TaskStore', {keyPath: 'name', unique: true});
+					}
+					const dependencyStore = this.db.createObjectStore('DependencyStore', {keyPath: 'name', unique: true});
+				}
+				const taskInstancesStore = this.db.createObjectStore('TaskInstancesStore', {keyPath:'name', unique: true});
             }
-            
-            //let index = store.createIndex("name","name",{unique: true});
         }
 
         dbOpenRequest.onerror = function(event) {
@@ -45,28 +46,25 @@ class ModelDatabase {
         };
     }
     
-    storeTask = function(task) {
-        const transaction = this.db.transaction('TaskStore', 'readwrite');
+    getObjectStore(storeName, mode) {
+    	const transaction = this.db.transaction(storeName, mode);
 
         // Error handeller
         transaction.onerror = function(event) {
             console.log('ModelDatabase store error: ' + event.target.errorCode);
         }
 
-        const objectStore = transaction.objectStore('TaskStore');
-        const putTask = objectStore.put(task.taskParameters);
+        return transaction.objectStore(storeName);
+    }
+    
+    storeTask = function(task) {
+    	const objectStore = this.getObjectStore('TaskStore', 'readwrite');
+    	const putTask = objectStore.put(task.parameters);
     }
 
 
     getTask = function(callbacks, name) {
-        const transaction = this.db.transaction('TaskStore', 'readonly');
-        
-        // Error handeller
-        transaction.onerror = function(event) {
-            console.log('ModelDatabase store error: ' + event.target.errorCode);
-        }
-        
-        const objectStore = transaction.objectStore('TaskStore');
+        const objectStore = this.getObjectStore('TaskStore', 'readonly');
         const getTask = objectStore.get(name); // Get using the index
 
         getTask.onsuccess = function(event) {
@@ -75,14 +73,7 @@ class ModelDatabase {
     }
 
     getAllTasks = function(callbacks) {
-        const transaction = this.db.transaction('TaskStore', 'readonly');
-        
-        // Error handeller
-        transaction.onerror = function(event) {
-            console.log('ModelDatabase store error: ' + event.target.errorCode);
-        }
-        
-        const objectStore = transaction.objectStore('TaskStore');
+        const objectStore = this.getObjectStore('TaskStore', 'readonly');
         const getTasks = objectStore.getAll(); 
         
         getTasks.onsuccess = function(event) {
@@ -91,34 +82,37 @@ class ModelDatabase {
     }
 
     deleteTask = function(callbacks, args, name) {
-        const transaction = this.db.transaction('TaskStore', 'readwrite');
-        
-        // Error handeller
-        transaction.onerror = function(event) {
-            console.log('ModelDatabase store error: ' + event.target.errorCode);
-        }
-        
-        const objectStore = transaction.objectStore('TaskStore');
-        const request = objectStore.delete(name); // Delete using the index
+    	const objectStore = this.getObjectStore('TaskStore', 'readwrite');
+        const deleteTask = objectStore.delete(name); // Delete using the index
 
-        request.onsuccess = function(event) {
-            //console.log(event);
+        deleteTask.onsuccess = function(event) {
             callbacks.forEach(callback => callback(args));
         }
     }
 
     storeDependency = function(dependency) {
-        const transaction = this.db.transaction('DependencyStore', 'readwrite');
-
-        // Error handeller
-        transaction.onerror = function(event) {
-            console.log('ModelDatabase store error: ' + event.target.errorCode);
-        }
-
-        const objectStore = transaction.objectStore('DependencyStore');
-        const putTask = objectStore.put(dependency);
+    	const objectStore = this.getObjectStore('DependencyStore', 'readwrite');
+        const putDependency = objectStore.put(dependency);
     }
 
+    getDependency  = function(callbacks, name) {
+    	const objectStore = this.getObjectStore('DependencyStore', 'readonly');
+        const getDependency = objectStore.get(name); // Get using the index
+
+        getDependency.onsuccess = function(event) {
+            callbacks.forEach(callback => callback(event.target.result));
+        }
+    }
+    
+    getAllDependencies = function(callbacks) {
+    	const objectStore = this.getObjectStore('DependencyStore', 'readonly');
+        const getDependencies = objectStore.getAll(); 
+        
+        getDependencies.onsuccess = function(event) {
+            callbacks.forEach(callback => callback(event.target.result));
+        }
+    }
+    
     getAllDependenciesFormatted = function(callbacks) {
         const formatDependencies = function(dependencies) {
             let dependenciesFormatted = [];
@@ -135,51 +129,11 @@ class ModelDatabase {
         this.getAllDependencies([formatDependencies]);
     }
 
-    getAllDependencies = function(callbacks) {
-        const transaction = this.db.transaction('DependencyStore', 'readonly');
-        
-        // Error handeller
-        transaction.onerror = function(event) {
-            console.log('ModelDatabase store error: ' + event.target.errorCode);
-        }
-        
-        const objectStore = transaction.objectStore('DependencyStore');
-        const getTasks = objectStore.getAll(); 
-        
-        getTasks.onsuccess = function(event) {
-            callbacks.forEach(callback => callback(event.target.result));
-        }
-    }
-
-    getDependency  = function(callbacks, name) {
-        const transaction = this.db.transaction('DependencyStore', 'readonly');
-        
-        // Error handeller
-        transaction.onerror = function(event) {
-            console.log('ModelDatabase store error: ' + event.target.errorCode);
-        }
-        
-        const objectStore = transaction.objectStore('DependencyStore');
-        const getTask = objectStore.get(name); // Get using the index
-
-        getTask.onsuccess = function(event) {
-            callbacks.forEach(callback => callback(event.target.result));
-        }
-    }
-
     deleteDependency = function(callbacks, args, name) {
-        const transaction = this.db.transaction('DependencyStore', 'readwrite');
-        
-        // Error handeller
-        transaction.onerror = function(event) {
-            console.log('ModelDatabase store error: ' + event.target.errorCode);
-        }
-        
-        const objectStore = transaction.objectStore('DependencyStore');
+    	const objectStore = this.getObjectStore('DependencyStore', 'readwrite');
         const request = objectStore.delete(name); // Delete using the index
 
         request.onsuccess = function(event) {
-            //console.log(event);
             callbacks.forEach(callback => callback(args));
         }
     }

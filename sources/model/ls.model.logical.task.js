@@ -19,11 +19,11 @@ class ModelLogicalTask {
         this.outputs = outputs;
     }
     
-    static CreateWithTaskParameters(taskParameters) {
-        return new ModelLogicalTask(taskParameters.name, taskParameters.initialOffset, taskParameters.activationOffset, taskParameters.period, taskParameters.duration, taskParameters.inputs, taskParameters.outputs);
+    static CreateWithParameters(parameters) {
+        return new ModelLogicalTask(parameters.name, parameters.initialOffset, parameters.activationOffset, parameters.period, parameters.duration, parameters.inputs, parameters.outputs);
     }
 
-    get taskParameters() {
+    get parameters() {
         return {
             'name': this.name, 
             'initialOffset': this.initialOffset,
