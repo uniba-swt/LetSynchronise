@@ -48,7 +48,9 @@ class ModelTask {
     }
     
     deleteTask(name) {
+    	// TODO: Delete associated communication dependencies
         this.database.deleteTask(name)
+        	.then(this.database.deleteTaskInstances(name))
         	.then(result => this.getAllTasks())
         	.then(result => { this.updateTasks(result); this.updateDependencySelectors(result) });
     }

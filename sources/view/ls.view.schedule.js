@@ -79,9 +79,10 @@ class ViewSchedule {
     }
     
     
-    async updateSchedule(promiseTaskAndInstances) {
-        const taskParametersSet = await promiseTaskAndInstances['promiseAllTasks'];
-        const tasksInstances = await promiseTaskAndInstances['promiseAllTasksInstances'];
+    async updateSchedule(promise) {
+        const taskParametersSet = await promise['promiseAllTasks'];
+        const tasksInstances = await promise['promiseAllTasksInstances'];
+        const dataflowsSet = await promise['promiseAllDependenciesInstances'];
     
         this.updatePrologue(taskParametersSet);
         this.updateHyperPeriod(taskParametersSet);
@@ -90,9 +91,7 @@ class ViewSchedule {
         const {svgElement, scale, taskIndices} = this.drawSchedule(tasksInstances);
         
         // Draw communication dependencies.
-        // TODO: Get communication dependencies.
-        const dataflows = this.modelDependency.getAllDependencyInstances();
-        this.drawDataflows(svgElement, scale, taskIndices, dataflows);
+        this.drawDataflows(svgElement, scale, taskIndices, dataflowsSet);
     }
     
     updatePrologue(taskParametersSet) {
@@ -118,17 +117,15 @@ class ViewSchedule {
         const svgElement = this.schedule.append('svg');
         
         // Draw the task instances.
-        var index = 0;
         var taskIndices = {};
-        for (const taskInstances of tasksInstances) {
+        for (const [index, taskInstances] of tasksInstances.entries()) {
             this.drawTaskInstances(taskInstances, svgElement, scale, index);
             taskIndices[taskInstances.name] = index;
-            index++;
         }
         
         svgElement
           .attr('width', `${View.Width}px`)
-          .attr('height', `${index * View.TaskHeight}px`);
+          .attr('height', `${Object.keys(tasksInstances).length * View.TaskHeight}px`);
         
         return {svgElement: svgElement, scale: scale, taskIndices: taskIndices};
     }
@@ -228,7 +225,7 @@ class ViewSchedule {
                  .call(g => g.select('.domain').remove());
     }
     
-    drawDataflows(svgElement, scale, taskIndices, dataflows) {
+    drawDataflows(svgElement, scale, taskIndices, dataflowsSet) {
         // Define arrow head of a dataflow line
         const svgDefs =
         svgElement.append('defs')
@@ -243,31 +240,28 @@ class ViewSchedule {
                   .append('path')
                     .attr('d', 'M0, -5L10, 0L0, 5')
                     .attr('class', 'arrowHead');
-        
-        for (const dataflow of dataflows) {
-            this.drawDataflow(svgElement, scale, taskIndices, dataflow);
+        for (const dataflows of dataflowsSet) {
+        	for (const dataflow of dataflows.value) {
+	            this.drawDataflow(svgElement, scale, taskIndices, dataflows.name, dataflow);
+        	}
         }
     }
-    
-    drawDataflow(svgElement, scale, taskIndices, dataflow) {
+        
+    drawDataflow(svgElement, scale, taskIndices, dependencyName, dataflow) {
         const yOffset = 0.5 * View.BarHeight + 2.5 * View.SvgPadding;
         const xOffset = 20;
-        
         const tooltip = this.dataflowTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
         
-        const dependencyName = dataflow.name;
-        
-        const sourceTask = Utility.GetTask(dataflow.sendEvent.port);
-        const sourceTimestamp = scale(dataflow.sendEvent.timestamp);
-        
-        const destinationTask = Utility.GetTask(dataflow.receiveEvent.port);
-        const destinationTimestamp = scale(dataflow.receiveEvent.timestamp);
+        const sendEvent = dataflow.sendEvent;
+        const receiveEvent = dataflow.receiveEvent;
+        sendEvent.timestamp = scale(sendEvent.timestamp);
+        receiveEvent.timestamp = scale(receiveEvent.timestamp);
 
         const points = [
-            { x: sourceTimestamp,                y: taskIndices[sourceTask] },
-            { x: sourceTimestamp + xOffset,      y: taskIndices[sourceTask] },
-            { x: destinationTimestamp - xOffset, y: taskIndices[destinationTask] },
-            { x: destinationTimestamp,           y: taskIndices[destinationTask] }
+            { x: sendEvent.timestamp,                y: taskIndices[sendEvent.task] },
+            { x: sendEvent.timestamp + xOffset,      y: taskIndices[sendEvent.task] },
+            { x: receiveEvent.timestamp - xOffset,   y: taskIndices[receiveEvent.task] },
+            { x: receiveEvent.timestamp,             y: taskIndices[receiveEvent.task] }
         ]
 
         var line = d3.line()
@@ -288,7 +282,7 @@ class ViewSchedule {
                  .transition()
                  .ease(d3.easeLinear)
                  .style('stroke', 'var(--orange)');
-               tooltip.innerHTML = `${dependencyName}:<br/>${dataflow.sendEvent.port} &rarr; ${dataflow.receiveEvent.port}`;
+               tooltip.innerHTML = `${dependencyName}:<br/>${Utility.TaskPorts(sendEvent.task, [sendEvent.port])} &rarr; ${Utility.TaskPorts(receiveEvent.task, [receiveEvent.port])}`;
                tooltip.style.visibility = 'visible';
              })
              .on('mousemove', function() {
