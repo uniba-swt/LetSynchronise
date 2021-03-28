@@ -1,7 +1,7 @@
 'use strict';
 
-class ModelConstraints {
-    updateConstraints = null;      // Callback to function in ls.view.constraints
+class ModelConstraint {
+    updateConstraints = null;      // Callback to function in ls.view.constraint
     database = null;
 
     constructor() { }
@@ -27,22 +27,25 @@ class ModelConstraints {
 
     createConstraint(constraint) {
         // Store constraint into Database
-        //    const constraint = ModelConstraint.CreateWithConstraint(constraint);
-        //    this.database.storeConstraint(this.updateConstraints, constraint);
+        // const constraint = ModelConstraint.CreateWithConstraint(constraint);
+        // this.database.storeConstraint(constraint)
+        //	.then(result => this.getAllConstraints())
+        //  .then(result => this.updateConstraints(result));
         alert(`Created constraint: ${JSON.stringify(constraint)}`);
-        const callbacks = [this.updateConstraints];
-        this.getAllConstraints(callbacks);
+        this.getAllConstraints()
+            .then(result => this.updateConstraints(result));
     }
     
     deleteConstraint(name) {
         alert(`Delete constraint ${name}`);
         
-        const callbacks = [this.updateConstraints];
-        this.getAllConstraints(callbacks);
+        this.getAllConstraints()
+            .then(result => this.updateConstraints(result));
     }
     
     getAllConstraints(callbacks) {
-    //    this.database.getAllConstraints(callbacks);
+    //    return this.database.getAllConstraints()
+    //        .then(result = { return result } );
         
         // TODO: Destination and Source values could be a string "task.port" or "task" and "port" separately.
         const dummyConstraints = [
@@ -52,7 +55,6 @@ class ModelConstraints {
                 'source': 't3.out1',
                 'relation': '<',
                 'time': '20'
-                
             },
             {
                 'name': 'actuatorConstraint',
@@ -60,10 +62,10 @@ class ModelConstraints {
                 'source': 't3.out2',
                 'relation': '<=',
                 'time': '15'
-                
             }
         ];
-        callbacks.forEach(callback => callback(dummyConstraints));
+
+        return new Promise((resolve, reject) => { resolve(dummyConstraints) });
     }
     
     toString() {

@@ -1,7 +1,7 @@
 'use strict';
 
-class ModelDependencies {
-    updateDependencies = null;      // Callback to function in ls.view.dependencies
+class ModelDependency {
+    updateDependencies = null;      // Callback to function in ls.view.dependency
     database = null;
 
     constructor() { }
@@ -26,36 +26,14 @@ class ModelDependencies {
     // Class methods
 
     createDependency(dependency) {
-        // Store dependencies into Database
-        //    const logicalDependency = ModelLogicalDependency.CreateWithDependency(dependency);
-        //this.database.storeDependency(this.updateDependencies, logicalDependency);
-        this.database.storeDependency(dependency);
-        alert(`Created dependency: ${JSON.stringify(dependency)}`);
-        const callbacks = [this.updateDependencies];
-        this.getAllDependencyDefinitions(callbacks);
-    }
-    /*
-    deleteUpdateCallback() {
-        //console.log(this.updateDependencies);
-        //this.updateDependencies is not in the scope of the callback
-        const callbacks = [this.updateDependencies];
-        this.getAllDependencyDefinitions(callbacks);
-    }
-    */
-    deleteDependency(name) {
-        alert(`Delete dependency ${name}`);
-        const callbacks = [this.getAllDependencyDefinitions.bind(this)];
-        const args = [this.updateDependencies];
-        this.database.deleteDependency(callbacks, args, name);
+        // Store dependency in Database
+        this.database.storeDependency(dependency)
+        	.then(result => this.getAllDependencies())
+        	.then(result => this.updateDependencies(result));
     }
     
-    getAllDependencyDefinitions(callbacks) {
-    //    this.database.getAllDependencies(callbacks);
-        
-        // TODO: Destination and Source values could be a string "task.port" or "task" and "port" separately.
-        //const dummyDependencies = [{'name': 'sensorDataflow', 'destination': 't1.in1', 'source': 't3.out1'}, {'name': 'actuatorDataflow', 'destination': 't1.in2', 'source': 't3.out2'}];
-        this.database.getAllDependenciesFormatted(callbacks);
-        //callbacks.forEach(callback => callback(dummyDependencies));
+    getAllDependencies() {
+        return this.database.getAllDependencies();
     }
     
     getAllDependencyInstances() {
@@ -119,12 +97,16 @@ class ModelDependencies {
             }
         ];
         
-        
-
         return dummyDataflows
     }
     
+    deleteDependency(name) {
+        this.database.deleteDependency(name)
+        	.then(result => this.getAllDependencies())
+        	.then(result => this.updateDependencies(result));
+    }
+    
     toString() {
-        return "ModelDependencies";
+        return "ModelDependency";
     }
 }

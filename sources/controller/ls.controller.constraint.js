@@ -1,6 +1,6 @@
 'use strict';
 
-class ControllerConstraints {
+class ControllerConstraint {
     _view = null;
     _model = null;
     _modelTask = null;      // Hack to allow new inputs/outputs to be displayed in the View's constraint selection when a task is added
@@ -27,7 +27,8 @@ class ControllerConstraints {
         
         // Hack to populate the View with constraints once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
-            this._model.getAllConstraints([this.callbackUpdateConstraints]);
+            this._model.getAllConstraints()
+            	.then(result => this.callbackUpdateConstraints(result));
         });
     }
     
@@ -43,7 +44,8 @@ class ControllerConstraints {
 
         // Hack to populate the View with constraint once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
-            this._modelTask.getAllTasks([this.callbackUpdateConstraintSelectors]);
+            this._modelTask.getAllTasks()
+            	.then(result => this.callbackUpdateConstraintSelectors(result));
         });
     }
     
@@ -55,13 +57,13 @@ class ControllerConstraints {
     // -----------------------------------------------------
     // Handlers for events from the view to the model
     
-    // Handler for creating constraints.
+    // Handler for creating constraint.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleCreateConstraint = (constraint) => {
         this.model.createConstraint(constraint);
     }
     
-    // Handler for deleting constraints.
+    // Handler for deleting constraint.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleDeleteConstraint = (name) => {
         this.model.deleteConstraint(name);
@@ -82,6 +84,6 @@ class ControllerConstraints {
     }
     
     toString() {
-    	return `ControllerConstraints with ${this.view} and ${this.model}`;
+    	return `ControllerConstraint with ${this.view} and ${this.model}`;
     }
 }

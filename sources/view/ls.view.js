@@ -2,9 +2,9 @@
 
 class View {
     _viewTask = null;
-    _viewDependencies = null;
+    _viewDependency = null;
     _viewSchedule = null;
-    _viewConstraints = null;
+    _viewConstraint = null;
     
     constructor() { }
     
@@ -26,32 +26,32 @@ class View {
         this._viewTask = viewTask;
     }
 
-    set viewDependencies(viewDependencies) {
-        this._viewDependencies = viewDependencies;
+    set viewDependency(viewDependency) {
+        this._viewDependency = viewDependency;
     }
     
     set viewSchedule(viewSchedule) {
         this._viewSchedule = viewSchedule;
     }
     
-    set viewConstraints(viewConstraints) {
-        this._viewConstraints = viewConstraints;
+    set viewConstraint(viewConstraint) {
+        this._viewConstraint = viewConstraint;
     }
     
     get viewTask() {
         return this._viewTask;
     }
     
-    get viewDependencies() {
-        return this._viewDependencies;
+    get viewDependency() {
+        return this._viewDependency;
     }
     
     get viewSchedule() {
         return this._viewSchedule;
     }
     
-    get viewConstraints() {
-        return this._viewConstraints;
+    get viewConstraint() {
+        return this._viewConstraint;
     }
     
     toString() {

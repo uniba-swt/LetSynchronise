@@ -1,30 +1,34 @@
 'use strict';
 
-class ViewDependencies {
+class ViewConstraint {
     root = null;
     
     nameField = null;
     sourceField = null;
     destinationField = null;
+    relationField = null;
+    timeField = null;
     
     submitButton = null;
     
-    taskDependencies = null;
+    constraints = null;
     
     deleteHandler = null;
     
     
     constructor() {
-        this.root = document.querySelector('#nav-design');
+        this.root = document.querySelector('#nav-analyse');
         
-        // Define or edit task dependencies
-        this.nameField = this.root.querySelector('#view-task-dependency-name');
-        this.sourceField = this.root.querySelector('#view-task-dependency-source');
-        this.destinationField = this.root.querySelector('#view-task-dependency-destination');
+        // Define or edit constraint
+        this.nameField = this.root.querySelector('#view-analyse-constraint-name');
+        this.sourceField = this.root.querySelector('#view-analyse-constraint-source');
+        this.destinationField = this.root.querySelector('#view-analyse-constraint-destination');
+        this.relationField = this.root.querySelector('#view-analyse-constraint-relation');
+        this.timeField = this.root.querySelector('#view-analyse-constraint-time');
+
+        this.submitButton = this.root.querySelector('#submitConstraint');
         
-        this.submitButton = this.root.querySelector('#submitDependency');
-        
-        this.taskDependencies = d3.select('#view-task-dependencies');
+        this.constraints = d3.select('#view-analyse-constraints');
     }
     
     
@@ -52,15 +56,33 @@ class ViewDependencies {
         this.destinationField.value = destination;
     }
     
-    get dependencyRaw() {
+    get relation() {
+        return this.relationField.value;
+    }
+    
+    set relation(relation) {
+        this.relationField.value = relation;
+    }
+    
+    get time() {
+        return this.timeField.value;
+    }
+
+    set time(time) {
+        this.timeField.value = time;
+    }
+    
+    get constraintRaw() {
         return {
             'name': this.name,
             'source': this.source,
-            'destination': this.destination
+            'destination': this.destination,
+            'relation': this.relation,
+            'time': this.time
         };
     }
     
-    get dependencyClean() {
+    get constraintClean() {
         const source = this.source.split('.');
         const destination = this.destination.split('.');
         return {
@@ -72,7 +94,9 @@ class ViewDependencies {
             'destination': {
                 'task': destination[0],
                 'port': destination[1]
-            }
+            },
+            'relation': this.relation.trim(),
+            'time': parseFloat(this.time)
         };
     }
     
@@ -102,9 +126,9 @@ class ViewDependencies {
             event.preventDefault();
             
             // Validate the destinations.
-            if (this.validateTaskDependency(this.dependencyRaw)) {
+            if (this.validateConstraint(this.constraintRaw)) {
                 // Call the handler.
-                handler(this.dependencyClean);
+                handler(this.constraintClean);
             }
         });
     }
@@ -114,35 +138,45 @@ class ViewDependencies {
     }
     
     
-    validateTaskDependency(taskDependency) {
-        if (taskDependency.name == null || taskDependency.name.trim() == '') {
+    validateConstraint(constraint) {
+        if (constraint.name == null || constraint.name.trim() == '') {
             alert('Name cannot be blank.');
             return false;
         }
 
-        if (taskDependency.source == 'null ') {
-            alert(`Choose source of dependency.`);
+        if (constraint.source == 'null ') {
+            alert('Choose source of constraint.');
             return false;
         }
 
-        if (taskDependency.destination == 'null ') {
-            alert(`Choose destination of dependency.`);
+        if (constraint.destination == 'null ') {
+            alert('Choose destination of constraint.');
+            return false;
+        }
+        
+        if (constraint.relation == 'null ') {
+            alert('Choose relation of constraint.');
+            return false;
+        }
+        
+        if (constraint.time == null || constraint.time.trim() == '') {
+            alert('Time cannot be blank.');
             return false;
         }
                 
         return true;
     }
     
-    updateDependencySelectors(taskParametersSet) {
+    updateConstraintSelectors(taskParametersSet) {
         const sources = taskParametersSet.map(taskParameters => Utility.TaskPorts(taskParameters.name, taskParameters.outputs)).flat();
         const destinations = taskParametersSet.map(taskParameters => Utility.TaskPorts(taskParameters.name, taskParameters.inputs)).flat();
         
         // Create list of available sources and destinations
-        this.updateTaskDependencyPorts(d3.select(this.sourceField), sources);
-        this.updateTaskDependencyPorts(d3.select(this.destinationField), destinations);
+        this.updateConstraintPorts(d3.select(this.sourceField), sources);
+        this.updateConstraintPorts(d3.select(this.destinationField), destinations);
     }
         
-    updateTaskDependencyPorts(parentElement, ports) {
+    updateConstraintPorts(parentElement, ports) {
         // Create list of available ports
         parentElement.selectAll('*').remove();
         parentElement
@@ -161,39 +195,41 @@ class ViewDependencies {
         );
     }
     
-    updateDependencies(dependencies) {
-        // Display task dependencies
-        this.taskDependencies.selectAll('*').remove();
+    updateConstraints(constraints) {
+        // Display constraints
+        this.constraints.selectAll('*').remove();
         
         const thisRef = this;
         
-        this.taskDependencies
+        this.constraints
             .selectAll('li')
-            .data(dependencies)
+            .data(constraints)
             .enter()
             .append('li')
-                .html(dependency => `<span>${dependency.name}: ${dependency.source} &rarr; ${dependency.destination}</span> ${Utility.AddDeleteButton(dependency.name)}`)
+                .html(constraint => `<span>${constraint.name}: ${constraint.source} &rarr; ${constraint.destination} ${constraint.relation} ${constraint.time}</span> ${Utility.AddDeleteButton(constraint.name)}`)
             .on('click', function(data) {
-                thisRef.taskDependencies.node().querySelectorAll('li')
-                    .forEach((dependency) => {
-                        if (dependency !== this) { dependency.classList.remove('dependencySelected'); }
+                thisRef.constraints.node().querySelectorAll('li')
+                    .forEach((constraint) => {
+                        if (constraint !== this) { constraint.classList.remove('constraintSelected'); }
                     });
-                this.classList.toggle('dependencySelected');
+                this.classList.toggle('constraintSelected');
                 thisRef.populateParameterForm.bind(thisRef)(data);
             });
 
-        for (const dependency of dependencies) {
-            this.setupDeleteButtonListener(`${dependency.name}`);
+        for (const constraint of constraints) {
+            this.setupDeleteButtonListener(`${constraint.name}`);
         }
     }
     
-    populateParameterForm(dependency) {
-        this.name = dependency.name;
-        this.source = dependency.source;
-        this.destination = dependency.destination;
+    populateParameterForm(constraint) {
+        this.name = constraint.name;
+        this.source = constraint.source;
+        this.destination = constraint.destination;
+        this.relation = constraint.relation;
+        this.time = constraint.time;
     }
     
     toString() {
-        return "ViewDependencies";
+        return "ViewConstraint";
     }
 }

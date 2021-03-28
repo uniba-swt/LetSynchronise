@@ -2,8 +2,8 @@
 
 class ModelTask {
     updateTasks = null;                 // Callback to function in ls.view.task
-    updateDependencySelectors = null;   // Callback to function in ls.view.dependencies
-    updateConstraintSelectors = null;   // Callback to function in ls.view.constraints
+    updateDependencySelectors = null;   // Callback to function in ls.view.dependency
+    updateConstraintSelectors = null;   // Callback to function in ls.view.constraint
     database = null;
     
     constructor() { }
@@ -12,7 +12,7 @@ class ModelTask {
     // -----------------------------------------------------
     // Registration of callbacks from the controller
 
-    registerUpdateTaskCallback(callback) {
+    registerUpdateTasksCallback(callback) {
         this.updateTasks = callback;
     }
     
@@ -35,29 +35,22 @@ class ModelTask {
     // -----------------------------------------------------
     // Class methods
 
-    createTask(taskParameters) {
+    createTask(parameters) {
         // Store taskParameters into Database
-        const logicalTask = ModelLogicalTask.CreateWithTaskParameters(taskParameters);
-        this.database.storeTask(logicalTask);
-        
-        const callbacks = [this.updateTasks, this.updateDependencySelectors];
-        this.getAllTasks(callbacks);
+        const logicalTask = ModelLogicalTask.CreateWithParameters(parameters);
+        this.database.storeTask(logicalTask)
+        	.then(result => this.getAllTasks())
+        	.then(result => { this.updateTasks(result); this.updateDependencySelectors(result) });
     }
     
-    getAllTasks(callbacks) {
-        this.database.getAllTasks(callbacks);
-    }
-
-    getAllTaskInstances(callbacks, makespan) {
-        alert("hello");
+    getAllTasks() {
+    	return this.database.getAllTasks();
     }
     
     deleteTask(name) {
-        alert(`Delete task ${name}`);
-        
-        const args = [this.updateTasks, this.updateDependencySelectors];
-        const callbacks = [this.getAllTasks.bind(this)];
-        this.database.deleteTask(callbacks, args, name);
+        this.database.deleteTask(name)
+        	.then(result => this.getAllTasks())
+        	.then(result => { this.updateTasks(result); this.updateDependencySelectors(result) });
     }
     
     toString() {
