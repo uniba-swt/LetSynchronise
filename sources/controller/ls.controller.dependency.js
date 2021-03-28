@@ -27,7 +27,8 @@ class ControllerDependency {
         
         // Hack to populate the View with dependencies once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
-            this._model.getAllDependencyDefinitions([this.callbackUpdateDependencies]);
+            this._model.getAllDependencies()
+            	.then(result => this.callbackUpdateDependencies(result));
         });
     }
     
@@ -43,7 +44,8 @@ class ControllerDependency {
 
         // Hack to populate the View with dependencies once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
-            this._modelTask.getAllTasks([this.callbackUpdateDependencySelectors]);
+            this._modelTask.getAllTasks()
+            	.then(result => this.callbackUpdateDependencySelectors(result));
         });
     }
     

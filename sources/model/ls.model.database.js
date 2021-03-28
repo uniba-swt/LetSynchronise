@@ -18,12 +18,12 @@ class ModelDatabase {
             this.db = event.target.result;
             if (event.oldVersion < 3) {
                 if (event.oldVersion < 2) {
-					if (event.oldVersion < 1) {
-						const taskStore = this.db.createObjectStore('TaskStore', {keyPath: 'name', unique: true});
-					}
-					const dependencyStore = this.db.createObjectStore('DependencyStore', {keyPath: 'name', unique: true});
-				}
-				const taskInstancesStore = this.db.createObjectStore('TaskInstancesStore', {keyPath:'name', unique: true});
+                    if (event.oldVersion < 1) {
+                        const taskStore = this.db.createObjectStore('TaskStore', {keyPath: 'name', unique: true});
+                    }
+                    const dependencyStore = this.db.createObjectStore('DependencyStore', {keyPath: 'name', unique: true});
+                }
+                const taskInstancesStore = this.db.createObjectStore('TaskInstancesStore', {keyPath:'name', unique: true});
             }
         }
 
@@ -46,96 +46,132 @@ class ModelDatabase {
         };
     }
     
-    getObjectStore(storeName, mode) {
-    	const transaction = this.db.transaction(storeName, mode);
+    getObjectStore(storeName, mode, promiseReject) {
+        const transaction = this.db.transaction(storeName, mode);
 
         // Error handeller
         transaction.onerror = function(event) {
-            console.log('ModelDatabase store error: ' + event.target.errorCode);
+            promiseReject(console.log('ModelDatabase store error: ' + event.target.errorCode));
         }
 
         return transaction.objectStore(storeName);
     }
     
-    storeTask = function(task) {
-    	const objectStore = this.getObjectStore('TaskStore', 'readwrite');
-    	const putTask = objectStore.put(task.parameters);
-    }
-
-
-    getTask = function(callbacks, name) {
-        const objectStore = this.getObjectStore('TaskStore', 'readonly');
-        const getTask = objectStore.get(name); // Get using the index
-
-        getTask.onsuccess = function(event) {
-            callbacks.forEach(callback => callback(event.target.result));
-        }
-    }
-
-    getAllTasks = function(callbacks) {
-        const objectStore = this.getObjectStore('TaskStore', 'readonly');
-        const getTasks = objectStore.getAll(); 
+    putObject(storeName, mode, object, promiseResolve, promiseReject) {
+        const objectStore = this.getObjectStore(storeName, mode, promiseReject)
+        const putObject = objectStore.put(object);
         
-        getTasks.onsuccess = function(event) {
-            callbacks.forEach(callback => callback(event.target.result));
+        putObject.onsuccess = function(event) {
+            promiseResolve(event.target.result);
         }
     }
+    
+    getObject(storeName, mode, index, promiseResolve, promiseReject) {
+        const objectStore = this.getObjectStore(storeName, mode, promiseReject)
+        const getObject = objectStore.get(index); // Get using the index
 
-    deleteTask = function(callbacks, args, name) {
-    	const objectStore = this.getObjectStore('TaskStore', 'readwrite');
-        const deleteTask = objectStore.delete(name); // Delete using the index
-
-        deleteTask.onsuccess = function(event) {
-            callbacks.forEach(callback => callback(args));
+        getObject.onsuccess = function(event) {
+            promiseResolve(event.target.result);
         }
     }
+    
+    getAllObjects(storeName, mode, promiseResolve, promiseReject) {
+        const objectStore = this.getObjectStore(storeName, mode, promiseReject)
+        const getObjects = objectStore.getAll();
+
+        getObjects.onsuccess = function(event) {
+            promiseResolve(event.target.result);
+        }
+    }
+    
+    deleteObject(storeName, mode, index, promiseResolve, promiseReject) {
+        const objectStore = this.getObjectStore(storeName, mode, promiseReject)
+        const deleteObject = objectStore.delete(index); // Delete using the index
+
+        deleteObject.onsuccess = function(event) {
+            promiseResolve(event.target.result);
+        }
+    }
+    
+    
+    // Task
+    
+    storeTask = function(task) {
+        return new Promise((resolve, reject) => {
+            this.putObject('TaskStore', 'readwrite', task.parameters, resolve, reject);
+        });
+    }
+
+    getTask = function(name) {
+        return new Promise((resolve, reject) => {
+            this.getObject('TaskStore', 'readonly', name, resolve, reject);
+        });
+    }
+
+    getAllTasks = function() {
+        return new Promise((resolve, reject) => {
+            this.getAllObjects('TaskStore', 'readonly', resolve, reject);
+        });
+    }
+
+    deleteTask = function(name) {
+        return new Promise((resolve, reject) => {
+            this.deleteObject('TaskStore', 'readwrite', name, resolve, reject);
+        });
+    }
+    
+    
+    // Task Instances
+    
+    storeTaskInstances = function(taskInstances) {
+        return new Promise((resolve, reject) => {
+            this.putObject('TaskInstancesStore', 'readwrite', taskInstances, resolve, reject);
+        });
+    }
+    
+    getTaskInstances = function(name) {
+        return new Promise((resolve, reject) => {
+            this.getObject('TaskInstancesStore', 'readonly', name, resolve, reject);
+        });
+    }
+    
+    getAllTasksInstances = function() {
+        return new Promise((resolve, reject) => {
+            this.getAllObjects('TaskInstancesStore', 'readonly', resolve, reject);
+        });
+    }
+
+    deleteTaskInstances = function(name) {
+        return new Promise((resolve, reject) => {
+            this.deleteObject('TaskInstancesStore', 'readwrite', name, resolve, reject);
+        });
+    }
+    
+    
+    // Dependency
 
     storeDependency = function(dependency) {
-    	const objectStore = this.getObjectStore('DependencyStore', 'readwrite');
-        const putDependency = objectStore.put(dependency);
+        return new Promise((resolve, reject) => {
+            this.putObject('DependencyStore', 'readwrite', dependency, resolve, reject);
+        });
     }
 
-    getDependency  = function(callbacks, name) {
-    	const objectStore = this.getObjectStore('DependencyStore', 'readonly');
-        const getDependency = objectStore.get(name); // Get using the index
-
-        getDependency.onsuccess = function(event) {
-            callbacks.forEach(callback => callback(event.target.result));
-        }
+    getDependency  = function(name) {
+        return new Promise((resolve, reject) => {
+            this.getObject('DependencyStore', 'readonly', name, resolve, reject);
+        });
     }
     
-    getAllDependencies = function(callbacks) {
-    	const objectStore = this.getObjectStore('DependencyStore', 'readonly');
-        const getDependencies = objectStore.getAll(); 
-        
-        getDependencies.onsuccess = function(event) {
-            callbacks.forEach(callback => callback(event.target.result));
-        }
-    }
-    
-    getAllDependenciesFormatted = function(callbacks) {
-        const formatDependencies = function(dependencies) {
-            let dependenciesFormatted = [];
-            for (const dependency of dependencies) {
-                let dependencyFormatted = {
-                		'name': dependency.name, 
-						'destination': `${dependency.destination.task}.${dependency.destination.port}`,
-						'source': `${dependency.source.task}.${dependency.source.port}`
-                	};
-                dependenciesFormatted.push(dependencyFormatted);
-            }
-            callbacks.forEach(callback => callback(dependenciesFormatted));
-        }
-        this.getAllDependencies([formatDependencies]);
+    getAllDependencies = function() {
+        return new Promise((resolve, reject) => {
+            this.getAllObjects('DependencyStore', 'readonly', resolve, reject);
+        });
     }
 
-    deleteDependency = function(callbacks, args, name) {
-    	const objectStore = this.getObjectStore('DependencyStore', 'readwrite');
-        const request = objectStore.delete(name); // Delete using the index
-
-        request.onsuccess = function(event) {
-            callbacks.forEach(callback => callback(args));
-        }
+    deleteDependency = function(name) {
+        return new Promise((resolve, reject) => {
+            this.deleteObject('DependencyStore', 'readwrite', name, resolve, reject);
+        });
     }
 
 }

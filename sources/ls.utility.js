@@ -63,7 +63,17 @@ class Utility {
     static GetPort(taskPort) {
         return taskPort.split('.')[1];
     }
-                             
+    
+	static FormatDependencies(rawDependencies) {
+		return rawDependencies.map(dependency => { 
+			return {
+				'name': dependency.name, 
+				'source': `${dependency.source.task}.${dependency.source.port}`,
+				'destination': `${dependency.destination.task}.${dependency.destination.port}`
+			}
+		});
+    }
+    
     static AddDeleteButton(id) {
         return `<button id="${id}" type="submit" class="btn btn-danger btn-sm delete">Delete</button>`;
     }

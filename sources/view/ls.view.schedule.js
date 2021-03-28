@@ -118,7 +118,7 @@ class ViewSchedule {
         var index = 0;
         var taskIndices = {};
         for (const taskParameters of taskParametersSet) {
-            this.drawTask(taskParameters, svgElement, scale, index);
+            this.drawTaskInstances(taskParameters, svgElement, scale, index);
             taskIndices[taskParameters.name] = index;
             index++;
         }
@@ -130,7 +130,7 @@ class ViewSchedule {
         return {svgElement: svgElement, scale: scale, taskIndices: taskIndices};
     }
     
-    drawTask(taskParameters, svgElement, scale, index) {
+    drawTaskInstances(taskParameters, svgElement, scale, index) {
         const tooltip = this.scheduleTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
 
         const group =

@@ -27,7 +27,8 @@ class ControllerConstraint {
         
         // Hack to populate the View with constraints once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
-            this._model.getAllConstraints([this.callbackUpdateConstraints]);
+            this._model.getAllConstraints()
+            	.then(result => this.callbackUpdateConstraints(result));
         });
     }
     
@@ -43,7 +44,8 @@ class ControllerConstraint {
 
         // Hack to populate the View with constraint once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
-            this._modelTask.getAllTasks([this.callbackUpdateConstraintSelectors]);
+            this._modelTask.getAllTasks()
+            	.then(result => this.callbackUpdateConstraintSelectors(result));
         });
     }
     

@@ -23,7 +23,8 @@ class ControllerSchedule {
                 
         // Hack to populate the View with the schedule once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
-            this._model.getSchedule([this.callbackGetSchedule]);
+            this._model.getSchedule(this._view.makespan)
+                .then(result => this.callbackGetSchedule(result));
         });
     }
     
@@ -49,7 +50,8 @@ class ControllerSchedule {
     // Handler for updating the task schedule.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleGetSchedule = (callback, makespan) => {
-        this.model.getSchedule([callback], makespan);
+        this._model.getSchedule(makespan)
+            .then(result => this.callbackGetSchedule(result));
     }
     
     
@@ -58,10 +60,10 @@ class ControllerSchedule {
     
     // Callback for updating the task schedule.
     callbackGetSchedule = (schedule) => {
-        this.view.updateSchedule(schedule);
+        this._view.updateSchedule(schedule);
     }
 
     toString() {
-    	return `ControllerSchedule with ${this.view} and ${this.model}`;
+        return `ControllerSchedule with ${this.view} and ${this.model}`;
     }
 }

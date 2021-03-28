@@ -12,7 +12,7 @@ class ModelTask {
     // -----------------------------------------------------
     // Registration of callbacks from the controller
 
-    registerUpdateTaskCallback(callback) {
+    registerUpdateTasksCallback(callback) {
         this.updateTasks = callback;
     }
     
@@ -38,24 +38,19 @@ class ModelTask {
     createTask(parameters) {
         // Store taskParameters into Database
         const logicalTask = ModelLogicalTask.CreateWithParameters(parameters);
-        this.database.storeTask(logicalTask);
-        
-        const callbacks = [this.updateTasks, this.updateDependencySelectors];
-        this.getAllTasks(callbacks);
+        this.database.storeTask(logicalTask)
+        	.then(result => this.getAllTasks())
+        	.then(result => { this.updateTasks(result); this.updateDependencySelectors(result) });
     }
     
-    getAllTasks(callbacks) {
-        this.database.getAllTasks(callbacks);
-    }
-
-    getAllTaskInstances(callbacks, makespan) {
-        alert("ToDo");
+    getAllTasks() {
+    	return this.database.getAllTasks();
     }
     
     deleteTask(name) {
-        const args = [this.updateTasks, this.updateDependencySelectors];
-        const callbacks = [this.getAllTasks.bind(this)];
-        this.database.deleteTask(callbacks, args, name);
+        this.database.deleteTask(name)
+        	.then(result => this.getAllTasks())
+        	.then(result => { this.updateTasks(result); this.updateDependencySelectors(result) });
     }
     
     toString() {

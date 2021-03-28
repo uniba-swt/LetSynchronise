@@ -161,8 +161,9 @@ class ViewDependency {
         );
     }
     
-    updateDependencies(dependencies) {
+    updateDependencies(rawDependencies) {
         // Display task dependencies
+        const dependencies = Utility.FormatDependencies(rawDependencies);
         this.taskDependencies.selectAll('*').remove();
         
         const thisRef = this;

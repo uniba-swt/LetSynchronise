@@ -27,28 +27,13 @@ class ModelDependency {
 
     createDependency(dependency) {
         // Store dependency in Database
-        //    const logicalDependency = ModelLogicalDependency.CreateWithDependency(dependency);
-        //this.database.storeDependency(this.updateDependency, logicalDependency);
-        this.database.storeDependency(dependency);
-        const callbacks = [this.updateDependencies];
-        this.getAllDependencyDefinitions(callbacks);
-    }
-    /*
-    deleteUpdateCallback() {
-        //console.log(this.updateDependency);
-        //this.updateDependency is not in the scope of the callback
-        const callbacks = [this.updateDependency];
-        this.getAllDependencyDefinitions(callbacks);
-    }
-    */
-    deleteDependency(name) {
-        const callbacks = [this.getAllDependencyDefinitions.bind(this)];
-        const args = [this.updateDependencies];
-        this.database.deleteDependency(callbacks, args, name);
+        this.database.storeDependency(dependency)
+        	.then(result => this.getAllDependencies())
+        	.then(result => this.updateDependencies(result));
     }
     
-    getAllDependencyDefinitions(callbacks) {
-        this.database.getAllDependenciesFormatted(callbacks);
+    getAllDependencies() {
+        return this.database.getAllDependencies();
     }
     
     getAllDependencyInstances() {
@@ -112,9 +97,13 @@ class ModelDependency {
             }
         ];
         
-        
-
         return dummyDataflows
+    }
+    
+    deleteDependency(name) {
+        this.database.deleteDependency(name)
+        	.then(result => this.getAllDependencies())
+        	.then(result => this.updateDependencies(result));
     }
     
     toString() {
