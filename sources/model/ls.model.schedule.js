@@ -37,11 +37,15 @@ class ModelSchedule {
     // Create all instances of a task within the makespan.
     createTaskInstances(parameters, makespan) {
         let instances = [];
-        for (let timePoint = 0; timePoint < makespan; timePoint += parameters.period + parameters.activationOffset) {
+        for (let timePoint = parameters.initialOffset; timePoint < makespan; timePoint += parameters.period) {
 			instances.push(this.createTaskInstance(parameters, timePoint));
         }
 
-        return this.database.storeTaskInstances({'name': parameters.name, 'value': instances});
+        return this.database.storeTaskInstances({
+        	'name': parameters.name, 
+        	'initialOffset': parameters.initialOffset,
+        	'value': instances
+        });
     }
     
     // Get all instances of all tasks.
