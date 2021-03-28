@@ -29,7 +29,7 @@ class ModelSchedule {
     	return {
     		'periodStartTime': timePoint,
     		'letStartTime'   : timePoint + parameters.activationOffset,
-    		'letEndTime'     : timePoint + parameters.activationOffset + parameters.letDuration,
+    		'letEndTime'     : timePoint + parameters.activationOffset + parameters.duration,
     		'periodEndTime'  : timePoint + parameters.period
     	};
     }
@@ -41,7 +41,7 @@ class ModelSchedule {
 			instances.push(this.createTaskInstance(parameters, timePoint));
         }
 
-        this.database.storeTaskInstances({'name': parameters.name, 'value': instances});
+        return this.database.storeTaskInstances({'name': parameters.name, 'value': instances});
     }
     
     // Get all instances of all tasks.
@@ -56,15 +56,11 @@ class ModelSchedule {
     }
     
     getSchedule(makespan) {
-        console.log("ls.model.schedule.getSchedule");
-        return this.database.getAllTasks()
-        	.then(result => { return result });
-        /*
-        return this.database.getAllTasks()
-        	.then(tasks => tasks.forEach(task => this.createTaskInstances(task.parameters, makespan)))
-        	.then(result => this.getAllTasksInstances())
-        	.then(result => resolve(result));
-        */
+    	const promiseAllTasks = this.database.getAllTasks();
+    	promiseAllTasks.then(tasks => tasks.forEach(task => this.createTaskInstances(task, makespan)));
+    	const promiseAllTasksInstances = this.getAllTasksInstances();
+    	
+    	return {'promiseAllTasks': promiseAllTasks, 'promiseAllTasksInstances': promiseAllTasksInstances};
     }
     
     toString() {

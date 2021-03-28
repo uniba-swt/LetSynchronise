@@ -79,7 +79,10 @@ class ViewSchedule {
     }
     
     
-    updateSchedule(taskParametersSet) {
+    async updateSchedule(promiseTaskAndInstances) {
+    	const taskParametersSet = await promiseTaskAndInstances['promiseAllTasks'];
+    	const tasksInstances = await promiseTaskAndInstances['promiseAllTasksInstances'];
+    
         this.updatePrologue(taskParametersSet);
         this.updateHyperPeriod(taskParametersSet);
         
