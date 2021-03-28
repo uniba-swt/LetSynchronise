@@ -11,6 +11,7 @@ class ViewSchedule {
     updateButton = null;
 
     schedule = null;
+    dependencies = null;
     scheduleTooltip = null;
     dataflowTooltip = null;
 
@@ -25,8 +26,9 @@ class ViewSchedule {
         this.updateButton = this.root.querySelector('#update');
 
         this.schedule = d3.select('#view-schedule');
-        this.scheduleTooltip = this.root.querySelector('#view-schedule-tooltip');
-        this.dataflowTooltip = this.root.querySelector('#view-dataflow-tooltip');
+        this.dependencies = d3.select('#view-schedule-dependencies-menu');
+        this.scheduleTooltip = this.root.querySelector('#view-schedule-task-tooltip');
+        this.dataflowTooltip = this.root.querySelector('#view-schedule-dataflow-tooltip');
 
         // Set the default makespan
         this.makespan = 10;
@@ -226,6 +228,15 @@ class ViewSchedule {
     }
     
     drawDataflows(svgElement, scale, taskIndices, dataflowsSet) {
+    	const dependencyNames = dataflowsSet.map(dataflows => dataflows.name);
+    	this.dependencies.selectAll('*').remove();
+    	
+        const allMenuItem = 
+    	this.dependencies
+            .append('a')
+        		.attr('class', 'dropdown-item active')
+            	.text('All');
+    
         // Define arrow head of a dataflow line
         const svgDefs =
         svgElement.append('defs')
@@ -240,11 +251,51 @@ class ViewSchedule {
                   .append('path')
                     .attr('d', 'M0, -5L10, 0L0, 5')
                     .attr('class', 'arrowHead');
+        
+        let svgGroups = [];
         for (const dataflows of dataflowsSet) {
+			const svgGroup = 
+			svgElement.append('g')
+						.attr('class', `dependency view-dependency-${dataflows.name}`);
+			svgGroups.push(svgGroup);
+			
+			this.dependencies
+				.append('a')
+					.attr('class', 'dropdown-item active')
+					.text(dataflows.name)
+					.on('click', function() {
+						// Update style of dropdown items
+						allMenuItem.node().classList.remove('active');
+						this.classList.toggle('active');
+						
+						// Update SVG style of dependencies
+						svgGroup.node().style.visibility = this.classList.contains('active') ? 'visible' : 'hidden';
+					});
+
         	for (const dataflow of dataflows.value) {
-	            this.drawDataflow(svgElement, scale, taskIndices, dataflows.name, dataflow);
+	            this.drawDataflow(svgGroup, scale, taskIndices, dataflows.name, dataflow);	            
         	}
         }
+        
+        allMenuItem
+			.on('click', function() {
+				// Update style of dropdown items
+				this.classList.toggle('active');
+				
+				this.parentNode.querySelectorAll('a').forEach(item => {
+					if (item != this) {
+						if (this.classList.contains('active')) {
+							item.classList.add('active');
+						} else {
+							item.classList.remove('active');
+						}
+					}
+					
+					svgGroups.forEach(svgGroup => {
+						svgGroup.node().style.visibility = this.classList.contains('active') ? 'visible' : 'hidden';
+					});
+				});
+			});
     }
         
     drawDataflow(svgElement, scale, taskIndices, dependencyName, dataflow) {
@@ -271,7 +322,6 @@ class ViewSchedule {
         
         const group =
         svgElement.append('g')
-                    .attr('class', `dependency view-dependency-${dependencyName}`)
                     .attr('transform', `translate(${View.SvgPadding}, ${View.SvgPadding})`);
         
         group.append('path')

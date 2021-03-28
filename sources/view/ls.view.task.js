@@ -417,10 +417,9 @@ class ViewTask {
             
             // Click listener
             anchor.on('click', () => {
-                taskListItem.node().parentNode.querySelectorAll('li')
-                    .forEach((item) => {
-                        if (item !== taskListItem.node()) { item.classList.remove('taskSelected'); }
-                    });
+                taskListItem.node().parentNode.querySelectorAll('li').forEach((item) => {
+					if (item !== taskListItem.node()) { item.classList.remove('taskSelected'); }
+				});
                 taskListItem.node().classList.toggle('taskSelected');
                 this.populateParameterForm(taskParameters);
             });
