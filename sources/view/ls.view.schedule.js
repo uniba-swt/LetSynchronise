@@ -79,17 +79,19 @@ class ViewSchedule {
     }
     
     
-    updateSchedule(taskParametersSet) {
+    async updateSchedule(promise) {
+        const taskParametersSet = await promise['promiseAllTasks'];
+        const tasksInstances = await promise['promiseAllTasksInstances'];
+        const dataflowsSet = await promise['promiseAllDependenciesInstances'];
+    
         this.updatePrologue(taskParametersSet);
         this.updateHyperPeriod(taskParametersSet);
         
         // Draw new schedule.
-        const {svgElement, scale, taskIndices} = this.drawSchedule(taskParametersSet);
+        const {svgElement, scale, taskIndices} = this.drawSchedule(tasksInstances);
         
         // Draw communication dependencies.
-        // TODO: Get communication dependencies.
-        const dataflows = this.modelDependency.getAllDependencyInstances();
-        this.drawDataflows(svgElement, scale, taskIndices, dataflows);
+        this.drawDataflows(svgElement, scale, taskIndices, dataflowsSet);
     }
     
     updatePrologue(taskParametersSet) {
@@ -102,35 +104,33 @@ class ViewSchedule {
         this.hyperPeriod = Utility.LeastCommonMultipleOfArray(periods);
     }
     
-    drawSchedule(taskParametersSet) {
-		// Create function to scale the data along the x-axis of fixed-length
-		const scale =
-		d3.scaleLinear()
-		  .domain([0, this.makespan])
-		  .range([0, View.Width - 2 * View.SvgPadding]);
+    drawSchedule(tasksInstances) {
+        // Create function to scale the data along the x-axis of fixed-length
+        const scale =
+        d3.scaleLinear()
+          .domain([0, this.makespan])
+          .range([0, View.Width - 2 * View.SvgPadding]);
 
         // Delete the existing task previews, if they exist
         // and set up the canvas.
         this.schedule.selectAll('*').remove();
-		const svgElement = this.schedule.append('svg');
+        const svgElement = this.schedule.append('svg');
         
         // Draw the task instances.
-        var index = 0;
         var taskIndices = {};
-        for (const taskParameters of taskParametersSet) {
-            this.drawTaskInstances(taskParameters, svgElement, scale, index);
-            taskIndices[taskParameters.name] = index;
-            index++;
+        for (const [index, taskInstances] of tasksInstances.entries()) {
+            this.drawTaskInstances(taskInstances, svgElement, scale, index);
+            taskIndices[taskInstances.name] = index;
         }
         
         svgElement
           .attr('width', `${View.Width}px`)
-          .attr('height', `${index * View.TaskHeight}px`);
+          .attr('height', `${Object.keys(tasksInstances).length * View.TaskHeight}px`);
         
         return {svgElement: svgElement, scale: scale, taskIndices: taskIndices};
     }
     
-    drawTaskInstances(taskParameters, svgElement, scale, index) {
+    drawTaskInstances(taskInstances, svgElement, scale, index) {
         const tooltip = this.scheduleTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
 
         const group =
@@ -145,7 +145,7 @@ class ViewSchedule {
 
         // Add the task's name, inputs, and outputs
         textInfo.append('text')
-                  .text(`Task: ${taskParameters.name}`);
+                  .text(`Task: ${taskInstances.name}`);
 
         // -----------------------------
         // Group for graphical information
@@ -153,12 +153,14 @@ class ViewSchedule {
         group.append('g')
                .attr('transform', `translate(0, ${index * View.TaskHeight + 2.5 * View.SvgPadding})`);
         
-        let periodStart = taskParameters.initialOffset;
+        const instances = taskInstances.value;
+        const firstPeriodStartTime = instances[0].periodStartTime;
+        const lastPeriodDuration = instances[instances.length -1].periodEndTime - instances[instances.length -1].periodStartTime;
 
         // Add horizontal line for the task's initial offset
         graphInfo.append('line')
                    .attr('x1', 0)
-                   .attr('x2', scale(periodStart))
+                   .attr('x2', scale(firstPeriodStartTime))
                    .attr('y1', `${View.BarHeight + View.BarMargin}`)
                    .attr('y2', `${View.BarHeight + View.BarMargin}`)
                    .attr('class', 'initialOffset');
@@ -173,26 +175,24 @@ class ViewSchedule {
         
         // Add horizontal line for the task's periods
         graphInfo.append('line')
-                   .attr('x1', scale(periodStart))
-                   .attr('x2', scale(this.makespan + taskParameters.period))
+                   .attr('x1', scale(firstPeriodStartTime))
+                   .attr('x2', scale(this.makespan + lastPeriodDuration))
                    .attr('y1', `${View.BarHeight + View.BarMargin}`)
                    .attr('y2', `${View.BarHeight + View.BarMargin}`)
                    .attr('class', 'period');
 
-        // Replace with pre-computed values from ls.model.schedule
-        for (var instance = 1; periodStart < this.makespan; periodStart += taskParameters.period, instance++) {
+        for (const [index, instance] of instances.entries()) {
             // Add the task's LET duration
-            const instanceCopy = instance;
             graphInfo.append('rect')
-                       .attr('x', scale(periodStart + taskParameters.activationOffset))
-                       .attr('width', scale(taskParameters.duration))
+                       .attr('x', scale(instance.letStartTime))
+                       .attr('width', scale(instance.letEndTime - instance.letStartTime))
                        .attr('height', View.BarHeight)
                       .on('mouseover', function() {
                           d3.select(this)
                             .transition()
                             .ease(d3.easeLinear)
                             .style('fill', 'var(--blue)');
-                          tooltip.innerHTML = `${taskParameters.name} instance ${instanceCopy}`;
+                          tooltip.innerHTML = `${taskInstances.name} instance ${index}`;
                           tooltip.style.visibility = 'visible';
                       })
                       .on('mousemove', function() {
@@ -209,8 +209,8 @@ class ViewSchedule {
             
             // Add vertical line at the start of the period
             graphInfo.append('line')
-                     .attr('x1', scale(periodStart))
-                     .attr('x2', scale(periodStart))
+                     .attr('x1', scale(instance.periodStartTime))
+                     .attr('x2', scale(instance.periodStartTime))
                      .attr('y1', `${View.BarHeight + View.TickHeight + View.BarMargin}`)
                      .attr('y2', `${View.BarHeight - View.TickHeight}`)
                      .attr('class', 'boundary');
@@ -223,9 +223,9 @@ class ViewSchedule {
                  .attr('transform', `translate(0, ${View.BarHeight + 2 * View.TickHeight})`)
                  .call(xAxis)
                  .call(g => g.select('.domain').remove());
-	}
+    }
     
-    drawDataflows(svgElement, scale, taskIndices, dataflows) {
+    drawDataflows(svgElement, scale, taskIndices, dataflowsSet) {
         // Define arrow head of a dataflow line
         const svgDefs =
         svgElement.append('defs')
@@ -237,34 +237,31 @@ class ViewSchedule {
                     .attr('markerWidth', 4)
                     .attr('markerHeight', 4)
                     .attr('orient', 'auto')
-				  .append('path')
-					.attr('d', 'M0, -5L10, 0L0, 5')
-					.attr('class', 'arrowHead');
-        
-        for (const dataflow of dataflows) {
-            this.drawDataflow(svgElement, scale, taskIndices, dataflow);
+                  .append('path')
+                    .attr('d', 'M0, -5L10, 0L0, 5')
+                    .attr('class', 'arrowHead');
+        for (const dataflows of dataflowsSet) {
+        	for (const dataflow of dataflows.value) {
+	            this.drawDataflow(svgElement, scale, taskIndices, dataflows.name, dataflow);
+        	}
         }
     }
-    
-    drawDataflow(svgElement, scale, taskIndices, dataflow) {
+        
+    drawDataflow(svgElement, scale, taskIndices, dependencyName, dataflow) {
         const yOffset = 0.5 * View.BarHeight + 2.5 * View.SvgPadding;
         const xOffset = 20;
-        
         const tooltip = this.dataflowTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
         
-        const dependencyName = dataflow.name;
-        
-        const sourceTask = Utility.GetTask(dataflow.sendEvent.port);
-        const sourceTimestamp = scale(dataflow.sendEvent.timestamp);
-        
-        const destinationTask = Utility.GetTask(dataflow.receiveEvent.port);
-        const destinationTimestamp = scale(dataflow.receiveEvent.timestamp);
+        const sendEvent = dataflow.sendEvent;
+        const receiveEvent = dataflow.receiveEvent;
+        sendEvent.timestamp = scale(sendEvent.timestamp);
+        receiveEvent.timestamp = scale(receiveEvent.timestamp);
 
         const points = [
-            { x: sourceTimestamp,                y: taskIndices[sourceTask] },
-            { x: sourceTimestamp + xOffset,      y: taskIndices[sourceTask] },
-            { x: destinationTimestamp - xOffset, y: taskIndices[destinationTask] },
-            { x: destinationTimestamp,           y: taskIndices[destinationTask] }
+            { x: sendEvent.timestamp,                y: taskIndices[sendEvent.task] },
+            { x: sendEvent.timestamp + xOffset,      y: taskIndices[sendEvent.task] },
+            { x: receiveEvent.timestamp - xOffset,   y: taskIndices[receiveEvent.task] },
+            { x: receiveEvent.timestamp,             y: taskIndices[receiveEvent.task] }
         ]
 
         var line = d3.line()
@@ -285,7 +282,7 @@ class ViewSchedule {
                  .transition()
                  .ease(d3.easeLinear)
                  .style('stroke', 'var(--orange)');
-               tooltip.innerHTML = `${dependencyName}:<br/>${dataflow.sendEvent.port} &rarr; ${dataflow.receiveEvent.port}`;
+               tooltip.innerHTML = `${dependencyName}:<br/>${Utility.TaskPorts(sendEvent.task, [sendEvent.port])} &rarr; ${Utility.TaskPorts(receiveEvent.task, [receiveEvent.port])}`;
                tooltip.style.visibility = 'visible';
              })
              .on('mousemove', function() {

@@ -11,19 +11,23 @@ class ModelDatabase {
             return;
         }
         
-        const dbOpenRequest = window.indexedDB.open('letDatabase', 3);
+        const dbOpenRequest = window.indexedDB.open('letDatabase', 4);
 
         // Upgrade old database schemas.
         dbOpenRequest.onupgradeneeded = function(event) {
             this.db = event.target.result;
-            if (event.oldVersion < 3) {
-                if (event.oldVersion < 2) {
-                    if (event.oldVersion < 1) {
-                        const taskStore = this.db.createObjectStore('TaskStore', {keyPath: 'name', unique: true});
+            
+            if (event.oldVersion < 4) {
+                if (event.oldVersion < 3) {
+                    if (event.oldVersion < 2) {
+                        if (event.oldVersion < 1) {
+                            this.db.createObjectStore('TaskStore', {keyPath: 'name', unique: true});
+                        }
+                        this.db.createObjectStore('DependencyStore', {keyPath: 'name', unique: true});
                     }
-                    const dependencyStore = this.db.createObjectStore('DependencyStore', {keyPath: 'name', unique: true});
+                    this.db.createObjectStore('TaskInstancesStore', {keyPath:'name', unique: true});
                 }
-                const taskInstancesStore = this.db.createObjectStore('TaskInstancesStore', {keyPath:'name', unique: true});
+                this.db.createObjectStore('DependencyInstancesStore', {keyPath: 'name', unique: true});
             }
         }
 
@@ -171,6 +175,32 @@ class ModelDatabase {
     deleteDependency = function(name) {
         return new Promise((resolve, reject) => {
             this.deleteObject('DependencyStore', 'readwrite', name, resolve, reject);
+        });
+    }
+
+    // DependencyInstances
+
+    storeDependencyInstances = function(dependency) {
+        return new Promise((resolve, reject) => {
+            this.putObject('DependencyInstancesStore', 'readwrite', dependency, resolve, reject);
+        });
+    }
+
+    getDependencyInstances  = function(name) {
+        return new Promise((resolve, reject) => {
+            this.getObject('DependencyInstancesStore', 'readonly', name, resolve, reject);
+        });
+    }
+    
+    getAllDependenciesInstances = function() {
+        return new Promise((resolve, reject) => {
+            this.getAllObjects('DependencyInstancesStore', 'readonly', resolve, reject);
+        });
+    }
+
+    deleteDependencyInstances = function(name) {
+        return new Promise((resolve, reject) => {
+            this.deleteObject('DependencyInstancesStore', 'readwrite', name, resolve, reject);
         });
     }
 
