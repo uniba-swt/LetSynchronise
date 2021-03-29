@@ -2,6 +2,8 @@
 
 class ModelSchedule {
     updateSchedule = null;              // Callback to function in ls.view.schedule
+    
+    database = null;
 
     constructor() { }
 
@@ -16,6 +18,7 @@ class ModelSchedule {
     
     // -----------------------------------------------------
     // Registration of model database
+    
     registerModelDatabase(database) {
         this.database = database;
     }
@@ -89,7 +92,7 @@ class ModelSchedule {
     // Create all instances of a dependency.
     createDependencyInstances(dependency) {
         // Get all instances of the source and destination tasks
-        Promise.all([
+        return Promise.all([
             this.database.getTaskInstances(dependency.source.task), 
             this.database.getTaskInstances(dependency.destination.task)
         ]).then(([sourceTaskInstances, destinationTaskInstances]) => {            
@@ -116,12 +119,13 @@ class ModelSchedule {
     // Get task schedule for given makespan.
     getSchedule(makespan) {
         const promiseAllTasks = this.database.getAllTasks();
-        promiseAllTasks.then(tasks => tasks.forEach(task => this.createTaskInstances(task, makespan)));
-        const promiseAllTasksInstances = this.database.getAllTasksInstances();
+        const promiseAllTasksInstances = promiseAllTasks
+        	.then(tasks => Promise.all(tasks.map(task => this.createTaskInstances(task, makespan))))
+        	.then(result => this.database.getAllTasksInstances());
         
-        this.database.getAllDependencies()
-            .then(dependencies => dependencies.forEach(dependency => this.createDependencyInstances(dependency)));
-        const promiseAllDependenciesInstances = this.database.getAllDependenciesInstances();
+        const promiseAllDependenciesInstances = this.database.getAllDependencies()
+            .then(dependencies => Promise.all(dependencies.map(dependency => this.createDependencyInstances(dependency))))
+            .then(result => this.database.getAllDependenciesInstances());
         
         return {
             'promiseAllTasks': promiseAllTasks, 
