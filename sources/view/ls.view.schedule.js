@@ -2,7 +2,6 @@
 
 class ViewSchedule {
     root = null;
-    modelDependency = null;
 
     prologueField = null;
     hyperPeriodField = null;
@@ -68,16 +67,8 @@ class ViewSchedule {
             event.preventDefault();
             
             // Ask the model to give us the current task set via a callback.
-            getScheduleHandler(this.updateSchedule.bind(this), this.makespan);
+            getScheduleHandler(this.makespan);
         });
-    }
-    
-    
-    // -----------------------------------------------------
-    // Registration of model dependency
-    
-    registerModelDependency(modelDependency) {
-        this.modelDependency = modelDependency;
     }
     
     
@@ -85,7 +76,7 @@ class ViewSchedule {
         const taskParametersSet = await promise['promiseAllTasks'];
         const tasksInstances = await promise['promiseAllTasksInstances'];
         const dataflowsSet = await promise['promiseAllDependenciesInstances'];
-    
+            
         this.updatePrologue(taskParametersSet);
         this.updateHyperPeriod(taskParametersSet);
         
