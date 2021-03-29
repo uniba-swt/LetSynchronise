@@ -22,12 +22,12 @@ class ControllerTask {
         this._model = model;
         
         // Register the handlers when setting the model.
-        this._model.registerUpdateTaskCallback(this.callbackUpdateTasks);
+        this._model.registerUpdateTasksCallback(this.callbackUpdateTasks);
         
         // Hack to populate the View with tasks once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
-            const callbacks = [this.callbackUpdateTasks];
-            this._model.getAllTasks(callbacks);
+            this._model.getAllTasks()
+                .then(result => this.callbackUpdateTasks(result));
         });
     }
     
@@ -61,6 +61,6 @@ class ControllerTask {
 
     
     toString() {
-    	return `ControllerTask with ${this.view} and ${this.model}`;
+        return `ControllerTask with ${this.view} and ${this.model}`;
     }
 }

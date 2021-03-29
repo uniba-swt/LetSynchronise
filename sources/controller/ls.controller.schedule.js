@@ -3,7 +3,7 @@
 class ControllerSchedule {
     _view = null;
     _model = null;
-    _modelDependencies = null;
+    _modelDependency = null;
     
     constructor() { }
 
@@ -21,9 +21,10 @@ class ControllerSchedule {
     set model(model) {
         this._model = model;
                 
-        // Hack to populate the View with dependencies once the database is ready
+        // Hack to populate the View with the schedule once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
-            this._model.getSchedule([this.callbackGetSchedule]);
+            const promise = this._model.getSchedule(this._view.makespan);
+            this.callbackGetSchedule(promise);
         });
     }
     
@@ -31,15 +32,15 @@ class ControllerSchedule {
         return this._model;
     }
     
-    set modelDependencies(modelDependencies) {
-        this._modelDependencies = modelDependencies;
+    set modelDependency(modelDependency) {
+        this._modelDependency = modelDependency;
         
         // Register the model dependency with the view.
-        this._view.registerModelDependencies(this._modelDependencies);
+        this._view.registerModelDependency(this._modelDependency);
     }
     
-    get modelDependencies() {
-        return this._modelDependencies;
+    get modelDependency() {
+        return this._modelDependency;
     }
     
     
@@ -49,7 +50,8 @@ class ControllerSchedule {
     // Handler for updating the task schedule.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleGetSchedule = (callback, makespan) => {
-        this.model.getSchedule([callback], makespan);
+		const promise = this._model.getSchedule(makespan);
+		this.callbackGetSchedule(promise);
     }
     
     
@@ -57,11 +59,11 @@ class ControllerSchedule {
     // Callbacks for events from the model to the view
     
     // Callback for updating the task schedule.
-    callbackGetSchedule = (schedule) => {
-        this.view.updateSchedule(schedule);
+    callbackGetSchedule = (promise) => {
+        this._view.updateSchedule(promise);
     }
 
     toString() {
-    	return `ControllerSchedule with ${this.view} and ${this.model}`;
+        return `ControllerSchedule with ${this.view} and ${this.model}`;
     }
 }

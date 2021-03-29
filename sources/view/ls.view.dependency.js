@@ -1,34 +1,30 @@
 'use strict';
 
-class ViewConstraints {
+class ViewDependency {
     root = null;
     
     nameField = null;
     sourceField = null;
     destinationField = null;
-    relationField = null;
-    timeField = null;
     
     submitButton = null;
     
-    constraints = null;
+    taskDependencies = null;
     
     deleteHandler = null;
     
     
     constructor() {
-        this.root = document.querySelector('#nav-analyse');
+        this.root = document.querySelector('#nav-design');
         
-        // Define or edit constraints
-        this.nameField = this.root.querySelector('#view-analyse-constraint-name');
-        this.sourceField = this.root.querySelector('#view-analyse-constraint-source');
-        this.destinationField = this.root.querySelector('#view-analyse-constraint-destination');
-        this.relationField = this.root.querySelector('#view-analyse-constraint-relation');
-        this.timeField = this.root.querySelector('#view-analyse-constraint-time');
-
-        this.submitButton = this.root.querySelector('#submitConstraint');
+        // Define or edit task dependency
+        this.nameField = this.root.querySelector('#view-task-dependency-name');
+        this.sourceField = this.root.querySelector('#view-task-dependency-source');
+        this.destinationField = this.root.querySelector('#view-task-dependency-destination');
         
-        this.constraints = d3.select('#view-analyse-constraints');
+        this.submitButton = this.root.querySelector('#submitDependency');
+        
+        this.taskDependencies = d3.select('#view-task-dependencies');
     }
     
     
@@ -56,33 +52,15 @@ class ViewConstraints {
         this.destinationField.value = destination;
     }
     
-    get relation() {
-        return this.relationField.value;
-    }
-    
-    set relation(relation) {
-        this.relationField.value = relation;
-    }
-    
-    get time() {
-        return this.timeField.value;
-    }
-
-    set time(time) {
-        this.timeField.value = time;
-    }
-    
-    get constraintRaw() {
+    get dependencyRaw() {
         return {
             'name': this.name,
             'source': this.source,
-            'destination': this.destination,
-            'relation': this.relation,
-            'time': this.time
+            'destination': this.destination
         };
     }
     
-    get constraintClean() {
+    get dependencyClean() {
         const source = this.source.split('.');
         const destination = this.destination.split('.');
         return {
@@ -94,9 +72,7 @@ class ViewConstraints {
             'destination': {
                 'task': destination[0],
                 'port': destination[1]
-            },
-            'relation': this.relation.trim(),
-            'time': parseFloat(this.time)
+            }
         };
     }
     
@@ -105,7 +81,7 @@ class ViewConstraints {
     // Setup listeners
     
     setupDeleteButtonListener(elementId) {
-        const deleteButton = this.root.querySelector(`#${elementId}`);
+        const deleteButton = this.root.querySelector(`[id='${elementId}']`);
         
         deleteButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
@@ -126,9 +102,9 @@ class ViewConstraints {
             event.preventDefault();
             
             // Validate the destinations.
-            if (this.validateConstraint(this.constraintRaw)) {
+            if (this.validateTaskDependency(this.dependencyRaw)) {
                 // Call the handler.
-                handler(this.constraintClean);
+                handler(this.dependencyClean);
             }
         });
     }
@@ -138,45 +114,35 @@ class ViewConstraints {
     }
     
     
-    validateConstraint(constraint) {
-        if (constraint.name == null || constraint.name.trim() == '') {
+    validateTaskDependency(taskDependency) {
+        if (taskDependency.name == null || taskDependency.name.trim() == '') {
             alert('Name cannot be blank.');
             return false;
         }
 
-        if (constraint.source == 'null ') {
-            alert('Choose source of constraint.');
+        if (taskDependency.source == 'null ') {
+            alert(`Choose source of dependency.`);
             return false;
         }
 
-        if (constraint.destination == 'null ') {
-            alert('Choose destination of constraint.');
-            return false;
-        }
-        
-        if (constraint.relation == 'null ') {
-            alert('Choose relation of constraint.');
-            return false;
-        }
-        
-        if (constraint.time == null || constraint.time.trim() == '') {
-            alert('Time cannot be blank.');
+        if (taskDependency.destination == 'null ') {
+            alert(`Choose destination of dependency.`);
             return false;
         }
                 
         return true;
     }
     
-    updateConstraintSelectors(taskParametersSet) {
+    updateDependencySelectors(taskParametersSet) {
         const sources = taskParametersSet.map(taskParameters => Utility.TaskPorts(taskParameters.name, taskParameters.outputs)).flat();
         const destinations = taskParametersSet.map(taskParameters => Utility.TaskPorts(taskParameters.name, taskParameters.inputs)).flat();
         
         // Create list of available sources and destinations
-        this.updateConstraintPorts(d3.select(this.sourceField), sources);
-        this.updateConstraintPorts(d3.select(this.destinationField), destinations);
+        this.updateTaskDependencyPorts(d3.select(this.sourceField), sources);
+        this.updateTaskDependencyPorts(d3.select(this.destinationField), destinations);
     }
         
-    updateConstraintPorts(parentElement, ports) {
+    updateTaskDependencyPorts(parentElement, ports) {
         // Create list of available ports
         parentElement.selectAll('*').remove();
         parentElement
@@ -195,41 +161,40 @@ class ViewConstraints {
         );
     }
     
-    updateConstraints(constraints) {
-        // Display constraints
-        this.constraints.selectAll('*').remove();
+    updateDependencies(rawDependencies) {
+        // Display task dependencies
+        const dependencies = Utility.FormatDependencies(rawDependencies);
+        this.taskDependencies.selectAll('*').remove();
         
         const thisRef = this;
         
-        this.constraints
+        this.taskDependencies
             .selectAll('li')
-            .data(constraints)
+            .data(dependencies)
             .enter()
             .append('li')
-                .html(constraint => `<span>${constraint.name}: ${constraint.source} &rarr; ${constraint.destination} ${constraint.relation} ${constraint.time}</span> ${Utility.AddDeleteButton(constraint.name)}`)
+                .html(dependency => `<span>${dependency.name}: ${dependency.source} &rarr; ${dependency.destination}</span> ${Utility.AddDeleteButton(dependency.name)}`)
             .on('click', function(data) {
-                thisRef.constraints.node().querySelectorAll('li')
-                    .forEach((constraint) => {
-                        if (constraint !== this) { constraint.classList.remove('constraintSelected'); }
+                thisRef.taskDependencies.node().querySelectorAll('li')
+                    .forEach((dependency) => {
+                        if (dependency !== this) { dependency.classList.remove('dependencySelected'); }
                     });
-                this.classList.toggle('constraintSelected');
+                this.classList.toggle('dependencySelected');
                 thisRef.populateParameterForm.bind(thisRef)(data);
             });
 
-        for (const constraint of constraints) {
-            this.setupDeleteButtonListener(`${constraint.name}`);
+        for (const dependency of dependencies) {
+            this.setupDeleteButtonListener(`${dependency.name}`);
         }
     }
     
-    populateParameterForm(constraint) {
-        this.name = constraint.name;
-        this.source = constraint.source;
-        this.destination = constraint.destination;
-        this.relation = constraint.relation;
-        this.time = constraint.time;
+    populateParameterForm(dependency) {
+        this.name = dependency.name;
+        this.source = dependency.source;
+        this.destination = dependency.destination;
     }
     
     toString() {
-        return "ViewConstraints";
+        return "ViewDependency";
     }
 }

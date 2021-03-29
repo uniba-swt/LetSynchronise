@@ -12,10 +12,10 @@
     <!-- JavaScript frameworks/libraries this page depends on -->
     <script src="dependencies/d3-5.16.0/d3.js"></script>
     <script src="dependencies/jquery-3.5.1.js"></script>
-    <script src="dependencies/bootstrap-4.5.2/js/bootstrap.bundle.js"></script>
+    <script src="dependencies/bootstrap-4.6.0/js/bootstrap.bundle.js"></script>
     
     <!-- CSS to use for this page -->
-    <link rel="stylesheet" href="dependencies/bootstrap-4.5.2/css/bootstrap.css">
+    <link rel="stylesheet" href="dependencies/bootstrap-4.6.0/css/bootstrap.css">
     
     <!-- Our own CSS -->
     <link rel="stylesheet" href="sources/ls.main.css">
@@ -23,24 +23,24 @@
     <!-- Our own JavaScript code/library/framework. Execution is deferred until the page has loaded -->
     <!-- <script type="module"> does not work when executed locally -->
     <script src="sources/model/ls.model.js"></script>
-    <script src="sources/model/ls.model.dependencies.js"></script>
+    <script src="sources/model/ls.model.dependency.js"></script>
     <script src="sources/model/ls.model.schedule.js"></script>
     <script src="sources/model/ls.model.task.js"></script>
     <script src="sources/model/ls.model.logical.task.js"></script>
-    <script src="sources/model/ls.model.constraints.js"></script>
+    <script src="sources/model/ls.model.constraint.js"></script>
     <script src="sources/model/ls.model.database.js"></script>
 
     <script src="sources/view/ls.view.js"></script>
-    <script src="sources/view/ls.view.dependencies.js"></script>
+    <script src="sources/view/ls.view.dependency.js"></script>
     <script src="sources/view/ls.view.schedule.js"></script>
     <script src="sources/view/ls.view.task.js"></script>
-    <script src="sources/view/ls.view.constraints.js"></script>
+    <script src="sources/view/ls.view.constraint.js"></script>
 
     <script src="sources/controller/ls.controller.js"></script>
-    <script src="sources/controller/ls.controller.dependencies.js"></script>
+    <script src="sources/controller/ls.controller.dependency.js"></script>
     <script src="sources/controller/ls.controller.schedule.js"></script>
     <script src="sources/controller/ls.controller.task.js"></script>
-    <script src="sources/controller/ls.controller.constraints.js"></script>
+    <script src="sources/controller/ls.controller.constraint.js"></script>
 
     <script src="sources/ls.utility.js"></script>
 
@@ -218,14 +218,22 @@
             
             <button id="update" type="submit" class="btn btn-primary">Update</button>
             <button id="analyse" type="submit" class="btn btn-primary">Analyse</button>
-
+            <div id="view-schedule-dependencies" class="dropdown">
+            	<button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					Dependencies
+				</button>
+				<div id="view-schedule-dependencies-menu" class="dropdown-menu">
+					<a class="dropdown-item">None</a>
+				</div>
+			</div>
+			
             <div class="m-3"></div>
             
             <div id="view-schedule"></div>
             
-            <div id="view-schedule-tooltip"></div>
-            <div id="view-dataflow-tooltip"></div>
-
+            <div id="view-schedule-task-tooltip"></div>
+            <div id="view-schedule-dataflow-tooltip"></div>
+            
             <div class="m-5"></div>
 
             

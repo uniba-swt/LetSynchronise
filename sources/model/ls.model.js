@@ -2,9 +2,9 @@
 
 class Model {
     _modelTask = null;
-    _modelDependencies = null;
+    _modelDependency = null;
     _modelSchedule = null;
-    _modelConstraints = null;
+    _modelConstraint = null;
     _modelDatabase = null;
     
     constructor() { }
@@ -17,12 +17,12 @@ class Model {
         this._modelTask = modelTask;
     }
     
-    get modelDependencies() {
-        return this._modelDependencies;
+    get modelDependency() {
+        return this._modelDependency;
     }
     
-    set modelDependencies(modelDependencies) {
-        this._modelDependencies = modelDependencies;
+    set modelDependency(modelDependency) {
+        this._modelDependency = modelDependency;
     }
     
     get modelSchedule() {
@@ -33,12 +33,12 @@ class Model {
         this._modelSchedule = modelSchedule;
     }
     
-    get modelConstraints() {
-        return this._modelConstraints;
+    get modelConstraint() {
+        return this._modelConstraint;
     }
     
-    set modelConstraints(modelConstraints) {
-        this._modelConstraints = modelConstraints;
+    set modelConstraint(modelConstraint) {
+        this._modelConstraint = modelConstraint;
     }
     
     get modelDatabase() {
@@ -49,8 +49,8 @@ class Model {
         this._modelDatabase = modelDatabase;
         this._modelTask.registerModelDatabase(this._modelDatabase);
         this._modelSchedule.registerModelDatabase(this._modelDatabase);
-        this._modelDependencies.registerModelDatabase(this._modelDatabase);
-        this._modelConstraints.registerModelDatabase(this._modelDatabase);
+        this._modelDependency.registerModelDatabase(this._modelDatabase);
+        this._modelConstraint.registerModelDatabase(this._modelDatabase);
     }
     
     toString() {

@@ -168,7 +168,7 @@ class ViewTask {
     }
 
     setupDeleteButtonListener(elementId) {
-        const deleteButton = this.root.querySelector(`#${elementId}`);
+        const deleteButton = this.root.querySelector(`[id='${elementId}']`);
         
         deleteButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
@@ -417,10 +417,9 @@ class ViewTask {
             
             // Click listener
             anchor.on('click', () => {
-                taskListItem.node().parentNode.querySelectorAll('li')
-                    .forEach((item) => {
-                        if (item !== taskListItem.node()) { item.classList.remove('taskSelected'); }
-                    });
+                taskListItem.node().parentNode.querySelectorAll('li').forEach((item) => {
+					if (item !== taskListItem.node()) { item.classList.remove('taskSelected'); }
+				});
                 taskListItem.node().classList.toggle('taskSelected');
                 this.populateParameterForm(taskParameters);
             });
