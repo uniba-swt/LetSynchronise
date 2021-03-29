@@ -4,6 +4,7 @@ class ModelTask {
     updateTasks = null;                 // Callback to function in ls.view.task
     updateDependencySelectors = null;   // Callback to function in ls.view.dependency
     updateConstraintSelectors = null;   // Callback to function in ls.view.constraint
+    modelDependency = null;
     database = null;
     
     constructor() { }
@@ -24,6 +25,9 @@ class ModelTask {
         this.updateConstraintSelectors = callback;
     }
     
+    registerModelDependency(modelDependency) {
+        this.modelDependency = modelDependency;
+    }
     
     // -----------------------------------------------------
     // Registration of model database
@@ -49,10 +53,22 @@ class ModelTask {
     
     deleteTask(name) {
     	// TODO: Delete associated communication dependencies
-        this.database.deleteTask(name)
-        	.then(this.database.deleteTaskInstances(name))
-        	.then(result => this.getAllTasks())
-        	.then(result => { this.updateTasks(result); this.updateDependencySelectors(result) });
+        this.database.getAllDependencies().then(
+            result => {
+                console.log(result);
+                for (let i in result) {
+                    let dependency = result[i];
+                    console.log(dependency);
+                    if (dependency.destination.task == name || dependency.source.task == name) {
+                        this.modelDependency.deleteDependency(dependency.name);
+                    }
+                }
+            }
+        )
+        .then (this.database.deleteTask(name))
+        .then(this.database.deleteTaskInstances(name))
+        .then(result => this.getAllTasks())
+        .then(result => { this.updateTasks(result); this.updateDependencySelectors(result) })
     }
     
     toString() {
