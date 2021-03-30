@@ -25,6 +25,7 @@ controller.controllerConstraint = new ControllerConstraint();
 // Link the models and views to their respective controllers
 controller.controllerTask.view = view.viewTask;
 controller.controllerTask.model = model.modelTask;
+controller.controllerTask.modelDependency = model.modelDependency;
 controller.controllerDependency.view = view.viewDependency;
 controller.controllerDependency.model = model.modelDependency;
 controller.controllerDependency.modelTask = model.modelTask;

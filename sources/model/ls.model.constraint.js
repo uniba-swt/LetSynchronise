@@ -2,6 +2,7 @@
 
 class ModelConstraint {
     updateConstraints = null;      // Callback to function in ls.view.constraint
+    
     database = null;
 
     constructor() { }
@@ -17,6 +18,7 @@ class ModelConstraint {
     
     // -----------------------------------------------------
     // Registration of model database
+    
     registerModelDatabase(database) {
         this.database = database;
     }

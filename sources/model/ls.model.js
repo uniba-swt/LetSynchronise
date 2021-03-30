@@ -10,7 +10,6 @@ class Model {
     constructor() { }
     
     get modelTask() {
-        this._modelTask.registerModelDependency(this._modelDependency);
         return this._modelTask;
     }
     

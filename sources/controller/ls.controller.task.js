@@ -3,6 +3,7 @@
 class ControllerTask {
     _view = null;
     _model = null;
+    _modelDependency = null;
     
     constructor() { }
     
@@ -33,6 +34,17 @@ class ControllerTask {
     
     get model() {
         return this._model;
+    }
+    
+    set modelDependency(modelDependency) {
+        this._modelDependency = modelDependency;
+        
+        // Register the model dependency with the model.
+        this._model.registerModelDependency(this._modelDependency);
+    }
+    
+    get modelDependency() {
+        return this._modelDependency;
     }
     
     
