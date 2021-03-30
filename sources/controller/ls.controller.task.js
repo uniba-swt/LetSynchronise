@@ -13,6 +13,8 @@ class ControllerTask {
         // Register the handlers when setting the view.
         this._view.registerSubmitHandler(this.handleCreateTask);
         this._view.registerDeleteHandler(this.handleDeleteTask);
+        this._view.registerExportButtonListener(this.handleExport);
+        this._view.registerImportButtonListener(this.handleImport);
     }
     
     get view() {
@@ -58,9 +60,34 @@ class ControllerTask {
     }
     
     // Handler for deleting a task.
+    handleExport = () => {
+        this.model.export();
+    }
+
+    // Handler for exporting a system
+    handleImport = () => {
+        let modelImport = this.model.import.bind(this.model);
+        let files = document.getElementById('importFiles').files;
+        if (files.length <= 0) {
+            alert("You must select a file");
+            return;
+        }
+        
+        let fileReader = new FileReader();
+        
+        fileReader.onload = function(e) { 
+            let result = JSON.parse(e.target.result);
+            modelImport(result);
+        }
+        
+        fileReader.readAsText(files.item(0));
+    }
+
+    // Handler for importing a system
     handleDeleteTask = (name) => {
         this.model.deleteTask(name);
     }
+    
     
     
     // -----------------------------------------------------

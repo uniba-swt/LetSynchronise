@@ -15,6 +15,9 @@ class ViewTask {
     submitButton = null;
     clearButton = null;
     
+    exportButton = null;
+    importButton = null;
+
     taskPreview = null;
 
     taskSet = null;
@@ -37,6 +40,9 @@ class ViewTask {
         this.previewButton = this.root.querySelector('#previewTask');
         this.submitButton = this.root.querySelector('#submitTask');
         this.clearButton = this.root.querySelector('#clearTask');
+
+        this.exportButton = this.root.querySelector('#exportSystem');
+        this.importButton = this.root.querySelector('#importSystem');
 
         this.taskPreview = d3.select('#view-task-preview');
 
@@ -179,7 +185,7 @@ class ViewTask {
         });
     }
     
-    
+
     // -----------------------------------------------------
     // Registration of handlers from the controller
 
@@ -200,6 +206,19 @@ class ViewTask {
         this.deleteHandler = handler;
     }
     
+    registerExportButtonListener(handler) {
+        this.exportButton.addEventListener('click', event => {
+            event.preventDefault();
+            handler();
+        });
+    }
+
+    registerImportButtonListener(handler) {
+        this.importButton.addEventListener('click', event => {
+            event.preventDefault(); 
+            handler();
+        });
+    }
     
     validateTaskParameters(taskParameters) {
 		if (taskParameters.name == null || taskParameters.name.trim() == '') {
