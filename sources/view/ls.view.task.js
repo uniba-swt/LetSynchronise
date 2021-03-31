@@ -15,9 +15,6 @@ class ViewTask {
     submitButton = null;
     clearButton = null;
     
-    exportButton = null;
-    importButton = null;
-
     taskPreview = null;
 
     taskSet = null;
@@ -27,11 +24,6 @@ class ViewTask {
     
     constructor() {
         this.root = document.querySelector('#nav-design');
-
-		// System export or import
-		this.exportButton = this.root.querySelector('#export-system');
-        this.importButton = this.root.querySelector('#import-system');
-
         
         // Define or edit task
         this.nameField = this.root.querySelector('#name');
@@ -61,68 +53,68 @@ class ViewTask {
     }
     
     set name(name) {
-    	this.nameField.value = name;
+        this.nameField.value = name;
     }
     
     get initialOffset() {
-    	return this.initialOffsetField.value;
+        return this.initialOffsetField.value;
     }
 
     set initialOffset(initialOffset) {
-    	return this.initialOffsetField.value = initialOffset;
+        return this.initialOffsetField.value = initialOffset;
     }
     
     get activationOffset() {
-    	return this.activationOffsetField.value;
+        return this.activationOffsetField.value;
     }
 
     set activationOffset(activationOffset) {
-    	return this.activationOffsetField.value = activationOffset;
+        return this.activationOffsetField.value = activationOffset;
     }
     
     get duration() {
-    	return this.durationField.value;
+        return this.durationField.value;
     }
     
     set duration(duration) {
-    	return this.durationField.value = duration;
+        return this.durationField.value = duration;
     }
     
     get period() {
-    	return this.periodField.value;
+        return this.periodField.value;
     }
     
     set period(period) {
-    	return this.periodField.value = period;
+        return this.periodField.value = period;
     }
     
     get inputs() {
-    	return this.inputsField.value;
+        return this.inputsField.value;
     }
     
     set inputs(inputs) {
-    	return this.inputsField.value = inputs;
+        return this.inputsField.value = inputs;
     }
     
     get outputs() {
-    	return this.outputsField.value;
+        return this.outputsField.value;
     }
     
     set outputs(outputs) {
-    	return this.outputsField.value = outputs;
+        return this.outputsField.value = outputs;
     }
     
     get taskParametersRaw() {
-		// Package all the task paramters as is into an object.
-		return {
-			'name': this.name,
-			'initialOffset': this.initialOffset,
-			'activationOffset': this.activationOffset,
-			'duration': this.duration,
-			'period': this.period,
-			'inputs': this.inputs,
-			'outputs': this.outputs
-		};
+        // Package all the task paramters as is into an object.
+        return {
+            'name': this.name,
+            'initialOffset': this.initialOffset,
+            'activationOffset': this.activationOffset,
+            'duration': this.duration,
+            'period': this.period,
+            'inputs': this.inputs,
+            'outputs': this.outputs
+        };
     }
     
     get taskParametersClean() {
@@ -150,7 +142,7 @@ class ViewTask {
             // Validate the inputs.            
             if (this.validateTaskParameters(this.taskParametersRaw)) {
                 // Call the handler.
-            	this.updatePreview(this.taskParametersClean);
+                this.updatePreview(this.taskParametersClean);
             }
         });
     }
@@ -169,8 +161,8 @@ class ViewTask {
             this.inputs = '';
             this.outputs = '';
             
-			// Clear the preview.
-			this.clearPreview();
+            // Clear the preview.
+            this.clearPreview();
             this.clearSelected();
         });
     }
@@ -195,11 +187,11 @@ class ViewTask {
         this.submitButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
             event.preventDefault();
-			
+            
             // Validate the inputs.            
             if (this.validateTaskParameters(this.taskParametersRaw)) {
                 // Call the handler.
-            	handler(this.taskParametersClean);
+                handler(this.taskParametersClean);
             }
         });
     }
@@ -208,95 +200,82 @@ class ViewTask {
         this.deleteHandler = handler;
     }
     
-    registerExportButtonListener(handler) {
-        this.exportButton.addEventListener('click', event => {
-            event.preventDefault();
-            handler();
-        });
-    }
 
-    registerImportButtonListener(handler) {
-        this.importButton.addEventListener('click', event => {
-            event.preventDefault(); 
-            handler();
-        });
-    }
-    
     validateTaskParameters(taskParameters) {
-		if (taskParameters.name == null || taskParameters.name.trim() == '') {
-			alert('Name cannot be blank.');
-			return false;
-		}
-		
-		if (taskParameters.initialOffset == null || !$.isNumeric(taskParameters.initialOffset)) {
-			alert('Initial offset has to be a decimal number.');
-			return false;
-		}
-		const initialOffset = parseFloat(taskParameters.initialOffset);
-		if (initialOffset < 0) {
-			alert('Initial offset cannot be negative');
-			return false;
-		}
+        if (taskParameters.name == null || taskParameters.name.trim() == '') {
+            alert('Name cannot be blank.');
+            return false;
+        }
+        
+        if (taskParameters.initialOffset == null || !$.isNumeric(taskParameters.initialOffset)) {
+            alert('Initial offset has to be a decimal number.');
+            return false;
+        }
+        const initialOffset = parseFloat(taskParameters.initialOffset);
+        if (initialOffset < 0) {
+            alert('Initial offset cannot be negative');
+            return false;
+        }
 
-		if (taskParameters.activationOffset == null || !$.isNumeric(taskParameters.activationOffset)) {
-			alert('Activation offset has to be a decimal number.');
-			return false;
-		}
-		const activationOffset = parseFloat(taskParameters.activationOffset);
-		if (activationOffset < 0) {
-			alert('Activation offset cannot be negative');
-			return false;
-		}
+        if (taskParameters.activationOffset == null || !$.isNumeric(taskParameters.activationOffset)) {
+            alert('Activation offset has to be a decimal number.');
+            return false;
+        }
+        const activationOffset = parseFloat(taskParameters.activationOffset);
+        if (activationOffset < 0) {
+            alert('Activation offset cannot be negative');
+            return false;
+        }
 
-		if (taskParameters.duration == null || !$.isNumeric(taskParameters.duration)) {
-			alert('Duration offset has to be a decimal number.');
-			return false;
-		}
-		
-		const duration = parseFloat(taskParameters.duration);
-		if (duration <= 0) {
-			alert('Duration has to be greater than 0.');
-			return false;
-		}
-		
-		if (taskParameters.period == null || !$.isNumeric(taskParameters.period)) {
-			alert('Period offset has to be a decimal number.');
-			return false;
-		}
-		
-		const period = parseFloat(taskParameters.period);
-		if (period <= 0) {
-			alert('Period has to be greater than 0.');
-			return false;
-		}
-		
-		if ((activationOffset + duration) > period) {
-			alert('Period is shorter than the combined activation offset and LET duration.');
-			return false;
-		}
-		
-		if (taskParameters.inputs == null || taskParameters.inputs == '') {
-			alert('Specify at least one input.');
-			return false;
-		}
+        if (taskParameters.duration == null || !$.isNumeric(taskParameters.duration)) {
+            alert('Duration offset has to be a decimal number.');
+            return false;
+        }
+        
+        const duration = parseFloat(taskParameters.duration);
+        if (duration <= 0) {
+            alert('Duration has to be greater than 0.');
+            return false;
+        }
+        
+        if (taskParameters.period == null || !$.isNumeric(taskParameters.period)) {
+            alert('Period offset has to be a decimal number.');
+            return false;
+        }
+        
+        const period = parseFloat(taskParameters.period);
+        if (period <= 0) {
+            alert('Period has to be greater than 0.');
+            return false;
+        }
+        
+        if ((activationOffset + duration) > period) {
+            alert('Period is shorter than the combined activation offset and LET duration.');
+            return false;
+        }
+        
+        if (taskParameters.inputs == null || taskParameters.inputs == '') {
+            alert('Specify at least one input.');
+            return false;
+        }
         const inputs = taskParameters.inputs.split(',').map(item => item.trim()).filter(Boolean)
         const duplicateInputs = inputs.filter((port, index, self) => self.indexOf(port) !== index);
         if (duplicateInputs.length != 0) {
             alert(`Remove duplicate input ports: ${duplicateInputs.join(', ')}.`);
             return false;
         }
-		
-		if (taskParameters.outputs == null || taskParameters.outputs == '') {
-			alert('Specify at least one output.');
-			return false;
-		}
+        
+        if (taskParameters.outputs == null || taskParameters.outputs == '') {
+            alert('Specify at least one output.');
+            return false;
+        }
         const outputs = taskParameters.outputs.split(',').map(item => item.trim()).filter(Boolean)
         const duplicateOutputs = outputs.filter((port, index, self) => self.indexOf(port) !== index);
         if (duplicateOutputs.length != 0) {
             alert(`Remove duplicate output ports: ${duplicateOutputs.join(', ')}.`);
             return false;
         }
-		
+        
         const inputsOutputs = inputs.concat(outputs);
         const duplicatePortNames = inputsOutputs.filter((port, index, self) => self.indexOf(port) !== index);
         if (duplicatePortNames.length != 0) {
@@ -304,7 +283,7 @@ class ViewTask {
             return false;
         }
         
-    	return true;
+        return true;
     }
     
     
@@ -313,7 +292,7 @@ class ViewTask {
     
     clearPreview() {
         // Delete the existing preview, if it exists
-		this.taskPreview.selectAll('*').remove();
+        this.taskPreview.selectAll('*').remove();
     }
     
     clearSelected() {
@@ -329,28 +308,28 @@ class ViewTask {
         this.draw(this.taskPreview, taskParameters);
     }
 
-	draw(parentElement, taskParameters) {
-		// Create function to scale the data along the x-axis of fixed-length
-		const scale =
-		d3.scaleLinear()
-		  .domain([0, taskParameters.initialOffset + taskParameters.period])
-		  .range([0, 600]);
+    draw(parentElement, taskParameters) {
+        // Create function to scale the data along the x-axis of fixed-length
+        const scale =
+        d3.scaleLinear()
+          .domain([0, taskParameters.initialOffset + taskParameters.period])
+          .range([0, 600]);
 
-		// Create x-axis with correct scale. Will be added to the chart later
-		const x_axis =
-		d3.axisBottom()
-		  .scale(scale);
+        // Create x-axis with correct scale. Will be added to the chart later
+        const x_axis =
+        d3.axisBottom()
+          .scale(scale);
 
         // Set up the canvas
         const anchor =
         parentElement
             .append('a')
 
-		const group =
+        const group =
         anchor
-		    .append('svg')
-		    .append('g')
-		      .attr('transform', `translate(${View.SvgPadding}, ${View.SvgPadding})`);
+            .append('svg')
+            .append('g')
+              .attr('transform', `translate(${View.SvgPadding}, ${View.SvgPadding})`);
         
         // -----------------------------
         // Group for textual information
@@ -380,8 +359,8 @@ class ViewTask {
                  .attr('x', scale(taskParameters.initialOffset + taskParameters.activationOffset))
                  .attr('width', scale(taskParameters.duration))
                  .attr('height', View.BarHeight);
-		
-		// Add horizontal line for the task's initial offset
+        
+        // Add horizontal line for the task's initial offset
         graphInfo.append('line')
                  .attr('x1', 0)
                  .attr('x2', scale(taskParameters.initialOffset))
@@ -423,7 +402,7 @@ class ViewTask {
                  .call(g => g.select('.domain').remove());
         
         return anchor;
-	}
+    }
     
     updateTasks(taskParametersSet) {
         // Delete the existing preview of the task set, if it exists
@@ -439,8 +418,8 @@ class ViewTask {
             // Click listener
             anchor.on('click', () => {
                 taskListItem.node().parentNode.querySelectorAll('li').forEach((item) => {
-					if (item !== taskListItem.node()) { item.classList.remove('taskSelected'); }
-				});
+                    if (item !== taskListItem.node()) { item.classList.remove('taskSelected'); }
+                });
                 taskListItem.node().classList.toggle('taskSelected');
                 this.populateParameterForm(taskParameters);
             });

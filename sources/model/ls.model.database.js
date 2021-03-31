@@ -223,9 +223,9 @@ class ModelDatabase {
         });
     }
 
-    export = function() {
+    exportSystem = function() {
         return new Promise((resolve, reject) => {
-            let data = [this.getAllTasks(),this.getAllDependencies()];
+            let data = [this.getAllTasks(), this.getAllDependencies()];
             Promise.all(data).then(result => 
                 {
                     let system = {'System' : {'Tasks' : result[0], 'Dependencies' : result[1]}};
@@ -234,16 +234,16 @@ class ModelDatabase {
         });
     }
 
-    exportJSON = function() {
+    exportSystemJson = function() {
         return new Promise((resolve, reject) => {this.export().then(result => resolve(JSON.stringify(result)))});
     } 
 
-
-
-    import = function(result) {
+    importSystem = function(result) {
         this.deleteAllTasksAndDependencies();
         let importPromises = [];
+        
         //console.log(result.System);
+        
         result.System.Tasks.forEach(
             task => {
                 let taskModel = ModelLogicalTask.CreateWithParameters(task);

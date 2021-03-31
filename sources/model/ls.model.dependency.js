@@ -41,8 +41,11 @@ class ModelDependency {
     deleteDependency(name) {
         return this.database.deleteDependency(name)
         	.then(this.database.deleteDependencyInstances(name))
-        	.then(result => this.getAllDependencies())
-        	.then(result => this.updateDependencies(result));
+        	.then(result => this.refreshViews());
+    }
+    
+    deleteAllDependencies() {
+    	// TODO
     }
     
     deleteDependenciesOfTask(taskName) {
@@ -57,6 +60,11 @@ class ModelDependency {
 				
 				return Promise.all(deletePromises);
     		});
+    }
+
+    refreshViews() {
+    	this.getAllDependencies()
+    		.then(result => this.updateDependencies(result));
     }
     
     toString() {

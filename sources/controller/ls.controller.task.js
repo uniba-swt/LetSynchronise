@@ -13,8 +13,6 @@ class ControllerTask {
         // Register the handlers when setting the view.
         this._view.registerSubmitHandler(this.handleCreateTask);
         this._view.registerDeleteHandler(this.handleDeleteTask);
-        this._view.registerExportButtonListener(this.handleExport);
-        this._view.registerImportButtonListener(this.handleImport);
     }
     
     get view() {
