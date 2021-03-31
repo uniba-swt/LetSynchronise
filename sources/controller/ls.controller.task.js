@@ -71,7 +71,7 @@ class ControllerTask {
 
     // Handler for importing a system
     handleImport = () => {
-        const files = document.getElementById('system-import-file').files;
+        const files = document.getElementById('import-system-file').files;
         if (files.length < 1) {
             alert("Select a system JSON file!");
             return;

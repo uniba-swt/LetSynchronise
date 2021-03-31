@@ -29,8 +29,8 @@ class ViewTask {
         this.root = document.querySelector('#nav-design');
 
 		// System export or import
-		this.exportButton = this.root.querySelector('#system-export');
-        this.importButton = this.root.querySelector('#system-import');
+		this.exportButton = this.root.querySelector('#export-system');
+        this.importButton = this.root.querySelector('#import-system');
 
         
         // Define or edit task
