@@ -60,16 +60,21 @@ class ControllerTask {
     }
     
     // Handler for deleting a task.
+    handleDeleteTask = (name) => {
+        this.model.deleteTask(name);
+    }
+    
+    // Handler for exporting a system
     handleExport = () => {
         this.model.export();
     }
 
-    // Handler for exporting a system
+    // Handler for importing a system
     handleImport = () => {
         let modelImport = this.model.import.bind(this.model);
-        let files = document.getElementById('importFiles').files;
+        let files = document.getElementById('system-import-file').files;
         if (files.length <= 0) {
-            alert("You must select a file");
+            alert("Select a system JSON file!");
             return;
         }
         
@@ -82,13 +87,7 @@ class ControllerTask {
         
         fileReader.readAsText(files.item(0));
     }
-
-    // Handler for importing a system
-    handleDeleteTask = (name) => {
-        this.model.deleteTask(name);
-    }
-    
-    
+        
     
     // -----------------------------------------------------
     // Callbacks for events from the model to the view

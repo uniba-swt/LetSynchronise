@@ -27,6 +27,11 @@ class ViewTask {
     
     constructor() {
         this.root = document.querySelector('#nav-design');
+
+		// System export or import
+		this.exportButton = this.root.querySelector('#system-export');
+        this.importButton = this.root.querySelector('#system-import');
+
         
         // Define or edit task
         this.nameField = this.root.querySelector('#name');
@@ -40,9 +45,6 @@ class ViewTask {
         this.previewButton = this.root.querySelector('#previewTask');
         this.submitButton = this.root.querySelector('#submitTask');
         this.clearButton = this.root.querySelector('#clearTask');
-
-        this.exportButton = this.root.querySelector('#exportSystem');
-        this.importButton = this.root.querySelector('#importSystem');
 
         this.taskPreview = d3.select('#view-task-preview');
 
