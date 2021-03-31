@@ -73,7 +73,7 @@ class ModelSchedule {
     getLatestLetEndTime(taskInstances, timePoint) {
     	for (let taskIndex = taskInstances.length - 1; taskIndex > -1;  taskIndex--) {
     		const taskInstance = taskInstances[taskIndex];
-			if (taskInstance.letEndTime < timePoint) {
+			if (taskInstance.letEndTime <= timePoint) {
 				return [taskIndex, taskInstance];
 			}
 		}
