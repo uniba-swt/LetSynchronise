@@ -71,21 +71,19 @@ class ControllerTask {
 
     // Handler for importing a system
     handleImport = () => {
-        let modelImport = this.model.import.bind(this.model);
-        let files = document.getElementById('system-import-file').files;
-        if (files.length <= 0) {
+        const files = document.getElementById('system-import-file').files;
+        if (files.length < 1) {
             alert("Select a system JSON file!");
             return;
         }
         
-        let fileReader = new FileReader();
-        
-        fileReader.onload = function(e) { 
-            let result = JSON.parse(e.target.result);
-            modelImport(result);
-        }
-        
+        const fileReader = new FileReader();
         fileReader.readAsText(files.item(0));
+        
+        fileReader.onload = (event) => { 
+            const result = JSON.parse(event.target.result);
+            this.model.import(result);
+        }
     }
         
     
