@@ -45,9 +45,8 @@ class ModelTask {
     createTask(parameters) {
         // Store taskParameters into Database
         const logicalTask = ModelLogicalTask.CreateWithParameters(parameters);
-        this.database.storeTask(logicalTask)
-        	.then(result => this.getAllTasks())
-        	.then(result => { this.updateTasks(result); this.updateDependencySelectors(result) });
+        return this.database.storeTask(logicalTask)
+        	.then(this.refreshViews());
     }
     
     getAllTasks() {
@@ -55,16 +54,25 @@ class ModelTask {
     }
     
     deleteTask(name) {
-		this.modelDependency.deleteDependenciesOfTask(name)
+		return this.modelDependency.deleteDependenciesOfTask(name)
 			.then(this.database.deleteTask(name))
 			.then(this.database.deleteTaskInstances(name))
-			.then(result => this.getAllTasks())
-			.then(result => { this.updateTasks(result); this.updateDependencySelectors(result) })
+			.then(result => this.refreshViews());
+    }
+    
+    deleteAllTasks() {
+    	return this.database.deleteAllTasks()
+    		.then(this.database.deleteAllTasksInstances())
+    		.then(this.refreshViews());
+    }
+    
+    refreshViews() {
+    	return this.getAllTasks()
+    		.then(result => { this.updateTasks(result); this.updateDependencySelectors(result) });
     }
     
     toString() {
         return "ModelTask";
     }
-
     
 }

@@ -62,6 +62,28 @@ class ControllerTask {
         this.model.deleteTask(name);
     }
     
+    // Handler for exporting a system
+    handleExport = () => {
+        this.model.export();
+    }
+
+    // Handler for importing a system
+    handleImport = () => {
+        const files = document.getElementById('import-system-file').files;
+        if (files.length < 1) {
+            alert("Select a system JSON file!");
+            return;
+        }
+        
+        const fileReader = new FileReader();
+        fileReader.readAsText(files.item(0));
+        
+        fileReader.onload = (event) => { 
+            const result = JSON.parse(event.target.result);
+            this.model.import(result);
+        }
+    }
+        
     
     // -----------------------------------------------------
     // Callbacks for events from the model to the view

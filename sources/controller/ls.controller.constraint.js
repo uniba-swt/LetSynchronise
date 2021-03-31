@@ -68,8 +68,6 @@ class ControllerConstraint {
     handleDeleteConstraint = (name) => {
         this.model.deleteConstraint(name);
     }
-    
-    
     // -----------------------------------------------------
     // Callbacks for events from the model to the view
     

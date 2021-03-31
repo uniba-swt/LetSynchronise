@@ -1,6 +1,7 @@
 'use strict';
 
 class View {
+    _viewExportImport = null;
     _viewTask = null;
     _viewDependency = null;
     _viewSchedule = null;
@@ -22,6 +23,10 @@ class View {
     // -----------------------------------------------------
     // Normal getters and setters
     
+    set viewExportImport(viewExportImport) {
+        this._viewExportImport = viewExportImport;
+    }
+    
     set viewTask(viewTask) {
         this._viewTask = viewTask;
     }
@@ -36,6 +41,10 @@ class View {
     
     set viewConstraint(viewConstraint) {
         this._viewConstraint = viewConstraint;
+    }
+    
+    get viewExportImport() {
+        return this._viewExportImport;
     }
     
     get viewTask() {
@@ -55,7 +64,7 @@ class View {
     }
     
     toString() {
-    	return "View";
+        return "View";
     }
 }
 
