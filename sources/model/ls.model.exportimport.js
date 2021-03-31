@@ -41,7 +41,21 @@ class ModelExportImport {
     }
 
     importSystem(system) {
-        this.database.importSystem(system)
+    	this.modelTask.deleteAllTasks()
+    		.then(this.modelDependency.deleteAllDependencies())
+    		.then(() => {
+				let importPromises = []
+				for (const task of system.Tasks) {
+					importPromises.push(this.modelTask.createTask(task));
+				}
+
+				for (const dependency of system.Dependencies) {
+					importPromises.push(this.modelDependency.createDependency(dependency));
+				}
+				
+				return Promise.all(importPromises);
+    		
+    		})
         	.then(Promise.all([this.modelTask.refreshViews(), this.modelDependency.refreshViews()]));
     }
     

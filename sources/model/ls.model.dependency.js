@@ -29,9 +29,8 @@ class ModelDependency {
 
     createDependency(dependency) {
         // Store dependency in Database
-        this.database.storeDependency(dependency)
-        	.then(result => this.getAllDependencies())
-        	.then(result => this.updateDependencies(result));
+        return this.database.storeDependency(dependency)
+        	.then(this.refreshViews());
     }
     
     getAllDependencies() {
@@ -45,7 +44,9 @@ class ModelDependency {
     }
     
     deleteAllDependencies() {
-    	// TODO
+    	return this.database.deleteAllDependencies()
+    		.then(this.database.deleteAllDependenciesInstances())
+    		.then(this.refreshViews());
     }
     
     deleteDependenciesOfTask(taskName) {
@@ -63,7 +64,7 @@ class ModelDependency {
     }
 
     refreshViews() {
-    	this.getAllDependencies()
+    	return this.getAllDependencies()
     		.then(result => this.updateDependencies(result));
     }
     
