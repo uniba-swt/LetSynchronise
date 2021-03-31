@@ -223,19 +223,18 @@ class ModelDatabase {
         });
     }
 
-    exportSystem = function() {
-        return new Promise((resolve, reject) => {
-            let data = [this.getAllTasks(), this.getAllDependencies()];
-            Promise.all(data).then(result => 
-                {
-                    let system = {'System' : {'Tasks' : result[0], 'Dependencies' : result[1]}};
-                    resolve(system);
-                });
-        });
+    exportSystem = async function() {
+        return {
+            'System' : {
+                'Tasks' : await this.getAllTasks(), 
+                'Dependencies' : await this.getAllDependencies()
+            }
+        };
     }
 
-    exportSystemJson = function() {
-        return new Promise((resolve, reject) => {this.export().then(result => resolve(JSON.stringify(result)))});
+    exportSystemJson = async function() {
+        return this.exportSystem()
+            .then(result => JSON.stringify(result));
     } 
 
     importSystem = function(result) {

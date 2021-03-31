@@ -27,11 +27,6 @@ class ModelExportImport {
     // -----------------------------------------------------
     // Class methods
 
-    importSystem(system) {
-        this.database.importSystem(system)
-        	.then(Promise.all([this.modelTask.refreshViews(), this.modelDependency.refreshViews()]));
-    }
-
     exportSystem() {
         this.database.exportSystemJson()
         	.then(result => {
@@ -41,6 +36,11 @@ class ModelExportImport {
 				link.download = 'system.json';
 				link.click();
 			});
+    }
+
+    importSystem(system) {
+        this.database.importSystem(system)
+        	.then(Promise.all([this.modelTask.refreshViews(), this.modelDependency.refreshViews()]));
     }
     
     toString() {
