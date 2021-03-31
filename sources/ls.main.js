@@ -49,3 +49,6 @@ controller.controllerConstraint.modelTask = model.modelTask;
 
 
 console.log(controller.toString());
+
+// Bootstrap plugin for dynamic file input behaviour
+bsCustomFileInput.init();
