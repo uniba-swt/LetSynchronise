@@ -232,11 +232,6 @@ class ModelDatabase {
         };
     }
 
-    exportSystemJson = async function() {
-        return this.exportSystem()
-            .then(result => JSON.stringify(result));
-    } 
-
     importSystem = function(result) {
         this.deleteAllTasksAndDependencies();
         let importPromises = [];

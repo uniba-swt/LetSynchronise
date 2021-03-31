@@ -28,13 +28,15 @@ class ModelExportImport {
     // Class methods
 
     exportSystem() {
-        this.database.exportSystemJson()
+        this.database.exportSystem()
+            .then(result => JSON.stringify(result))
         	.then(result => {
 				const link = document.createElement("a");
 				const file = new Blob([result], { type: 'application/json' });
 				link.href = URL.createObjectURL(file);
 				link.download = 'system.json';
 				link.click();
+				URL.revokeObjectURL(link.href);
 			});
     }
 
