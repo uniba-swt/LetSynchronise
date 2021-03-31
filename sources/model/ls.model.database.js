@@ -62,7 +62,7 @@ class ModelDatabase {
     }
     
     putObject(storeName, mode, object, promiseResolve, promiseReject) {
-        const objectStore = this.getObjectStore(storeName, mode, promiseReject)
+        const objectStore = this.getObjectStore(storeName, mode, promiseReject);
         const putObject = objectStore.put(object);
         
         putObject.onsuccess = function(event) {
@@ -71,7 +71,7 @@ class ModelDatabase {
     }
     
     getObject(storeName, mode, index, promiseResolve, promiseReject) {
-        const objectStore = this.getObjectStore(storeName, mode, promiseReject)
+        const objectStore = this.getObjectStore(storeName, mode, promiseReject);
         const getObject = objectStore.get(index); // Get using the index
 
         getObject.onsuccess = function(event) {
@@ -80,7 +80,7 @@ class ModelDatabase {
     }
     
     getAllObjects(storeName, mode, promiseResolve, promiseReject) {
-        const objectStore = this.getObjectStore(storeName, mode, promiseReject)
+        const objectStore = this.getObjectStore(storeName, mode, promiseReject);
         const getObjects = objectStore.getAll();
 
         getObjects.onsuccess = function(event) {
@@ -89,10 +89,19 @@ class ModelDatabase {
     }
     
     deleteObject(storeName, mode, index, promiseResolve, promiseReject) {
-        const objectStore = this.getObjectStore(storeName, mode, promiseReject)
+        const objectStore = this.getObjectStore(storeName, mode, promiseReject);
         const deleteObject = objectStore.delete(index); // Delete using the index
 
         deleteObject.onsuccess = function(event) {
+            promiseResolve(event.target.result);
+        }
+    }
+    
+    deleteAllObjects(storeName, mode, promiseResolve, promiseReject) {
+        const objectStore = this.getObjectStore(storeName, mode, promiseReject);
+        const deleteObjects = objectStore.clear();
+        
+        deleteObjects.onsuccess = function(event) {
             promiseResolve(event.target.result);
         }
     }
@@ -124,6 +133,12 @@ class ModelDatabase {
         });
     }
     
+    deleteAllTasks = function() {
+        return new Promise((resolve, reject) => {
+            this.deleteAllObjects('TaskStore', 'readwrite', resolve, reject);
+        });
+    }
+    
     
     // Task Instances
     
@@ -148,6 +163,12 @@ class ModelDatabase {
     deleteTaskInstances = function(name) {
         return new Promise((resolve, reject) => {
             this.deleteObject('TaskInstancesStore', 'readwrite', name, resolve, reject);
+        });
+    }
+    
+    deleteAllTasksInstances = function() {
+        return new Promise((resolve, reject) => {
+            this.deleteAllObjects('TaskInstancesStore', 'readwrite', resolve, reject);
         });
     }
     
@@ -178,7 +199,13 @@ class ModelDatabase {
         });
     }
 
-    // DependencyInstances
+    deleteAllDependencies = function() {
+        return new Promise((resolve, reject) => {
+            this.deleteAllObjects('DependencyStore', 'readwrite', resolve, reject);
+        });
+    }
+
+    // Dependency Instances
 
     storeDependencyInstances = function(dependency) {
         return new Promise((resolve, reject) => {
@@ -202,6 +229,28 @@ class ModelDatabase {
         return new Promise((resolve, reject) => {
             this.deleteObject('DependencyInstancesStore', 'readwrite', name, resolve, reject);
         });
+    }
+    
+    deleteAllDependenciesInstances = function() {
+        return new Promise((resolve, reject) => {
+            this.deleteAllObjects('DependencyInstancesStore', 'readwrite', resolve, reject);
+        });
+    }
+    
+
+    // System export
+    
+    exportSystem = async function() {
+        return {
+            'System' : {
+                'Tasks' : await this.getAllTasks(), 
+                'Dependencies' : await this.getAllDependencies()
+            }
+        };
+    }
+
+    toString() {
+        return "Model";
     }
 
 }

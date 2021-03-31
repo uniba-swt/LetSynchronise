@@ -13,6 +13,7 @@
     <script src="dependencies/d3-5.16.0/d3.js"></script>
     <script src="dependencies/jquery-3.5.1.js"></script>
     <script src="dependencies/bootstrap-4.6.0/js/bootstrap.bundle.js"></script>
+    <script src="dependencies/bs-custom-file-input/bs-custom-file-input.js"></script>
     
     <!-- CSS to use for this page -->
     <link rel="stylesheet" href="dependencies/bootstrap-4.6.0/css/bootstrap.css">
@@ -23,6 +24,7 @@
     <!-- Our own JavaScript code/library/framework. Execution is deferred until the page has loaded -->
     <!-- <script type="module"> does not work when executed locally -->
     <script src="sources/model/ls.model.js"></script>
+    <script src="sources/model/ls.model.exportImport.js"></script>
     <script src="sources/model/ls.model.dependency.js"></script>
     <script src="sources/model/ls.model.schedule.js"></script>
     <script src="sources/model/ls.model.task.js"></script>
@@ -31,12 +33,14 @@
     <script src="sources/model/ls.model.database.js"></script>
 
     <script src="sources/view/ls.view.js"></script>
+    <script src="sources/view/ls.view.exportImport.js"></script>
     <script src="sources/view/ls.view.dependency.js"></script>
     <script src="sources/view/ls.view.schedule.js"></script>
     <script src="sources/view/ls.view.task.js"></script>
     <script src="sources/view/ls.view.constraint.js"></script>
 
     <script src="sources/controller/ls.controller.js"></script>
+    <script src="sources/controller/ls.controller.exportImport.js"></script>
     <script src="sources/controller/ls.controller.dependency.js"></script>
     <script src="sources/controller/ls.controller.schedule.js"></script>
     <script src="sources/controller/ls.controller.task.js"></script>
@@ -64,6 +68,27 @@
     <!-- Content for the tab views defined below -->
     <div class="tab-content" id="nav-tabContent">
         <div class="tab-pane fade show active" id="nav-design" role="tabpanel" aria-labelledby="nav-design-tab">
+        	<h3>System Export or Import</h3>
+				
+			<form id="view-exportimport">
+				<button id="export-system" type="submit" class="btn btn-primary">Export</button>
+				
+				<div class="m-1"></div>
+				
+				<div class="input-group mb-3">
+					<div class="input-group-prepend">
+						<button id="import-system" type="submit" class="btn btn-primary">Import</button>
+					</div>
+					<div class="custom-file col-sm-3">
+						<input id="import-system-file" type="file" accept=".json" class="custom-file-input btn"/>
+						<label for="import-system-file" class="custom-file-label">Choose system JSON file</label>
+					</div>
+				</div>
+            </form>
+        
+            <div class="m-5"></div>
+
+
             <h3>Define or Edit a LET Task</h3>
             
             <form id="view-task-define">
@@ -124,7 +149,7 @@
 
                 <div class="form-group row" id="view-task-preview"></div>
                 
-                <button id="previewTask" type="submit" class="btn btn-primary">Preview</button>
+        	    <button id="previewTask" type="submit" class="btn btn-primary">Preview</button>
                 <button id="submitTask" type="submit" class="btn btn-primary">Save</button>
                 <button id="clearTask" type="reset" class="btn btn-outline-secondary">Clear</button>
             </form>
@@ -141,36 +166,38 @@
             
             <h3>Define Task Dependencies</h3>
             
-            <div class="input-group row mb-1">
-                <div class="input-group col-sm-3">
-                    <div class="input-group-prepend">
-                        <label class="input-group-text" for="view-task-dependency-name">Name</label>
-                    </div>
-                    <input required type="text" id="view-task-dependency-name" class="form-control"/>
-                </div>
-                
-                <div class="input-group col-sm-3">
-                    <div class="input-group-prepend">
-                        <label class="input-group-text" for="view-task-dependency-source">Source</label>
-                    </div>
-                    <select id="view-task-dependency-source" class="custom-select">
-                        <option disabled>Choose...</option>
-                    </select>
-                </div>
-                
-                <div class="input-group col-sm-3">
-                    <div class="input-group-prepend">
-                        <label class="input-group-text" for="view-task-dependency-destination">Destination</label>
-                    </div>
-                    <select id="view-task-dependency-destination" class="custom-select">
-                        <option disabled>Choose...</option>
-                    </select>
-                </div>
-                
-                <div class="input-group col-sm-3">
-                    <button id="submitDependency" type="submit" class="btn btn-primary">Save</button>
-                </div>
-            </div>
+            <form id="view-task-dependency">
+				<div class="input-group row mb-1">
+					<div class="input-group col-sm-3">
+						<div class="input-group-prepend">
+							<label class="input-group-text" for="view-task-dependency-name">Name</label>
+						</div>
+						<input required type="text" id="view-task-dependency-name" class="form-control"/>
+					</div>
+				
+					<div class="input-group col-sm-3">
+						<div class="input-group-prepend">
+							<label class="input-group-text" for="view-task-dependency-source">Source</label>
+						</div>
+						<select id="view-task-dependency-source" class="custom-select">
+							<option disabled>Choose...</option>
+						</select>
+					</div>
+				
+					<div class="input-group col-sm-3">
+						<div class="input-group-prepend">
+							<label class="input-group-text" for="view-task-dependency-destination">Destination</label>
+						</div>
+						<select id="view-task-dependency-destination" class="custom-select">
+							<option disabled>Choose...</option>
+						</select>
+					</div>
+				
+					<div class="input-group col-sm-3">
+						<button id="submitDependency" type="submit" class="btn btn-primary">Save</button>
+					</div>
+				</div>
+            </form>
 
             <div class="m-3"></div>
 

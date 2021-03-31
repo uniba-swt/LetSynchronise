@@ -76,9 +76,14 @@ class ViewSchedule {
         const taskParametersSet = await promise['promiseAllTasks'];
         const tasksInstances = await promise['promiseAllTasksInstances'];
         const dataflowsSet = await promise['promiseAllDependenciesInstances'];
-            
-        this.updatePrologue(taskParametersSet);
-        this.updateHyperPeriod(taskParametersSet);
+        
+        if (taskParametersSet.length < 1) {
+    		this.prologue = 0;
+    		this.hyperPeriod = 0;
+    	} else {
+			this.updatePrologue(taskParametersSet);
+			this.updateHyperPeriod(taskParametersSet);
+    	}
         
         // Draw new schedule.
         const {svgElement, scale, taskIndices} = this.drawSchedule(tasksInstances);
@@ -104,8 +109,7 @@ class ViewSchedule {
           .domain([0, this.makespan])
           .range([0, View.Width - 2 * View.SvgPadding]);
 
-        // Delete the existing task previews, if they exist
-        // and set up the canvas.
+        // Delete the existing task previews, if they exist and set up the canvas.
         this.schedule.selectAll('*').remove();
         const svgElement = this.schedule.append('svg');
         

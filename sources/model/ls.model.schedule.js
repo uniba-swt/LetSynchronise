@@ -73,7 +73,7 @@ class ModelSchedule {
     getLatestLetEndTime(taskInstances, timePoint) {
     	for (let taskIndex = taskInstances.length - 1; taskIndex > -1;  taskIndex--) {
     		const taskInstance = taskInstances[taskIndex];
-			if (taskInstance.letEndTime < timePoint) {
+			if (taskInstance.letEndTime <= timePoint) {
 				return [taskIndex, taskInstance];
 			}
 		}
@@ -95,7 +95,7 @@ class ModelSchedule {
         return Promise.all([
             this.database.getTaskInstances(dependency.source.task), 
             this.database.getTaskInstances(dependency.destination.task)
-        ]).then(([sourceTaskInstances, destinationTaskInstances]) => {            
+        ]).then(([sourceTaskInstances, destinationTaskInstances]) => {
             const destinationInstances = destinationTaskInstances.value;
             const sourceInstances = sourceTaskInstances.value;
 
@@ -117,7 +117,7 @@ class ModelSchedule {
     
     
     // Get task schedule for given makespan.
-    getSchedule(makespan) {
+    getSchedule(makespan) {    
         const promiseAllTasks = this.database.getAllTasks();
         const promiseAllTasksInstances = promiseAllTasks
         	.then(tasks => Promise.all(tasks.map(task => this.createTaskInstances(task, makespan))))

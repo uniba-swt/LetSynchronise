@@ -1,6 +1,7 @@
 'use strict';
 
 class Model {
+    _modelExportImport = null;
     _modelTask = null;
     _modelDependency = null;
     _modelSchedule = null;
@@ -8,6 +9,14 @@ class Model {
     _modelDatabase = null;
     
     constructor() { }
+
+    get modelExportImport() {
+        return this._modelExportImport;
+    }
+    
+    set modelExportImport(modelExportImport) {
+        this._modelExportImport = modelExportImport;
+    }
     
     get modelTask() {
         return this._modelTask;
@@ -47,6 +56,7 @@ class Model {
     
     set modelDatabase(modelDatabase) {
         this._modelDatabase = modelDatabase;
+        this._modelExportImport.registerModelDatabase(this._modelDatabase);
         this._modelTask.registerModelDatabase(this._modelDatabase);
         this._modelSchedule.registerModelDatabase(this._modelDatabase);
         this._modelDependency.registerModelDatabase(this._modelDatabase);
@@ -54,6 +64,6 @@ class Model {
     }
     
     toString() {
-    	return "Model";
+        return "Model";
     }
 }
