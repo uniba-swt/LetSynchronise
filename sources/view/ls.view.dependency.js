@@ -151,7 +151,7 @@ class ViewDependency {
                 .property('selected', true)
                 .property('hidden', true)
                 .attr('value', 'null ')
-                .text('Choose...');
+                .text('Choose ...');
         
         ports.forEach(port =>
             parentElement
