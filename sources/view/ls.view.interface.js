@@ -36,7 +36,7 @@ class ViewInterface {
     }
     
     set input(input) {
-    	this.input.value;
+    	this.inputField.value = input;
     }
     
     get output() {
@@ -44,7 +44,7 @@ class ViewInterface {
     }
     
     set output(output) {
-    	this.output.value = output.trim();
+    	this.outputField.value = output;
     }
     
     get inputClean() {
@@ -97,6 +97,7 @@ class ViewInterface {
 
             if (this.validateName(this.input)) {
 	            handler(this.inputClean);
+	            this.input = '';
             }
         });
     }
@@ -107,6 +108,7 @@ class ViewInterface {
             
             if (this.validateName(this.output)) {
 	            handler(this.outputClean);
+	            this.output = '';
             }
         });
     }
