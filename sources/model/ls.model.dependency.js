@@ -40,7 +40,7 @@ class ModelDependency {
     deleteDependency(name) {
         return this.database.deleteDependency(name)
         	.then(this.database.deleteDependencyInstances(name))
-        	.then(result => this.refreshViews());
+        	.then(this.refreshViews());
     }
     
     deleteAllDependencies() {
