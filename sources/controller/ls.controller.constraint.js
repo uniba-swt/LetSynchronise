@@ -5,7 +5,6 @@ class ControllerConstraint {
     _model = null;
     _modelTask = null;
 	_modelInterface = null;
-
     
     constructor() { }
 
@@ -43,16 +42,6 @@ class ControllerConstraint {
         
         // Register the model task with the model.
 		this._model.registerModelTask(this._modelTask);
-
-        
-        // Register the handlers when setting the model.
-/*        this._modelTask.registerUpdateConstraintSelectorsCallback(this.callbackUpdateConstraintSelectors);
-
-        // Hack to populate the View with constraint once the database is ready
-        window.addEventListener('DatabaseReady', (event) => {
-            this._modelTask.getAllTasks()
-            	.then(result => this.callbackUpdateConstraintSelectors(result));
-        });*/
     }
     
     get modelTask() {

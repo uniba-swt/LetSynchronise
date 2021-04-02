@@ -42,14 +42,6 @@ class ControllerDependency {
         
         // Register the model task with the model.
         this._model.registerModelTask(this._modelTask);
-        
-//        this._modelTask.registerUpdateDependencySelectorsCallback(this.callbackUpdateDependencySelectors);
-
-        // Hack to populate the View with dependencies once the database is ready
-//        window.addEventListener('DatabaseReady', (event) => {
-//            this._modelTask.getAllTasks()
-//            	.then(result => this.callbackUpdateDependencySelectors(result));
-//        });
     }
     
     get modelTask() {
