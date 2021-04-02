@@ -44,23 +44,23 @@ class ModelConstraint {
 
     createConstraint(constraint) {
         // Store constraint into Database
-        return this.database.storeConstraint(constraint)
+        return this.database.putObject(Model.ConstraintStoreName, constraint)
         	.then(this.refreshViews());
     }
     
     getAllConstraints() {
-        return this.database.getAllConstraints();
+        return this.database.getAllObjects(Model.ConstraintStoreName);
     }
 
     deleteConstraint(name) {
-        return this.database.deleteConstraint(name)
-        	.then(this.database.deleteConstraintInstances(name))
+        return this.database.deleteObject(Model.ConstraintStoreName, name)
+        	.then(this.database.deleteObject(Model.ConstraintInstancesStoreName, name))
         	.then(this.refreshViews());
     }
     
     deleteAllConstraints() {
-    	return this.database.deleteAllConstraints()
-    		.then(this.database.deleteAllConstraintsInstances())
+    	return this.database.deleteAllObjects(Model.ConstraintStoreName)
+    		.then(this.database.deleteAllObjects(Model.ConstraintInstancesStoreName))
     		.then(this.refreshViews());
     }
     
