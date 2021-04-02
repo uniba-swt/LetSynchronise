@@ -167,7 +167,8 @@ class ViewConstraint {
         return true;
     }
     
-    updateConstraintSelectors(taskParametersSet) {
+    updateConstraintSelectors(taskParametersSet, systemInputs, systemOutputs) {
+    	// TODO: systemInputs, systemOutputs
         const sources = taskParametersSet.map(taskParameters => Utility.TaskPorts(taskParameters.name, taskParameters.outputs)).flat();
         const destinations = taskParametersSet.map(taskParameters => Utility.TaskPorts(taskParameters.name, taskParameters.inputs)).flat();
         

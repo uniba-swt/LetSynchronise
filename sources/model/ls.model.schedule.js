@@ -92,13 +92,21 @@ class ModelSchedule {
     // Create all instances of a dependency.
     createDependencyInstances(dependency) {
         // Get all instances of the source and destination tasks
+        // If one of the tasks is Model.SystemInterfaceName, we duplicate the other task
+        const sourceTaskInstancesPromise = (dependency.source.task != Model.SystemInterfaceName)
+                                         ? this.database.getTaskInstances(dependency.source.task)
+                                         : this.database.getTaskInstances(dependency.destination.task);
+    	const destinationTaskInstancesPromise = (dependency.destination.task != Model.SystemInterfaceName)
+                                              ? this.database.getTaskInstances(dependency.destination.task)
+                                              : this.database.getTaskInstances(dependency.source.task);
+        
         return Promise.all([
-            this.database.getTaskInstances(dependency.source.task), 
-            this.database.getTaskInstances(dependency.destination.task)
+            sourceTaskInstancesPromise, 
+            destinationTaskInstancesPromise
         ]).then(([sourceTaskInstances, destinationTaskInstances]) => {
-            const destinationInstances = destinationTaskInstances.value;
-            const sourceInstances = sourceTaskInstances.value;
-
+			const sourceInstances = sourceTaskInstances.value;
+			const destinationInstances = destinationTaskInstances.value;
+        
             let instances = [];
             for (let destinationIndex = destinationInstances.length - 1; destinationIndex > -1;  destinationIndex--) {
                 // Find latest sourceInstance

@@ -66,10 +66,18 @@ class Utility {
     
 	static FormatDependencies(rawDependencies) {
 		return rawDependencies.map(dependency => { 
+			const sourceText = (dependency.source.task == Model.SystemInterfaceName)
+			                 ? `${dependency.source.port}`
+			                 : `${dependency.source.task}.${dependency.source.port}`;
+
+			const destinationText = (dependency.destination.task == Model.SystemInterfaceName)
+			                      ? `${dependency.destination.port}`
+			                      : `${dependency.destination.task}.${dependency.destination.port}`;
+		
 			return {
 				'name': dependency.name, 
-				'source': `${dependency.source.task}.${dependency.source.port}`,
-				'destination': `${dependency.destination.task}.${dependency.destination.port}`
+				'source': sourceText,
+				'destination': destinationText
 			}
 		});
     }

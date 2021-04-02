@@ -39,6 +39,7 @@ controller.controllerExportImport.modelConstraint = model.modelConstraint;
 controller.controllerInterface.view = view.viewInterface;
 controller.controllerInterface.model = model.modelInterface;
 controller.controllerInterface.modelDependency = model.modelDependency;
+controller.controllerInterface.modelConstraint = model.modelConstraint;
 
 controller.controllerTask.view = view.viewTask;
 controller.controllerTask.model = model.modelTask;

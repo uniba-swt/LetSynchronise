@@ -133,16 +133,16 @@ class ViewDependency {
         return true;
     }
     
-    updateDependencySelectors(taskParametersSet) {
+    updateDependencySelectors(taskParametersSet, systemInputs, systemOutputs) {
         const sources = taskParametersSet.map(taskParameters => Utility.TaskPorts(taskParameters.name, taskParameters.outputs)).flat();
         const destinations = taskParametersSet.map(taskParameters => Utility.TaskPorts(taskParameters.name, taskParameters.inputs)).flat();
         
         // Create list of available sources and destinations
-        this.updateTaskDependencyPorts(d3.select(this.sourceField), sources);
-        this.updateTaskDependencyPorts(d3.select(this.destinationField), destinations);
+        this.updateTaskDependencyPorts(d3.select(this.sourceField), sources, systemInputs);
+        this.updateTaskDependencyPorts(d3.select(this.destinationField), destinations, systemOutputs);
     }
         
-    updateTaskDependencyPorts(parentElement, ports) {
+    updateTaskDependencyPorts(parentElement, taskPorts, systemPorts) {
         // Create list of available ports
         parentElement.selectAll('*').remove();
         parentElement
@@ -153,7 +153,14 @@ class ViewDependency {
                 .attr('value', 'null ')
                 .text('Choose ...');
         
-        ports.forEach(port =>
+        systemPorts.forEach(port =>
+            parentElement
+                .append('option')
+                    .attr('value', `${Model.SystemInterfaceName}.${port.name}`)
+                    .text(port.name)
+        );
+        
+        taskPorts.forEach(port =>
             parentElement
                 .append('option')
                     .attr('value', port)

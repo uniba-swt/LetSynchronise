@@ -40,6 +40,9 @@ class ControllerInterface {
 
     set modelDependency(modelDependency) {
         this._modelDependency = modelDependency;
+        
+		// Register the model dependency with the model.
+        this._model.registerModelDependency(this._modelDependency);
     }
     
     get modelDependency() {
