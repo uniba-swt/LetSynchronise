@@ -129,6 +129,11 @@ class ViewDependency {
             alert(`Choose destination of dependency.`);
             return false;
         }
+        
+        if (taskDependency.source.includes(Model.SystemInterfaceName) && taskDependency.destination.includes(Model.SystemInterfaceName)) {
+			alert('Source and destination of dependency cannot both be from the system.')
+        	return false;
+        }
                 
         return true;
     }
@@ -197,8 +202,8 @@ class ViewDependency {
     
     populateParameterForm(dependency) {
         this.name = dependency.name;
-        this.source = dependency.source;
-        this.destination = dependency.destination;
+        this.source = dependency.sourceFull;
+        this.destination = dependency.destinationFull;
     }
     
     toString() {
