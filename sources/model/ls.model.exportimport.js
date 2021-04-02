@@ -37,6 +37,11 @@ class ModelExportImport {
     
     // -----------------------------------------------------
     // Class methods
+    
+    resetSystem() {
+    	this.database.deleteSystem()
+    		.then(this.refreshViews());
+    }
 
     exportSystem() {
         this.database.exportSystem()
