@@ -33,6 +33,7 @@ controller.controllerExportImport.view = view.viewExportImport;
 controller.controllerExportImport.model = model.modelExportImport;
 controller.controllerExportImport.modelTask = model.modelTask;
 controller.controllerExportImport.modelDependency = model.modelDependency;
+controller.controllerExportImport.modelInterface = model.modelInterface;
 
 controller.controllerInterface.view = view.viewInterface;
 controller.controllerInterface.model = model.modelInterface;

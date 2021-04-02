@@ -5,6 +5,7 @@ class ControllerExportImport {
     _model = null;
     _modelTask = null;
     _modelDependency = null;
+    _modelInterface = null;
     
     constructor() { }
     
@@ -48,6 +49,17 @@ class ControllerExportImport {
     
     get modelDependency() {
         return this._modelDependency;
+    }
+    
+    set modelInterface(modelInterface) {
+        this._modelInterface = modelInterface;
+        
+        // Register the model interface with the model.
+        this._model.registerModelInterface(this._modelInterface);
+    }
+    
+    get modelInterface() {
+        return this._modelInterface;
     }
     
     
