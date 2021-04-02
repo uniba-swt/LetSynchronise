@@ -11,27 +11,31 @@ class ModelDatabase {
             return;
         }
         
-        const dbOpenRequest = window.indexedDB.open('letDatabase', 5);
+        const dbOpenRequest = window.indexedDB.open('letDatabase', 6);
 
         // Upgrade old database schemas.
         dbOpenRequest.onupgradeneeded = function(event) {
             this.db = event.target.result;
             
-            if (event.oldVersion < 5) {
-                if (event.oldVersion < 4) {
-                    if (event.oldVersion < 3) {
-                        if (event.oldVersion < 2) {
-                            if (event.oldVersion < 1) {
-                                this.db.createObjectStore('TaskStore', {keyPath: 'name', unique: true});
+            if (event.oldVersion < 6) {
+                if (event.oldVersion < 5) {
+                    if (event.oldVersion < 4) {
+                        if (event.oldVersion < 3) {
+                            if (event.oldVersion < 2) {
+                                if (event.oldVersion < 1) {
+                                    this.db.createObjectStore('TaskStore', {keyPath: 'name', unique: true});
+                                }
+                                this.db.createObjectStore('DependencyStore', {keyPath: 'name', unique: true});
                             }
-                            this.db.createObjectStore('DependencyStore', {keyPath: 'name', unique: true});
+                            this.db.createObjectStore('TaskInstancesStore', {keyPath:'name', unique: true});
                         }
-                        this.db.createObjectStore('TaskInstancesStore', {keyPath:'name', unique: true});
+                        this.db.createObjectStore('DependencyInstancesStore', {keyPath: 'name', unique: true});
                     }
-                    this.db.createObjectStore('DependencyInstancesStore', {keyPath: 'name', unique: true});
+                    this.db.createObjectStore('SystemInputStore', {keyPath: 'name', unique: true});
+                    this.db.createObjectStore('SystemOutputStore', {keyPath: 'name', unique: true});
                 }
-                this.db.createObjectStore('SystemInputStore', {keyPath: 'name', unique: true});
-                this.db.createObjectStore('SystemOutputStore', {keyPath: 'name', unique: true});
+                this.db.createObjectStore('ConstraintStore', {keyPath: 'name', unique: true});
+                this.db.createObjectStore('ConstraintInstancesStore', {keyPath: 'name', unique: true});
             }
         }
 
@@ -212,9 +216,9 @@ class ModelDatabase {
 
     // Dependency Instances
 
-    storeDependencyInstances = function(dependency) {
+    storeDependencyInstances = function(dependencyInstances) {
         return new Promise((resolve, reject) => {
-            this.putObject('DependencyInstancesStore', 'readwrite', dependency, resolve, reject);
+            this.putObject('DependencyInstancesStore', 'readwrite', dependencyInstances, resolve, reject);
         });
     }
 
@@ -239,6 +243,72 @@ class ModelDatabase {
     deleteAllDependenciesInstances = function() {
         return new Promise((resolve, reject) => {
             this.deleteAllObjects('DependencyInstancesStore', 'readwrite', resolve, reject);
+        });
+    }
+    
+    
+    // Constraint
+    
+    storeConstraint = function(constraint) {
+        return new Promise((resolve, reject) => {
+            this.putObject('ConstraintStore', 'readwrite', constraint, resolve, reject);
+        });
+    }
+
+    getConstraint  = function(name) {
+        return new Promise((resolve, reject) => {
+            this.getObject('ConstraintStore', 'readonly', name, resolve, reject);
+        });
+    }
+    
+    getAllConstraints = function() {
+        return new Promise((resolve, reject) => {
+            this.getAllObjects('ConstraintStore', 'readonly', resolve, reject);
+        });
+    }
+
+    deleteConstraint = function(name) {
+        return new Promise((resolve, reject) => {
+            this.deleteObject('ConstraintStore', 'readwrite', name, resolve, reject);
+        });
+    }
+
+    deleteAllConstraints = function() {
+        return new Promise((resolve, reject) => {
+            this.deleteAllObjects('ConstraintStore', 'readwrite', resolve, reject);
+        });
+    }
+    
+    
+    // Constraint Instances
+    
+    storeConstraintInstances = function(constraintInstances) {
+        return new Promise((resolve, reject) => {
+            this.putObject('ConstraintInstancesStore', 'readwrite', constraintInstances, resolve, reject);
+        });
+    }
+
+    getConstraintInstances  = function(name) {
+        return new Promise((resolve, reject) => {
+            this.getObject('ConstraintInstancesStore', 'readonly', name, resolve, reject);
+        });
+    }
+    
+    getAllConstraintsInstances = function() {
+        return new Promise((resolve, reject) => {
+            this.getAllObjects('ConstraintInstancesStore', 'readonly', resolve, reject);
+        });
+    }
+
+    deleteConstraintInstances = function(name) {
+        return new Promise((resolve, reject) => {
+            this.deleteObject('ConstraintInstancesStore', 'readwrite', name, resolve, reject);
+        });
+    }
+    
+    deleteAllConstraintsInstances = function() {
+        return new Promise((resolve, reject) => {
+            this.deleteAllObjects('ConstraintInstancesStore', 'readwrite', resolve, reject);
         });
     }
     

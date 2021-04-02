@@ -5,6 +5,7 @@ class ModelInterface {
     
     database = null;
     modelDependency = null;
+    modelConstraint = null;
 
     constructor() { }
     
@@ -26,6 +27,10 @@ class ModelInterface {
     
     registerModelDependency(modelDependency) {
         this.modelDependency = modelDependency;
+    }
+    
+    registerModelConstraint(modelConstraint) {
+        this.modelConstraint = modelConstraint;
     }
     
     
@@ -54,12 +59,14 @@ class ModelInterface {
     
     deleteInput(name) {
 		return this.modelDependency.deleteDependenciesOfSystem(name)
+			.then(this.modelConstraint.deleteConstraintsOfSystem(name))
         	.then(this.database.deleteInput(name))
         	.then(this.refreshViews());
     }
     
     deleteOutput(name) {
 		return this.modelDependency.deleteDependenciesOfSystem(name)
+			.then(this.modelConstraint.deleteConstraintsOfSystem(name))
         	.then(this.database.deleteOutput(name))
         	.then(this.refreshViews());
     }

@@ -44,6 +44,7 @@ controller.controllerInterface.modelConstraint = model.modelConstraint;
 controller.controllerTask.view = view.viewTask;
 controller.controllerTask.model = model.modelTask;
 controller.controllerTask.modelDependency = model.modelDependency;
+controller.controllerTask.modelConstraint = model.modelConstraint;
 
 controller.controllerDependency.view = view.viewDependency;
 controller.controllerDependency.model = model.modelDependency;
