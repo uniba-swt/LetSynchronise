@@ -2,8 +2,6 @@
 
 class ModelTask {
     updateTasks = null;                 // Callback to function in ls.view.task
-    updateDependencySelectors = null;   // Callback to function in ls.view.dependency
-    updateConstraintSelectors = null;   // Callback to function in ls.view.constraint
 
     database = null;
     modelDependency = null;
@@ -16,14 +14,6 @@ class ModelTask {
 
     registerUpdateTasksCallback(callback) {
         this.updateTasks = callback;
-    }
-    
-    registerUpdateDependencySelectorsCallback(callback) {
-        this.updateDependencySelectors = callback;
-    }
-    
-    registerUpdateConstraintSelectorsCallback(callback) {
-        this.updateConstraintSelectors = callback;
     }
     
     
@@ -60,15 +50,9 @@ class ModelTask {
 			.then(result => this.refreshViews());
     }
     
-    deleteAllTasks() {
-    	return this.database.deleteAllTasks()
-    		.then(this.database.deleteAllTasksInstances())
-    		.then(this.refreshViews());
-    }
-    
     refreshViews() {
     	return this.getAllTasks()
-    		.then(result => { this.updateTasks(result); this.updateDependencySelectors(result) });
+    		.then(result => { this.updateTasks(result); /*this.updateDependencySelectors(result)*/ });
     }
     
     toString() {

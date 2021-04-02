@@ -2,6 +2,7 @@
 
 class Model {
     _modelExportImport = null;
+    _modelInterface = null;
     _modelTask = null;
     _modelDependency = null;
     _modelSchedule = null;
@@ -9,6 +10,12 @@ class Model {
     _modelDatabase = null;
     
     constructor() { }
+    
+    // -----------------------------------------------------
+    // Static constants.
+    
+    static get SystemInterfaceName()      { return '__system'; }
+
 
     get modelExportImport() {
         return this._modelExportImport;
@@ -16,6 +23,14 @@ class Model {
     
     set modelExportImport(modelExportImport) {
         this._modelExportImport = modelExportImport;
+    }
+    
+    get modelInterface() {
+        return this._modelInterface;
+    }
+    
+    set modelInterface(modelInterface) {
+        this._modelInterface = modelInterface;
     }
     
     get modelTask() {
@@ -57,6 +72,7 @@ class Model {
     set modelDatabase(modelDatabase) {
         this._modelDatabase = modelDatabase;
         this._modelExportImport.registerModelDatabase(this._modelDatabase);
+        this._modelInterface.registerModelDatabase(this._modelDatabase);
         this._modelTask.registerModelDatabase(this._modelDatabase);
         this._modelSchedule.registerModelDatabase(this._modelDatabase);
         this._modelDependency.registerModelDatabase(this._modelDatabase);

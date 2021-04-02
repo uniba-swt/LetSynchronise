@@ -2,8 +2,11 @@
 
 class ModelExportImport {
     database = null;
+    
     modelTask = null;
     modelDependency = null;
+    modelConstraint = null;
+    modelInterface = null;
     
     constructor() { }
     
@@ -15,12 +18,20 @@ class ModelExportImport {
         this.database = database;
     }
 
+    registerModelInterface(modelInterface) {
+        this.modelInterface = modelInterface;
+    }
+
     registerModelTask(modelTask) {
         this.modelTask = modelTask;
     }
     
     registerModelDependency(modelDependency) {
         this.modelDependency = modelDependency;
+    }
+    
+     registerModelConstraint(modelConstraint) {
+        this.modelConstraint = modelConstraint;
     }
     
     
@@ -41,23 +52,18 @@ class ModelExportImport {
     }
 
     importSystem(system) {
-    	this.modelTask.deleteAllTasks()
-    		.then(this.modelDependency.deleteAllDependencies())
-    		.then(() => {
-				let importPromises = []
-				for (const task of system.Tasks) {
-					importPromises.push(this.modelTask.createTask(task));
-				}
-
-				for (const dependency of system.Dependencies) {
-					importPromises.push(this.modelDependency.createDependency(dependency));
-				}
-				
-				return Promise.all(importPromises);
-    		
-    		})
-        	.then(Promise.all([this.modelTask.refreshViews(), this.modelDependency.refreshViews()]));
+    	this.database.deleteSystem()
+			.then(this.database.importSystem(system))
+        	.then(this.refreshViews());
     }
+    
+    refreshViews() {
+    	return this.modelInterface.refreshViews()
+    		.then(this.modelTask.refreshViews())
+    		.then(this.modelDependency.refreshViews())
+    		.then(this.modelConstraint.refreshViews())
+    }
+    
     
     toString() {
         return "ModelExportImport";

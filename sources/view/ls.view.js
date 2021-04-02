@@ -2,6 +2,7 @@
 
 class View {
     _viewExportImport = null;
+    _viewInterface = null;
     _viewTask = null;
     _viewDependency = null;
     _viewSchedule = null;
@@ -27,6 +28,10 @@ class View {
         this._viewExportImport = viewExportImport;
     }
     
+    set viewInterface(viewInterface) {
+        this._viewInterface = viewInterface;
+    }
+
     set viewTask(viewTask) {
         this._viewTask = viewTask;
     }
@@ -45,6 +50,10 @@ class View {
     
     get viewExportImport() {
         return this._viewExportImport;
+    }
+    
+    get viewInterface() {
+        return this._viewInterface;
     }
     
     get viewTask() {

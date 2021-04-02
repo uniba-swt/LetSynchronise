@@ -300,19 +300,40 @@ class ViewSchedule {
         
         const sendEvent = dataflow.sendEvent;
         const receiveEvent = dataflow.receiveEvent;
+        let sendPortName = Utility.TaskPorts(sendEvent.task, [sendEvent.port]);
+        let receivePortName = Utility.TaskPorts(receiveEvent.task, [receiveEvent.port]);
         sendEvent.timestamp = scale(sendEvent.timestamp);
         receiveEvent.timestamp = scale(receiveEvent.timestamp);
-
+        
+        // Create dangling arrows if one of the tasks is Model.SystemInterfaceName
+        // Need an additional y-offset
+        const adjustedSendTaskHeight = (sendEvent.task == Model.SystemInterfaceName) ? -0.4 * View.TaskHeight : 0;
+		const adjustedReceiveTaskHeight = (receiveEvent.task == Model.SystemInterfaceName) ? 0.4 * View.TaskHeight : 0 ;
+		
+		// Change the name and timestamp of the system event
+        if (sendEvent.task == Model.SystemInterfaceName) {
+        	sendEvent.task = receiveEvent.task;
+        	sendEvent.timestamp = receiveEvent.timestamp;
+        	sendPortName = sendEvent.port;
+        }
+        
+        if (receiveEvent.task == Model.SystemInterfaceName) {
+        	receiveEvent.task = sendEvent.task;
+        	receiveEvent.timestamp = sendEvent.timestamp;
+        	receivePortName = receiveEvent.port;
+        }
+        
+		// Create the arrow
         const points = [
-            { x: sendEvent.timestamp,                y: taskIndices[sendEvent.task] },
-            { x: sendEvent.timestamp + xOffset,      y: taskIndices[sendEvent.task] },
-            { x: receiveEvent.timestamp - xOffset,   y: taskIndices[receiveEvent.task] },
-            { x: receiveEvent.timestamp,             y: taskIndices[receiveEvent.task] }
+            { x: sendEvent.timestamp,                y: yOffset + taskIndices[sendEvent.task] * View.TaskHeight + adjustedSendTaskHeight },
+            { x: sendEvent.timestamp + xOffset,      y: yOffset + taskIndices[sendEvent.task] * View.TaskHeight + adjustedSendTaskHeight },
+            { x: receiveEvent.timestamp - xOffset,   y: yOffset + taskIndices[receiveEvent.task] * View.TaskHeight + adjustedReceiveTaskHeight },
+            { x: receiveEvent.timestamp,             y: yOffset + taskIndices[receiveEvent.task] * View.TaskHeight + adjustedReceiveTaskHeight }
         ]
 
         var line = d3.line()
                      .x((point) => point.x)
-                     .y((point) => yOffset + View.TaskHeight * point.y)
+                     .y((point) => point.y)
                      .curve(d3.curveBundle);
         
         const group =
@@ -327,7 +348,7 @@ class ViewSchedule {
                  .transition()
                  .ease(d3.easeLinear)
                  .style('stroke', 'var(--orange)');
-               tooltip.innerHTML = `${dependencyName}:<br/>${Utility.TaskPorts(sendEvent.task, [sendEvent.port])} &rarr; ${Utility.TaskPorts(receiveEvent.task, [receiveEvent.port])}`;
+               tooltip.innerHTML = `${dependencyName}:<br/>${sendPortName} &rarr; ${receivePortName}`;
                tooltip.style.visibility = 'visible';
              })
              .on('mousemove', function() {

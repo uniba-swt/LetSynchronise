@@ -66,10 +66,24 @@ class Utility {
     
 	static FormatDependencies(rawDependencies) {
 		return rawDependencies.map(dependency => { 
+			const sourceFullText = `${dependency.source.task}.${dependency.source.port}`;
+		
+			const sourceText = (dependency.source.task == Model.SystemInterfaceName)
+			                 ? `${dependency.source.port}`
+			                 : sourceFullText;
+
+			const destinationFullText = `${dependency.destination.task}.${dependency.destination.port}`;
+
+			const destinationText = (dependency.destination.task == Model.SystemInterfaceName)
+			                      ? `${dependency.destination.port}`
+			                      : destinationFullText;
+		
 			return {
 				'name': dependency.name, 
-				'source': `${dependency.source.task}.${dependency.source.port}`,
-				'destination': `${dependency.destination.task}.${dependency.destination.port}`
+				'source': sourceText,
+				'sourceFull': sourceFullText,
+				'destination': destinationText,
+				'destinationFull': destinationFullText
 			}
 		});
     }
