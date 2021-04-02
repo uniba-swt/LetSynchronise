@@ -312,12 +312,47 @@ class ModelDatabase {
     // System export
     
     exportSystem = async function() {
-        return {
-            'System' : {
-                'Tasks' : await this.getAllTasks(), 
-                'Dependencies' : await this.getAllDependencies()
+        var system = {};
+        var necessaryStoreNames = [];
+        
+        const allStoreNames = this.db.objectStoreNames;
+        for (const storeName of allStoreNames) {
+            if (!storeName.includes('Instance')) {
+                necessaryStoreNames.push(storeName);
+                system[storeName] = await new Promise((resolve, reject) => {
+                    this.getAllObjects(storeName, 'readonly', resolve, reject)
+                });
             }
-        };
+        }
+        
+        return system;
+    }
+    
+    deleteSystem = function() {
+        var deletePromises = [];
+        
+        const allStoreNames = this.db.objectStoreNames;
+        for (const storeName of allStoreNames) {
+            deletePromises.push(new Promise((resolve, reject) => {
+                this.deleteAllObjects(storeName, 'readwrite', resolve, reject)
+            }));
+        }
+        
+        return Promise.all(deletePromises);
+    }
+    
+    importSystem = function(system) {
+        let importPromises = [];
+        
+        for (const [storeName, objects] of Object.entries(system)) {
+            for (const object of objects) {
+                importPromises.push(new Promise((resolve, reject) => {
+                    this.putObject(storeName, 'readwrite', object, resolve, reject);
+                }));
+            }
+        }
+
+        return Promise.all(importPromises);
     }
     
 

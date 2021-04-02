@@ -41,7 +41,7 @@ class ViewExportImport {
 		
 			fileReader.onload = (event) => { 
 				const result = JSON.parse(event.target.result);
-	            handler(result.System);
+	            handler(result);
 			}
         });
     }
