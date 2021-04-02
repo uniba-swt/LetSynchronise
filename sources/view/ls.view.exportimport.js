@@ -5,6 +5,8 @@ class ViewExportImport {
 
     exportButton = null;
     importButton = null;
+    resetButton = null;
+    
     importSelector = null;
 
 
@@ -14,6 +16,8 @@ class ViewExportImport {
         // System export or import
         this.exportButton = this.root.querySelector('#export-system');
         this.importButton = this.root.querySelector('#import-system');
+        this.resetButton = this.root.querySelector('#reset-system');
+
         this.importSelector = this.root.querySelector('#import-system-file');
     }
     
@@ -41,8 +45,15 @@ class ViewExportImport {
 		
 			fileReader.onload = (event) => { 
 				const result = JSON.parse(event.target.result);
-	            handler(result.System);
+	            handler(result);
 			}
+        });
+    }
+    
+    registerResetButtonHandler(handler) {
+        this.resetButton.addEventListener('click', event => {
+            event.preventDefault();
+            handler();
         });
     }
     

@@ -3,7 +3,8 @@
 class ControllerConstraint {
     _view = null;
     _model = null;
-    _modelTask = null;      // Hack to allow new inputs/outputs to be displayed in the View's constraint selection when a task is added
+    _modelTask = null;
+	_modelInterface = null;
     
     constructor() { }
 
@@ -24,11 +25,11 @@ class ControllerConstraint {
         
         // Register the handlers when setting the model.
         this._model.registerUpdateConstraintsCallback(this.callbackUpdateConstraints);
+        this._model.registerUpdateConstraintSelectorsCallback(this.callbackUpdateConstraintSelectors)
         
         // Hack to populate the View with constraints once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
-            this._model.getAllConstraints()
-            	.then(result => this.callbackUpdateConstraints(result));
+            this._model.refreshViews();
         });
     }
     
@@ -39,18 +40,23 @@ class ControllerConstraint {
     set modelTask(modelTask) {
         this._modelTask = modelTask;
         
-        // Register the handlers when setting the model.
-        this._modelTask.registerUpdateConstraintSelectorsCallback(this.callbackUpdateConstraintSelectors);
-
-        // Hack to populate the View with constraint once the database is ready
-        window.addEventListener('DatabaseReady', (event) => {
-            this._modelTask.getAllTasks()
-            	.then(result => this.callbackUpdateConstraintSelectors(result));
-        });
+        // Register the model task with the model.
+		this._model.registerModelTask(this._modelTask);
     }
     
     get modelTask() {
         return this._modelTask;
+    }
+    
+    set modelInterface(modelInterface) {
+        this._modelInterface = modelInterface;
+        
+        // Register the model interface with the model.
+        this._model.registerModelInterface(this._modelInterface);
+    }
+    
+    get modelInterface() {
+        return this._modelInterface;
     }
     
     
@@ -77,8 +83,8 @@ class ControllerConstraint {
     }
     
     // Callback for updating the displayed constraint selectors.
-    callbackUpdateConstraintSelectors = (taskParametersSet) => {
-        this.view.updateConstraintSelectors(taskParametersSet);
+    callbackUpdateConstraintSelectors = (taskParametersSet, systemInputs, systemOutputs) => {
+        this.view.updateConstraintSelectors(taskParametersSet, systemInputs, systemOutputs);
     }
     
     toString() {

@@ -25,6 +25,7 @@
     <!-- <script type="module"> does not work when executed locally -->
     <script src="sources/model/ls.model.js"></script>
     <script src="sources/model/ls.model.exportImport.js"></script>
+    <script src="sources/model/ls.model.interface.js"></script>
     <script src="sources/model/ls.model.dependency.js"></script>
     <script src="sources/model/ls.model.schedule.js"></script>
     <script src="sources/model/ls.model.task.js"></script>
@@ -34,6 +35,7 @@
 
     <script src="sources/view/ls.view.js"></script>
     <script src="sources/view/ls.view.exportImport.js"></script>
+    <script src="sources/view/ls.view.interface.js"></script>
     <script src="sources/view/ls.view.dependency.js"></script>
     <script src="sources/view/ls.view.schedule.js"></script>
     <script src="sources/view/ls.view.task.js"></script>
@@ -41,6 +43,7 @@
 
     <script src="sources/controller/ls.controller.js"></script>
     <script src="sources/controller/ls.controller.exportImport.js"></script>
+    <script src="sources/controller/ls.controller.interface.js"></script>
     <script src="sources/controller/ls.controller.dependency.js"></script>
     <script src="sources/controller/ls.controller.schedule.js"></script>
     <script src="sources/controller/ls.controller.task.js"></script>
@@ -71,17 +74,25 @@
         	<h3>System Export or Import</h3>
 				
 			<form id="view-exportimport">
-				<button id="export-system" type="submit" class="btn btn-primary">Export</button>
-				
-				<div class="m-1"></div>
-				
-				<div class="input-group mb-3">
-					<div class="input-group-prepend">
-						<button id="import-system" type="submit" class="btn btn-primary">Import</button>
+				<div class="row">
+					<div class="col-auto">
+						<button id="export-system" type="submit" class="btn btn-primary">Export</button>
 					</div>
-					<div class="custom-file col-sm-3">
-						<input id="import-system-file" type="file" accept=".json" class="custom-file-input btn"/>
-						<label for="import-system-file" class="custom-file-label">Choose system JSON file</label>
+				
+					<div class="col-sm-4">
+						<div class="input-group mb-12">
+							<div class="custom-file col-sm-12">
+								<input id="import-system-file" type="file" accept=".json" class="custom-file-input btn"/>
+								<label for="import-system-file" class="custom-file-label">Choose system JSON file</label>
+							</div>
+							<div class="input-group-append">
+								<button id="import-system" type="submit" class="btn btn-primary">Import</button>
+							</div>
+						</div>
+					</div>
+					
+					<div class="col-auto">
+						<button id="reset-system" type="submit" class="btn btn-danger">Reset</button>
 					</div>
 				</div>
             </form>
@@ -89,69 +100,116 @@
             <div class="m-5"></div>
 
 
+			<h3>Define System Inputs and Outputs</h3>
+            
+            <form id="view-system-interface">
+            	<div class="row">
+					<div class="col-auto">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<label class="input-group-text" for="view-system-input-name">Input</label>
+							</div>
+							<input required type="text" id="view-system-input-name" class="form-control"/>
+						
+							<div class="input-group-append">
+								<button id="submitInput" type="submit" class="btn btn-primary">Save</button>
+							</div>
+						</div>
+						
+						<div class="m-3"></div>
+						
+						<ul id="view-system-inputs"></ul>
+					</div>
+				
+					<div class="col-auto">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<label class="input-group-text" for="view-system-output-name">Output</label>
+							</div>
+							<input required type="text" id="view-system-output-name" class="form-control"/>
+						
+							<div class="input-group-append">
+								<button id="submitOutput" type="submit" class="btn btn-primary">Save</button>
+							</div>
+						</div>
+						<div class="m-3"></div>
+						<ul id="view-system-outputs"></ul>
+					</div>
+				</div>
+            </form>
+
+            <div class="m-3"></div>
+
+
             <h3>Define or Edit a LET Task</h3>
             
             <form id="view-task-define">
-                <div class="form-group row mb-1">
-                    <label for="name" class="col-sm-2 col-form-label">Name</label>
-                    <input required type="text" class="form-control col-sm-2" id="name" value="t1"/>
-                </div>
+				<div class="row align-items-end">
+					<div class="col-sm-4">
+						<div class="form-group row mb-1">
+							<label for="name" class="col-sm-5 col-form-label">Name</label>
+							<input required type="text" class="form-control col-sm-7" id="name" value="t1"/>
+						</div>
 
-                <div class="form-group row mb-1">
-                    <label for="initial-offset" class="col-sm-2 col-form-label">Initial Offset</label>
-                    <div class="input-group col-sm-2 p-0">
-                        <input required type="text" class="form-control" id="initial-offset" value="1"/>
-                        <div class="input-group-append">
-                            <span class="input-group-text">ms</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-group row mb-1">
-                    <label for="activation-offset" class="col-sm-2 col-form-label">Activation Offset</label>
-                    <div class="input-group col-sm-2 p-0">
-                        <input required type="text" class="form-control" id="activation-offset" value="1"/>
-                        <div class="input-group-append">
-                            <span class="input-group-text">ms</span>
-                        </div>
-                    </div>
-                </div>
+						<div class="form-group row mb-1">
+							<label for="initial-offset" class="col-sm-5 col-form-label">Initial Offset</label>
+							<div class="input-group col-sm-7 p-0">
+								<input required type="text" class="form-control" id="initial-offset" value="1"/>
+								<div class="input-group-append">
+									<span class="input-group-text">ms</span>
+								</div>
+							</div>
+						</div>
+				
+						<div class="form-group row mb-1">
+							<label for="activation-offset" class="col-sm-5 col-form-label">Activation Offset</label>
+							<div class="input-group col-sm-7 p-0">
+								<input required type="text" class="form-control" id="activation-offset" value="1"/>
+								<div class="input-group-append">
+									<span class="input-group-text">ms</span>
+								</div>
+							</div>
+						</div>
 
-                <div class="form-group row mb-1">
-                    <label for="duration" class="col-sm-2 col-form-label">Duration</label>
-                    <div class="input-group col-sm-2 p-0">
-                        <input required type="text" class="form-control" id="duration" value="1"/>
-                        <div class="input-group-append">
-                            <span class="input-group-text">ms</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-group row mb-1">
-                    <label for="period" class="col-sm-2 col-form-label">Period</label>
-                    <div class="input-group col-sm-2 p-0">
-                        <input required type="text" class="form-control" id="period" value="2"/>
-                        <div class="input-group-append">
-                            <span class="input-group-text">ms</span>
-                        </div>
-                    </div>
-                </div>
+						<div class="form-group row mb-1">
+							<label for="duration" class="col-sm-5 col-form-label">Duration</label>
+							<div class="input-group col-sm-7 p-0">
+								<input required type="text" class="form-control" id="duration" value="1"/>
+								<div class="input-group-append">
+									<span class="input-group-text">ms</span>
+								</div>
+							</div>
+						</div>
+				
+						<div class="form-group row mb-1">
+							<label for="period" class="col-sm-5 col-form-label">Period</label>
+							<div class="input-group col-sm-7 p-0">
+								<input required type="text" class="form-control" id="period" value="2"/>
+								<div class="input-group-append">
+									<span class="input-group-text">ms</span>
+								</div>
+							</div>
+						</div>
 
-                <div class="form-group row mb-1">
-                    <label for="inputs" class="col-sm-2 col-form-label">Inputs</label>
-                    <input required type="text" class="form-control col-sm-2" id="inputs" placeholder="E.g., in1, in2, in3" value="in1,in2,in3"/>
-                </div>
-                
-                <div class="form-group row mb-1">
-                    <label for="outputs" class="col-sm-2 col-form-label">Outputs</label>
-                    <input required type="text" class="form-control col-sm-2" id="outputs" placeholder="E.g., out1, out2, out3" value="out1,out2,out3"/>
-                </div>
+						<div class="form-group row mb-1">
+							<label for="inputs" class="col-sm-5 col-form-label">Inputs</label>
+							<input required type="text" class="form-control col-sm-7" id="inputs" placeholder="E.g., in1, in2, in3" value="in1,in2,in3"/>
+						</div>
+				
+						<div class="form-group row mb-1">
+							<label for="outputs" class="col-sm-5 col-form-label">Outputs</label>
+							<input required type="text" class="form-control col-sm-7" id="outputs" placeholder="E.g., out1, out2, out3" value="out1,out2,out3"/>
+						</div>
 
-                <div class="form-group row" id="view-task-preview"></div>
-                
-        	    <button id="previewTask" type="submit" class="btn btn-primary">Preview</button>
-                <button id="submitTask" type="submit" class="btn btn-primary">Save</button>
-                <button id="clearTask" type="reset" class="btn btn-outline-secondary">Clear</button>
+						<button id="previewTask" type="submit" class="btn btn-primary">Preview</button>
+						<button id="submitTask" type="submit" class="btn btn-primary">Save</button>
+						<button id="clearTask" type="reset" class="btn btn-outline-secondary">Clear</button>
+					</div>
+			
+					<div class="col ml-4">
+						<div class="form-group row" id="view-task-preview"></div>
+					</div>
+				</div>
             </form>
             
             <div class="m-5"></div>
@@ -180,7 +238,7 @@
 							<label class="input-group-text" for="view-task-dependency-source">Source</label>
 						</div>
 						<select id="view-task-dependency-source" class="custom-select">
-							<option disabled>Choose...</option>
+							<option disabled selected>Choose ...</option>
 						</select>
 					</div>
 				
@@ -189,7 +247,7 @@
 							<label class="input-group-text" for="view-task-dependency-destination">Destination</label>
 						</div>
 						<select id="view-task-dependency-destination" class="custom-select">
-							<option disabled>Choose...</option>
+							<option disabled selected>Choose ...</option>
 						</select>
 					</div>
 				
@@ -279,7 +337,7 @@
                         <label class="input-group-text" for="view-analyse-constraint-source">Source</label>
                     </div>
                     <select id="view-analyse-constraint-source" class="custom-select">
-                        <option disabled>Choose...</option>
+                        <option disabled selected>Choose ...</option>
                     </select>
                 </div>
                 
@@ -288,7 +346,7 @@
                         <label class="input-group-text" for="view-analyse-constraint-destination">Destination</label>
                     </div>
                     <select id="view-analyse-constraint-destination" class="custom-select">
-                        <option disabled>Choose...</option>
+                        <option disabled selected>Choose ...</option>
                     </select>
                 </div>
             </div>
@@ -299,7 +357,7 @@
                         <label class="input-group-text" for="view-analyse-constraint-relation">Relation</label>
                     </div>
                     <select id="view-analyse-constraint-relation" class="custom-select">
-                        <option value="null " disabled>Choose...</option>
+                        <option value="null " disabled selected>Choose ...</option>
                         <option value="<">&lt;</option>
                         <option value="<=">&le;</option>
                         <option vlaue="=">&equals;</option>

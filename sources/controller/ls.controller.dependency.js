@@ -3,7 +3,8 @@
 class ControllerDependency {
     _view = null;
     _model = null;
-    _modelTask = null;      // Hack to allow new inputs/outputs to be displayed in the View's dependency selection when a task is added
+    _modelTask = null;
+    _modelInterface = null;
     
     constructor() { }
 
@@ -24,11 +25,11 @@ class ControllerDependency {
         
         // Register the handlers when setting the model.
         this._model.registerUpdateDependenciesCallback(this.callbackUpdateDependencies);
-        
+        this._model.registerUpdateDependencySelectorsCallback(this.callbackUpdateDependencySelectors);
+
         // Hack to populate the View with dependencies once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
-            this._model.getAllDependencies()
-            	.then(result => this.callbackUpdateDependencies(result));
+            this._model.refreshViews();
         });
     }
     
@@ -39,18 +40,23 @@ class ControllerDependency {
     set modelTask(modelTask) {
         this._modelTask = modelTask;
         
-        // Register the handlers when setting the model.
-        this._modelTask.registerUpdateDependencySelectorsCallback(this.callbackUpdateDependencySelectors);
-
-        // Hack to populate the View with dependencies once the database is ready
-        window.addEventListener('DatabaseReady', (event) => {
-            this._modelTask.getAllTasks()
-            	.then(result => this.callbackUpdateDependencySelectors(result));
-        });
+        // Register the model task with the model.
+        this._model.registerModelTask(this._modelTask);
     }
     
     get modelTask() {
         return this._modelTask;
+    }
+    
+    set modelInterface(modelInterface) {
+        this._modelInterface = modelInterface;
+        
+        // Register the model interface with the model.
+        this._model.registerModelInterface(this._modelInterface);
+    }
+    
+    get modelInterface() {
+        return this._modelInterface;
     }
     
     
@@ -79,8 +85,8 @@ class ControllerDependency {
     }
     
     // Callback for updating the displayed task dependency selectors.
-    callbackUpdateDependencySelectors = (taskParametersSet) => {
-        this.view.updateDependencySelectors(taskParametersSet);
+    callbackUpdateDependencySelectors = (taskParametersSet, systemInputs, systemOutputs) => {
+        this.view.updateDependencySelectors(taskParametersSet, systemInputs, systemOutputs);
     }
     
     toString() {

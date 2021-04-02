@@ -3,8 +3,10 @@
 class ControllerExportImport {
     _view = null;
     _model = null;
+    _modelInterface = null;
     _modelTask = null;
     _modelDependency = null;
+    _modelConstraint = null;
     
     constructor() { }
     
@@ -14,6 +16,7 @@ class ControllerExportImport {
         // Register the handlers when setting the view.
         this._view.registerExportButtonHandler(this.handleExport);
         this._view.registerImportButtonHandler(this.handleImport);
+        this._view.registerResetButtonHandler(this.handleReset);
     }
     
     get view() {
@@ -50,6 +53,28 @@ class ControllerExportImport {
         return this._modelDependency;
     }
     
+    set modelInterface(modelInterface) {
+        this._modelInterface = modelInterface;
+        
+        // Register the model interface with the model.
+        this._model.registerModelInterface(this._modelInterface);
+    }
+    
+    get modelInterface() {
+        return this._modelInterface;
+    }
+    
+    set modelConstraint(modelConstraint) {
+        this._modelConstraint = modelConstraint;
+        
+        // Register the model constraint with the model.
+        this._model.registerModelConstraint(this._modelConstraint);
+    }
+    
+    get modelConstraint() {
+        return this._modelConstraint;
+    }
+    
     
     // -----------------------------------------------------
     // Handlers for events from the view to the model
@@ -65,7 +90,14 @@ class ControllerExportImport {
     	this.model.importSystem(system);
     }
     
+    // Handler for resetting a system
+    handleReset = () => {
+    	this.model.resetSystem();
+    }
+    
+    
     toString() {
         return `ControllerExportImport with ${this.view} and ${this.model}`;
     }
+    
 }
