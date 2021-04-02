@@ -23,19 +23,19 @@ class ModelDatabase {
                         if (event.oldVersion < 3) {
                             if (event.oldVersion < 2) {
                                 if (event.oldVersion < 1) {
-                                    this.db.createObjectStore('TaskStore', {keyPath: 'name', unique: true});
+                                    this.db.createObjectStore(Model.TaskStoreName, {keyPath: 'name', unique: true});
                                 }
-                                this.db.createObjectStore('DependencyStore', {keyPath: 'name', unique: true});
+                                this.db.createObjectStore(Model.DependencyStoreName, {keyPath: 'name', unique: true});
                             }
-                            this.db.createObjectStore('TaskInstancesStore', {keyPath:'name', unique: true});
+                            this.db.createObjectStore(Model.TaskInstancesStoreName, {keyPath:'name', unique: true});
                         }
-                        this.db.createObjectStore('DependencyInstancesStore', {keyPath: 'name', unique: true});
+                        this.db.createObjectStore(Model.DependencyInstancesStoreName, {keyPath: 'name', unique: true});
                     }
-                    this.db.createObjectStore('SystemInputStore', {keyPath: 'name', unique: true});
-                    this.db.createObjectStore('SystemOutputStore', {keyPath: 'name', unique: true});
+                    this.db.createObjectStore(Model.SystemInputStoreName, {keyPath: 'name', unique: true});
+                    this.db.createObjectStore(Model.SystemOutputStoreName, {keyPath: 'name', unique: true});
                 }
-                this.db.createObjectStore('ConstraintStore', {keyPath: 'name', unique: true});
-                this.db.createObjectStore('ConstraintInstancesStore', {keyPath: 'name', unique: true});
+                this.db.createObjectStore(Model.ConstraintStoreName, {keyPath: 'name', unique: true});
+                this.db.createObjectStore(Model.ConstraintInstancesStoreName, {keyPath: 'name', unique: true});
             }
         }
 
@@ -57,6 +57,9 @@ class ModelDatabase {
             window.dispatchEvent(databaseReadyEvent);
         };
     }
+    
+    
+    // Database methods
     
     getObjectStore(storeName, mode, promiseReject) {
         const transaction = this.db.transaction(storeName, mode);
@@ -123,190 +126,6 @@ class ModelDatabase {
                 resolve(event.target.result);
             }
         });
-    }
-    
-    
-    // Task
-    
-    storeTask = function(task) {
-        return this.putObject('TaskStore', task.parameters);
-    }
-
-    getTask = function(name) {
-        return this.getObject('TaskStore', name);
-    }
-
-    getAllTasks = function() {
-        return this.getAllObjects('TaskStore');
-    }
-
-    deleteTask = function(name) {
-        return this.deleteObject('TaskStore', name);
-    }
-    
-    deleteAllTasks = function() {
-        return this.deleteAllObjects('TaskStore');
-    }
-    
-    
-    // Task Instances
-    
-    storeTaskInstances = function(taskInstances) {
-        return this.putObject('TaskInstancesStore', taskInstances);
-    }
-    
-    getTaskInstances = function(name) {
-        return this.getObject('TaskInstancesStore', name);
-    }
-    
-    getAllTasksInstances = function() {
-        return this.getAllObjects('TaskInstancesStore');
-    }
-
-    deleteTaskInstances = function(name) {
-        return this.deleteObject('TaskInstancesStore', name);
-    }
-    
-    deleteAllTasksInstances = function() {
-        return this.deleteAllObjects('TaskInstancesStore');
-    }
-    
-    
-    // Dependency
-
-    storeDependency = function(dependency) {
-        return this.putObject('DependencyStore', dependency);
-    }
-
-    getDependency  = function(name) {
-        return this.getObject('DependencyStore', name);
-    }
-    
-    getAllDependencies = function() {
-        return this.getAllObjects('DependencyStore');
-    }
-
-    deleteDependency = function(name) {
-        return this.deleteObject('DependencyStore', name);
-    }
-
-    deleteAllDependencies = function() {
-        return this.deleteAllObjects('DependencyStore');
-    }
-
-
-    // Dependency Instances
-
-    storeDependencyInstances = function(dependencyInstances) {
-        return this.putObject('DependencyInstancesStore', dependencyInstances);
-    }
-
-    getDependencyInstances  = function(name) {
-        return this.getObject('DependencyInstancesStore', name);
-    }
-    
-    getAllDependenciesInstances = function() {
-        return this.getAllObjects('DependencyInstancesStore');
-    }
-
-    deleteDependencyInstances = function(name) {
-        return this.deleteObject('DependencyInstancesStore', name);
-    }
-    
-    deleteAllDependenciesInstances = function() {
-        return this.deleteAllObjects('DependencyInstancesStore');
-    }
-    
-    
-    // Constraint
-    
-    storeConstraint = function(constraint) {
-        return this.putObject('ConstraintStore', constraint);
-    }
-
-    getConstraint  = function(name) {
-        return this.getObject('ConstraintStore', name);
-    }
-    
-    getAllConstraints = function() {
-        return this.getAllObjects('ConstraintStore');
-    }
-
-    deleteConstraint = function(name) {
-        return this.deleteObject('ConstraintStore', name);
-    }
-
-    deleteAllConstraints = function() {
-        return this.deleteAllObjects('ConstraintStore');
-    }
-    
-    
-    // Constraint Instances
-    
-    storeConstraintInstances = function(constraintInstances) {
-        return this.putObject('ConstraintInstancesStore', constraintInstances);
-    }
-
-    getConstraintInstances  = function(name) {
-        return this.getObject('ConstraintInstancesStore', name);
-    }
-    
-    getAllConstraintsInstances = function() {
-        return this.getAllObjects('ConstraintInstancesStore');
-    }
-
-    deleteConstraintInstances = function(name) {
-        return this.deleteObject('ConstraintInstancesStore', name);
-    }
-    
-    deleteAllConstraintsInstances = function() {
-        return this.deleteAllObjects('ConstraintInstancesStore');
-    }
-    
-    
-    // System Inputs
-    
-    storeInput = function(name) {
-        return this.putObject('SystemInputStore', name);
-    }
-
-    getInput  = function(name) {
-        return this.getObject('SystemInputStore', name);
-    }
-    
-    getAllInputs = function() {
-        return this.getAllObjects('SystemInputStore');
-    }
-
-    deleteInput = function(name) {
-        return this.deleteObject('SystemInputStore', name);
-    }
-
-    deleteAllInputs = function() {
-        return this.deleteAllObjects('SystemInputStore');
-    }
-    
-    
-    // System Outputs
-    
-    storeOutput = function(name) {
-        return this.putObject('SystemOutputStore', name);
-    }
-
-    getOutput  = function(name) {
-        return this.getObject('SystemOutputStore', name);
-    }
-    
-    getAllOutputs = function() {
-        return this.getAllObjects('SystemOutputStore');
-    }
-
-    deleteOutput = function(name) {
-        return this.deleteObject('SystemOutputStore', name);
-    }
-
-    deleteAllOutputs = function() {
-        return this.deleteAllObjects('SystemOutputStore');
     }
     
 

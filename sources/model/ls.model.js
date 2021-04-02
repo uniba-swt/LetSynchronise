@@ -13,8 +13,17 @@ class Model {
     
     // -----------------------------------------------------
     // Static constants.
+
+    static get SystemInputStoreName()         { return 'SystemInputStore'; }
+    static get SystemOutputStoreName()        { return 'SystemOutputStore'; }    
+    static get TaskStoreName()                { return 'TaskStore'; }
+    static get TaskInstancesStoreName()       { return 'TaskInstancesStore'; }
+    static get DependencyStoreName()          { return 'DependencyStore'; }
+    static get DependencyInstancesStoreName() { return 'DependencyInstancesStore'; }
+    static get ConstraintStoreName()          { return 'ConstraintStore'; }
+    static get ConstraintInstancesStoreName() { return 'ConstraintInstancesStore'; }
     
-    static get SystemInterfaceName()      { return '__system'; }
+    static get SystemInterfaceName() { return '__system'; }
 
 
     get modelExportImport() {

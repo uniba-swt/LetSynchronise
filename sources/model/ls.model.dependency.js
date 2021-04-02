@@ -44,23 +44,23 @@ class ModelDependency {
 
     createDependency(dependency) {
         // Store dependency in Database
-        return this.database.storeDependency(dependency)
+        return this.database.putObject(Model.DependencyStoreName, dependency)
         	.then(this.refreshViews());
     }
     
     getAllDependencies() {
-        return this.database.getAllDependencies();
+        return this.database.getAllObjects(Model.DependencyStoreName);
     }
     
     deleteDependency(name) {
-        return this.database.deleteDependency(name)
-        	.then(this.database.deleteDependencyInstances(name))
+        return this.database.deleteObject(Model.DependencyInstancesStoreName, name)
+        	.then(this.database.deleteObject(Model.DependencyStoreName, name))
         	.then(this.refreshViews());
     }
     
     deleteAllDependencies() {
-    	return this.database.deleteAllDependencies()
-    		.then(this.database.deleteAllDependenciesInstances())
+    	return this.database.deleteAllObjects(Model.DependencyInstancesStoreName)
+    		.then(this.database.deleteAllObjects(Model.DependencyStoreName))
     		.then(this.refreshViews());
     }
     

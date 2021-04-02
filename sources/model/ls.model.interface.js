@@ -39,35 +39,35 @@ class ModelInterface {
 
     createInput(name) {
         // Store input in Database
-        return this.database.storeInput(name)
+        return this.database.putObject(Model.SystemInputStoreName, name)
         	.then(this.refreshViews());
     }
     
     createOutput(name) {
         // Store input in Database
-        return this.database.storeOutput(name)
+        return this.database.putObject(Model.SystemOutputStoreName, name)
         	.then(this.refreshViews());
     }
     
     getAllInputs() {
-        return this.database.getAllInputs();
+        return this.database.getAllObjects(Model.SystemInputStoreName);
     }
     
     getAllOutputs() {
-        return this.database.getAllOutputs();
+        return this.database.getAllObjects(Model.SystemOutputStoreName);
     }
     
     deleteInput(name) {
 		return this.modelDependency.deleteDependenciesOfSystem(name)
 			.then(this.modelConstraint.deleteConstraintsOfSystem(name))
-        	.then(this.database.deleteInput(name))
+        	.then(this.database.deleteObject(Model.SystemInputStoreName, name))
         	.then(this.refreshViews());
     }
     
     deleteOutput(name) {
 		return this.modelDependency.deleteDependenciesOfSystem(name)
 			.then(this.modelConstraint.deleteConstraintsOfSystem(name))
-        	.then(this.database.deleteOutput(name))
+        	.then(this.database.deleteObject(Model.SystemOutputStoreName, name))
         	.then(this.refreshViews());
     }
 
