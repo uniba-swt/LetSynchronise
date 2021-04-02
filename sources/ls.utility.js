@@ -88,6 +88,33 @@ class Utility {
 		});
     }
     
+    static FormatConstraints(rawConstraints) {
+    	return rawConstraints.map(constraint => {
+    		const sourceFullText = `${constraint.source.task}.${constraint.source.port}`;
+
+			const sourceText = (constraint.source.task == Model.SystemInterfaceName)
+			                 ? `${constraint.source.port}`
+			                 : sourceFullText;
+			                 
+			const destinationFullText = `${constraint.destination.task}.${constraint.destination.port}`;
+
+			const destinationText = (constraint.destination.task == Model.SystemInterfaceName)
+			                      ? `${constraint.destination.port}`
+			                      : destinationFullText;
+			                      
+			return {
+				'name': constraint.name, 
+				'source': sourceText,
+				'sourceFull': sourceFullText,
+				'destination': destinationText,
+				'destinationFull': destinationFullText,
+        		'relation': constraint.relation,
+        		'time': constraint.time
+
+			}
+    	});
+    }
+    
     static AddDeleteButton(id) {
         return `<button id="${id}" type="submit" class="btn btn-danger btn-sm delete">Delete</button>`;
     }

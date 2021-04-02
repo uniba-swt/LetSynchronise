@@ -159,25 +159,34 @@ class ViewConstraint {
             return false;
         }
         
-        if (constraint.time == null || constraint.time.trim() == '') {
-            alert('Time cannot be blank.');
+        if (constraint.time == null || !$.isNumeric(constraint.time)) {
+            alert('Time has to be a decimal number.');
             return false;
         }
-                
+        const time = parseFloat(constraint.time);
+        if (time < 0) {
+            alert('Time cannot be negative');
+            return false;
+        }
+        
+        if (constraint.source.includes(Model.SystemInterfaceName) && constraint.destination.includes(Model.SystemInterfaceName)) {
+			alert('Source and destination of constraint cannot both be from the system.')
+        	return false;
+        }
+        
         return true;
     }
     
     updateConstraintSelectors(taskParametersSet, systemInputs, systemOutputs) {
-    	// TODO: systemInputs, systemOutputs
         const sources = taskParametersSet.map(taskParameters => Utility.TaskPorts(taskParameters.name, taskParameters.outputs)).flat();
         const destinations = taskParametersSet.map(taskParameters => Utility.TaskPorts(taskParameters.name, taskParameters.inputs)).flat();
         
         // Create list of available sources and destinations
-        this.updateConstraintPorts(d3.select(this.sourceField), sources);
-        this.updateConstraintPorts(d3.select(this.destinationField), destinations);
+        this.updateConstraintPorts(d3.select(this.sourceField), sources, systemInputs);
+        this.updateConstraintPorts(d3.select(this.destinationField), destinations, systemOutputs);
     }
         
-    updateConstraintPorts(parentElement, ports) {
+    updateConstraintPorts(parentElement, taskPorts, systemPorts) {
         // Create list of available ports
         parentElement.selectAll('*').remove();
         parentElement
@@ -187,8 +196,15 @@ class ViewConstraint {
                 .property('hidden', true)
                 .attr('value', 'null ')
                 .text('Choose ...');
+
+        systemPorts.forEach(port =>
+            parentElement
+                .append('option')
+                    .attr('value', `${Model.SystemInterfaceName}.${port.name}`)
+                    .text(port.name)
+        );
         
-        ports.forEach(port =>
+        taskPorts.forEach(port =>
             parentElement
                 .append('option')
                     .attr('value', port)
@@ -196,8 +212,9 @@ class ViewConstraint {
         );
     }
     
-    updateConstraints(constraints) {
+    updateConstraints(rawConstraints) {
         // Display constraints
+        const constraints = Utility.FormatConstraints(rawConstraints);
         this.constraints.selectAll('*').remove();
         
         const thisRef = this;
@@ -224,8 +241,8 @@ class ViewConstraint {
     
     populateParameterForm(constraint) {
         this.name = constraint.name;
-        this.source = constraint.source;
-        this.destination = constraint.destination;
+        this.source = constraint.sourceFull;
+        this.destination = constraint.destinationFull;
         this.relation = constraint.relation;
         this.time = constraint.time;
     }

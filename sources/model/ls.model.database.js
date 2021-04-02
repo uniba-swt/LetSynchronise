@@ -11,27 +11,31 @@ class ModelDatabase {
             return;
         }
         
-        const dbOpenRequest = window.indexedDB.open('letDatabase', 5);
+        const dbOpenRequest = window.indexedDB.open('letDatabase', 6);
 
         // Upgrade old database schemas.
         dbOpenRequest.onupgradeneeded = function(event) {
             this.db = event.target.result;
             
-            if (event.oldVersion < 5) {
-                if (event.oldVersion < 4) {
-                    if (event.oldVersion < 3) {
-                        if (event.oldVersion < 2) {
-                            if (event.oldVersion < 1) {
-                                this.db.createObjectStore('TaskStore', {keyPath: 'name', unique: true});
+            if (event.oldVersion < 6) {
+                if (event.oldVersion < 5) {
+                    if (event.oldVersion < 4) {
+                        if (event.oldVersion < 3) {
+                            if (event.oldVersion < 2) {
+                                if (event.oldVersion < 1) {
+                                    this.db.createObjectStore('TaskStore', {keyPath: 'name', unique: true});
+                                }
+                                this.db.createObjectStore('DependencyStore', {keyPath: 'name', unique: true});
                             }
-                            this.db.createObjectStore('DependencyStore', {keyPath: 'name', unique: true});
+                            this.db.createObjectStore('TaskInstancesStore', {keyPath:'name', unique: true});
                         }
-                        this.db.createObjectStore('TaskInstancesStore', {keyPath:'name', unique: true});
+                        this.db.createObjectStore('DependencyInstancesStore', {keyPath: 'name', unique: true});
                     }
-                    this.db.createObjectStore('DependencyInstancesStore', {keyPath: 'name', unique: true});
+                    this.db.createObjectStore('SystemInputStore', {keyPath: 'name', unique: true});
+                    this.db.createObjectStore('SystemOutputStore', {keyPath: 'name', unique: true});
                 }
-                this.db.createObjectStore('SystemInputStore', {keyPath: 'name', unique: true});
-                this.db.createObjectStore('SystemOutputStore', {keyPath: 'name', unique: true});
+                this.db.createObjectStore('ConstraintStore', {keyPath: 'name', unique: true});
+                this.db.createObjectStore('ConstraintInstancesStore', {keyPath: 'name', unique: true});
             }
         }
 
@@ -65,247 +69,244 @@ class ModelDatabase {
         return transaction.objectStore(storeName);
     }
     
-    putObject(storeName, mode, object, promiseResolve, promiseReject) {
-        const objectStore = this.getObjectStore(storeName, mode, promiseReject);
-        const putObject = objectStore.put(object);
+    
+    putObject(storeName, object) {
+        return new Promise((resolve, reject) => {
+            const objectStore = this.getObjectStore(storeName, 'readwrite', reject);
+            const putObject = objectStore.put(object);
         
-        putObject.onsuccess = function(event) {
-            promiseResolve(event.target.result);
-        }
+            putObject.onsuccess = function(event) {
+                resolve(event.target.result);
+            }
+        });
     }
     
-    getObject(storeName, mode, index, promiseResolve, promiseReject) {
-        const objectStore = this.getObjectStore(storeName, mode, promiseReject);
-        const getObject = objectStore.get(index); // Get using the index
+    getObject(storeName, index, promiseResolve, promiseReject) {
+        return new Promise((resolve, reject) => {
+            const objectStore = this.getObjectStore(storeName, 'readonly', reject);
+            const getObject = objectStore.get(index); // Get using the index
 
-        getObject.onsuccess = function(event) {
-            promiseResolve(event.target.result);
-        }
+            getObject.onsuccess = function(event) {
+                resolve(event.target.result);
+            }
+        });
     }
     
-    getAllObjects(storeName, mode, promiseResolve, promiseReject) {
-        const objectStore = this.getObjectStore(storeName, mode, promiseReject);
-        const getObjects = objectStore.getAll();
+    getAllObjects(storeName, promiseResolve, promiseReject) {
+        return new Promise((resolve, reject) => {
+            const objectStore = this.getObjectStore(storeName, 'readonly', reject);
+            const getObjects = objectStore.getAll();
 
-        getObjects.onsuccess = function(event) {
-            promiseResolve(event.target.result);
-        }
+            getObjects.onsuccess = function(event) {
+                resolve(event.target.result);
+            }
+        });
     }
     
-    deleteObject(storeName, mode, index, promiseResolve, promiseReject) {
-        const objectStore = this.getObjectStore(storeName, mode, promiseReject);
-        const deleteObject = objectStore.delete(index); // Delete using the index
+    deleteObject(storeName, index, promiseResolve, promiseReject) {
+        return new Promise((resolve, reject) => {
+            const objectStore = this.getObjectStore(storeName, 'readwrite', reject);
+            const deleteObject = objectStore.delete(index); // Delete using the index
 
-        deleteObject.onsuccess = function(event) {
-            promiseResolve(event.target.result);
-        }
+            deleteObject.onsuccess = function(event) {
+                resolve(event.target.result);
+            }
+        });
     }
     
-    deleteAllObjects(storeName, mode, promiseResolve, promiseReject) {
-        const objectStore = this.getObjectStore(storeName, mode, promiseReject);
-        const deleteObjects = objectStore.clear();
+    deleteAllObjects(storeName, promiseResolve, promiseReject) {
+        return new Promise((resolve, reject) => {
+            const objectStore = this.getObjectStore(storeName, 'readwrite', reject);
+            const deleteObjects = objectStore.clear();
         
-        deleteObjects.onsuccess = function(event) {
-            promiseResolve(event.target.result);
-        }
+            deleteObjects.onsuccess = function(event) {
+                resolve(event.target.result);
+            }
+        });
     }
     
     
     // Task
     
     storeTask = function(task) {
-        return new Promise((resolve, reject) => {
-            this.putObject('TaskStore', 'readwrite', task.parameters, resolve, reject);
-        });
+        return this.putObject('TaskStore', task.parameters);
     }
 
     getTask = function(name) {
-        return new Promise((resolve, reject) => {
-            this.getObject('TaskStore', 'readonly', name, resolve, reject);
-        });
+        return this.getObject('TaskStore', name);
     }
 
     getAllTasks = function() {
-        return new Promise((resolve, reject) => {
-            this.getAllObjects('TaskStore', 'readonly', resolve, reject);
-        });
+        return this.getAllObjects('TaskStore');
     }
 
     deleteTask = function(name) {
-        return new Promise((resolve, reject) => {
-            this.deleteObject('TaskStore', 'readwrite', name, resolve, reject);
-        });
+        return this.deleteObject('TaskStore', name);
     }
     
     deleteAllTasks = function() {
-        return new Promise((resolve, reject) => {
-            this.deleteAllObjects('TaskStore', 'readwrite', resolve, reject);
-        });
+        return this.deleteAllObjects('TaskStore');
     }
     
     
     // Task Instances
     
     storeTaskInstances = function(taskInstances) {
-        return new Promise((resolve, reject) => {
-            this.putObject('TaskInstancesStore', 'readwrite', taskInstances, resolve, reject);
-        });
+        return this.putObject('TaskInstancesStore', taskInstances);
     }
     
     getTaskInstances = function(name) {
-        return new Promise((resolve, reject) => {
-            this.getObject('TaskInstancesStore', 'readonly', name, resolve, reject);
-        });
+        return this.getObject('TaskInstancesStore', name);
     }
     
     getAllTasksInstances = function() {
-        return new Promise((resolve, reject) => {
-            this.getAllObjects('TaskInstancesStore', 'readonly', resolve, reject);
-        });
+        return this.getAllObjects('TaskInstancesStore');
     }
 
     deleteTaskInstances = function(name) {
-        return new Promise((resolve, reject) => {
-            this.deleteObject('TaskInstancesStore', 'readwrite', name, resolve, reject);
-        });
+        return this.deleteObject('TaskInstancesStore', name);
     }
     
     deleteAllTasksInstances = function() {
-        return new Promise((resolve, reject) => {
-            this.deleteAllObjects('TaskInstancesStore', 'readwrite', resolve, reject);
-        });
+        return this.deleteAllObjects('TaskInstancesStore');
     }
     
     
     // Dependency
 
     storeDependency = function(dependency) {
-        return new Promise((resolve, reject) => {
-            this.putObject('DependencyStore', 'readwrite', dependency, resolve, reject);
-        });
+        return this.putObject('DependencyStore', dependency);
     }
 
     getDependency  = function(name) {
-        return new Promise((resolve, reject) => {
-            this.getObject('DependencyStore', 'readonly', name, resolve, reject);
-        });
+        return this.getObject('DependencyStore', name);
     }
     
     getAllDependencies = function() {
-        return new Promise((resolve, reject) => {
-            this.getAllObjects('DependencyStore', 'readonly', resolve, reject);
-        });
+        return this.getAllObjects('DependencyStore');
     }
 
     deleteDependency = function(name) {
-        return new Promise((resolve, reject) => {
-            this.deleteObject('DependencyStore', 'readwrite', name, resolve, reject);
-        });
+        return this.deleteObject('DependencyStore', name);
     }
 
     deleteAllDependencies = function() {
-        return new Promise((resolve, reject) => {
-            this.deleteAllObjects('DependencyStore', 'readwrite', resolve, reject);
-        });
+        return this.deleteAllObjects('DependencyStore');
     }
 
 
     // Dependency Instances
 
-    storeDependencyInstances = function(dependency) {
-        return new Promise((resolve, reject) => {
-            this.putObject('DependencyInstancesStore', 'readwrite', dependency, resolve, reject);
-        });
+    storeDependencyInstances = function(dependencyInstances) {
+        return this.putObject('DependencyInstancesStore', dependencyInstances);
     }
 
     getDependencyInstances  = function(name) {
-        return new Promise((resolve, reject) => {
-            this.getObject('DependencyInstancesStore', 'readonly', name, resolve, reject);
-        });
+        return this.getObject('DependencyInstancesStore', name);
     }
     
     getAllDependenciesInstances = function() {
-        return new Promise((resolve, reject) => {
-            this.getAllObjects('DependencyInstancesStore', 'readonly', resolve, reject);
-        });
+        return this.getAllObjects('DependencyInstancesStore');
     }
 
     deleteDependencyInstances = function(name) {
-        return new Promise((resolve, reject) => {
-            this.deleteObject('DependencyInstancesStore', 'readwrite', name, resolve, reject);
-        });
+        return this.deleteObject('DependencyInstancesStore', name);
     }
     
     deleteAllDependenciesInstances = function() {
-        return new Promise((resolve, reject) => {
-            this.deleteAllObjects('DependencyInstancesStore', 'readwrite', resolve, reject);
-        });
+        return this.deleteAllObjects('DependencyInstancesStore');
+    }
+    
+    
+    // Constraint
+    
+    storeConstraint = function(constraint) {
+        return this.putObject('ConstraintStore', constraint);
+    }
+
+    getConstraint  = function(name) {
+        return this.getObject('ConstraintStore', name);
+    }
+    
+    getAllConstraints = function() {
+        return this.getAllObjects('ConstraintStore');
+    }
+
+    deleteConstraint = function(name) {
+        return this.deleteObject('ConstraintStore', name);
+    }
+
+    deleteAllConstraints = function() {
+        return this.deleteAllObjects('ConstraintStore');
+    }
+    
+    
+    // Constraint Instances
+    
+    storeConstraintInstances = function(constraintInstances) {
+        return this.putObject('ConstraintInstancesStore', constraintInstances);
+    }
+
+    getConstraintInstances  = function(name) {
+        return this.getObject('ConstraintInstancesStore', name);
+    }
+    
+    getAllConstraintsInstances = function() {
+        return this.getAllObjects('ConstraintInstancesStore');
+    }
+
+    deleteConstraintInstances = function(name) {
+        return this.deleteObject('ConstraintInstancesStore', name);
+    }
+    
+    deleteAllConstraintsInstances = function() {
+        return this.deleteAllObjects('ConstraintInstancesStore');
     }
     
     
     // System Inputs
     
     storeInput = function(name) {
-        return new Promise((resolve, reject) => {
-            this.putObject('SystemInputStore', 'readwrite', name, resolve, reject);
-        });
+        return this.putObject('SystemInputStore', name);
     }
 
     getInput  = function(name) {
-        return new Promise((resolve, reject) => {
-            this.getObject('SystemInputStore', 'readonly', name, resolve, reject);
-        });
+        return this.getObject('SystemInputStore', name);
     }
     
     getAllInputs = function() {
-        return new Promise((resolve, reject) => {
-            this.getAllObjects('SystemInputStore', 'readonly', resolve, reject);
-        });
+        return this.getAllObjects('SystemInputStore');
     }
 
     deleteInput = function(name) {
-        return new Promise((resolve, reject) => {
-            this.deleteObject('SystemInputStore', 'readwrite', name, resolve, reject);
-        });
+        return this.deleteObject('SystemInputStore', name);
     }
 
     deleteAllInputs = function() {
-        return new Promise((resolve, reject) => {
-            this.deleteAllObjects('SystemInputStore', 'readwrite', resolve, reject);
-        });
+        return this.deleteAllObjects('SystemInputStore');
     }
     
     
     // System Outputs
     
     storeOutput = function(name) {
-        return new Promise((resolve, reject) => {
-            this.putObject('SystemOutputStore', 'readwrite', name, resolve, reject);
-        });
+        return this.putObject('SystemOutputStore', name);
     }
 
     getOutput  = function(name) {
-        return new Promise((resolve, reject) => {
-            this.getObject('SystemOutputStore', 'readonly', name, resolve, reject);
-        });
+        return this.getObject('SystemOutputStore', name);
     }
     
     getAllOutputs = function() {
-        return new Promise((resolve, reject) => {
-            this.getAllObjects('SystemOutputStore', 'readonly', resolve, reject);
-        });
+        return this.getAllObjects('SystemOutputStore');
     }
 
     deleteOutput = function(name) {
-        return new Promise((resolve, reject) => {
-            this.deleteObject('SystemOutputStore', 'readwrite', name, resolve, reject);
-        });
+        return this.deleteObject('SystemOutputStore', name);
     }
 
     deleteAllOutputs = function() {
-        return new Promise((resolve, reject) => {
-            this.deleteAllObjects('SystemOutputStore', 'readwrite', resolve, reject);
-        });
+        return this.deleteAllObjects('SystemOutputStore');
     }
     
 
@@ -319,9 +320,7 @@ class ModelDatabase {
         for (const storeName of allStoreNames) {
             if (!storeName.includes('Instance')) {
                 necessaryStoreNames.push(storeName);
-                system[storeName] = await new Promise((resolve, reject) => {
-                    this.getAllObjects(storeName, 'readonly', resolve, reject)
-                });
+                system[storeName] = await this.getAllObjects(storeName);
             }
         }
         
@@ -333,9 +332,7 @@ class ModelDatabase {
         
         const allStoreNames = this.db.objectStoreNames;
         for (const storeName of allStoreNames) {
-            deletePromises.push(new Promise((resolve, reject) => {
-                this.deleteAllObjects(storeName, 'readwrite', resolve, reject)
-            }));
+            deletePromises.push(this.deleteAllObjects(storeName));
         }
         
         return Promise.all(deletePromises);
@@ -346,9 +343,7 @@ class ModelDatabase {
         
         for (const [storeName, objects] of Object.entries(system)) {
             for (const object of objects) {
-                importPromises.push(new Promise((resolve, reject) => {
-                    this.putObject(storeName, 'readwrite', object, resolve, reject);
-                }));
+                importPromises.push(this.putObject(storeName, object));
             }
         }
 

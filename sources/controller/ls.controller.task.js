@@ -4,6 +4,7 @@ class ControllerTask {
     _view = null;
     _model = null;
     _modelDependency = null;
+    _modelConstraint = null;
     
     constructor() { }
     
@@ -50,6 +51,9 @@ class ControllerTask {
         
     set modelConstraint(modelConstraint) {
         this._modelConstraint = modelConstraint;
+
+        // Register the model constraint with the model.
+        this._model.registerModelConstraint(this._modelConstraint);
     }
     
     get modelConstraint() {

@@ -5,6 +5,7 @@ class ModelTask {
 
     database = null;
     modelDependency = null;
+    modelConstraint = null;
     
     constructor() { }
     
@@ -28,6 +29,9 @@ class ModelTask {
         this.modelDependency = modelDependency;
     }
     
+    registerModelConstraint(modelConstraint) {
+        this.modelConstraint = modelConstraint;
+    }
     
     // -----------------------------------------------------
     // Class methods
@@ -45,6 +49,7 @@ class ModelTask {
     
     deleteTask(name) {
 		return this.modelDependency.deleteDependenciesOfTask(name)
+			.then(this.modelConstraint.deleteConstraintsOfTask(name))
 			.then(this.database.deleteTask(name))
 			.then(this.database.deleteTaskInstances(name))
 			.then(result => this.refreshViews());

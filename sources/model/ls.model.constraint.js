@@ -44,45 +44,54 @@ class ModelConstraint {
 
     createConstraint(constraint) {
         // Store constraint into Database
-        // const constraint = ModelConstraint.CreateWithConstraint(constraint);
-        // this.database.storeConstraint(constraint)
-        //	.then(result => this.getAllConstraints())
-        //  .then(result => this.updateConstraints(result));
-        alert(`Created constraint: ${JSON.stringify(constraint)}`);
-        this.getAllConstraints()
-            .then(result => this.updateConstraints(result));
-    }
-    
-    deleteConstraint(name) {
-        alert(`Delete constraint ${name}`);
-        
-        this.getAllConstraints()
-            .then(result => this.updateConstraints(result));
+        return this.database.storeConstraint(constraint)
+        	.then(this.refreshViews());
     }
     
     getAllConstraints() {
-    //    return this.database.getAllConstraints()
-    //        .then(result = { return result } );
-        
-        // TODO: Destination and Source values could be a string "task.port" or "task" and "port" separately.
-        const dummyConstraints = [
-            {
-                'name': 'sensorConstraint',
-                'destination': 't1.in1',
-                'source': 't3.out1',
-                'relation': '<',
-                'time': '20'
-            },
-            {
-                'name': 'actuatorConstraint',
-                'destination': 't1.in2',
-                'source': 't3.out2',
-                'relation': '<=',
-                'time': '15'
-            }
-        ];
+        return this.database.getAllConstraints();
+    }
 
-        return new Promise((resolve, reject) => { resolve(dummyConstraints) });
+    deleteConstraint(name) {
+        return this.database.deleteConstraint(name)
+        	.then(this.database.deleteConstraintInstances(name))
+        	.then(this.refreshViews());
+    }
+    
+    deleteAllConstraints() {
+    	return this.database.deleteAllConstraints()
+    		.then(this.database.deleteAllConstraintsInstances())
+    		.then(this.refreshViews());
+    }
+    
+    deleteConstraintsOfTask(taskName) {
+    	return this.getAllConstraints()
+    		.then(constraints => {
+    			let deletePromises = [];
+				for (const constraint of constraints) {
+					if (constraint.destination.task == taskName || constraint.source.task == taskName) {
+						deletePromises.push(this.deleteConstraint(constraint.name));
+					}
+				}
+				
+				return Promise.all(deletePromises);
+    		});
+    }
+    
+    deleteConstraintsOfSystem(portName) {
+    	return this.getAllConstraints()
+    		.then(constraints => {
+    			let deletePromises = [];
+				for (const constraint of constraints) {
+					if (constraint.destination.task == Model.SystemInterfaceName || constraint.source.task == Model.SystemInterfaceName) {
+						if (constraint.destination.port == portName || constraint.source.port == portName) {
+							deletePromises.push(this.deleteConstraint(constraint.name));
+						}
+					}
+				}
+				
+				return Promise.all(deletePromises);
+    		});
     }
     
     refreshViews() {
