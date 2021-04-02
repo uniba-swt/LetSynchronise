@@ -159,11 +159,21 @@ class ViewConstraint {
             return false;
         }
         
-        if (constraint.time == null || constraint.time.trim() == '') {
-            alert('Time cannot be blank.');
+        if (constraint.time == null || !$.isNumeric(constraint.time)) {
+            alert('Time has to be a decimal number.');
             return false;
         }
-                
+        const time = parseFloat(constraint.time);
+        if (time < 0) {
+            alert('Time cannot be negative');
+            return false;
+        }
+        
+        if (constraint.source.includes(Model.SystemInterfaceName) && constraint.destination.includes(Model.SystemInterfaceName)) {
+			alert('Source and destination of constraint cannot both be from the system.')
+        	return false;
+        }
+        
         return true;
     }
     
