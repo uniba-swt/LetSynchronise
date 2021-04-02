@@ -93,33 +93,47 @@ class ModelSchedule {
     createDependencyInstances(dependency) {
         // Get all instances of the source and destination tasks
         // If one of the tasks is Model.SystemInterfaceName, we duplicate the other task
-        const sourceTaskInstancesPromise = (dependency.source.task != Model.SystemInterfaceName)
-                                         ? this.database.getTaskInstances(dependency.source.task)
-                                         : this.database.getTaskInstances(dependency.destination.task);
-    	const destinationTaskInstancesPromise = (dependency.destination.task != Model.SystemInterfaceName)
-                                              ? this.database.getTaskInstances(dependency.destination.task)
-                                              : this.database.getTaskInstances(dependency.source.task);
-        
         return Promise.all([
-            sourceTaskInstancesPromise, 
-            destinationTaskInstancesPromise
+            this.database.getTaskInstances(dependency.source.task), 
+            this.database.getTaskInstances(dependency.destination.task)
         ]).then(([sourceTaskInstances, destinationTaskInstances]) => {
-			const sourceInstances = sourceTaskInstances.value;
-			const destinationInstances = destinationTaskInstances.value;
-        
-            let instances = [];
-            for (let destinationIndex = destinationInstances.length - 1; destinationIndex > -1;  destinationIndex--) {
-                // Find latest sourceInstance
-                const destinationInstance = destinationInstances[destinationIndex];
-                const [sourceIndex, sourceInstance] = this.getLatestLetEndTime(sourceInstances, destinationInstance.letStartTime);
-                
-                instances.unshift(this.createDependencyInstance(dependency, sourceIndex, sourceInstance, destinationIndex, destinationInstance));
+			let instances = [];
+        	if (dependency.source.task == Model.SystemInterfaceName) {
+        		// Dependency is between system input and task
+				const destinationInstances = destinationTaskInstances.value;
+
+				for (let destinationIndex = destinationInstances.length - 1; destinationIndex > -1;  destinationIndex--) {
+					// Source index and instance is same as destination
+					const destinationInstance = destinationInstances[destinationIndex];
+					instances.unshift(this.createDependencyInstance(dependency, destinationIndex, destinationInstance, destinationIndex, destinationInstance));
+				}
+			} else if (dependency.destination.task == Model.SystemInterfaceName) {
+				// Dependency is between task and system output
+				const sourceInstances = sourceTaskInstances.value;
+				
+				for (let sourceIndex = sourceInstances.length - 1; sourceIndex > -1;  sourceIndex--) {
+					// Destination index and instance is same as source
+					const sourceInstance = sourceInstances[sourceIndex];
+					instances.unshift(this.createDependencyInstance(dependency, sourceIndex, sourceInstance, sourceIndex, sourceInstance));
+				}
+			} else {
+				// Dependency is between two tasks
+				const sourceInstances = sourceTaskInstances.value;
+				const destinationInstances = destinationTaskInstances.value;
+		
+				for (let destinationIndex = destinationInstances.length - 1; destinationIndex > -1;  destinationIndex--) {
+					// Find latest sourceInstance
+					const destinationInstance = destinationInstances[destinationIndex];
+					const [sourceIndex, sourceInstance] = this.getLatestLetEndTime(sourceInstances, destinationInstance.letStartTime);
+				
+					instances.unshift(this.createDependencyInstance(dependency, sourceIndex, sourceInstance, destinationIndex, destinationInstance));
+				}
             }
-            
-            return this.database.storeDependencyInstances({
-                'name': dependency.name,
-                'value': instances
-            });
+		
+			return this.database.storeDependencyInstances({
+				'name': dependency.name,
+				'value': instances
+			});
         });
     }
     
