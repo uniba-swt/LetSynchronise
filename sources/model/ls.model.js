@@ -10,6 +10,12 @@ class Model {
     _modelDatabase = null;
     
     constructor() { }
+    
+    // -----------------------------------------------------
+    // Static constants.
+    
+    static get SystemInterfaceName()      { return '__system'; }
+
 
     get modelExportImport() {
         return this._modelExportImport;

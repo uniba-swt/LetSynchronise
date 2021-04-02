@@ -2,9 +2,12 @@
 
 class ModelConstraint {
     updateConstraints = null;      // Callback to function in ls.view.constraint
+    updateConstraintSelectors = null;
     
     database = null;
-
+    modelTask = null;
+    modelInterface = null;
+    
     constructor() { }
     
     
@@ -15,12 +18,24 @@ class ModelConstraint {
         this.updateConstraints = callback;
     }
     
+    registerUpdateConstraintSelectorsCallback(callback) {
+        this.updateConstraintSelectors = callback;
+    }
+    
     
     // -----------------------------------------------------
     // Registration of model database
     
     registerModelDatabase(database) {
         this.database = database;
+    }
+    
+    registerModelTask(modelTask) {
+        this.modelTask = modelTask;
+    }
+    
+    registerModelInterface(modelInterface) {
+        this.modelInterface = modelInterface;
     }
     
     
@@ -45,7 +60,7 @@ class ModelConstraint {
             .then(result => this.updateConstraints(result));
     }
     
-    getAllConstraints(callbacks) {
+    getAllConstraints() {
     //    return this.database.getAllConstraints()
     //        .then(result = { return result } );
         
@@ -68,6 +83,13 @@ class ModelConstraint {
         ];
 
         return new Promise((resolve, reject) => { resolve(dummyConstraints) });
+    }
+    
+    refreshViews() {
+    	return this.getAllConstraints()
+    		.then(result => this.updateConstraints(result))
+    		.then(result => Promise.all([this.modelTask.getAllTasks(), this.modelInterface.getAllInputs(), this.modelInterface.getAllOutputs()]))
+    		.then(([tasks, systemInputs, systemOutputs]) => this.updateConstraintSelectors(tasks, systemInputs, systemOutputs));
     }
     
     toString() {

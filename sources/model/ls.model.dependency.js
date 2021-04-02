@@ -2,8 +2,11 @@
 
 class ModelDependency {
     updateDependencies = null;      // Callback to function in ls.view.dependency
+    updateDependencySelectors = null;
     
     database = null;
+    modelTask = null;
+    modelInterface = null;
 
     constructor() { }
     
@@ -15,12 +18,24 @@ class ModelDependency {
         this.updateDependencies = callback;
     }
     
+    registerUpdateDependencySelectorsCallback(callback) {
+        this.updateDependencySelectors = callback;
+    }
+    
     
     // -----------------------------------------------------
     // Registration of model database
     
     registerModelDatabase(database) {
         this.database = database;
+    }
+    
+    registerModelTask(modelTask) {
+        this.modelTask = modelTask;
+    }
+    
+    registerModelInterface(modelInterface) {
+        this.modelInterface = modelInterface;
     }
     
     
@@ -62,10 +77,28 @@ class ModelDependency {
 				return Promise.all(deletePromises);
     		});
     }
+    
+    deleteDependenciesOfSystem(portName) {
+    	return this.getAllDependencies()
+    		.then(dependencies => {
+    			let deletePromises = [];
+				for (const dependency of dependencies) {
+					if (dependency.destination.task == Model.SystemInterfaceName || dependency.source.task == Model.SystemInterfaceName) {
+						if (dependency.destination.port == portName || dependency.source.port == portName) {
+							deletePromises.push(this.deleteDependency(dependency.name));
+						}
+					}
+				}
+				
+				return Promise.all(deletePromises);
+    		});
+    }
 
     refreshViews() {
     	return this.getAllDependencies()
-    		.then(result => this.updateDependencies(result));
+    		.then(result => this.updateDependencies(result))
+    		.then(result => Promise.all([this.modelTask.getAllTasks(), this.modelInterface.getAllInputs(), this.modelInterface.getAllOutputs()]))
+    		.then(([tasks, systemInputs, systemOutputs]) => this.updateDependencySelectors(tasks, systemInputs, systemOutputs));
     }
     
     toString() {

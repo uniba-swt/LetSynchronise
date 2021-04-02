@@ -3,6 +3,7 @@
 class ControllerInterface {
     _view = null;
     _model = null;
+    _modelDependency = null;
     
     constructor() { }
 
@@ -36,7 +37,23 @@ class ControllerInterface {
     get model() {
         return this._model;
     }
+
+    set modelDependency(modelDependency) {
+        this._modelDependency = modelDependency;
+    }
     
+    get modelDependency() {
+        return this._modelDependency;
+    }
+    
+    set modelConstraint(modelConstraint) {
+        this._modelConstraint = modelConstraint;
+    }
+    
+    get modelConstraint() {
+        return this._modelConstraint;
+    }
+        
     
     // -----------------------------------------------------
     // Handlers for events from the view to the model
@@ -44,13 +61,17 @@ class ControllerInterface {
     // Handler for creating system input.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleCreateInput = (name) => {
-        this.model.createInput(name);
+        this.model.createInput(name)
+	        .then(this.modelDependency.refreshViews())
+	        .then(this.modelConstraint.refreshViews());
     }
     
     // Handler for creating system output.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleCreateOutput = (name) => {
-        this.model.createOutput(name);
+        this.model.createOutput(name)
+	        .then(this.modelDependency.refreshViews())
+	        .then(this.modelConstraint.refreshViews());
     }
     
     handleDeleteInput = (name) => {

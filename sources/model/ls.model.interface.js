@@ -4,6 +4,7 @@ class ModelInterface {
     updateInterface = null;      // Callback to function in ls.view.interface
     
     database = null;
+    modelDependency = null;
 
     constructor() { }
     
@@ -21,6 +22,10 @@ class ModelInterface {
     
     registerModelDatabase(database) {
         this.database = database;
+    }
+    
+    registerModelDependency(modelDependency) {
+        this.modelDependency = modelDependency;
     }
     
     
@@ -48,23 +53,15 @@ class ModelInterface {
     }
     
     deleteInput(name) {
-        return this.database.deleteInput(name)
+		return this.modelDependency.deleteDependenciesOfSystem(name)
+        	.then(this.database.deleteInput(name))
         	.then(this.refreshViews());
     }
     
     deleteOutput(name) {
-        return this.database.deleteOutput(name)
+		return this.modelDependency.deleteDependenciesOfSystem(name)
+        	.then(this.database.deleteOutput(name))
         	.then(this.refreshViews());
-    }
-    
-    deleteAllInputs() {
-    	return this.database.deleteAllInputs()
-    		.then(this.refreshViews());
-    }
-    
-    deleteAllOutputs() {
-    	return this.database.deleteAllOutputs()
-    		.then(this.refreshViews());
     }
 
     refreshViews() {

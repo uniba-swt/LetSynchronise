@@ -5,6 +5,7 @@ class ModelExportImport {
     
     modelTask = null;
     modelDependency = null;
+    modelConstraint = null;
     modelInterface = null;
     
     constructor() { }
@@ -17,6 +18,10 @@ class ModelExportImport {
         this.database = database;
     }
 
+    registerModelInterface(modelInterface) {
+        this.modelInterface = modelInterface;
+    }
+
     registerModelTask(modelTask) {
         this.modelTask = modelTask;
     }
@@ -25,8 +30,8 @@ class ModelExportImport {
         this.modelDependency = modelDependency;
     }
     
-    registerModelInterface(modelInterface) {
-        this.modelInterface = modelInterface;
+     registerModelConstraint(modelConstraint) {
+        this.modelConstraint = modelConstraint;
     }
     
     
@@ -53,9 +58,10 @@ class ModelExportImport {
     }
     
     refreshViews() {
-    	return this.modelTask.refreshViews()
+    	return this.modelInterface.refreshViews()
+    		.then(this.modelTask.refreshViews())
     		.then(this.modelDependency.refreshViews())
-    		.then(this.modelInterface.refreshViews())
+    		.then(this.modelConstraint.refreshViews())
     }
     
     
