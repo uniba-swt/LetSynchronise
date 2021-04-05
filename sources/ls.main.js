@@ -4,11 +4,14 @@
 let model = new Model();
 model.modelExportImport = new ModelExportImport();
 model.modelInterface = new ModelInterface();
+model.modelAnalyse = new ModelAnalyse();
 model.modelTask = new ModelTask();
 model.modelDependency = new ModelDependency();
 model.modelSchedule = new ModelSchedule();
 model.modelConstraint = new ModelConstraint();
 model.modelDatabase = new ModelDatabase();
+
+
 
 // Define the view implementations
 let view = new View();
@@ -18,6 +21,7 @@ view.viewTask = new ViewTask();
 view.viewDependency = new ViewDependency();
 view.viewSchedule = new ViewSchedule();
 view.viewConstraint = new ViewConstraint();
+view.viewAnalyse = new ViewAnalyse();
 
 // Define the controller implementations
 let controller = new Controller();
@@ -27,6 +31,7 @@ controller.controllerTask = new ControllerTask();
 controller.controllerDependency = new ControllerDependency();
 controller.controllerSchedule = new ControllerSchedule();
 controller.controllerConstraint = new ControllerConstraint();
+controller.controllerAnalyse = new ControllerAnalyse();
 
 // Link the models and views to their respective controllers
 controller.controllerExportImport.view = view.viewExportImport;
@@ -59,6 +64,9 @@ controller.controllerConstraint.view = view.viewConstraint;
 controller.controllerConstraint.model = model.modelConstraint;
 controller.controllerConstraint.modelTask = model.modelTask;
 controller.controllerConstraint.modelInterface= model.modelInterface;
+
+controller.controllerAnalyse.view = view.viewAnalyse;
+controller.controllerAnalyse.model= model.modelAnalyse;
 
 
 

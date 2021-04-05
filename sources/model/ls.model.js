@@ -8,6 +8,7 @@ class Model {
     _modelSchedule = null;
     _modelConstraint = null;
     _modelDatabase = null;
+    _modelAnalyse = null;
     
     constructor() { }
     
@@ -47,6 +48,7 @@ class Model {
     }
     
     set modelTask(modelTask) {
+        this.modelAnalyse.registerModelTask(modelTask);
         this._modelTask = modelTask;
     }
     
@@ -55,6 +57,7 @@ class Model {
     }
     
     set modelDependency(modelDependency) {
+        this.modelAnalyse.registerModelDependency(modelDependency);
         this._modelDependency = modelDependency;
     }
     
@@ -71,9 +74,18 @@ class Model {
     }
     
     set modelConstraint(modelConstraint) {
+        this.modelAnalyse.registerModelConstraint(modelConstraint);
         this._modelConstraint = modelConstraint;
     }
-    
+
+    get modelAnalyse() {
+        return this._modelAnalyse;
+    }
+
+    set modelAnalyse(modelAnalyse) {
+        this._modelAnalyse = modelAnalyse;
+    }
+
     get modelDatabase() {
         return this._modelDatabase;
     }

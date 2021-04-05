@@ -100,7 +100,11 @@ class ModelDependency {
     		.then(result => Promise.all([this.modelTask.getAllTasks(), this.modelInterface.getAllInputs(), this.modelInterface.getAllOutputs()]))
     		.then(([tasks, systemInputs, systemOutputs]) => this.updateDependencySelectors(tasks, systemInputs, systemOutputs));
     }
-    
+
+    static GetDependencyString(dependency) {
+        return  "["+dependency.name+"]:"+dependency.source.task+"."+dependency.source.port + "->" + dependency.destination.task+"."+dependency.destination.port;
+    }
+
     toString() {
         return "ModelDependency";
     }
