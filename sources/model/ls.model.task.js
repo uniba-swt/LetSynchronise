@@ -49,6 +49,10 @@ class ModelTask {
     	return this.database.getAllObjects(Model.TaskStoreName);
     }
     
+    getAllTaskInstances() {
+    	return this.database.getAllObjects(Model.TaskInstancesStoreName);
+    }
+
     deleteTask(name) {
 		return this.modelDependency.deleteDependenciesOfTask(name)
 			.then(this.modelConstraint.deleteConstraintsOfTask(name))

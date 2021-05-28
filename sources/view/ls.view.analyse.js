@@ -23,7 +23,8 @@ class ViewAnalyse {
     }
 
     updateAnalyse() {
-        console.log("Analysis View: result");
+
+        console.log("Analysis View: display result");
     }
 
     toString() {

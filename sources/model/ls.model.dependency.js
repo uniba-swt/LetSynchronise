@@ -51,6 +51,10 @@ class ModelDependency {
     getAllDependencies() {
         return this.database.getAllObjects(Model.DependencyStoreName);
     }
+    getAllDependencyInstances() {
+        return this.database.getAllObjects(Model.DependencyInstancesStoreName);
+    }
+
     
     deleteDependency(name) {
         return this.database.deleteObject(Model.DependencyInstancesStoreName, name)
