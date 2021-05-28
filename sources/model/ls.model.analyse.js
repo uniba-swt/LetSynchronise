@@ -71,13 +71,27 @@ class ModelAnalyse {
     getLastSendEventTimeOfChain(path, dependencyInstances, eventInstance) {
         //console.log("getLastSendEventTimeOfChain");
         let nextInstances = this.getNextDependencyInstance(path, dependencyInstances, eventInstance);
-        let lastSendEventTime = -1;
+        
+        let lastSendEventTime
+        if (eventInstance.receiveEvent.task == "__system") {
+        	lastSendEventTime = eventInstance.sendEvent.timestamp
+        } else {
+        	lastSendEventTime = eventInstance.receiveEvent.timestamp
+        }
         
         for (const nextInstance of nextInstances) {
             /*console.log("getLastSendEventTimeOfChain2");
             console.log(nextInstance);*/
-            if (lastSendEventTime < nextInstance.eventInstance.sendEvent.timestamp) {
-                lastSendEventTime = nextInstance.eventInstance.sendEvent.timestamp;
+            
+        	let endTime
+			if (nextInstance.eventInstance.receiveEvent.task == "__system") {
+				endTime = nextInstance.eventInstance.sendEvent.timestamp
+			} else {
+				endTime = nextInstance.eventInstance.receiveEvent.timestamp
+			}
+            
+            if (lastSendEventTime < endTime) {
+                lastSendEventTime = endTime;
             }
             let result = this.getLastSendEventTimeOfChain(nextInstance.node, dependencyInstances, nextInstance.eventInstance);
             if (lastSendEventTime < result) {
@@ -117,47 +131,56 @@ class ModelAnalyse {
             console.log("Compute chain");
             let paths = [];
             let sourceDependenciesChainNodes = this.getTaskSourceDependenciesInChainNodes(dependencies, constraint.destination);
+
             while(sourceDependenciesChainNodes.length > 0) {
                 let sourceDependenciesChainNodesTemp = [];
                 for (let i = 0; i < sourceDependenciesChainNodes.length; i++) {
                     const sourceDependencyChainNode = sourceDependenciesChainNodes[i];
                     console.log("Chain: "+sourceDependencyChainNode.toString());
-                    /*The source nodes of the current chain node*/
-                    let result = this.getTaskSourceDependenciesInChainNodes(dependencies, sourceDependencyChainNode.dependency.source);
-                    for (let j = 0; j < result.length; j++) {
-                        let parentChainNode = result[j];
-                        //prevent self loops
-                        if (sourceDependencyChainNode.contains(parentChainNode)==false) {
-                            parentChainNode.addChildren(sourceDependencyChainNode);
-                            sourceDependenciesChainNodesTemp.push(parentChainNode);
-                            if (parentChainNode.dependency.source.task == constraint.source.task && parentChainNode.dependency.source.port == constraint.source.port) {
-                                paths.push(parentChainNode);
-                            }
-                        }
-                    }
+
+					if (sourceDependencyChainNode.dependency.source.task == constraint.source.task && sourceDependencyChainNode.dependency.source.port == constraint.source.port) {
+						paths.push(sourceDependencyChainNode);
+					} else {
+						/*The source nodes of the current chain node*/
+						let result = this.getTaskSourceDependenciesInChainNodes(dependencies, sourceDependencyChainNode.dependency.source);
+						for (let j = 0; j < result.length; j++) {
+							let parentChainNode = result[j];
+							//prevent self loops
+							if (sourceDependencyChainNode.contains(parentChainNode)==false) {
+								parentChainNode.addChildren(sourceDependencyChainNode);
+								sourceDependenciesChainNodesTemp.push(parentChainNode);
+// 								if (parentChainNode.dependency.source.task == constraint.source.task && parentChainNode.dependency.source.port == constraint.source.port) {
+// 									paths.push(parentChainNode);
+// 								}
+							}
+						}
+					}
                 }
                 console.log("iteration----");
                 console.log(sourceDependenciesChainNodesTemp);
-                if (sourceDependenciesChainNodesTemp.length == 0) {
-                    break;
-                }else{
-                    sourceDependenciesChainNodes = sourceDependenciesChainNodesTemp;
-                }
+                sourceDependenciesChainNodes = sourceDependenciesChainNodesTemp;
             }
             console.log("Paths");
             console.log(paths.toString());
-            let startTimes = [];
             let maxDifference = -1;
             for (const path of paths) {
                 let eventInstances = this.getDependencyEventInstances(dependencyInstances, path.dependency);
                 for (const eventInstance of eventInstances) {
-                    let startTime = eventInstance.receiveEvent.timestamp;
+                	// Only true if the event is from a system
+                	let startTime = -1
+                	if (eventInstance.sendEvent.task == "__system") {
+                		startTime = eventInstance.receiveEvent.timestamp;
+                	} else {
+	                    startTime = eventInstance.sendEvent.timestamp;
+                	}
                     //console.log("Entering");
                     let endTime = this.getLastSendEventTimeOfChain(path, dependencyInstances, eventInstance);
                     console.log("Start time: "+startTime+" End Time: "+endTime);
                     if (endTime - startTime > maxDifference) {
                         maxDifference = endTime-startTime;
                     }
+                    
+                    // TODO: Ignore incomplete paths at the end of the makespan
                 }
             }
             let evalulateString = ""+maxDifference + constraint.relation + constraint.time;
