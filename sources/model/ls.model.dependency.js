@@ -51,6 +51,7 @@ class ModelDependency {
     getAllDependencies() {
         return this.database.getAllObjects(Model.DependencyStoreName);
     }
+    
     getAllDependencyInstances() {
         return this.database.getAllObjects(Model.DependencyInstancesStoreName);
     }
@@ -103,10 +104,6 @@ class ModelDependency {
     		.then(result => this.updateDependencies(result))
     		.then(result => Promise.all([this.modelTask.getAllTasks(), this.modelInterface.getAllInputs(), this.modelInterface.getAllOutputs()]))
     		.then(([tasks, systemInputs, systemOutputs]) => this.updateDependencySelectors(tasks, systemInputs, systemOutputs));
-    }
-
-    static GetDependencyString(dependency) {
-        return  "["+dependency.name+"]:"+dependency.source.task+"."+dependency.source.port + "->" + dependency.destination.task+"."+dependency.destination.port;
     }
 
     toString() {

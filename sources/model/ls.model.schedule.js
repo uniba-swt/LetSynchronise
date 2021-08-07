@@ -139,7 +139,7 @@ class ModelSchedule {
     
     
     // Get task schedule for given makespan.
-    getSchedule(makespan) {    
+    getSchedule(makespan) {
         const promiseAllTasks = this.database.getAllObjects(Model.TaskStoreName);
         const promiseAllTasksInstances = promiseAllTasks
         	.then(tasks => Promise.all(tasks.map(task => this.createTaskInstances(task, makespan))))

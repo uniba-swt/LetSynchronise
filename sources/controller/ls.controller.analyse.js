@@ -14,7 +14,7 @@ class ControllerAnalyse {
         this._view = view;
         
         // Register the handlers when setting the view.
-        this._view.registerAnalyseHandler(this.handleAnalyse);
+        this._view.registerAnalyseHandler(this.handleGetAnalyse);
     }
 
     get view() {
@@ -62,7 +62,6 @@ class ControllerAnalyse {
         return this._modelDependency;
     }
     
-        
     set modelConstraint(modelConstraint) {
         this._modelConstraint = modelConstraint;
 
@@ -82,19 +81,27 @@ class ControllerAnalyse {
     	return this._controllerSchedule;
     }
 
+
     // -----------------------------------------------------
     // Handlers for events from the view to the model
 
     // Handler for updating the schedule analysis.
-    handleAnalyse = () => {
+    handleGetAnalyse = () => {
         console.log("Analyse Controller");
         this.controllerSchedule.handleGetSchedule(this.viewSchedule.makespan);
-        this.model.analyse();
+        
+        const promise = this.model.getAnalyse();
+        this.callbackGetAnalyse(promise);
     }
     
     
     // -----------------------------------------------------
     // Callbacks for events from the model to the view
+    
+    // Callback for updating the schedule analysis.
+    callbackGetAnalyse = (promise) => {
+        this.view.updateAnalyse(promise);
+    }
     
     toString() {
         return `ControllerAnalyse with ${this.view} and ${this.model}`;

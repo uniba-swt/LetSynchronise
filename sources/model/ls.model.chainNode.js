@@ -30,9 +30,9 @@ class ChainNode {
 
     toString() {
         let output = "";
-        output = output + ModelDependency.GetDependencyString(this.dependency);
+        output = output + Utility.FormatDependencyString(this.dependency);
         for (const node of this.children) {
-            output = output + '->' +node.toString();
+            output = output + ` -> ${node.toString()}`;
         }
         return output;
     }

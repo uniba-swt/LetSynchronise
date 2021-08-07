@@ -27,7 +27,7 @@ class ViewAnalyse {
         });
     }
 
-    updateAnalyse() {
+    async updateAnalyse(promise) {
         console.log("Analysis View: display result");
     }
 
