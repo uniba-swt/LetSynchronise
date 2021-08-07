@@ -8,6 +8,7 @@ class ViewExportImport {
     resetButton = null;
     
     importSelector = null;
+    importSelectorLabel = null;
 
 
     constructor() {
@@ -19,6 +20,7 @@ class ViewExportImport {
         this.resetButton = this.root.querySelector('#reset-system');
 
         this.importSelector = this.root.querySelector('#import-system-file');
+        this.importSelectorLabel = this.root.querySelector('#import-system-file-label');
     }
     
     // -----------------------------------------------------
@@ -27,6 +29,10 @@ class ViewExportImport {
     registerExportButtonHandler(handler) {
         this.exportButton.addEventListener('click', event => {
             event.preventDefault();
+            
+        	this.importSelector.value = null;
+			this.importSelectorLabel.innerText = "Choose system JSON file";
+		
             handler();
         });
     }
