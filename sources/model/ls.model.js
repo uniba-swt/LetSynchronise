@@ -7,8 +7,8 @@ class Model {
     _modelDependency = null;
     _modelSchedule = null;
     _modelConstraint = null;
-    _modelDatabase = null;
     _modelAnalyse = null;
+    _modelDatabase = null;
     
     constructor() { }
     
@@ -48,7 +48,6 @@ class Model {
     }
     
     set modelTask(modelTask) {
-        this.modelAnalyse.registerModelTask(modelTask);
         this._modelTask = modelTask;
     }
     
@@ -57,7 +56,6 @@ class Model {
     }
     
     set modelDependency(modelDependency) {
-        this.modelAnalyse.registerModelDependency(modelDependency);
         this._modelDependency = modelDependency;
     }
     
@@ -74,7 +72,6 @@ class Model {
     }
     
     set modelConstraint(modelConstraint) {
-        this.modelAnalyse.registerModelConstraint(modelConstraint);
         this._modelConstraint = modelConstraint;
     }
 

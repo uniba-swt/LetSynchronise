@@ -16,10 +16,10 @@ class Controller {
                 `  ${this.controllerExportImport}, `,
                 `  ${this.controllerInterface}, `,
                 `  ${this.controllerTask}, `,
-                `  ${this.controllerDependency}`,
-                `  ${this.controllerSchedule}`,
+                `  ${this.controllerDependency}, `,
+                `  ${this.controllerSchedule}, `,
                 `  ${this.controllerConstraint}, and`,
-                `  ${this.controllerAnalyse}`,].join('\n');
+                `  ${this.controllerAnalyse}`].join('\n');
     }
     
 }
