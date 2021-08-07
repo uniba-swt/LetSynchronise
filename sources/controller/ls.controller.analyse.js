@@ -2,9 +2,11 @@
 
 class ControllerAnalyse {
     _view = null;
+    _viewSchedule = null;
     _model = null;
     _modelDependency = null;
     _modelConstraint = null;
+    _controllerSchedule = null;
     
     constructor() { }
 
@@ -17,6 +19,14 @@ class ControllerAnalyse {
 
     get view() {
         return this._view;
+    }
+    
+    set viewSchedule(viewSchedule) {
+    	this._viewSchedule = viewSchedule;
+    }
+    
+    get viewSchedule() {
+    	return this._viewSchedule;
     }
     
     set model(model) {
@@ -63,6 +73,14 @@ class ControllerAnalyse {
     get modelConstraint() {
         return this._modelConstraint;
     }
+    
+    set controllerSchedule(controllerSchedule) {
+    	this._controllerSchedule = controllerSchedule;
+    }
+    
+    get controllerSchedule() {
+    	return this._controllerSchedule;
+    }
 
     // -----------------------------------------------------
     // Handlers for events from the view to the model
@@ -70,7 +88,7 @@ class ControllerAnalyse {
     // Handler for updating the schedule analysis.
     handleAnalyse = () => {
         console.log("Analyse Controller");
-    //    this.modelSchedule.refreshViews();
+        this.controllerSchedule.handleGetSchedule(this.viewSchedule.makespan);
         this.model.analyse();
     }
     

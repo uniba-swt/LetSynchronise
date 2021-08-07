@@ -66,10 +66,12 @@ controller.controllerConstraint.modelTask = model.modelTask;
 controller.controllerConstraint.modelInterface = model.modelInterface;
 
 controller.controllerAnalyse.view = view.viewAnalyse;
+controller.controllerAnalyse.viewSchedule = view.viewSchedule;
 controller.controllerAnalyse.model = model.modelAnalyse;
 controller.controllerAnalyse.modelTask = model.modelTask;
 controller.controllerAnalyse.modelDependency = model.modelDependency;
 controller.controllerAnalyse.modelConstraint = model.modelConstraint;
+controller.controllerAnalyse.controllerSchedule = controller.controllerSchedule;
 
 
 console.log(controller.toString());
