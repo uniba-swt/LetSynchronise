@@ -35,9 +35,8 @@ class ModelAnalyse {
     }
 
 
-    getBasicSourceEventChains(dependencies, task) {
-        return dependencies.filter(dependency => (dependency.destination.task == task))
-                           .map(dependency => new EventChain(dependency));
+    getSourceDependencies(dependencies, task) {
+        return dependencies.filter(dependency => (dependency.destination.task == task));
     }
 
     getDependencyInstanceEvents(dependencyInstances, dependency) {
@@ -46,18 +45,19 @@ class ModelAnalyse {
     }
 
     getNextDependencyInstanceEvents(path, dependencyInstances, currentEventInstance) {
-        let nextDependencyInstanceEvents = [];
-        // A path should have zero or one child
-        for (const child of path.children) {
-            let nextEventInstances = this.getDependencyInstanceEvents(dependencyInstances, child.dependency);
-            for (const nextEventInstance of nextEventInstances) {
-            	// Check if the current event instance is received by the same task that is making the 
-            	// next send event instance
-                if (nextEventInstance.sendEvent.taskInstance == currentEventInstance.receiveEvent.taskInstance) {
-                    nextDependencyInstanceEvents.push({ path: child, eventInstance: nextEventInstance });
-                }
-            }
+        if (!path.successor) {
+            return [];
         }
+        
+        let nextDependencyInstanceEvents = [];
+		let nextEventInstances = this.getDependencyInstanceEvents(dependencyInstances, path.successor.segment);
+		for (const nextEventInstance of nextEventInstances) {
+			// Check if the current event instance is received by the same task that is making the 
+			// next send event instance
+			if (nextEventInstance.sendEvent.taskInstance == currentEventInstance.receiveEvent.taskInstance) {
+				nextDependencyInstanceEvents.push({ path: path.successor, eventInstance: nextEventInstance });
+			}
+		}
         
         return nextDependencyInstanceEvents;
     }
@@ -89,13 +89,13 @@ class ModelAnalyse {
 				// Find all event chains that go from the constraint's source port to its destination port.
 				// Event chains are found via backwards reachability from the destination port. Assumes that
 				// a task's destination port can be reached by any of the task's source ports.
-				console.log("Compute event chain");
-				let paths = [];
-				let eventChains = this.getBasicSourceEventChains(allDependencies, constraint.destination.task);
+				console.log("Compute event chains");
+				const sourceDependencies = this.getSourceDependencies(allDependencies, constraint.destination.task);
+				let eventChains = sourceDependencies.map(dependency => new EventChain(dependency));
 				
-				// Replace with eventChain.buildCompleteChain(allDependencies, constraint.source, constraint.destination);
+				let paths = [];
 				while(eventChains.length > 0) {
-					let eventChainsTemp = [];
+					let updatedEventChains = [];
 					for (const eventChain of eventChains) {
 						if (eventChain.startsWith(constraint.source)) {
 							// Event chain is complete 
@@ -103,29 +103,31 @@ class ModelAnalyse {
 							console.log("Chain: " + eventChain.toString());
 						} else {
 							// Event chain is still incomplete, so add predecessors
-							const predecessorBasicEventChains = this.getBasicSourceEventChains(allDependencies, eventChain.dependency.source.task);
-							for (const predecessorBasicEventChain of predecessorBasicEventChains) {
-								//prevent self loops
-								if (eventChain.includes(predecessorBasicEventChain) == false) {
-									predecessorBasicEventChain.addChild(eventChain);
-									eventChainsTemp.push(predecessorBasicEventChain);
+							const predecessorDependencies = this.getSourceDependencies(allDependencies, eventChain.sourceTask);
+							for (const predecessorDependency of predecessorDependencies) {							
+								// Limitation: Do not follow feedback loops
+								if (!eventChain.includes(predecessorDependency)) {
+									// Create copy of the current event chain and add the predecessor
+									let newEventChain = new EventChain(predecessorDependency);
+									newEventChain.successor = eventChain;
+									updatedEventChains.push(newEventChain);
 								}
 							}
 						}
 					}
 					
 					console.log("iteration----");
-					console.log(eventChainsTemp);
-					eventChains = eventChainsTemp;
+					console.log(updatedEventChains);
+					eventChains = updatedEventChains;
 				}
 				
 				console.log("Paths");
 				console.log(paths.toString());
 				let maxDifference = -1;
 				for (const path of paths) {
-					let startEventInstances = this.getDependencyInstanceEvents(allDependencyInstances, path.dependency);
+					let startEventInstances = this.getDependencyInstanceEvents(allDependencyInstances, path.segment);
 					for (const startEventInstance of startEventInstances) {
-						let startTime = startEventInstance.sendEvent.timestamp;
+						const startTime = startEventInstance.sendEvent.timestamp;
 						
 						const endTime = this.getLastSendEventTimeOfChain(path, allDependencyInstances, startEventInstance);
 						maxDifference = Math.max(maxDifference, endTime - startTime);
