@@ -38,7 +38,7 @@ class ControllerSchedule {
     // Handler for updating the task schedule.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleGetSchedule = (makespan) => {
-		const promise = this._model.getSchedule(makespan);
+		const promise = this.model.getSchedule(makespan);
 		this.callbackGetSchedule(promise);
     }
     
@@ -48,7 +48,7 @@ class ControllerSchedule {
     
     // Callback for updating the task schedule.
     callbackGetSchedule = (promise) => {
-        this._view.updateSchedule(promise);
+        this.view.updateSchedule(promise);
     }
 
     toString() {

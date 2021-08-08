@@ -7,6 +7,7 @@ class Model {
     _modelDependency = null;
     _modelSchedule = null;
     _modelConstraint = null;
+    _modelAnalyse = null;
     _modelDatabase = null;
     
     constructor() { }
@@ -73,7 +74,15 @@ class Model {
     set modelConstraint(modelConstraint) {
         this._modelConstraint = modelConstraint;
     }
-    
+
+    get modelAnalyse() {
+        return this._modelAnalyse;
+    }
+
+    set modelAnalyse(modelAnalyse) {
+        this._modelAnalyse = modelAnalyse;
+    }
+
     get modelDatabase() {
         return this._modelDatabase;
     }

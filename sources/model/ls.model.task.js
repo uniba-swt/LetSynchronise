@@ -38,9 +38,30 @@ class ModelTask {
     // -----------------------------------------------------
     // Class methods
 
-    createTask(parameters) {
+   /*async*/ createTask(parameters) {
         // Store taskParameters into Database
         const logicalTask = ModelLogicalTask.CreateWithParameters(parameters);
+        
+        /* WORK in progress of issue 48 */
+        /*let dependencies = await this.modelDependency.getAllDependencies();
+        for (const dependency of dependencies) {
+            if (dependency.destination.task == logicalTask.name) { 
+                let vaild = false;
+                for (const input of logicalTask.inputs) {
+                    if (input.name = dependency.destination.port) {
+                        vaild = true;
+                    }
+                }
+            }
+            if (dependency.source.task == logicalTask.name) { 
+                let vaild = false;
+                for (const input of logicalTask.inputs) {
+                    if (input.name = dependency.source.port) {
+                        vaild = true;
+                    }
+                }
+            }
+        }*/
         return this.database.putObject(Model.TaskStoreName, logicalTask.parameters)
         	.then(this.refreshViews());
     }
@@ -49,6 +70,10 @@ class ModelTask {
     	return this.database.getAllObjects(Model.TaskStoreName);
     }
     
+    getAllTaskInstances() {
+    	return this.database.getAllObjects(Model.TaskInstancesStoreName);
+    }
+
     deleteTask(name) {
 		return this.modelDependency.deleteDependenciesOfTask(name)
 			.then(this.modelConstraint.deleteConstraintsOfTask(name))

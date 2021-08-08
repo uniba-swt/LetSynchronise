@@ -52,6 +52,11 @@ class ModelDependency {
         return this.database.getAllObjects(Model.DependencyStoreName);
     }
     
+    getAllDependencyInstances() {
+        return this.database.getAllObjects(Model.DependencyInstancesStoreName);
+    }
+
+    
     deleteDependency(name) {
         return this.database.deleteObject(Model.DependencyInstancesStoreName, name)
         	.then(this.database.deleteObject(Model.DependencyStoreName, name))
@@ -100,7 +105,7 @@ class ModelDependency {
     		.then(result => Promise.all([this.modelTask.getAllTasks(), this.modelInterface.getAllInputs(), this.modelInterface.getAllOutputs()]))
     		.then(([tasks, systemInputs, systemOutputs]) => this.updateDependencySelectors(tasks, systemInputs, systemOutputs));
     }
-    
+
     toString() {
         return "ModelDependency";
     }
