@@ -65,14 +65,10 @@ class ModelAnalyse {
     getLastSendEventTimeOfChain(path, dependencyInstances, eventInstance) {
         let nextEventInstances = this.getNextDependencyInstanceEvents(path, dependencyInstances, eventInstance);
         
-        let lastSendEventTime = (eventInstance.receiveEvent.task == Model.SystemInterfaceName)
-                              ? eventInstance.sendEvent.timestamp
-                              : eventInstance.receiveEvent.timestamp;
+        let lastSendEventTime = eventInstance.receiveEvent.timestamp;
         
         for (const { path: remainingPath, eventInstance: nextEventInstance } of nextEventInstances) {
-        	let endTime = (nextEventInstance.receiveEvent.task == Model.SystemInterfaceName)
-        	            ? nextEventInstance.sendEvent.timestamp
-        	            : nextEventInstance.receiveEvent.timestamp;
+        	let endTime = nextEventInstance.receiveEvent.timestamp;
             
             lastSendEventTime = Math.max(lastSendEventTime, endTime);
             
@@ -129,9 +125,7 @@ class ModelAnalyse {
 				for (const path of paths) {
 					let startEventInstances = this.getDependencyInstanceEvents(allDependencyInstances, path.dependency);
 					for (const startEventInstance of startEventInstances) {
-						let startTime = (startEventInstance.sendEvent.task == Model.SystemInterfaceName)
-						              ? startEventInstance.receiveEvent.timestamp
-						              : startEventInstance.sendEvent.timestamp;
+						let startTime = startEventInstance.sendEvent.timestamp;
 						
 						const endTime = this.getLastSendEventTimeOfChain(path, allDependencyInstances, startEventInstance);
 						maxDifference = Math.max(maxDifference, endTime - startTime);
