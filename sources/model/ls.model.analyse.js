@@ -4,9 +4,10 @@
 class ModelAnalyse {
     updateAnalysis = null;    // Callback to function in ls.view.analyse
     
+    modelTask = null;
     modelDependency = null;
     modelConstraint = null;
-    modelTask = null;
+    
     constructor() { }
 
     
@@ -28,168 +29,122 @@ class ModelAnalyse {
     registerModelDependency(modelDependency) {
         this.modelDependency = modelDependency;
     }
+    
     registerModelConstraint(modelConstraint) {
         this.modelConstraint = modelConstraint;
     }
 
-    getTaskSourceDependenciesInChainNodes(dependencies, port) {
-        let sourceDependenciesChainNodes = [];
-        for (const dependency of dependencies) {
-            if (dependency.destination.task == port.task) { 
-                sourceDependenciesChainNodes.push(new ChainNode(dependency))
-            }
-        }
-        return sourceDependenciesChainNodes;
+
+    getBasicSourceEventChains(dependencies, task) {
+        return dependencies.filter(dependency => (dependency.destination.task == task))
+                           .map(dependency => new EventChain(dependency));
     }
 
-    getDependencyEventInstances(dependencyInstances, dependency) {
-        for (const instanceType of dependencyInstances) {
-            if (instanceType.name == dependency.name) {
-                return instanceType.value;
-            }
-        }
-        return [];
+    getDependencyInstanceEvents(dependencyInstances, dependency) {
+    	return dependencyInstances.filter(dependencyInstance => (dependencyInstance.name == dependency.name))
+    	                          .flatMap(dependencyInstance => dependencyInstance.value);
     }
 
-    getNextDependencyInstance(path, dependencyInstances, eventInstance){
-        let resultInstances = [];
-        /*console.log("getNextDependencyInstance");
-        console.log(path);
-        console.log(eventInstance);*/
+    getNextDependencyInstanceEvents(path, dependencyInstances, currentEventInstance) {
+        let nextDependencyInstanceEvents = [];
+        // A path should have zero or one child
         for (const child of path.children) {
-            let childDependencyEventInstances = this.getDependencyEventInstances(dependencyInstances, child.dependency)
-            for (const childEventInstance of childDependencyEventInstances) {
-                if (childEventInstance.sendEvent.taskInstance == eventInstance.receiveEvent.taskInstance) {
-                    resultInstances.push({node : child, eventInstance : childEventInstance});
+            let nextEventInstances = this.getDependencyInstanceEvents(dependencyInstances, child.dependency);
+            for (const nextEventInstance of nextEventInstances) {
+            	// Check if the current event instance is received by the same task that is making the 
+            	// next send event instance
+                if (nextEventInstance.sendEvent.taskInstance == currentEventInstance.receiveEvent.taskInstance) {
+                    nextDependencyInstanceEvents.push({ path: child, eventInstance: nextEventInstance });
                 }
             }
         }
         
-        return resultInstances;
+        return nextDependencyInstanceEvents;
     }
 
     getLastSendEventTimeOfChain(path, dependencyInstances, eventInstance) {
-        //console.log("getLastSendEventTimeOfChain");
-        let nextInstances = this.getNextDependencyInstance(path, dependencyInstances, eventInstance);
+        let nextEventInstances = this.getNextDependencyInstanceEvents(path, dependencyInstances, eventInstance);
         
-        let lastSendEventTime
-        if (eventInstance.receiveEvent.task == "__system") {
-        	lastSendEventTime = eventInstance.sendEvent.timestamp
-        } else {
-        	lastSendEventTime = eventInstance.receiveEvent.timestamp
+        let lastSendEventTime = (eventInstance.receiveEvent.task == Model.SystemInterfaceName)
+                              ? eventInstance.sendEvent.timestamp
+                              : eventInstance.receiveEvent.timestamp;
+        
+        for (const { path: remainingPath, eventInstance: nextEventInstance } of nextEventInstances) {
+        	let endTime = (nextEventInstance.receiveEvent.task == Model.SystemInterfaceName)
+        	            ? nextEventInstance.sendEvent.timestamp
+        	            : nextEventInstance.receiveEvent.timestamp;
+            
+            lastSendEventTime = Math.max(lastSendEventTime, endTime);
+            
+            endTime = this.getLastSendEventTimeOfChain(remainingPath, dependencyInstances, nextEventInstance);
+            lastSendEventTime = Math.max(lastSendEventTime, endTime);
         }
         
-        for (const nextInstance of nextInstances) {
-            /*console.log("getLastSendEventTimeOfChain2");
-            console.log(nextInstance);*/
-            
-        	let endTime
-			if (nextInstance.eventInstance.receiveEvent.task == "__system") {
-				endTime = nextInstance.eventInstance.sendEvent.timestamp
-			} else {
-				endTime = nextInstance.eventInstance.receiveEvent.timestamp
-			}
-            
-            if (lastSendEventTime < endTime) {
-                lastSendEventTime = endTime;
-            }
-            let result = this.getLastSendEventTimeOfChain(nextInstance.node, dependencyInstances, nextInstance.eventInstance);
-            if (lastSendEventTime < result) {
-                lastSendEventTime = result;
-            }
-        }
         return lastSendEventTime;
     }
 
     getAnalyse() {
         return Promise.all([
-			this.modelTask.getAllTasks(),
 			this.modelConstraint.getAllConstraints(),
 			this.modelDependency.getAllDependencies(),
-			this.modelTask.getAllTaskInstances(),
 			this.modelDependency.getAllDependencyInstances()
-        ]).then(([tasks, constraints, dependencies, taskInstances, dependencyInstances]) => {
-			/*console.log("Analyse Model begin");
-			console.log(tasks);
-			console.log(constraints);
-			console.log(dependencies);
-			console.log("instances");
-			console.log(taskInstances);
-			console.log(dependencyInstances);*/
-		
-			/*hardcoded chain for testing and development*/
-			//let chain = new ChainNode(dependencies[0]);
-			//let child = chain.addChildrenDependency(dependencies[1]).addChildrenDependency(dependencies[2]);
-			//console.log(chain.toString());
-			for (const constraint of constraints) {
-				/*let name = constraint["name"];
-				let source = constraint["source"];
-				let destination = constraint["destination"];
-				let relation = constraint["relation"];
-				let time = constraint["time"];*/
-				//console.log(name+" source:"+source.task+"."+source.port+" destination:"+destination.task+"."+destination.port+" relation:"+relation+" time:"+time);
-			
-				/*find paths to source*/
-				console.log("Compute chain");
+        ]).then(([allConstraints, allDependencies, allDependencyInstances]) => {
+			for (const constraint of allConstraints) {
+				// Find all event chains that go from the constraint's source port to its destination port.
+				// Event chains are found via backwards reachability from the destination port. Assumes that
+				// a task's destination port can be reached by any of the task's source ports.
+				console.log("Compute event chain");
 				let paths = [];
-				let sourceDependenciesChainNodes = this.getTaskSourceDependenciesInChainNodes(dependencies, constraint.destination);
-
-				while(sourceDependenciesChainNodes.length > 0) {
-					let sourceDependenciesChainNodesTemp = [];
-					for (let i = 0; i < sourceDependenciesChainNodes.length; i++) {
-						const sourceDependencyChainNode = sourceDependenciesChainNodes[i];
-						console.log("Chain: "+sourceDependencyChainNode.toString());
-
-						if (sourceDependencyChainNode.dependency.source.task == constraint.source.task && sourceDependencyChainNode.dependency.source.port == constraint.source.port) {
-							paths.push(sourceDependencyChainNode);
+				let eventChains = this.getBasicSourceEventChains(allDependencies, constraint.destination.task);
+				
+				// Replace with eventChain.buildCompleteChain(allDependencies, constraint.source, constraint.destination);
+				while(eventChains.length > 0) {
+					let eventChainsTemp = [];
+					for (const eventChain of eventChains) {
+						if (eventChain.startsWith(constraint.source)) {
+							// Event chain is complete 
+							paths.push(eventChain);
+							console.log("Chain: " + eventChain.toString());
 						} else {
-							/*The source nodes of the current chain node*/
-							let result = this.getTaskSourceDependenciesInChainNodes(dependencies, sourceDependencyChainNode.dependency.source);
-							for (let j = 0; j < result.length; j++) {
-								let parentChainNode = result[j];
+							// Event chain is still incomplete, so add predecessors
+							const predecessorBasicEventChains = this.getBasicSourceEventChains(allDependencies, eventChain.dependency.source.task);
+							for (const predecessorBasicEventChain of predecessorBasicEventChains) {
 								//prevent self loops
-								if (sourceDependencyChainNode.contains(parentChainNode)==false) {
-									parentChainNode.addChildren(sourceDependencyChainNode);
-									sourceDependenciesChainNodesTemp.push(parentChainNode);
-	// 								if (parentChainNode.dependency.source.task == constraint.source.task && parentChainNode.dependency.source.port == constraint.source.port) {
-	// 									paths.push(parentChainNode);
-	// 								}
+								if (eventChain.includes(predecessorBasicEventChain) == false) {
+									predecessorBasicEventChain.addChild(eventChain);
+									eventChainsTemp.push(predecessorBasicEventChain);
 								}
 							}
 						}
 					}
+					
 					console.log("iteration----");
-					console.log(sourceDependenciesChainNodesTemp);
-					sourceDependenciesChainNodes = sourceDependenciesChainNodesTemp;
+					console.log(eventChainsTemp);
+					eventChains = eventChainsTemp;
 				}
+				
 				console.log("Paths");
 				console.log(paths.toString());
 				let maxDifference = -1;
 				for (const path of paths) {
-					let eventInstances = this.getDependencyEventInstances(dependencyInstances, path.dependency);
-					for (const eventInstance of eventInstances) {
-						// Only true if the event is from a system
-						let startTime = -1
-						if (eventInstance.sendEvent.task == "__system") {
-							startTime = eventInstance.receiveEvent.timestamp;
-						} else {
-							startTime = eventInstance.sendEvent.timestamp;
-						}
-						//console.log("Entering");
-						let endTime = this.getLastSendEventTimeOfChain(path, dependencyInstances, eventInstance);
+					let startEventInstances = this.getDependencyInstanceEvents(allDependencyInstances, path.dependency);
+					for (const startEventInstance of startEventInstances) {
+						let startTime = (startEventInstance.sendEvent.task == Model.SystemInterfaceName)
+						              ? startEventInstance.receiveEvent.timestamp
+						              : startEventInstance.sendEvent.timestamp;
+						
+						const endTime = this.getLastSendEventTimeOfChain(path, allDependencyInstances, startEventInstance);
+						maxDifference = Math.max(maxDifference, endTime - startTime);
 						console.log("Start time: "+startTime+" End Time: "+endTime);
-						if (endTime - startTime > maxDifference) {
-							maxDifference = endTime-startTime;
-						}
 					
 						// TODO: Ignore incomplete paths at the end of the makespan
 					}
 				}
-				let evalulateString = ""+maxDifference + constraint.relation + constraint.time;
-				let constraintCompute = eval(evalulateString);
-				console.log("eval: " +maxDifference + constraint.relation + constraint.time);
-				console.log(constraint.name + " is " + constraintCompute);
-				console.log("longest path: "+maxDifference)
+				
+				const evaluateString = `${maxDifference} ${constraint.relation} ${constraint.time}`;
+				const constraintCompute = eval(evaluateString);
+				console.log(`${constraint.name}: ${evaluateString} is ${constraintCompute}`);
+				console.log("Longest path: " + maxDifference)
 			}
 		
 			console.log("Analyse Model complete");

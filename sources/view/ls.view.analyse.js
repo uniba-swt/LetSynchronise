@@ -22,7 +22,6 @@ class ViewAnalyse {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
             event.preventDefault();
             
-            console.log("Analysis View: clicked");
             hander();
         });
     }

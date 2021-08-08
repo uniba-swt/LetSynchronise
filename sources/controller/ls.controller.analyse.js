@@ -87,7 +87,6 @@ class ControllerAnalyse {
 
     // Handler for updating the schedule analysis.
     handleGetAnalyse = () => {
-        console.log("Analyse Controller");
         this.controllerSchedule.handleGetSchedule(this.viewSchedule.makespan);
         
         const promise = this.model.getAnalyse();
