@@ -91,7 +91,11 @@ class Utility {
     static FormatDependencyString(dependency) {
         return  `[${dependency.name}]: ${dependency.source.task}.${dependency.source.port} -> ${dependency.destination.task}.${dependency.destination.port}`;
     }
-    
+
+    static FormatDependencyInstanceString(dependency) {
+        return  `[${dependency.name}]: ${dependency.sendEvent.task}.${dependency.sendEvent.port}(${dependency.sendEvent.taskInstance}) -> ${dependency.receiveEvent.task}.${dependency.receiveEvent.port}(${dependency.receiveEvent.taskInstance})`;
+    }
+
     static FormatConstraints(rawConstraints) {
     	return rawConstraints.map(constraint => {
     		const sourceFullText = `${constraint.source.task}.${constraint.source.port}`;

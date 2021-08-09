@@ -99,20 +99,20 @@ class ModelSchedule {
         ]).then(([sourceTaskInstances, destinationTaskInstances]) => {
 			let instances = [];
         	if (dependency.source.task == Model.SystemInterfaceName) {
-        		// Dependency is between system input and task
+        		// Dependency is system input --> task
 				const destinationInstances = destinationTaskInstances.value;
 
 				for (let destinationIndex = destinationInstances.length - 1; destinationIndex > -1;  destinationIndex--) {
-					// Source index and instance is same as destination
+					// Make the source index and instance of system input the same as the destination
 					const destinationInstance = destinationInstances[destinationIndex];
 					instances.unshift(this.createDependencyInstance(dependency, destinationIndex, {letEndTime: destinationInstance.letStartTime}, destinationIndex, destinationInstance));
 				}
 			} else if (dependency.destination.task == Model.SystemInterfaceName) {
-				// Dependency is between task and system output
+				// Dependency is task --> system output
 				const sourceInstances = sourceTaskInstances.value;
 				
 				for (let sourceIndex = sourceInstances.length - 1; sourceIndex > -1;  sourceIndex--) {
-					// Destination index and instance is same as source
+					// Make the destination index and instance of the system output the same as the source
 					const sourceInstance = sourceInstances[sourceIndex];
 					instances.unshift(this.createDependencyInstance(dependency, sourceIndex, sourceInstance, sourceIndex, {letStartTime: sourceInstance.letEndTime}));
 				}
