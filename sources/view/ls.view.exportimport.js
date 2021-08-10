@@ -30,9 +30,9 @@ class ViewExportImport {
         this.exportButton.addEventListener('click', event => {
             event.preventDefault();
             
-        	this.importSelector.value = null;
-			this.importSelectorLabel.innerText = "Choose system JSON file";
-		
+            this.importSelector.value = null;
+            this.importSelectorLabel.innerText = "Choose system JSON file";
+        
             handler();
         });
     }
@@ -41,18 +41,18 @@ class ViewExportImport {
         this.importButton.addEventListener('click', event => {
             event.preventDefault(); 
             
-			if (this.importSelector.files.length < 1) {
-				alert("Select a system JSON file!");
-				return;
-			}
-		
-			const fileReader = new FileReader();
-			fileReader.readAsText(this.importSelector.files.item(0));
-		
-			fileReader.onload = (event) => { 
-				const result = JSON.parse(event.target.result);
-	            handler(result);
-			}
+            if (this.importSelector.files.length < 1) {
+                alert("Select a system JSON file!");
+                return;
+            }
+        
+            const fileReader = new FileReader();
+            fileReader.readAsText(this.importSelector.files.item(0));
+        
+            fileReader.onload = (event) => { 
+                const result = JSON.parse(event.target.result);
+                handler(result);
+            }
         });
     }
     
@@ -64,6 +64,6 @@ class ViewExportImport {
     }
     
     toString() {
-    	return "ViewExportImport";
+        return "ViewExportImport";
     }
 }

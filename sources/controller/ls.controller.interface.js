@@ -31,7 +31,7 @@ class ControllerInterface {
         // Hack to populate the View with system inputs and outputs once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
             Promise.all([this._model.getAllInputs(), this._model.getAllOutputs()])
-            	.then(([inputs, outputs]) => this.callbackUpdateInterface(inputs, outputs));
+                .then(([inputs, outputs]) => this.callbackUpdateInterface(inputs, outputs));
         });
     }
     
@@ -42,7 +42,7 @@ class ControllerInterface {
     set modelDependency(modelDependency) {
         this._modelDependency = modelDependency;
         
-		// Register the model dependency with the model.
+        // Register the model dependency with the model.
         this._model.registerModelDependency(this._modelDependency);
     }
     
@@ -69,24 +69,24 @@ class ControllerInterface {
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleCreateInput = (name) => {
         this.model.createInput(name)
-	        .then(this.modelDependency.refreshViews())
-	        .then(this.modelConstraint.refreshViews());
+            .then(this.modelDependency.refreshViews())
+            .then(this.modelConstraint.refreshViews());
     }
     
     // Handler for creating system output.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleCreateOutput = (name) => {
         this.model.createOutput(name)
-	        .then(this.modelDependency.refreshViews())
-	        .then(this.modelConstraint.refreshViews());
+            .then(this.modelDependency.refreshViews())
+            .then(this.modelConstraint.refreshViews());
     }
     
     handleDeleteInput = (name) => {
-    	this.model.deleteInput(name);
+        this.model.deleteInput(name);
     }
     
     handleDeleteOutput = (name) => {
-    	this.model.deleteOutput(name);
+        this.model.deleteOutput(name);
     }
     
     
@@ -100,6 +100,6 @@ class ControllerInterface {
     
 
     toString() {
-    	return `ControllerInterface with ${this.view} and ${this.model}`;
+        return `ControllerInterface with ${this.view} and ${this.model}`;
     }
 }

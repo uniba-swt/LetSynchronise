@@ -90,6 +90,6 @@ class ControllerDependency {
     }
     
     toString() {
-    	return `ControllerDependency with ${this.view} and ${this.model}`;
+        return `ControllerDependency with ${this.view} and ${this.model}`;
     }
 }

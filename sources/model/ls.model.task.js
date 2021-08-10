@@ -63,28 +63,28 @@ class ModelTask {
             }
         }*/
         return this.database.putObject(Model.TaskStoreName, logicalTask.parameters)
-        	.then(this.refreshViews());
+            .then(this.refreshViews());
     }
     
     getAllTasks() {
-    	return this.database.getAllObjects(Model.TaskStoreName);
+        return this.database.getAllObjects(Model.TaskStoreName);
     }
     
     getAllTaskInstances() {
-    	return this.database.getAllObjects(Model.TaskInstancesStoreName);
+        return this.database.getAllObjects(Model.TaskInstancesStoreName);
     }
 
     deleteTask(name) {
-		return this.modelDependency.deleteDependenciesOfTask(name)
-			.then(this.modelConstraint.deleteConstraintsOfTask(name))
-			.then(this.database.deleteObject(Model.TaskStoreName, name))
-			.then(this.database.deleteAllObjects(Model.TaskInstancesStoreName, name))
-			.then(result => this.refreshViews());
+        return this.modelDependency.deleteDependenciesOfTask(name)
+            .then(this.modelConstraint.deleteConstraintsOfTask(name))
+            .then(this.database.deleteObject(Model.TaskStoreName, name))
+            .then(this.database.deleteAllObjects(Model.TaskInstancesStoreName, name))
+            .then(result => this.refreshViews());
     }
     
     refreshViews() {
-    	return this.getAllTasks()
-    		.then(result => this.updateTasks(result));
+        return this.getAllTasks()
+            .then(result => this.updateTasks(result));
     }
     
     toString() {

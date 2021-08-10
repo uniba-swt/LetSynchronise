@@ -7,6 +7,7 @@ class Controller {
     controllerDependency = null;
     controllerSchedule = null;
     controllerConstraint = null;
+    controllerEventChain = null;
     controllerAnalyse = null;
 
     constructor() { }
@@ -18,7 +19,8 @@ class Controller {
                 `  ${this.controllerTask}, `,
                 `  ${this.controllerDependency}, `,
                 `  ${this.controllerSchedule}, `,
-                `  ${this.controllerConstraint}, and`,
+                `  ${this.controllerConstraint},`,
+                `  ${this.controllerEventChain}, and`,
                 `  ${this.controllerAnalyse}`].join('\n');
     }
     

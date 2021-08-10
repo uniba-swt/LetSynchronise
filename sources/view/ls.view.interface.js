@@ -32,31 +32,31 @@ class ViewInterface {
     
     
     get input() {
-    	return this.inputField.value;
+        return this.inputField.value;
     }
     
     set input(input) {
-    	this.inputField.value = input;
+        this.inputField.value = input;
     }
     
     get output() {
-    	return this.outputField.value;
+        return this.outputField.value;
     }
     
     set output(output) {
-    	this.outputField.value = output;
+        this.outputField.value = output;
     }
     
     get inputClean() {
-    	return {
-    		'name': this.input.trim()
-    	};
+        return {
+            'name': this.input.trim()
+        };
     }
 
     get outputClean() {
-    	return {
-    		'name': this.output.trim()
-    	};
+        return {
+            'name': this.output.trim()
+        };
     }
     
     
@@ -75,7 +75,7 @@ class ViewInterface {
         });
     }
     
-	setupDeleteOutputButtonListener(elementId) {
+    setupDeleteOutputButtonListener(elementId) {
         const deleteOutputButton = this.root.querySelector(`[id='${elementId}']`);
         
         deleteOutputButton.addEventListener('click', event => {
@@ -96,8 +96,8 @@ class ViewInterface {
             event.preventDefault();
 
             if (this.validateName(this.input)) {
-	            handler(this.inputClean);
-	            this.input = '';
+                handler(this.inputClean);
+                this.input = '';
             }
         });
     }
@@ -107,8 +107,8 @@ class ViewInterface {
             event.preventDefault();
             
             if (this.validateName(this.output)) {
-	            handler(this.outputClean);
-	            this.output = '';
+                handler(this.outputClean);
+                this.output = '';
             }
         });
     }
@@ -122,15 +122,15 @@ class ViewInterface {
     }
     
     
-	validateName(name) {
+    validateName(name) {
         if (name == null || name.trim() == '') {
             alert('Name cannot be blank.');
             return false;
         }
         
-    	return true;
-	}
-	
+        return true;
+    }
+    
     updateInterface(inputs, outputs) {
         // Display system inputs and outputs.
         this.updatePorts(this.systemInputs, inputs, this.setupDeleteInputButtonListener);
@@ -164,6 +164,6 @@ class ViewInterface {
 
     
     toString() {
-    	return "ViewInterface";
+        return "ViewInterface";
     }
 }

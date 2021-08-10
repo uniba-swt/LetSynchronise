@@ -40,13 +40,13 @@ class ModelInterface {
     createInput(name) {
         // Store input in Database
         return this.database.putObject(Model.SystemInputStoreName, name)
-        	.then(this.refreshViews());
+            .then(this.refreshViews());
     }
     
     createOutput(name) {
         // Store input in Database
         return this.database.putObject(Model.SystemOutputStoreName, name)
-        	.then(this.refreshViews());
+            .then(this.refreshViews());
     }
     
     getAllInputs() {
@@ -58,22 +58,22 @@ class ModelInterface {
     }
     
     deleteInput(name) {
-		return this.modelDependency.deleteDependenciesOfSystem(name)
-			.then(this.modelConstraint.deleteConstraintsOfSystem(name))
-        	.then(this.database.deleteObject(Model.SystemInputStoreName, name))
-        	.then(this.refreshViews());
+        return this.modelDependency.deleteDependenciesOfSystem(name)
+            .then(this.modelConstraint.deleteConstraintsOfSystem(name))
+            .then(this.database.deleteObject(Model.SystemInputStoreName, name))
+            .then(this.refreshViews());
     }
     
     deleteOutput(name) {
-		return this.modelDependency.deleteDependenciesOfSystem(name)
-			.then(this.modelConstraint.deleteConstraintsOfSystem(name))
-        	.then(this.database.deleteObject(Model.SystemOutputStoreName, name))
-        	.then(this.refreshViews());
+        return this.modelDependency.deleteDependenciesOfSystem(name)
+            .then(this.modelConstraint.deleteConstraintsOfSystem(name))
+            .then(this.database.deleteObject(Model.SystemOutputStoreName, name))
+            .then(this.refreshViews());
     }
 
     refreshViews() {
-    	return Promise.all([this.getAllInputs(), this.getAllOutputs()])
-        	.then(([inputs, outputs]) => this.updateInterface(inputs, outputs))
+        return Promise.all([this.getAllInputs(), this.getAllOutputs()])
+            .then(([inputs, outputs]) => this.updateInterface(inputs, outputs))
     }
     
     toString() {
