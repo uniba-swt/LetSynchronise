@@ -131,8 +131,8 @@ class ViewDependency {
         }
         
         if (taskDependency.source.includes(Model.SystemInterfaceName) && taskDependency.destination.includes(Model.SystemInterfaceName)) {
-			alert('Source and destination of dependency cannot both be from the system.')
-        	return false;
+            alert('Source and destination of dependency cannot both be from the system.')
+            return false;
         }
                 
         return true;

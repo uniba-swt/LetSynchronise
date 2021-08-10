@@ -46,7 +46,7 @@ class EventChain {
     }
     
     get variant() {
-    	return parseInt(this.name.split(':')[1]);
+        return parseInt(this.name.split(':')[1]);
     }
     
     get segment() {

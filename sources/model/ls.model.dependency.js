@@ -45,7 +45,7 @@ class ModelDependency {
     createDependency(dependency) {
         // Store dependency in Database
         return this.database.putObject(Model.DependencyStoreName, dependency)
-        	.then(this.refreshViews());
+            .then(this.refreshViews());
     }
     
     getAllDependencies() {
@@ -59,51 +59,51 @@ class ModelDependency {
     
     deleteDependency(name) {
         return this.database.deleteObject(Model.DependencyInstancesStoreName, name)
-        	.then(this.database.deleteObject(Model.DependencyStoreName, name))
-        	.then(this.refreshViews());
+            .then(this.database.deleteObject(Model.DependencyStoreName, name))
+            .then(this.refreshViews());
     }
     
     deleteAllDependencies() {
-    	return this.database.deleteAllObjects(Model.DependencyInstancesStoreName)
-    		.then(this.database.deleteAllObjects(Model.DependencyStoreName))
-    		.then(this.refreshViews());
+        return this.database.deleteAllObjects(Model.DependencyInstancesStoreName)
+            .then(this.database.deleteAllObjects(Model.DependencyStoreName))
+            .then(this.refreshViews());
     }
     
     deleteDependenciesOfTask(taskName) {
-    	return this.getAllDependencies()
-    		.then(dependencies => {
-    			let deletePromises = [];
-				for (const dependency of dependencies) {
-					if (dependency.destination.task == taskName || dependency.source.task == taskName) {
-						deletePromises.push(this.deleteDependency(dependency.name));
-					}
-				}
-				
-				return Promise.all(deletePromises);
-    		});
+        return this.getAllDependencies()
+            .then(dependencies => {
+                let deletePromises = [];
+                for (const dependency of dependencies) {
+                    if (dependency.destination.task == taskName || dependency.source.task == taskName) {
+                        deletePromises.push(this.deleteDependency(dependency.name));
+                    }
+                }
+                
+                return Promise.all(deletePromises);
+            });
     }
     
     deleteDependenciesOfSystem(portName) {
-    	return this.getAllDependencies()
-    		.then(dependencies => {
-    			let deletePromises = [];
-				for (const dependency of dependencies) {
-					if (dependency.destination.task == Model.SystemInterfaceName || dependency.source.task == Model.SystemInterfaceName) {
-						if (dependency.destination.port == portName || dependency.source.port == portName) {
-							deletePromises.push(this.deleteDependency(dependency.name));
-						}
-					}
-				}
-				
-				return Promise.all(deletePromises);
-    		});
+        return this.getAllDependencies()
+            .then(dependencies => {
+                let deletePromises = [];
+                for (const dependency of dependencies) {
+                    if (dependency.destination.task == Model.SystemInterfaceName || dependency.source.task == Model.SystemInterfaceName) {
+                        if (dependency.destination.port == portName || dependency.source.port == portName) {
+                            deletePromises.push(this.deleteDependency(dependency.name));
+                        }
+                    }
+                }
+                
+                return Promise.all(deletePromises);
+            });
     }
 
     refreshViews() {
-    	return this.getAllDependencies()
-    		.then(result => this.updateDependencies(result))
-    		.then(result => Promise.all([this.modelTask.getAllTasks(), this.modelInterface.getAllInputs(), this.modelInterface.getAllOutputs()]))
-    		.then(([tasks, systemInputs, systemOutputs]) => this.updateDependencySelectors(tasks, systemInputs, systemOutputs));
+        return this.getAllDependencies()
+            .then(result => this.updateDependencies(result))
+            .then(result => Promise.all([this.modelTask.getAllTasks(), this.modelInterface.getAllInputs(), this.modelInterface.getAllOutputs()]))
+            .then(([tasks, systemInputs, systemOutputs]) => this.updateDependencySelectors(tasks, systemInputs, systemOutputs));
     }
 
     toString() {
