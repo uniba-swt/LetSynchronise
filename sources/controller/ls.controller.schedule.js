@@ -40,6 +40,7 @@ class ControllerSchedule {
     handleGetSchedule = (makespan) => {
 		const promise = this.model.getSchedule(makespan);
 		this.callbackGetSchedule(promise);
+		return promise;
     }
     
     

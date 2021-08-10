@@ -86,11 +86,13 @@ class ControllerAnalyse {
     // Handlers for events from the view to the model
 
     // Handler for updating the schedule analysis.
+    // Wait for the schedule to be updated before analysing.
     handleGetAnalyse = () => {
-        this.controllerSchedule.handleGetSchedule(this.viewSchedule.makespan);
-        
-        const promise = this.model.getAnalyse();
-        this.callbackGetAnalyse(promise);
+        const promises = this.controllerSchedule.handleGetSchedule(this.viewSchedule.makespan);
+        Promise.all(Object.keys(promises).map(key => promises[key])).then(result => {
+            const promise = this.model.getAnalyse();
+        	this.callbackGetAnalyse(promise);
+        });
     }
     
     
