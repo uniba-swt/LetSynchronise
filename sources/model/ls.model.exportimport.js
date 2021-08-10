@@ -45,10 +45,10 @@ class ModelExportImport {
 
     exportSystem() {
         this.database.exportSystem()
-            .then(result => JSON.stringify(result))
-        	.then(result => {
+        	.then(system => {
+        		const json = JSON.stringify(system);
 				const link = document.createElement("a");
-				const file = new Blob([result], { type: 'application/json' });
+				const file = new Blob([json], { type: 'application/json' });
 				link.href = URL.createObjectURL(file);
 				link.download = 'system.json';
 				link.click();
