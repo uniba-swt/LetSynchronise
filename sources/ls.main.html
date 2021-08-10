@@ -206,9 +206,11 @@
                             <input required type="text" class="form-control col-sm-7" id="outputs" placeholder="E.g., out1, out2, out3" value="out1,out2,out3"/>
                         </div>
 
-                        <button id="previewTask" type="submit" class="btn btn-primary">Preview</button>
-                        <button id="submitTask" type="submit" class="btn btn-primary">Save</button>
-                        <button id="clearTask" type="reset" class="btn btn-outline-secondary">Clear</button>
+                        <div class="btn-toolbar">
+                            <button id="previewTask" type="submit" class="btn btn-primary mr-2">Preview</button>
+                            <button id="submitTask" type="submit" class="btn btn-primary mr-2">Save</button>
+                            <button id="clearTask" type="reset" class="btn btn-outline-secondary mr-2">Clear</button>
+                        </div>
                     </div>
             
                     <div class="col ml-4">
@@ -306,14 +308,16 @@
                 </div>
             </form>
             
-            <button id="update" type="submit" class="btn btn-primary">Update</button>
-            <button id="analyse" type="submit" class="btn btn-primary">Analyse</button>
-            <div id="view-schedule-dependencies" class="dropdown">
-                <button class="btn btn-danger dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Dependencies
-                </button>
-                <div id="view-schedule-dependencies-menu" class="dropdown-menu">
-                    <a class="dropdown-item">None</a>
+            <div class="btn-toolbar">
+                <button id="update" type="submit" class="btn btn-primary mr-2">Update</button>
+                <button id="analyse" type="submit" class="btn btn-primary mr-2">Analyse</button>
+                <div id="view-schedule-dependencies" class="dropdown">
+                    <button class="btn btn-danger dropdown-toggle mr-2" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Dependencies
+                    </button>
+                    <div id="view-schedule-dependencies-menu" class="dropdown-menu">
+                        <a class="dropdown-item">None</a>
+                    </div>
                 </div>
             </div>
             
@@ -326,6 +330,38 @@
             
             <div class="m-5"></div>
 
+
+            <h3>Define Event Chains</h3>
+
+            <div class="row">
+                <div class="input-group col-sm-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="view-analyse-event-chain-name">Name</label>
+                    </div>
+                    <input required type="text" id="view-analyse-event-chain-name" class="form-control"/>
+                </div>
+                
+                <div class="input-group col-sm-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="view-analyse-event-chain-dependency">Dependency</label>
+                    </div>
+                    <select id="view-analyse-event-chain-dependency" class="custom-select">
+                        <option disabled selected>Choose ...</option>
+                    </select>
+                </div>
+
+                <div class="btn-toolbar">
+                    <button id="nextDependency" type="submit" class="btn btn-outline-secondary mr-2">Next</button>
+                    <button id="submitEventChain" type="submit" class="btn btn-primary mr-2">Save</button>
+                </div>
+            </div>
+            
+            <div class="m-3"></div>
+            
+            <ul id="view-analyse-event-chains"></ul>
+            
+            <div class="m-5"></div>
+            
             
             <h3>Define Timing Constraints</h3>
             

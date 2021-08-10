@@ -132,15 +132,19 @@ class ModelAnalyse {
     }
 
     getAnalyse() {
+        const promiseDeleteEventChains = this.database.deleteAllObjects(Model.EventChainStoreName);
+        const promiseDeleteEventChainInstances = this.database.deleteAllObjects(Model.EventChainInstanceStoreName);
+        const promiseDeleteDatabase = Promise.all([promiseDeleteEventChains, promiseDeleteEventChainInstances]);
+
         const promiseAllConstraints = this.modelConstraint.getAllConstraints();
         const promiseAllDependencies = this.modelDependency.getAllDependencies();
         const promiseAllDependencyInstances = this.modelDependency.getAllDependencyInstances();
-    
+            
         // Get all constraints and all dependencies.
         // Infer all event chains from each constraint, and store them in the model database.
         // Retrieve the inferred event chains from the database, and transform them back into EventChain objects.
-        const promiseAllInferredEventChains = Promise.all([promiseAllConstraints, promiseAllDependencies])
-            .then(([allConstraints, allDependencies]) => allConstraints
+        const promiseAllInferredEventChains = Promise.all([promiseAllConstraints, promiseAllDependencies, promiseDeleteDatabase])
+            .then(([allConstraints, allDependencies, _]) => allConstraints
                 .forEach(constraint => this.createInferredEventChains(allDependencies, constraint.name, constraint.source, constraint.destination)))
             .then(result => this.database.getAllObjects(Model.EventChainStoreName))
             .then(allEventChains => allEventChains.map(eventChain => EventChain.FromJson(eventChain)));
