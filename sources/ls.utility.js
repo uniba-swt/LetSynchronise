@@ -119,7 +119,16 @@ class Utility {
                 'relation': constraint.relation,
                 'time': constraint.time
 
-            }
+            };
+        });
+    }
+    
+    static FormatChains(chains) {
+        return chains.map(chain => {        
+            return {
+                'name': chain.name,
+                'segments': chain.segments.map(segment => segment.name)
+            };
         });
     }
     

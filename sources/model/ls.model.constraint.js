@@ -106,6 +106,6 @@ class ModelConstraint {
     }
     
     toString() {
-        return "ModelConstraints";
+        return "ModelConstraint";
     }
 }

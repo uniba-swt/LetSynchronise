@@ -1,6 +1,6 @@
-class EventChainInstance {
+class ChainInstance {
     name = null;
-    segment = null;    // Dependency instance event
+    segment = null;    // Dependency instance
     successor = null;
 
     constructor(constraintName, dependency) {
@@ -9,13 +9,13 @@ class EventChainInstance {
     }
     
     static FromJson(json) {
-        let eventChainInstance = new EventChainInstance(json.name, json.segment);
+        let chainInstance = new ChainInstance(json.name, json.segment);
                 
         if (json.successor) {
-            eventChainInstance.successor = EventChainInstance.FromJson(json.successor);
+            chainInstance.successor = ChainInstance.FromJson(json.successor);
         }
         
-        return eventChainInstance;
+        return chainInstance;
     }
     
     get json() {
@@ -33,7 +33,7 @@ class EventChainInstance {
     }
     
     get copy() {
-        let copy = new EventChainInstance(this.name, this.segment);
+        let copy = new ChainInstance(this.name, this.segment);
         
         if (this.successor) {
             copy.successor = this.successor.copy;
@@ -51,20 +51,20 @@ class EventChainInstance {
     }
     
     get constraintName() {
-        return this.name.split(':')[0];
+        return this.name.split('-')[0];
     }
     
-    get eventChainName() {
-        const nameComponents = this.name.split(':');
-        return `${nameComponents[0]}:${nameComponents[1]}`;
+    get chainName() {
+        const nameComponents = this.name.split('-');
+        return `${nameComponents[0]}-${nameComponents[1]}`;
     }
     
     get variant() {
-        return parseInt(this.name.split(':')[1]);
+        return parseInt(this.name.split('-')[1]);
     }
     
     get instance() {
-        return parseInt(this.name.split(':')[2]);
+        return parseInt(this.name.split('-')[2]);
     }
     
     get segment() {
@@ -75,12 +75,12 @@ class EventChainInstance {
         return this.successor;
     }
     
-    set successor(eventChainInstance) {
+    set successor(chainInstance) {
         if (this.successor) {
-            alert('EventChainInstance: Overwriting a successor!');
+            alert('ChainInstance: Overwriting a successor!');
         }
         
-        this.successor = eventChainInstance;
+        this.successor = chainInstance;
     }
     
     get last() {
@@ -98,7 +98,7 @@ class EventChainInstance {
         return endTime - startTime;
     }
     
-    // Generator function for visiting each segment in the event chain instance
+    // Generator function for visiting each segment in the chain instance
     * generator () {
         yield this.segment;
         

@@ -73,6 +73,19 @@ class ControllerAnalyse {
         return this._modelConstraint;
     }
     
+    set modelEventChain(modelEventChain) {
+        this._modelEventChain = modelEventChain;
+
+        // Register the model event chain with the model.
+        this._model.registerModelEventChain(this._modelEventChain);
+    }
+    
+    get modelEventChain() {
+        return this._modelEventChain;
+    }
+    
+    registerModelEventChain
+    
     set controllerSchedule(controllerSchedule) {
         this._controllerSchedule = controllerSchedule;
     }
