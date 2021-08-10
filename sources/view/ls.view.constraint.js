@@ -169,11 +169,6 @@ class ViewConstraint {
             return false;
         }
         
-        if (constraint.source.includes(Model.SystemInterfaceName) && constraint.destination.includes(Model.SystemInterfaceName)) {
-			alert('Source and destination of constraint cannot both be from the system.')
-        	return false;
-        }
-        
         return true;
     }
     

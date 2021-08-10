@@ -7,6 +7,7 @@ class Model {
     _modelDependency = null;
     _modelSchedule = null;
     _modelConstraint = null;
+    _modelEventChain = null;
     _modelAnalyse = null;
     _modelDatabase = null;
     
@@ -77,6 +78,14 @@ class Model {
         this._modelConstraint = modelConstraint;
     }
 
+    get modelEventChain() {
+        return this._modelEventChain;
+    }
+    
+    set modelEventChain(modelEventChain) {
+        this._modelEventChain = modelEventChain;
+    }
+
     get modelAnalyse() {
         return this._modelAnalyse;
     }
@@ -97,6 +106,7 @@ class Model {
         this._modelSchedule.registerModelDatabase(this._modelDatabase);
         this._modelDependency.registerModelDatabase(this._modelDatabase);
         this._modelConstraint.registerModelDatabase(this._modelDatabase);
+        this._modelEventChain.registerModelDatabase(this._modelDatabase);
         this._modelAnalyse.registerModelDatabase(this._modelDatabase);
     }
     

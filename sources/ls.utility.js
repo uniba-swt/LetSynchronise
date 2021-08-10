@@ -64,28 +64,28 @@ class Utility {
         return taskPort.split('.')[1];
     }
     
-	static FormatDependencies(rawDependencies) {
-		return rawDependencies.map(dependency => { 
-			const sourceFullText = `${dependency.source.task}.${dependency.source.port}`;
-		
-			const sourceText = (dependency.source.task == Model.SystemInterfaceName)
-			                 ? `${dependency.source.port}`
-			                 : sourceFullText;
+    static FormatDependencies(rawDependencies) {
+        return rawDependencies.map(dependency => { 
+            const sourceFullText = `${dependency.source.task}.${dependency.source.port}`;
+        
+            const sourceText = (dependency.source.task == Model.SystemInterfaceName)
+                             ? `${dependency.source.port}`
+                             : sourceFullText;
 
-			const destinationFullText = `${dependency.destination.task}.${dependency.destination.port}`;
+            const destinationFullText = `${dependency.destination.task}.${dependency.destination.port}`;
 
-			const destinationText = (dependency.destination.task == Model.SystemInterfaceName)
-			                      ? `${dependency.destination.port}`
-			                      : destinationFullText;
-		
-			return {
-				'name': dependency.name, 
-				'source': sourceText,
-				'sourceFull': sourceFullText,
-				'destination': destinationText,
-				'destinationFull': destinationFullText
-			}
-		});
+            const destinationText = (dependency.destination.task == Model.SystemInterfaceName)
+                                  ? `${dependency.destination.port}`
+                                  : destinationFullText;
+        
+            return {
+                'name': dependency.name, 
+                'source': sourceText,
+                'sourceFull': sourceFullText,
+                'destination': destinationText,
+                'destinationFull': destinationFullText
+            }
+        });
     }
     
     static FormatDependencyString(dependency) {
@@ -97,30 +97,39 @@ class Utility {
     }
 
     static FormatConstraints(rawConstraints) {
-    	return rawConstraints.map(constraint => {
-    		const sourceFullText = `${constraint.source.task}.${constraint.source.port}`;
+        return rawConstraints.map(constraint => {
+            const sourceFullText = `${constraint.source.task}.${constraint.source.port}`;
 
-			const sourceText = (constraint.source.task == Model.SystemInterfaceName)
-			                 ? `${constraint.source.port}`
-			                 : sourceFullText;
-			                 
-			const destinationFullText = `${constraint.destination.task}.${constraint.destination.port}`;
+            const sourceText = (constraint.source.task == Model.SystemInterfaceName)
+                             ? `${constraint.source.port}`
+                             : sourceFullText;
+                             
+            const destinationFullText = `${constraint.destination.task}.${constraint.destination.port}`;
 
-			const destinationText = (constraint.destination.task == Model.SystemInterfaceName)
-			                      ? `${constraint.destination.port}`
-			                      : destinationFullText;
-			                      
-			return {
-				'name': constraint.name, 
-				'source': sourceText,
-				'sourceFull': sourceFullText,
-				'destination': destinationText,
-				'destinationFull': destinationFullText,
-        		'relation': constraint.relation,
-        		'time': constraint.time
+            const destinationText = (constraint.destination.task == Model.SystemInterfaceName)
+                                  ? `${constraint.destination.port}`
+                                  : destinationFullText;
+                                  
+            return {
+                'name': constraint.name, 
+                'source': sourceText,
+                'sourceFull': sourceFullText,
+                'destination': destinationText,
+                'destinationFull': destinationFullText,
+                'relation': constraint.relation,
+                'time': constraint.time
 
-			}
-    	});
+            };
+        });
+    }
+    
+    static FormatChains(chains) {
+        return chains.map(chain => {        
+            return {
+                'name': chain.name,
+                'segments': chain.segments.map(segment => segment.name)
+            };
+        });
     }
     
     static AddDeleteButton(id) {

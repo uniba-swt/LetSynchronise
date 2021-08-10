@@ -1,104 +1,91 @@
-class EventChain {
-	name = null;
-    segment = null;    // Dependency
-    successor = null;
+'use strict';
 
-    constructor(dependency) {
-        this.segment = dependency;
+class ModelEventChain {
+    updateEventChains = null;      // Callback to function in ls.view.eventChain
+    updateEventChainSelectors = null;
+    
+    database = null;
+    modelDependency = null;
+    
+    constructor() { }
+    
+    
+    // -----------------------------------------------------
+    // Registration of callbacks from the controller
+    
+    registerUpdateEventChainsCallback(callback) {
+        this.updateEventChains = callback;
     }
     
-    static FromJson(json) {
-    	let eventChain = new EventChain(json.segment);
-    	
-    	eventChain.name = json.name;
-    	
-    	if (json.successor) {
-	    	eventChain.successor = EventChain.FromJson(json.successor);
-    	}
-    	
-    	return eventChain;
+    registerUpdateEventChainSelectorsCallback(callback) {
+        this.updateEventChainSelectors = callback;
     }
     
-    get json() {
-    	let json = { segment: this.segment };
-    	
-    	if (this.name) {
-    		json['name'] = this.name;
-    	}
-    	
-    	if (this.successor) {
-    		json['successor'] = this.successor.json;
-    	}
-    	
-    	return json;
+    
+    // -----------------------------------------------------
+    // Registration of model database
+    
+    registerModelDatabase(database) {
+        this.database = database;
     }
     
-    get name() {
-    	return this.name;
+    registerModelDependency(modelDependency) {
+        this.modelDependency = modelDependency;
     }
     
-    set name(name) {
-    	this.name = name;
+    
+    // -----------------------------------------------------
+    // Class methods
+
+    createEventChain(eventChain) {
+        // Store event chain into Database
+        return this.database.putObject(Model.EventChainStoreName, eventChain)
+            .then(this.refreshViews());
     }
     
-    get constraintName() {
-    	return this.name.split(':')[0];
+    getAllEventChains() {
+        return this.database.getAllObjects(Model.EventChainStoreName)
+            .then(allEventChains => allEventChains.map(eventChain => Chain.FromJson(eventChain)));
     }
     
-    get variant() {
-    	return parseInt(this.name.split(':')[1]);
+    getEventChain(name) {
+        return this.database.getObject(Model.EventChainStoreName, name)
+            .then(eventChain => Chain.FromJson(eventChain));
     }
-    
-    get segment() {
-        return this.segment;
-    }
-    
-    get successor() {
-        return this.successor;
-    }
-    
-    set successor(eventChain) {
-        if (this.successor) {
-            alert('EventChain: Overwriting a successor!');
-        }
+
+    deleteEventChain(name) {
+        const promiseDeleteEventChain = this.database.deleteObject(Model.EventChainStoreName, name);
         
-        this.successor = eventChain;
-    }
-    
-    get sourceTask() {
-        return this.segment.source.task;
-    }
-    
-    // Generator function to visit each segment in the event chain
-	* generator() {
-		yield this.segment;
-		
-		if (this.successor) {
-			yield* this.successor.generator();
-		}		
-	}
+        const promiseDeleteEventChainInstances = this.getAllEventChainsInstances(name)
+            .then(eventChainsInstances => Promise.all(
+                eventChainsInstances.filter(eventChainInstance => (eventChainInstance.chainName == name))
+                    .map(eventChainInstance => this.deleteEventChainInstance(eventChainInstance.name))
+            ));
 
-    includes(dependency) {
-        if (this.segment == dependency) {
-            return true;
-        } else if (this.successor == null) {
-            return false;
-        }
-        
-        return this.successor.includes(dependency);
+        return Promise.all([promiseDeleteEventChain, promiseDeleteEventChainInstances])
+            .then(this.refreshViews());
     }
     
-    startsWith(source) {
-        return (this.segment.source.task == source.task
-                && this.segment.source.port == source.port);
+    deleteAllEventChains() {
+        return this.database.deleteAllObjects(Model.EventChainStoreName)
+            .then(this.database.deleteAllObjects(Model.EventChainInstanceStoreName))
+            .then(this.refreshViews());
+    }
+    
+    getAllEventChainsInstances() {
+        return this.database.getAllObjects(Model.EventChainInstanceStoreName)
+            .then(allEventChainInstances => allEventChainInstances.map(eventChainInstance => ChainInstance.FromJson(eventChainInstance)));
     }
 
+    
+    refreshViews() {
+        return this.getAllEventChains()
+            .then(result => this.updateEventChains(result))
+            .then(result => this.modelDependency.getAllDependencies())
+            .then(result => this.updateEventChainSelectors(result));
+    }
+    
     toString() {
-        const output = Utility.FormatDependencyString(this.segment);
-        if (!this.successor) {
-            return output;
-        } else {
-            return `${output} -> ${this.successor.toString()}`;
-        }
+        return "ModelEventChain";
     }
 }

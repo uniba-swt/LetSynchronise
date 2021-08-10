@@ -7,6 +7,7 @@ class View {
     _viewDependency = null;
     _viewSchedule = null;
     _viewConstraint = null;
+    _viewEventChain = null;
     
     constructor() { }
     
@@ -48,6 +49,10 @@ class View {
         this._viewConstraint = viewConstraint;
     }
     
+    set viewEventChain(viewEventChain) {
+        this._viewEventChain = viewEventChain;
+    }
+    
     get viewExportImport() {
         return this._viewExportImport;
     }
@@ -70,6 +75,10 @@ class View {
     
     get viewConstraint() {
         return this._viewConstraint;
+    }
+
+    get viewEventChain() {
+        return this._viewEventChain;
     }
     
     toString() {

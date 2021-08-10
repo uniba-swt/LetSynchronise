@@ -22,11 +22,11 @@ class ControllerAnalyse {
     }
     
     set viewSchedule(viewSchedule) {
-    	this._viewSchedule = viewSchedule;
+        this._viewSchedule = viewSchedule;
     }
     
     get viewSchedule() {
-    	return this._viewSchedule;
+        return this._viewSchedule;
     }
     
     set model(model) {
@@ -73,12 +73,25 @@ class ControllerAnalyse {
         return this._modelConstraint;
     }
     
+    set modelEventChain(modelEventChain) {
+        this._modelEventChain = modelEventChain;
+
+        // Register the model event chain with the model.
+        this._model.registerModelEventChain(this._modelEventChain);
+    }
+    
+    get modelEventChain() {
+        return this._modelEventChain;
+    }
+    
+    registerModelEventChain
+    
     set controllerSchedule(controllerSchedule) {
-    	this._controllerSchedule = controllerSchedule;
+        this._controllerSchedule = controllerSchedule;
     }
     
     get controllerSchedule() {
-    	return this._controllerSchedule;
+        return this._controllerSchedule;
     }
 
 
@@ -91,7 +104,7 @@ class ControllerAnalyse {
         const promises = this.controllerSchedule.handleGetSchedule(this.viewSchedule.makespan);
         Promise.all(Object.keys(promises).map(key => promises[key])).then(result => {
             const promise = this.model.getAnalyse();
-        	this.callbackGetAnalyse(promise);
+            this.callbackGetAnalyse(promise);
         });
     }
     
