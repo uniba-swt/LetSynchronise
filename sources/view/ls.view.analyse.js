@@ -27,7 +27,8 @@ class ViewAnalyse {
     }
 
     async updateAnalyse(promise) {
-        console.log("Analysis View: display result");
+    	const evaluations = await promise;
+    	console.log(evaluations);
     }
 
     toString() {

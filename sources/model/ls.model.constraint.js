@@ -51,6 +51,10 @@ class ModelConstraint {
     getAllConstraints() {
         return this.database.getAllObjects(Model.ConstraintStoreName);
     }
+    
+    getConstraint(name) {
+        return this.database.getObject(Model.ConstraintStoreName, name);
+    }
 
     deleteConstraint(name) {
         return this.database.deleteObject(Model.ConstraintStoreName, name)

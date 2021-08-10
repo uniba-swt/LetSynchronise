@@ -23,6 +23,8 @@ class Model {
     static get DependencyInstancesStoreName() { return 'DependencyInstancesStore'; }
     static get ConstraintStoreName()          { return 'ConstraintStore'; }
     static get ConstraintInstancesStoreName() { return 'ConstraintInstancesStore'; }
+    static get EventChainStoreName()          { return 'EventChainStore'; }
+    static get EventChainInstanceStoreName()  { return 'EventChainInstanceStore'; }
     
     static get SystemInterfaceName() { return '__system'; }
 
@@ -95,6 +97,7 @@ class Model {
         this._modelSchedule.registerModelDatabase(this._modelDatabase);
         this._modelDependency.registerModelDatabase(this._modelDatabase);
         this._modelConstraint.registerModelDatabase(this._modelDatabase);
+        this._modelAnalyse.registerModelDatabase(this._modelDatabase);
     }
     
     toString() {
