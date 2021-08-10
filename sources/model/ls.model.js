@@ -24,7 +24,7 @@ class Model {
     static get ConstraintStoreName()          { return 'ConstraintStore'; }
     static get ConstraintInstancesStoreName() { return 'ConstraintInstancesStore'; }
     static get EventChainStoreName()          { return 'EventChainStore'; }
-    static get EventChainInstancesStoreName() { return 'EventChainInstancesStore'; }
+    static get EventChainInstanceStoreName()  { return 'EventChainInstanceStore'; }
     
     static get SystemInterfaceName() { return '__system'; }
 

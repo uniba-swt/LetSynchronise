@@ -11,24 +11,26 @@ class ModelDatabase {
             return;
         }
         
-        const dbOpenRequest = window.indexedDB.open('letDatabase', 2);
+        const dbOpenRequest = window.indexedDB.open('letDatabase', 3);
 
         // Upgrade old database schemas.
         dbOpenRequest.onupgradeneeded = function(event) {
             this.db = event.target.result;
-            if (event.oldVersion < 2) {
-                if (event.oldVersion < 1) {
-                    this.db.createObjectStore(Model.TaskStoreName, {keyPath: 'name', unique: true});
-                    this.db.createObjectStore(Model.DependencyStoreName, {keyPath: 'name', unique: true});
-                    this.db.createObjectStore(Model.TaskInstancesStoreName, {keyPath:'name', unique: true});
-                    this.db.createObjectStore(Model.DependencyInstancesStoreName, {keyPath: 'name', unique: true});
-                    this.db.createObjectStore(Model.SystemInputStoreName, {keyPath: 'name', unique: true});
-                    this.db.createObjectStore(Model.SystemOutputStoreName, {keyPath: 'name', unique: true});
-                    this.db.createObjectStore(Model.ConstraintStoreName, {keyPath: 'name', unique: true});
-                    this.db.createObjectStore(Model.ConstraintInstancesStoreName, {keyPath: 'name', unique: true});
+            if (event.oldVersion < 3) {
+                if (event.oldVersion < 2) {
+                    if (event.oldVersion < 1) {
+                        this.db.createObjectStore(Model.TaskStoreName, {keyPath: 'name', unique: true});
+                        this.db.createObjectStore(Model.DependencyStoreName, {keyPath: 'name', unique: true});
+                        this.db.createObjectStore(Model.TaskInstancesStoreName, {keyPath:'name', unique: true});
+                        this.db.createObjectStore(Model.DependencyInstancesStoreName, {keyPath: 'name', unique: true});
+                        this.db.createObjectStore(Model.SystemInputStoreName, {keyPath: 'name', unique: true});
+                        this.db.createObjectStore(Model.SystemOutputStoreName, {keyPath: 'name', unique: true});
+                        this.db.createObjectStore(Model.ConstraintStoreName, {keyPath: 'name', unique: true});
+                        this.db.createObjectStore(Model.ConstraintInstancesStoreName, {keyPath: 'name', unique: true});
+                    }
+                    this.db.createObjectStore('EventChainStore', {keyPath: 'name', unique: true});
                 }
-                this.db.createObjectStore('EventChainStore', {keyPath: 'name', unique: true});
-                this.db.createObjectStore('EventChainInstancesStore', {keyPath: 'name', unique: true});
+                this.db.createObjectStore('EventChainInstanceStore', {keyPath: 'name', unique: true});
             }
         }
         

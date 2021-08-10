@@ -1,4 +1,5 @@
 class EventChain {
+	name = null;
     segment = null;    // Dependency
     successor = null;
 
@@ -8,11 +9,44 @@ class EventChain {
     
     static FromJson(json) {
     	let eventChain = new EventChain(json.segment);
+    	
+    	eventChain.name = json.name;
+    	
     	if (json.successor) {
 	    	eventChain.successor = EventChain.FromJson(json.successor);
     	}
     	
     	return eventChain;
+    }
+    
+    get json() {
+    	let json = { segment: this.segment };
+    	
+    	if (this.name) {
+    		json['name'] = this.name;
+    	}
+    	
+    	if (this.successor) {
+    		json['successor'] = this.successor.json;
+    	}
+    	
+    	return json;
+    }
+    
+    get name() {
+    	return this.name;
+    }
+    
+    set name(name) {
+    	this.name = name;
+    }
+    
+    get constraintName() {
+    	return this.name.split(':')[0];
+    }
+    
+    get variant() {
+    	return parseInt(this.name.split(':')[1]);
     }
     
     get segment() {
