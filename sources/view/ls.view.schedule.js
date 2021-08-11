@@ -78,12 +78,12 @@ class ViewSchedule {
         const dataflowsSet = await promise['promiseAllDependenciesInstances'];
         
         if (taskParametersSet.length < 1) {
-    		this.prologue = 0;
-    		this.hyperPeriod = 0;
-    	} else {
-			this.updatePrologue(taskParametersSet);
-			this.updateHyperPeriod(taskParametersSet);
-    	}
+            this.prologue = 0;
+            this.hyperPeriod = 0;
+        } else {
+            this.updatePrologue(taskParametersSet);
+            this.updateHyperPeriod(taskParametersSet);
+        }
         
         // Draw new schedule.
         const {svgElement, scale, taskIndices} = this.drawSchedule(tasksInstances);
@@ -223,14 +223,14 @@ class ViewSchedule {
     }
     
     drawDataflows(svgElement, scale, taskIndices, dataflowsSet) {
-    	const dependencyNames = dataflowsSet.map(dataflows => dataflows.name);
-    	this.dependencies.selectAll('*').remove();
-    	
+        const dependencyNames = dataflowsSet.map(dataflows => dataflows.name);
+        this.dependencies.selectAll('*').remove();
+        
         const allMenuItem = 
-    	this.dependencies
+        this.dependencies
             .append('a')
-        		.attr('class', 'dropdown-item active')
-            	.text('All');
+                .attr('class', 'dropdown-item active')
+                .text('All');
     
         // Define arrow head of a dataflow line
         const svgDefs =
@@ -249,48 +249,48 @@ class ViewSchedule {
         
         let svgGroups = [];
         for (const dataflows of dataflowsSet) {
-			const svgGroup = 
-			svgElement.append('g')
-						.attr('class', `dependency view-dependency-${dataflows.name}`);
-			svgGroups.push(svgGroup);
-			
-			this.dependencies
-				.append('a')
-					.attr('class', 'dropdown-item active')
-					.text(dataflows.name)
-					.on('click', function() {
-						// Update style of dropdown items
-						allMenuItem.node().classList.remove('active');
-						this.classList.toggle('active');
-						
-						// Update SVG style of dependencies
-						svgGroup.node().style.visibility = this.classList.contains('active') ? 'visible' : 'hidden';
-					});
+            const svgGroup = 
+            svgElement.append('g')
+                        .attr('class', `dependency view-dependency-${dataflows.name}`);
+            svgGroups.push(svgGroup);
+            
+            this.dependencies
+                .append('a')
+                    .attr('class', 'dropdown-item active')
+                    .text(dataflows.name)
+                    .on('click', function() {
+                        // Update style of dropdown items
+                        allMenuItem.node().classList.remove('active');
+                        this.classList.toggle('active');
+                        
+                        // Update SVG style of dependencies
+                        svgGroup.node().style.visibility = this.classList.contains('active') ? 'visible' : 'hidden';
+                    });
 
-        	for (const dataflow of dataflows.value) {
-	            this.drawDataflow(svgGroup, scale, taskIndices, dataflows.name, dataflow);	            
-        	}
+            for (const dataflow of dataflows.value) {
+                this.drawDataflow(svgGroup, scale, taskIndices, dataflows.name, dataflow);              
+            }
         }
         
         allMenuItem
-			.on('click', function() {
-				// Update style of dropdown items
-				this.classList.toggle('active');
-				
-				this.parentNode.querySelectorAll('a').forEach(item => {
-					if (item != this) {
-						if (this.classList.contains('active')) {
-							item.classList.add('active');
-						} else {
-							item.classList.remove('active');
-						}
-					}
-					
-					svgGroups.forEach(svgGroup => {
-						svgGroup.node().style.visibility = this.classList.contains('active') ? 'visible' : 'hidden';
-					});
-				});
-			});
+            .on('click', function() {
+                // Update style of dropdown items
+                this.classList.toggle('active');
+                
+                this.parentNode.querySelectorAll('a').forEach(item => {
+                    if (item != this) {
+                        if (this.classList.contains('active')) {
+                            item.classList.add('active');
+                        } else {
+                            item.classList.remove('active');
+                        }
+                    }
+                    
+                    svgGroups.forEach(svgGroup => {
+                        svgGroup.node().style.visibility = this.classList.contains('active') ? 'visible' : 'hidden';
+                    });
+                });
+            });
     }
         
     drawDataflow(svgElement, scale, taskIndices, dependencyName, dataflow) {
@@ -308,22 +308,22 @@ class ViewSchedule {
         // Create dangling arrows if one of the tasks is Model.SystemInterfaceName
         // Need an additional y-offset
         const adjustedSendTaskHeight = (sendEvent.task == Model.SystemInterfaceName) ? -0.4 * View.TaskHeight : 0;
-		const adjustedReceiveTaskHeight = (receiveEvent.task == Model.SystemInterfaceName) ? 0.4 * View.TaskHeight : 0 ;
-		
-		// Change the name and timestamp of the system event
+        const adjustedReceiveTaskHeight = (receiveEvent.task == Model.SystemInterfaceName) ? 0.4 * View.TaskHeight : 0 ;
+        
+        // Change the name and timestamp of the system event
         if (sendEvent.task == Model.SystemInterfaceName) {
-        	sendEvent.task = receiveEvent.task;
-        	sendEvent.timestamp = receiveEvent.timestamp;
-        	sendPortName = sendEvent.port;
+            sendEvent.task = receiveEvent.task;
+            sendEvent.timestamp = receiveEvent.timestamp;
+            sendPortName = sendEvent.port;
         }
         
         if (receiveEvent.task == Model.SystemInterfaceName) {
-        	receiveEvent.task = sendEvent.task;
-        	receiveEvent.timestamp = sendEvent.timestamp;
-        	receivePortName = receiveEvent.port;
+            receiveEvent.task = sendEvent.task;
+            receiveEvent.timestamp = sendEvent.timestamp;
+            receivePortName = receiveEvent.port;
         }
         
-		// Create the arrow
+        // Create the arrow
         const points = [
             { x: sendEvent.timestamp,                y: yOffset + taskIndices[sendEvent.task] * View.TaskHeight + adjustedSendTaskHeight },
             { x: sendEvent.timestamp + xOffset,      y: yOffset + taskIndices[sendEvent.task] * View.TaskHeight + adjustedSendTaskHeight },

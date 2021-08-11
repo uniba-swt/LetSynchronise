@@ -5,27 +5,31 @@ class ViewEventChain {
     
     nameField = null;
     dependencyField = null;
+    dependenciesField = null;
     
     nextButton = null;
+    clearButton = null;
     submitButton = null;
     
-    dependencies = null;
     eventChains = null;
     
     deleteHandler = null;
     
+    static get ArrowSeparator() {return '--&gt;' };
     
     constructor() {
         this.root = document.querySelector('#nav-analyse');
         
-        // Define or edit constraint
+        // Define or edit an event chain
         this.nameField = this.root.querySelector('#view-analyse-event-chain-name');
         this.dependencyField = this.root.querySelector('#view-analyse-event-chain-dependency');
+        this.dependenciesField = this.root.querySelector('#view-analyse-event-chain-dependencies');
 
         this.nextButton = this.root.querySelector('#nextDependency');
+        this.clearButton = this.root.querySelector('#clearDependencies');
         this.submitButton = this.root.querySelector('#submitEventChain');
         
-        this.dependencies = d3.select('#view-analyse-event-chain-dependencies');
+        // Current event chains
         this.eventChains = d3.select('#view-analyse-event-chains');
     }
     
@@ -46,16 +50,22 @@ class ViewEventChain {
         this.dependencyField.value = dependency;
     }
     
+    get dependencies() {
+        if (this.dependenciesField.innerHTML) {
+            return this.dependenciesField.innerHTML.split(ViewEventChain.ArrowSeparator)
+                .map(name => name.trim());
+        }
+        
+        return [];
+    }
+    
+    set dependencies(dependencies) {
+        this.dependenciesField.innerHTML = dependencies.join(` ${ViewEventChain.ArrowSeparator} `);
+    }
+    
     get eventChainRaw() {
         return {
             'name': this.name,
-            'dependencies': this.dependencies
-        };
-    }
-    
-    get constraintClean() {
-        return {
-            'name': this.name.trim(),
             'dependencies': this.dependencies
         };
     }
@@ -80,15 +90,40 @@ class ViewEventChain {
     // -----------------------------------------------------
     // Registration of handlers from the controller
 
+    registerNextHander(handler) {
+        this.nextButton.addEventListener('click', event => {
+            // Prevent the default behaviour of submitting the form and the reloading of the webpage.
+            event.preventDefault();
+            
+            // Validate the dependency.
+            if (this.validateDependency(this.dependency)) {
+                // Call the handler.
+                handler(this.dependency);
+            }
+        });
+    }
+    
+    registerClearHander(handler) {
+        this.clearButton.addEventListener('click', event => {
+            // Prevent the default behaviour of submitting the form and the reloading of the webpage.
+            event.preventDefault();
+            
+            // Validate the dependency.
+            this.dependencies = [];
+            handler();
+        });
+    }
+
     registerSubmitHandler(handler) {
         this.submitButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
             event.preventDefault();
             
-            // Validate the destinations.
+            // Validate the dependency.
             if (this.validateEventChain(this.eventChainRaw)) {
                 // Call the handler.
-                handler(this.eventChainClean);
+                handler(this.eventChainRaw);
+                this.dependencies = [];
             }
         });
     }
@@ -97,19 +132,37 @@ class ViewEventChain {
         this.deleteHandler = handler;
     }
     
+    validateDependency(dependency) {
+        if (dependency == 'null ') {
+            alert('Choose a dependency.');
+            return false;
+        }
+                
+        return true;
+    }
     
     validateEventChain(eventChain) {
         if (eventChain.name == null || eventChain.name.trim() == '') {
             alert('Name cannot be blank.');
             return false;
         }
+        
+        if (eventChain.name.split('-').length > 1 || eventChain.name.split('_').length > 1) {
+            alert('Name cannot contain a dash \'-\' or underscore \'_\'.');
+            return false;
+        }
 
-        if (eventChain.dependency == 'null ') {
-            alert('Choose a dependency.');
+        if (eventChain.dependencies == null || !eventChain.dependencies.length) {
+            alert('Dependencies cannot be empty.');
             return false;
         }
                 
         return true;
+    }
+    
+    updateNextDependency(dependencyName, nextDependencies) {
+        this.dependencies = this.dependencies.concat(dependencyName);
+        this.updateEventChainSelectors(nextDependencies);
     }
     
     updateEventChainSelectors(dependencies) {
@@ -118,7 +171,7 @@ class ViewEventChain {
         // Create list of available dependencies
         this.updateDependencies(d3.select(this.dependencyField), dependencyNames);
     }
-        
+    
     updateDependencies(parentElement, dependencyNames) {
         // Create list of available dependencies
         parentElement.selectAll('*').remove();
@@ -140,7 +193,7 @@ class ViewEventChain {
     
     updateEventChains(rawEventChains) {
         // Display event chains
-        const eventChains = Utility.FormatChains(rawEventChains);
+        const eventChains = Utility.SimplifyChains(rawEventChains);
         this.eventChains.selectAll('*').remove();
         
         const thisRef = this;
@@ -151,7 +204,7 @@ class ViewEventChain {
             .enter()
             .append('li')
                 .html(eventChain => {
-                    const dependencies = eventChain.segments.join(' &rarr; ');
+                    const dependencies = eventChain.segments.join(` ${ViewEventChain.ArrowSeparator} `);
                     return `<span>${eventChain.name}: ${dependencies}</span> ${Utility.AddDeleteButton(eventChain.name)}`;
                 })
             .on('click', function(data) {
