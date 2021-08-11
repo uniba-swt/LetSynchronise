@@ -59,14 +59,14 @@ class ModelInterface {
     
     deleteInput(name) {
         return this.modelDependency.deleteDependenciesOfSystem(name)
-            .then(this.modelEventChain.deleteEventChainsOfSystem(name))
+        //    .then(this.modelEventChain.deleteEventChainsOfSystem(name))
             .then(this.database.deleteObject(Model.SystemInputStoreName, name))
             .then(this.refreshViews());
     }
     
     deleteOutput(name) {
         return this.modelDependency.deleteDependenciesOfSystem(name)
-            .then(this.modelEventChain.deleteEventChainsOfSystem(name))
+        //    .then(this.modelEventChain.deleteEventChainsOfSystem(name))
             .then(this.database.deleteObject(Model.SystemOutputStoreName, name))
             .then(this.refreshViews());
     }

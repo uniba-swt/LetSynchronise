@@ -69,6 +69,7 @@ class ModelDependency {
     deleteDependency(name) {
         return this.database.deleteObject(Model.DependencyInstancesStoreName, name)
             .then(this.database.deleteObject(Model.DependencyStoreName, name))
+    		.then(this.modelEventChain.deleteEventChainsOfDependency(name))
             .then(this.refreshViews());
     }
     
@@ -80,42 +81,25 @@ class ModelDependency {
     
     deleteDependenciesOfTask(taskName) {
         return this.getAllDependencies()
-            .then(dependencies => {
-                let deletePromises = [];
-                for (const dependency of dependencies) {
-                    if (dependency.destination.task == taskName || dependency.source.task == taskName) {
-                        deletePromises.push(this.deleteDependency(dependency.name));
-                    }
-                }
-                
-                return Promise.all(deletePromises);
-            });
+            .then(dependencies => Promise.all(
+            	dependencies.filter(dependency => (dependency.destination.task == taskName || dependency.source.task == taskName))
+            		.map(dependency => this.deleteDependency(dependency.name))
+            ));
     }
     
     deleteDependenciesOfSystem(portName) {
         return this.getAllDependencies()
-            .then(dependencies => {
-                let deletePromises = [];
-                for (const dependency of dependencies) {
-                    if (dependency.destination.task == Model.SystemInterfaceName || dependency.source.task == Model.SystemInterfaceName) {
-                        if (dependency.destination.port == portName || dependency.source.port == portName) {
-                            deletePromises.push(this.deleteDependency(dependency.name));
-                        }
-                    }
-                }
-                
-                return Promise.all(deletePromises);
-            });
+            .then(dependencies => Promise.all(
+                dependencies.filter(dependency => ((dependency.destination.task == Model.SystemInterfaceName || dependency.source.task == Model.SystemInterfaceName)
+                    && (dependency.destination.port == portName || dependency.source.port == portName)))
+                    .map(dependency => this.deleteDependency(dependency.name))
+            ));
     }
     
     getSuccessorDependencies(name) {
 		const promiseDependency = this.getDependency(name);
 		const promiseAllDependencies = promiseDependency.then(sourceDependency => {
-			if (sourceDependency.destination.task == Model.SystemInterfaceName) {
-				return [];
-			} else {
-				return this.getAllDependencies();
-			}
+			return (sourceDependency.destination.task == Model.SystemInterfaceName) ? [] : this.getAllDependencies();
 		});
 		
 		return Promise.all([promiseDependency, promiseAllDependencies])

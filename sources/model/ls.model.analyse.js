@@ -133,9 +133,9 @@ class ModelAnalyse {
         const promiseAllConstraints = this.modelConstraint.getAllConstraints();
         const promiseAllDependencyInstances = this.modelDependency.getAllDependencyInstances();
             
-        // Get all constraints and all dependencies.
-        // Infer all event chains from each constraint, and store them in the model database.
-        // Retrieve the inferred event chains from the database, and transform them back into Chain objects.
+//         // Get all constraints and all dependencies.
+//         // Infer all event chains from each constraint, and store them in the model database.
+//         // Retrieve the inferred event chains from the database, and transform them back into Chain objects.
 //         const promiseAllDependencies = this.modelDependency.getAllDependencies();
 //         const promiseAllInferredEventChains = Promise.all([promiseAllConstraints, promiseAllDependencies])
 //             .then(([allConstraints, allDependencies]) => allConstraints
@@ -162,7 +162,7 @@ class ModelAnalyse {
                 let results = { };
                 for (const constraint of allConstraints) {              
                     for (const chainName in chainsLatencies) {
-                        if (chainName.split('-')[0] == constraint.name) {
+                        if (chainName == constraint.eventChain) {
                             results[chainName] = {
                                 'min': Math.min(...chainsLatencies[chainName]),
                                 'max': Math.max(...chainsLatencies[chainName]),

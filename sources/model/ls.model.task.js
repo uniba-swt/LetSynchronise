@@ -76,7 +76,7 @@ class ModelTask {
 
     deleteTask(name) {
         return this.modelDependency.deleteDependenciesOfTask(name)
-            .then(this.modelEventChain.deleteEventChainsOfTask(name))
+        //    .then(this.modelEventChain.deleteEventChainsOfTask(name))
             .then(this.database.deleteObject(Model.TaskStoreName, name))
             .then(this.database.deleteAllObjects(Model.TaskInstancesStoreName, name))
             .then(result => this.refreshViews());

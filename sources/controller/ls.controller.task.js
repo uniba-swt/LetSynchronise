@@ -55,7 +55,7 @@ class ControllerTask {
         this._model.registerModelEventChain(this._modelEventChain);
     }
     
-    get modelDependency() {
+    get modelEventChain() {
         return this._modelEventChain;
     }
     

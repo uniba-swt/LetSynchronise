@@ -6,6 +6,7 @@ class ModelEventChain {
     
     database = null;
     modelDependency = null;
+    modelConstraint = null;
     
     constructor() { }
     
@@ -31,6 +32,10 @@ class ModelEventChain {
     
     registerModelDependency(modelDependency) {
         this.modelDependency = modelDependency;
+    }
+    
+    registerModelConstraint(modelConstraint) {
+        this.modelConstraint = modelConstraint;
     }
     
     
@@ -118,6 +123,7 @@ class ModelEventChain {
 					for (const segment of eventChain.generator()) {
 						if (segment.destination.task == taskName || segment.source.task == taskName) {
 							deletePromises.push(this.deleteEventChain(eventChain.name));
+							deletePromises.push(this.modelConstraint.deleteConstraintsOfEventChain(eventChain.name));
 							break;
 						}
 					}
@@ -136,6 +142,7 @@ class ModelEventChain {
 						if ((segment.destination.task == Model.SystemInterfaceName || segment.source.task == Model.SystemInterfaceName)
 								&& (segment.destination.port == portName || segment.source.port == portName)) {
 							deletePromises.push(this.deleteEventChain(eventChain.name));
+							deletePromises.push(this.modelConstraint.deleteConstraintsOfEventChain(eventChain.name));
 							break;
 						}
 					}
@@ -143,6 +150,24 @@ class ModelEventChain {
                 
                 return Promise.all(deletePromises);
             });
+    }
+    
+    deleteEventChainsOfDependency(dependencyName) {
+    	return this.getAllEventChains()
+    		.then(eventChains => {
+    			let deletePromises = [];
+    			for (const eventChain of eventChains) {
+					for (const segment of eventChain.generator()) {
+						if (segment.name == dependencyName) {
+							deletePromises.push(this.deleteEventChain(eventChain.name));
+							deletePromises.push(this.modelConstraint.deleteConstraintsOfEventChain(eventChain.name));
+							break;
+						}
+					}
+    			}
+    			
+				return Promise.all(deletePromises);
+    		});
     }
 
     synchroniseWithDependencies(dependencies) {        

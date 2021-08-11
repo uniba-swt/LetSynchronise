@@ -42,7 +42,7 @@ class ControllerEventChain {
     set modelDependency(modelDependency) {
         this._modelDependency = modelDependency;
         
-        // Register the model task with the model.
+        // Register the model dependency with the model.
         this._model.registerModelDependency(this._modelDependency);
     }
     
@@ -50,8 +50,11 @@ class ControllerEventChain {
         return this._modelDependency;
     }
     
-    set modelConstraint(modelDependency) {
-        this._modelConstraint = modelDependency;
+    set modelConstraint(modelConstraint) {
+        this._modelConstraint = modelConstraint;
+        
+        // Register the model constraint with the model.
+        this._model.registerModelConstraint(this._modelConstraint);
     }
     
     get modelConstraint() {
