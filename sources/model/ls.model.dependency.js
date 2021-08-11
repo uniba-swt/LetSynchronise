@@ -18,12 +18,12 @@ class ModelDependency {
     registerUpdateDependenciesCallback(callback) {
         this.updateDependencies = callback;
     }
-    
+
     registerUpdateDependencySelectorsCallback(callback) {
         this.updateDependencySelectors = callback;
     }
-    
-    
+        
+
     // -----------------------------------------------------
     // Registration of model database
     
@@ -51,6 +51,10 @@ class ModelDependency {
         // Store dependency in Database
         return this.database.putObject(Model.DependencyStoreName, dependency)
             .then(this.refreshViews());
+    }
+    
+    getDependency(name) {
+        return this.database.getObject(Model.DependencyStoreName, name);
     }
     
     getAllDependencies() {
@@ -103,10 +107,25 @@ class ModelDependency {
                 return Promise.all(deletePromises);
             });
     }
+    
+    getSuccessorDependencies(name) {
+		const promiseDependency = this.getDependency(name);
+		const promiseAllDependencies = promiseDependency.then(sourceDependency => {
+			if (sourceDependency.destination.task == Model.SystemInterfaceName) {
+				return [];
+			} else {
+				return this.getAllDependencies();
+			}
+		});
+		
+		return Promise.all([promiseDependency, promiseAllDependencies])
+			.then(([sourceDependency, allDependencies]) => allDependencies
+				.filter(dependency => (dependency.source.task == sourceDependency.destination.task)));
+    }
 
     refreshViews() {
         return this.getAllDependencies()
-            .then(result => { this.updateDependencies(result); this.modelEventChain.synchroniseWithDependencies(result) })
+            .then(result => { this.updateDependencies(result); this.modelEventChain.synchroniseWithDependencies(result); })
             .then(result => Promise.all([this.modelTask.getAllTasks(), this.modelInterface.getAllInputs(), this.modelInterface.getAllOutputs()]))
             .then(([tasks, systemInputs, systemOutputs]) => this.updateDependencySelectors(tasks, systemInputs, systemOutputs));
     }

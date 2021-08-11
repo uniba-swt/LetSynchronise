@@ -4,7 +4,7 @@ class ControllerTask {
     _view = null;
     _model = null;
     _modelDependency = null;
-    _modelConstraint = null;
+    _modelEventChain = null;
     
     constructor() { }
     
@@ -48,19 +48,18 @@ class ControllerTask {
         return this._modelDependency;
     }
     
+    set modelEventChain(modelEventChain) {
+        this._modelEventChain = modelEventChain;
         
-    set modelConstraint(modelConstraint) {
-        this._modelConstraint = modelConstraint;
+        // Register the model event chain with the model.
+        this._model.registerModelEventChain(this._modelEventChain);
+    }
+    
+    get modelDependency() {
+        return this._modelEventChain;
+    }
+    
 
-        // Register the model constraint with the model.
-        this._model.registerModelConstraint(this._modelConstraint);
-    }
-    
-    get modelConstraint() {
-        return this._modelConstraint;
-    }
-    
-    
     // -----------------------------------------------------
     // Handlers for events from the view to the model
     
@@ -68,15 +67,13 @@ class ControllerTask {
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleCreateTask = (taskParameters) => {
         this.model.createTask(taskParameters)
-	        .then(this.modelDependency.refreshViews())
-	        .then(this.modelConstraint.refreshViews());
+	        .then(this.modelDependency.refreshViews());
     }
     
     // Handler for deleting a task.
     handleDeleteTask = (name) => {
         this.model.deleteTask(name)
-	        .then(this.modelDependency.refreshViews())
-	        .then(this.modelConstraint.refreshViews());
+	        .then(this.modelDependency.refreshViews());
     }
         
     

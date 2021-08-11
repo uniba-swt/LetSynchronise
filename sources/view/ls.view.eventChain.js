@@ -8,25 +8,28 @@ class ViewEventChain {
     dependenciesField = null;
     
     nextButton = null;
+    clearButton = null;
     submitButton = null;
     
     eventChains = null;
     
     deleteHandler = null;
     
-    static get ArrowSeparator() {return '&rarr;' };
+    static get ArrowSeparator() {return '--&gt;' };
     
     constructor() {
         this.root = document.querySelector('#nav-analyse');
         
-        // Define or edit constraint
+        // Define or edit an event chain
         this.nameField = this.root.querySelector('#view-analyse-event-chain-name');
         this.dependencyField = this.root.querySelector('#view-analyse-event-chain-dependency');
         this.dependenciesField = this.root.querySelector('#view-analyse-event-chain-dependencies');
 
         this.nextButton = this.root.querySelector('#nextDependency');
+        this.clearButton = this.root.querySelector('#clearDependencies');
         this.submitButton = this.root.querySelector('#submitEventChain');
         
+        // Current event chains
         this.eventChains = d3.select('#view-analyse-event-chains');
     }
     
@@ -48,24 +51,21 @@ class ViewEventChain {
     }
     
     get dependencies() {
-    	return this.dependenciesField.split(this.ArrowSeparator);
+    	if (this.dependenciesField.innerHTML) {
+	    	return this.dependenciesField.innerHTML.split(ViewEventChain.ArrowSeparator)
+	    		.map(name => name.trim());
+    	}
+    	
+    	return [];
     }
     
     set dependencies(dependencies) {
-    	this.dependenciesField.value = dependencies.join(` ${this.ArrowSeparator} `);
+    	this.dependenciesField.innerHTML = dependencies.join(` ${ViewEventChain.ArrowSeparator} `);
     }
     
     get eventChainRaw() {
-    	
         return {
             'name': this.name,
-            'dependencies': this.dependencies
-        };
-    }
-    
-    get constraintClean() {
-        return {
-            'name': this.name.trim(),
             'dependencies': this.dependencies
         };
     }
@@ -96,10 +96,21 @@ class ViewEventChain {
             event.preventDefault();
             
             // Validate the dependency.
-            if (this.validateDependency(this.dependencyField)) {
+            if (this.validateDependency(this.dependency)) {
                 // Call the handler.
-                handler(this.dependencyField);
+                handler(this.dependency);
             }
+    	});
+    }
+    
+    registerClearHander(handler) {
+    	this.clearButton.addEventListener('click', event => {
+            // Prevent the default behaviour of submitting the form and the reloading of the webpage.
+            event.preventDefault();
+            
+            // Validate the dependency.
+            this.dependencies = [];
+            handler();
     	});
     }
 
@@ -111,7 +122,8 @@ class ViewEventChain {
             // Validate the dependency.
             if (this.validateEventChain(this.eventChainRaw)) {
                 // Call the handler.
-                handler(this.eventChainClean);
+                handler(this.eventChainRaw);
+                this.dependencies = [];
             }
         });
     }
@@ -120,8 +132,8 @@ class ViewEventChain {
         this.deleteHandler = handler;
     }
     
-    validateEventChain(eventChain) {
-        if (eventChain.dependency == 'null ') {
+    validateDependency(dependency) {
+        if (dependency == 'null ') {
             alert('Choose a dependency.');
             return false;
         }
@@ -134,17 +146,22 @@ class ViewEventChain {
             alert('Name cannot be blank.');
             return false;
         }
+        
+        if (eventChain.name.split('-').length > 1 || eventChain.name.split('_').length > 1) {
+            alert('Name cannot contain a dash \'-\' or underscore \'_\'.');
+            return false;
+        }
 
-        if (eventChain.dependency == 'null ') {
-            alert('Choose a dependency.');
+        if (eventChain.dependencies == null || !eventChain.dependencies.length) {
+            alert('Dependencies cannot be empty.');
             return false;
         }
                 
         return true;
     }
     
-    updateNextDependency(dependency, nextDependencies) {
-    	this.dependencies = this.dependencies.push(dependency);
+    updateNextDependency(dependencyName, nextDependencies) {
+    	this.dependencies = this.dependencies.concat(dependencyName);
     	this.updateEventChainSelectors(nextDependencies);
     }
     
@@ -187,7 +204,7 @@ class ViewEventChain {
             .enter()
             .append('li')
                 .html(eventChain => {
-                    const dependencies = eventChain.segments.join(' ${this.ArrowSeparator} ');
+                    const dependencies = eventChain.segments.join(` ${ViewEventChain.ArrowSeparator} `);
                     return `<span>${eventChain.name}: ${dependencies}</span> ${Utility.AddDeleteButton(eventChain.name)}`;
                 })
             .on('click', function(data) {

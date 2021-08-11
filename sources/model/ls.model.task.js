@@ -7,7 +7,7 @@ class ModelTask {
     storeName = null;
     
     modelDependency = null;
-    modelConstraint = null;
+    modelEventChain = null;
         
     constructor() { }
     
@@ -31,8 +31,8 @@ class ModelTask {
         this.modelDependency = modelDependency;
     }
     
-    registerModelConstraint(modelConstraint) {
-        this.modelConstraint = modelConstraint;
+    registerModelEventChain(modelEventChain) {
+        this.modelEventChain = modelEventChain;
     }
     
     // -----------------------------------------------------
@@ -76,7 +76,7 @@ class ModelTask {
 
     deleteTask(name) {
         return this.modelDependency.deleteDependenciesOfTask(name)
-            .then(this.modelConstraint.deleteConstraintsOfTask(name))
+            .then(this.modelEventChain.deleteEventChainsOfTask(name))
             .then(this.database.deleteObject(Model.TaskStoreName, name))
             .then(this.database.deleteAllObjects(Model.TaskInstancesStoreName, name))
             .then(result => this.refreshViews());

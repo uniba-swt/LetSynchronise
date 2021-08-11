@@ -5,7 +5,7 @@ class ModelInterface {
     
     database = null;
     modelDependency = null;
-    modelConstraint = null;
+    modelEventChain = null;
 
     constructor() { }
     
@@ -29,8 +29,8 @@ class ModelInterface {
         this.modelDependency = modelDependency;
     }
     
-    registerModelConstraint(modelConstraint) {
-        this.modelConstraint = modelConstraint;
+    registerModelEventChain(modelEventChain) {
+        this.modelEventChain = modelEventChain;
     }
     
     
@@ -59,14 +59,14 @@ class ModelInterface {
     
     deleteInput(name) {
         return this.modelDependency.deleteDependenciesOfSystem(name)
-            .then(this.modelConstraint.deleteConstraintsOfSystem(name))
+            .then(this.modelEventChain.deleteEventChainsOfSystem(name))
             .then(this.database.deleteObject(Model.SystemInputStoreName, name))
             .then(this.refreshViews());
     }
     
     deleteOutput(name) {
         return this.modelDependency.deleteDependenciesOfSystem(name)
-            .then(this.modelConstraint.deleteConstraintsOfSystem(name))
+            .then(this.modelEventChain.deleteEventChainsOfSystem(name))
             .then(this.database.deleteObject(Model.SystemOutputStoreName, name))
             .then(this.refreshViews());
     }

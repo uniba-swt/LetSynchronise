@@ -41,14 +41,6 @@ class Chain {
         this.name = name;
     }
     
-    get constraintName() {
-        return this.name.split('-')[0];
-    }
-    
-    get variant() {
-        return parseInt(this.name.split('-')[1]);
-    }
-    
     get segment() {
         return this.segment;
     }
@@ -73,6 +65,14 @@ class Chain {
         }
         
         this.successor = chain;
+    }
+    
+    get last() {
+        if (!this.successor) {
+            return this;
+        }
+        
+        return this.successor.last;
     }
     
     get sourceTask() {
