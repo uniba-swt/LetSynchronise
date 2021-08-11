@@ -58,6 +58,17 @@ class ControllerDependency {
     get modelInterface() {
         return this._modelInterface;
     }
+
+    set modelEventChain(modelEventChain) {
+        this._modelEventChain = modelEventChain;
+        
+        // Register the model interface with the model.
+        this._model.registerModelEventChain(this._modelEventChain);
+    }
+    
+    get modelEventChain() {
+        return this._modelEventChain;
+    }
     
     
     // -----------------------------------------------------

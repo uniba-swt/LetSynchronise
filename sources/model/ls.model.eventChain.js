@@ -39,7 +39,7 @@ class ModelEventChain {
 
     createEventChain(eventChain) {
         // Store event chain into Database
-        return this.database.putObject(Model.EventChainStoreName, eventChain)
+        return this.database.putObject(Model.EventChainStoreName, eventChain.json)
             .then(this.refreshViews());
     }
     
@@ -54,13 +54,8 @@ class ModelEventChain {
     }
 
     deleteEventChain(name) {
+        const promiseDeleteEventChainInstances = this.deleteEventChainInstances(name);
         const promiseDeleteEventChain = this.database.deleteObject(Model.EventChainStoreName, name);
-        
-        const promiseDeleteEventChainInstances = this.getAllEventChainsInstances(name)
-            .then(eventChainsInstances => Promise.all(
-                eventChainsInstances.filter(eventChainInstance => (eventChainInstance.chainName == name))
-                    .map(eventChainInstance => this.deleteEventChainInstance(eventChainInstance.name))
-            ));
 
         return Promise.all([promiseDeleteEventChain, promiseDeleteEventChainInstances])
             .then(this.refreshViews());
@@ -72,11 +67,37 @@ class ModelEventChain {
             .then(this.refreshViews());
     }
     
+    createEventChainInstance(eventChainInstance) {
+        // Store event chain instance into Database
+        return this.database.putObject(Model.EventChainInstanceStoreName, eventChainInstance.json);
+    }
+    
     getAllEventChainsInstances() {
         return this.database.getAllObjects(Model.EventChainInstanceStoreName)
             .then(allEventChainInstances => allEventChainInstances.map(eventChainInstance => ChainInstance.FromJson(eventChainInstance)));
     }
 
+    // Deletes all instances of a given event chain
+    deleteEventChainInstances(name) {
+        return this.getAllEventChainsInstances()
+            .then(allEventChainInstances => allEventChainInstances.filter(eventChainInstance => (eventChainInstance.chainName == name)))
+            .then(instancesToDelete => Promise.all(
+                instancesToDelete.map(instance => this.database.deleteObject(Model.EventChainInstanceStoreName, instance.name))
+            ));
+    }
+
+    synchroniseWithDependencies(dependencies) {        
+        return this.getAllEventChains()
+            .then(allEventChains => allEventChains.forEach(eventChain => {
+                for (const segment of eventChain.segments) {
+                    if (!dependencies.some(dependency => (dependency.name == segment.name))) {
+                        this.deleteEventChain(eventChain.name);
+                        break;
+                    }
+                }
+            }))
+            .then(this.refreshViews());
+    }
     
     refreshViews() {
         return this.getAllEventChains()

@@ -5,15 +5,16 @@ class ViewEventChain {
     
     nameField = null;
     dependencyField = null;
+    dependenciesField = null;
     
     nextButton = null;
     submitButton = null;
     
-    dependencies = null;
     eventChains = null;
     
     deleteHandler = null;
     
+    static get ArrowSeparator() {return '&rarr;' };
     
     constructor() {
         this.root = document.querySelector('#nav-analyse');
@@ -21,11 +22,11 @@ class ViewEventChain {
         // Define or edit constraint
         this.nameField = this.root.querySelector('#view-analyse-event-chain-name');
         this.dependencyField = this.root.querySelector('#view-analyse-event-chain-dependency');
+        this.dependenciesField = this.root.querySelector('#view-analyse-event-chain-dependencies');
 
         this.nextButton = this.root.querySelector('#nextDependency');
         this.submitButton = this.root.querySelector('#submitEventChain');
         
-        this.dependencies = d3.select('#view-analyse-event-chain-dependencies');
         this.eventChains = d3.select('#view-analyse-event-chains');
     }
     
@@ -46,7 +47,16 @@ class ViewEventChain {
         this.dependencyField.value = dependency;
     }
     
+    get dependencies() {
+    	return this.dependenciesField.split(this.ArrowSeparator);
+    }
+    
+    set dependencies(dependencies) {
+    	this.dependenciesField.value = dependencies.join(` ${this.ArrowSeparator} `);
+    }
+    
     get eventChainRaw() {
+    	
         return {
             'name': this.name,
             'dependencies': this.dependencies
@@ -80,12 +90,25 @@ class ViewEventChain {
     // -----------------------------------------------------
     // Registration of handlers from the controller
 
+    registerNextHander(handler) {
+    	this.nextButton.addEventListener('click', event => {
+            // Prevent the default behaviour of submitting the form and the reloading of the webpage.
+            event.preventDefault();
+            
+            // Validate the dependency.
+            if (this.validateDependency(this.dependencyField)) {
+                // Call the handler.
+                handler(this.dependencyField);
+            }
+    	});
+    }
+
     registerSubmitHandler(handler) {
         this.submitButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
             event.preventDefault();
             
-            // Validate the destinations.
+            // Validate the dependency.
             if (this.validateEventChain(this.eventChainRaw)) {
                 // Call the handler.
                 handler(this.eventChainClean);
@@ -97,6 +120,14 @@ class ViewEventChain {
         this.deleteHandler = handler;
     }
     
+    validateEventChain(eventChain) {
+        if (eventChain.dependency == 'null ') {
+            alert('Choose a dependency.');
+            return false;
+        }
+                
+        return true;
+    }
     
     validateEventChain(eventChain) {
         if (eventChain.name == null || eventChain.name.trim() == '') {
@@ -112,13 +143,18 @@ class ViewEventChain {
         return true;
     }
     
+    updateNextDependency(dependency, nextDependencies) {
+    	this.dependencies = this.dependencies.push(dependency);
+    	this.updateEventChainSelectors(nextDependencies);
+    }
+    
     updateEventChainSelectors(dependencies) {
         const dependencyNames = dependencies.map(dependency => dependency.name);
         
         // Create list of available dependencies
         this.updateDependencies(d3.select(this.dependencyField), dependencyNames);
     }
-        
+    
     updateDependencies(parentElement, dependencyNames) {
         // Create list of available dependencies
         parentElement.selectAll('*').remove();
@@ -140,7 +176,7 @@ class ViewEventChain {
     
     updateEventChains(rawEventChains) {
         // Display event chains
-        const eventChains = Utility.FormatChains(rawEventChains);
+        const eventChains = Utility.SimplifyChains(rawEventChains);
         this.eventChains.selectAll('*').remove();
         
         const thisRef = this;
@@ -151,7 +187,7 @@ class ViewEventChain {
             .enter()
             .append('li')
                 .html(eventChain => {
-                    const dependencies = eventChain.segments.join(' &rarr; ');
+                    const dependencies = eventChain.segments.join(' ${this.ArrowSeparator} ');
                     return `<span>${eventChain.name}: ${dependencies}</span> ${Utility.AddDeleteButton(eventChain.name)}`;
                 })
             .on('click', function(data) {

@@ -56,6 +56,7 @@ controller.controllerDependency.view = view.viewDependency;
 controller.controllerDependency.model = model.modelDependency;
 controller.controllerDependency.modelTask = model.modelTask;
 controller.controllerDependency.modelInterface = model.modelInterface;
+controller.controllerDependency.modelEventChain = model.modelEventChain;
 
 controller.controllerSchedule.view = view.viewSchedule;
 controller.controllerSchedule.model = model.modelSchedule;

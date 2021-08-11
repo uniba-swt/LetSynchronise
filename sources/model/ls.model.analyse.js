@@ -80,9 +80,7 @@ class ModelAnalyse {
             chains = updatedChains;
         }
         
-        Promise.all(completeChains.map((completeChain, index) => {
-            this.database.putObject(Model.EventChainStoreName, completeChain.json);
-        }));
+        return Promise.all(completeChains.map(completeChain => this.modelEventChain.createEventChain(completeChain)));
     }
 
     getPredecessorDependencies(dependencies, task) {
@@ -116,9 +114,9 @@ class ModelAnalyse {
             chainInstances = updatedChainInstances;
         }
         
-        Promise.all(chainInstances.map((chainInstance, index) => {
+        return Promise.all(chainInstances.map((chainInstance, index) => {
             chainInstance.name = `${chainInstance.name}-${index}`;
-            this.database.putObject(Model.EventChainInstanceStoreName, chainInstance.json);
+            this.modelEventChain.createEventChainInstance(chainInstance);
         }));
     }
 

@@ -7,6 +7,7 @@ class ModelDependency {
     database = null;
     modelTask = null;
     modelInterface = null;
+    modelEventChain = null;
 
     constructor() { }
     
@@ -37,7 +38,11 @@ class ModelDependency {
     registerModelInterface(modelInterface) {
         this.modelInterface = modelInterface;
     }
-    
+
+    registerModelEventChain(modelEventChain) {
+        this.modelEventChain = modelEventChain;
+    }
+        
     
     // -----------------------------------------------------
     // Class methods
@@ -101,7 +106,7 @@ class ModelDependency {
 
     refreshViews() {
         return this.getAllDependencies()
-            .then(result => this.updateDependencies(result))
+            .then(result => { this.updateDependencies(result); this.modelEventChain.synchroniseWithDependencies(result) })
             .then(result => Promise.all([this.modelTask.getAllTasks(), this.modelInterface.getAllInputs(), this.modelInterface.getAllOutputs()]))
             .then(([tasks, systemInputs, systemOutputs]) => this.updateDependencySelectors(tasks, systemInputs, systemOutputs));
     }

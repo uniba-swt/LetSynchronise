@@ -123,7 +123,7 @@ class Utility {
         });
     }
     
-    static FormatChains(chains) {
+    static SimplifyChains(chains) {
         return chains.map(chain => {        
             return {
                 'name': chain.name,

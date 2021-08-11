@@ -10,6 +10,7 @@ class ControllerEventChain {
         this._view = view;
         
         // Register the handlers when setting the view.
+        this._view.registerNextHander(this.handleNextDependency);
         this._view.registerSubmitHandler(this.handleCreateEventChain);
         this._view.registerDeleteHandler(this.handleDeleteEventChain);
     }
@@ -49,6 +50,14 @@ class ControllerEventChain {
     
     // -----------------------------------------------------
     // Handlers for events from the view to the model
+    
+    // Handler for updating event chain to be created.
+    // Arrow function is used so that 'this' is accessible when the handler is called within the view.
+    handleNextDependency = (dependency) => {
+    	// Get next dependencies
+    	this.modelDependency.getNextDependencies(dependency)
+    		.then(result => this.view.updateNextDependency(dependency, result));
+    }
     
     // Handler for creating event chain.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
