@@ -67,13 +67,13 @@ class ControllerTask {
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleCreateTask = (taskParameters) => {
         this.model.createTask(taskParameters)
-	        .then(this.modelDependency.refreshViews());
+            .then(this.modelDependency.refreshViews());
     }
     
     // Handler for deleting a task.
     handleDeleteTask = (name) => {
         this.model.deleteTask(name)
-	        .then(this.modelDependency.refreshViews());
+            .then(this.modelDependency.refreshViews());
     }
         
     

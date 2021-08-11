@@ -68,26 +68,26 @@ class ControllerEventChain {
     // Handler for updating event chain to be created.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleNextDependency = (dependencyName) => {
-    	this.modelDependency.getSuccessorDependencies(dependencyName)
-    		.then(result => this.view.updateNextDependency(dependencyName, result));
+        this.modelDependency.getSuccessorDependencies(dependencyName)
+            .then(result => this.view.updateNextDependency(dependencyName, result));
     }
     
     // Handler for updating event chain to be created.
     handleClearDependencies = () => {
-    	this.modelDependency.getAllDependencies()
-    		.then(result => this.callbackUpdateEventChainSelectors(result));
+        this.modelDependency.getAllDependencies()
+            .then(result => this.callbackUpdateEventChainSelectors(result));
     }
     
     // Handler for creating event chain.
     handleCreateEventChain = (eventChainRaw) => {
         this.model.createEventChainFromNames(eventChainRaw)
-	        .then(this.modelConstraint.refreshViews());
+            .then(this.modelConstraint.refreshViews());
     }
     
     // Handler for deleting event chain.
     handleDeleteEventChain = (name) => {
         this.model.deleteEventChain(name)
-	        .then(this.modelConstraint.refreshViews());
+            .then(this.modelConstraint.refreshViews());
     }
     
     

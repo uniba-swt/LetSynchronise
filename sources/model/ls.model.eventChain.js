@@ -49,27 +49,27 @@ class ModelEventChain {
     }
     
     createEventChainFromNames(eventChainRaw) {
-    	return this.modelDependency.getAllDependencies()
-    		.then(allDependencies => {
-    			let eventChain = null;
-    			
-    			for (const dependencyName of eventChainRaw.dependencies) {
-    				for (const dependency of allDependencies) {
-    					if (dependency.name == dependencyName) {
-    						if (!eventChain) {
-    							eventChain = new Chain(dependency);
-    							eventChain.name = eventChainRaw.name;
-    						} else {
-								const successor = new Chain(dependency);
-								eventChain.last.successor = successor;
-							}
-							break;
-    					}
-    				}
-    			}
-    		
-    			return this.createEventChain(eventChain);
-    		});    	
+        return this.modelDependency.getAllDependencies()
+            .then(allDependencies => {
+                let eventChain = null;
+                
+                for (const dependencyName of eventChainRaw.dependencies) {
+                    for (const dependency of allDependencies) {
+                        if (dependency.name == dependencyName) {
+                            if (!eventChain) {
+                                eventChain = new Chain(dependency);
+                                eventChain.name = eventChainRaw.name;
+                            } else {
+                                const successor = new Chain(dependency);
+                                eventChain.last.successor = successor;
+                            }
+                            break;
+                        }
+                    }
+                }
+            
+                return this.createEventChain(eventChain);
+            });     
     }
     
     getAllEventChains() {
@@ -124,13 +124,13 @@ class ModelEventChain {
             .then(eventChains => {
                 let deletePromises = [];
                 for (const eventChain of eventChains) {
-					for (const segment of eventChain.generator()) {
-						if (segment.destination.task == taskName || segment.source.task == taskName) {
-							deletePromises.push(this.deleteEventChain(eventChain.name));
-							deletePromises.push(this.modelConstraint.deleteConstraintsOfEventChain(eventChain.name));
-							break;
-						}
-					}
+                    for (const segment of eventChain.generator()) {
+                        if (segment.destination.task == taskName || segment.source.task == taskName) {
+                            deletePromises.push(this.deleteEventChain(eventChain.name));
+                            deletePromises.push(this.modelConstraint.deleteConstraintsOfEventChain(eventChain.name));
+                            break;
+                        }
+                    }
                 }
                 
                 return Promise.all(deletePromises);
@@ -142,14 +142,14 @@ class ModelEventChain {
             .then(eventChains => {
                 let deletePromises = [];
                 for (const eventChain of eventChains) {
-					for (const segment of eventChain.generator()) {
-						if ((segment.destination.task == Model.SystemInterfaceName || segment.source.task == Model.SystemInterfaceName)
-								&& (segment.destination.port == portName || segment.source.port == portName)) {
-							deletePromises.push(this.deleteEventChain(eventChain.name));
-							deletePromises.push(this.modelConstraint.deleteConstraintsOfEventChain(eventChain.name));
-							break;
-						}
-					}
+                    for (const segment of eventChain.generator()) {
+                        if ((segment.destination.task == Model.SystemInterfaceName || segment.source.task == Model.SystemInterfaceName)
+                                && (segment.destination.port == portName || segment.source.port == portName)) {
+                            deletePromises.push(this.deleteEventChain(eventChain.name));
+                            deletePromises.push(this.modelConstraint.deleteConstraintsOfEventChain(eventChain.name));
+                            break;
+                        }
+                    }
                 }
                 
                 return Promise.all(deletePromises);
@@ -157,21 +157,21 @@ class ModelEventChain {
     }
     
     deleteEventChainsOfDependency(dependencyName) {
-    	return this.getAllEventChains()
-    		.then(eventChains => {
-    			let deletePromises = [];
-    			for (const eventChain of eventChains) {
-					for (const segment of eventChain.generator()) {
-						if (segment.name == dependencyName) {
-							deletePromises.push(this.deleteEventChain(eventChain.name));
-							deletePromises.push(this.modelConstraint.deleteConstraintsOfEventChain(eventChain.name));
-							break;
-						}
-					}
-    			}
-    			
-				return Promise.all(deletePromises);
-    		});
+        return this.getAllEventChains()
+            .then(eventChains => {
+                let deletePromises = [];
+                for (const eventChain of eventChains) {
+                    for (const segment of eventChain.generator()) {
+                        if (segment.name == dependencyName) {
+                            deletePromises.push(this.deleteEventChain(eventChain.name));
+                            deletePromises.push(this.modelConstraint.deleteConstraintsOfEventChain(eventChain.name));
+                            break;
+                        }
+                    }
+                }
+                
+                return Promise.all(deletePromises);
+            });
     }
 
     synchroniseWithDependencies(dependencies) {        

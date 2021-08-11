@@ -69,7 +69,7 @@ class ModelDependency {
     deleteDependency(name) {
         return this.database.deleteObject(Model.DependencyInstancesStoreName, name)
             .then(this.database.deleteObject(Model.DependencyStoreName, name))
-    		.then(this.modelEventChain.deleteEventChainsOfDependency(name))
+            .then(this.modelEventChain.deleteEventChainsOfDependency(name))
             .then(this.refreshViews());
     }
     
@@ -82,8 +82,8 @@ class ModelDependency {
     deleteDependenciesOfTask(taskName) {
         return this.getAllDependencies()
             .then(dependencies => Promise.all(
-            	dependencies.filter(dependency => (dependency.destination.task == taskName || dependency.source.task == taskName))
-            		.map(dependency => this.deleteDependency(dependency.name))
+                dependencies.filter(dependency => (dependency.destination.task == taskName || dependency.source.task == taskName))
+                    .map(dependency => this.deleteDependency(dependency.name))
             ));
     }
     
@@ -91,20 +91,20 @@ class ModelDependency {
         return this.getAllDependencies()
             .then(dependencies => Promise.all(
                 dependencies.filter(dependency => ((dependency.destination.task == Model.SystemInterfaceName || dependency.source.task == Model.SystemInterfaceName)
-                    && (dependency.destination.port == portName || dependency.source.port == portName)))
+                        && (dependency.destination.port == portName || dependency.source.port == portName)))
                     .map(dependency => this.deleteDependency(dependency.name))
             ));
     }
     
     getSuccessorDependencies(name) {
-		const promiseDependency = this.getDependency(name);
-		const promiseAllDependencies = promiseDependency.then(sourceDependency => {
-			return (sourceDependency.destination.task == Model.SystemInterfaceName) ? [] : this.getAllDependencies();
-		});
-		
-		return Promise.all([promiseDependency, promiseAllDependencies])
-			.then(([sourceDependency, allDependencies]) => allDependencies
-				.filter(dependency => (dependency.source.task == sourceDependency.destination.task)));
+        const promiseDependency = this.getDependency(name);
+        const promiseAllDependencies = promiseDependency.then(sourceDependency => {
+            return (sourceDependency.destination.task == Model.SystemInterfaceName) ? [] : this.getAllDependencies();
+        });
+        
+        return Promise.all([promiseDependency, promiseAllDependencies])
+            .then(([sourceDependency, allDependencies]) => allDependencies
+                .filter(dependency => (dependency.source.task == sourceDependency.destination.task)));
     }
 
     refreshViews() {

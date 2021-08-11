@@ -51,16 +51,16 @@ class ViewEventChain {
     }
     
     get dependencies() {
-    	if (this.dependenciesField.innerHTML) {
-	    	return this.dependenciesField.innerHTML.split(ViewEventChain.ArrowSeparator)
-	    		.map(name => name.trim());
-    	}
-    	
-    	return [];
+        if (this.dependenciesField.innerHTML) {
+            return this.dependenciesField.innerHTML.split(ViewEventChain.ArrowSeparator)
+                .map(name => name.trim());
+        }
+        
+        return [];
     }
     
     set dependencies(dependencies) {
-    	this.dependenciesField.innerHTML = dependencies.join(` ${ViewEventChain.ArrowSeparator} `);
+        this.dependenciesField.innerHTML = dependencies.join(` ${ViewEventChain.ArrowSeparator} `);
     }
     
     get eventChainRaw() {
@@ -91,7 +91,7 @@ class ViewEventChain {
     // Registration of handlers from the controller
 
     registerNextHander(handler) {
-    	this.nextButton.addEventListener('click', event => {
+        this.nextButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
             event.preventDefault();
             
@@ -100,18 +100,18 @@ class ViewEventChain {
                 // Call the handler.
                 handler(this.dependency);
             }
-    	});
+        });
     }
     
     registerClearHander(handler) {
-    	this.clearButton.addEventListener('click', event => {
+        this.clearButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
             event.preventDefault();
             
             // Validate the dependency.
             this.dependencies = [];
             handler();
-    	});
+        });
     }
 
     registerSubmitHandler(handler) {
@@ -161,8 +161,8 @@ class ViewEventChain {
     }
     
     updateNextDependency(dependencyName, nextDependencies) {
-    	this.dependencies = this.dependencies.concat(dependencyName);
-    	this.updateEventChainSelectors(nextDependencies);
+        this.dependencies = this.dependencies.concat(dependencyName);
+        this.updateEventChainSelectors(nextDependencies);
     }
     
     updateEventChainSelectors(dependencies) {

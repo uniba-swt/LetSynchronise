@@ -129,8 +129,8 @@ class ModelAnalyse {
     }
 
     getAnalyse() {
-    	const promiseDeleteChainInstances = this.modelEventChain.deleteAllEventChainsInstances();
-		const promiseAllEventChains = this.modelEventChain.getAllEventChains();
+        const promiseDeleteChainInstances = this.modelEventChain.deleteAllEventChainsInstances();
+        const promiseAllEventChains = this.modelEventChain.getAllEventChains();
         const promiseAllConstraints = this.modelConstraint.getAllConstraints();
         const promiseAllDependencyInstances = this.modelDependency.getAllDependencyInstances();
             
