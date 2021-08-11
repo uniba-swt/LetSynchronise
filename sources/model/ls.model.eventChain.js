@@ -114,6 +114,10 @@ class ModelEventChain {
                 instancesToDelete.map(instance => this.database.deleteObject(Model.EventChainInstanceStoreName, instance.name))
             ));
     }
+    
+    deleteAllEventChainsInstances() {
+        return this.database.deleteAllObjects(Model.EventChainInstanceStoreName);
+    }
 
     deleteEventChainsOfTask(taskName) {
         return this.getAllEventChains()

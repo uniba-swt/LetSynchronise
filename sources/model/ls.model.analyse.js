@@ -80,7 +80,7 @@ class ModelAnalyse {
             chains = updatedChains;
         }
         
-        return Promise.all(completeChains.map(completeChain => this.modelEventChain.createEventChain(completeChain)));
+        return completeChains;
     }
 
     getPredecessorDependencies(dependencies, task) {
@@ -129,6 +129,7 @@ class ModelAnalyse {
     }
 
     getAnalyse() {
+    	const promiseDeleteChainInstances = this.modelEventChain.deleteAllEventChainsInstances();
 		const promiseAllEventChains = this.modelEventChain.getAllEventChains();
         const promiseAllConstraints = this.modelConstraint.getAllConstraints();
         const promiseAllDependencyInstances = this.modelDependency.getAllDependencyInstances();
@@ -146,8 +147,8 @@ class ModelAnalyse {
         // Get all event chains and all dependency instances.
         // Create all instances of each event chain, and store them in the model database.
         // Retrieve the event chain instances from the database, and transform them back into ChainInstance objects.
-        const promiseAllEventChainInstances = Promise.all([promiseAllEventChains, promiseAllDependencyInstances])
-            .then(([allEventChains, allDependencyInstances]) => allEventChains
+        const promiseAllEventChainInstances = Promise.all([promiseAllEventChains, promiseAllDependencyInstances, promiseDeleteChainInstances])
+            .then(([allEventChains, allDependencyInstances, _]) => allEventChains
                 .forEach(chain => this.createEventChainInstances(allDependencyInstances, chain)))
             .then(result => this.modelEventChain.getAllEventChainsInstances())
         
