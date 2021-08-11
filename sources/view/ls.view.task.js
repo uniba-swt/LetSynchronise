@@ -25,7 +25,7 @@ class ViewTask {
     constructor() {
         this.root = document.querySelector('#nav-design');
         
-        // Define or edit task
+        // Define or edit a task
         this.nameField = this.root.querySelector('#name');
         this.initialOffsetField = this.root.querySelector('#initial-offset');
         this.activationOffsetField = this.root.querySelector('#activation-offset');

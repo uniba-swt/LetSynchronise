@@ -4,8 +4,7 @@ class ViewConstraint {
     root = null;
     
     nameField = null;
-    sourceField = null;
-    destinationField = null;
+    eventChainField = null;
     relationField = null;
     timeField = null;
     
@@ -21,8 +20,7 @@ class ViewConstraint {
         
         // Define or edit constraint
         this.nameField = this.root.querySelector('#view-analyse-constraint-name');
-        this.sourceField = this.root.querySelector('#view-analyse-constraint-source');
-        this.destinationField = this.root.querySelector('#view-analyse-constraint-destination');
+        this.eventChainField = this.root.querySelector('#view-analyse-constraint-event-chain');
         this.relationField = this.root.querySelector('#view-analyse-constraint-relation');
         this.timeField = this.root.querySelector('#view-analyse-constraint-time');
 
@@ -40,20 +38,12 @@ class ViewConstraint {
         this.nameField.value = name;
     }
     
-    get source() {
-        return this.sourceField.value;
+    get eventChain() {
+        return this.eventChainField.value;
     }
     
-    set source(source) {
-        this.sourceField.value = source;
-    }
-    
-    get destination() {
-        return this.destinationField.value;
-    }
-    
-    set destination(destination) {
-        this.destinationField.value = destination;
+    set eventChain(eventChain) {
+        this.eventChainField.value = eventChain;
     }
     
     get relation() {
@@ -75,26 +65,16 @@ class ViewConstraint {
     get constraintRaw() {
         return {
             'name': this.name,
-            'source': this.source,
-            'destination': this.destination,
+            'eventChain': this.eventChain,
             'relation': this.relation,
             'time': this.time
         };
     }
     
     get constraintClean() {
-        const source = this.source.split('.');
-        const destination = this.destination.split('.');
         return {
             'name': this.name.trim(),
-            'source': {
-                'task': source[0],
-                'port': source[1]
-            },
-            'destination': {
-                'task': destination[0],
-                'port': destination[1]
-            },
+            'eventChain': this.eventChain.trim(),
             'relation': this.relation.trim(),
             'time': parseFloat(this.time)
         };
@@ -144,13 +124,8 @@ class ViewConstraint {
             return false;
         }
 
-        if (constraint.source == 'null ') {
-            alert('Choose source of constraint.');
-            return false;
-        }
-
-        if (constraint.destination == 'null ') {
-            alert('Choose destination of constraint.');
+        if (constraint.eventChain == 'null ') {
+            alert('Choose event chain of constraint.');
             return false;
         }
         
@@ -172,16 +147,14 @@ class ViewConstraint {
         return true;
     }
     
-    updateConstraintSelectors(taskParametersSet, systemInputs, systemOutputs) {
-        const sources = taskParametersSet.map(taskParameters => Utility.TaskPorts(taskParameters.name, taskParameters.outputs)).flat();
-        const destinations = taskParametersSet.map(taskParameters => Utility.TaskPorts(taskParameters.name, taskParameters.inputs)).flat();
+    updateConstraintSelectors(eventChains) {
+        const eventChainNames = eventChains.map(eventChain => eventChain.name);
         
         // Create list of available sources and destinations
-        this.updateConstraintPorts(d3.select(this.sourceField), sources, systemInputs);
-        this.updateConstraintPorts(d3.select(this.destinationField), destinations, systemOutputs);
+        this.updateConstraintEventChains(d3.select(this.eventChainField), eventChainNames);
     }
         
-    updateConstraintPorts(parentElement, taskPorts, systemPorts) {
+    updateConstraintEventChains(parentElement, eventChainNames) {
         // Create list of available ports
         parentElement.selectAll('*').remove();
         parentElement
@@ -192,24 +165,16 @@ class ViewConstraint {
                 .attr('value', 'null ')
                 .text('Choose ...');
 
-        systemPorts.forEach(port =>
+        eventChainNames.forEach(name =>
             parentElement
                 .append('option')
-                    .attr('value', `${Model.SystemInterfaceName}.${port.name}`)
-                    .text(port.name)
-        );
-        
-        taskPorts.forEach(port =>
-            parentElement
-                .append('option')
-                    .attr('value', port)
-                    .text(port)
+                    .attr('value', name)
+                    .text(name)
         );
     }
     
-    updateConstraints(rawConstraints) {
+    updateConstraints(constraints) {
         // Display constraints
-        const constraints = Utility.FormatConstraints(rawConstraints);
         this.constraints.selectAll('*').remove();
         
         const thisRef = this;
@@ -219,7 +184,7 @@ class ViewConstraint {
             .data(constraints)
             .enter()
             .append('li')
-                .html(constraint => `<span>${constraint.name}: ${constraint.source} &rarr; ${constraint.destination} ${constraint.relation} ${constraint.time}</span> ${Utility.AddDeleteButton(constraint.name)}`)
+                .html(constraint => `<span>${constraint.name}: ${constraint.eventChain} ${constraint.relation} ${constraint.time}</span> ${Utility.AddDeleteButton(constraint.name)}`)
             .on('click', function(data) {
                 thisRef.constraints.node().querySelectorAll('li')
                     .forEach((constraint) => {
@@ -236,8 +201,7 @@ class ViewConstraint {
     
     populateParameterForm(constraint) {
         this.name = constraint.name;
-        this.source = constraint.sourceFull;
-        this.destination = constraint.destinationFull;
+        this.eventChain = constraint.eventChain;
         this.relation = constraint.relation;
         this.time = constraint.time;
     }

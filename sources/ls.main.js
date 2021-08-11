@@ -45,30 +45,31 @@ controller.controllerExportImport.modelConstraint = model.modelConstraint;
 controller.controllerInterface.view = view.viewInterface;
 controller.controllerInterface.model = model.modelInterface;
 controller.controllerInterface.modelDependency = model.modelDependency;
-controller.controllerInterface.modelConstraint = model.modelConstraint;
+controller.controllerInterface.modelEventChain = model.modelEventChain;
 
 controller.controllerTask.view = view.viewTask;
 controller.controllerTask.model = model.modelTask;
 controller.controllerTask.modelDependency = model.modelDependency;
-controller.controllerTask.modelConstraint = model.modelConstraint;
+controller.controllerTask.modelEventChain = model.modelEventChain;
 
 controller.controllerDependency.view = view.viewDependency;
 controller.controllerDependency.model = model.modelDependency;
 controller.controllerDependency.modelTask = model.modelTask;
 controller.controllerDependency.modelInterface = model.modelInterface;
+controller.controllerDependency.modelEventChain = model.modelEventChain;
 
 controller.controllerSchedule.view = view.viewSchedule;
 controller.controllerSchedule.model = model.modelSchedule;
 controller.controllerSchedule.modelDependency = model.modelDependency;
 
-controller.controllerConstraint.view = view.viewConstraint;
-controller.controllerConstraint.model = model.modelConstraint;
-controller.controllerConstraint.modelTask = model.modelTask;
-controller.controllerConstraint.modelInterface = model.modelInterface;
-
 controller.controllerEventChain.view = view.viewEventChain;
 controller.controllerEventChain.model = model.modelEventChain;
 controller.controllerEventChain.modelDependency = model.modelDependency;
+controller.controllerEventChain.modelConstraint = model.modelConstraint;
+
+controller.controllerConstraint.view = view.viewConstraint;
+controller.controllerConstraint.model = model.modelConstraint;
+controller.controllerConstraint.modelEventChain = model.modelEventChain;
 
 controller.controllerAnalyse.view = view.viewAnalyse;
 controller.controllerAnalyse.viewSchedule = view.viewSchedule;

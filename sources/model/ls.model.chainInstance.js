@@ -3,8 +3,8 @@ class ChainInstance {
     segment = null;    // Dependency instance
     successor = null;
 
-    constructor(constraintName, dependency) {
-        this.name = constraintName;
+    constructor(chainName, dependency) {
+        this.name = chainName;
         this.segment = dependency;
     }
     
@@ -50,21 +50,12 @@ class ChainInstance {
         this.name = name;
     }
     
-    get constraintName() {
+    get chainName() {
         return this.name.split('-')[0];
     }
     
-    get chainName() {
-        const nameComponents = this.name.split('-');
-        return `${nameComponents[0]}-${nameComponents[1]}`;
-    }
-    
-    get variant() {
-        return parseInt(this.name.split('-')[1]);
-    }
-    
     get instance() {
-        return parseInt(this.name.split('-')[2]);
+        return parseInt(this.name.split('-')[1]);
     }
     
     get segment() {

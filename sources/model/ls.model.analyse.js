@@ -61,7 +61,7 @@ class ModelAnalyse {
             for (const chain of chains) {
                 if (chain.startsWith(source)) {
                     // Event chain is complete 
-                    chain.name = `${name}-${completeChains.length}`;
+                    chain.name = `${name}_${completeChains.length}`;
                     completeChains.push(chain);
                     continue;
                 }
@@ -80,17 +80,11 @@ class ModelAnalyse {
             chains = updatedChains;
         }
         
-        Promise.all(completeChains.map((completeChain, index) => {
-            this.database.putObject(Model.EventChainStoreName, completeChain.json);
-        }));
+        return completeChains;
     }
 
     getPredecessorDependencies(dependencies, task) {
         return dependencies.filter(dependency => (dependency.destination.task == task));
-    }
-
-    getSuccessorDependencies(dependencies, task) {
-        return dependencies.filter(dependency => (dependency.source.task == task));
     }
     
     // Creates all instances of an event chain from the given dependencyInstances.
@@ -116,9 +110,9 @@ class ModelAnalyse {
             chainInstances = updatedChainInstances;
         }
         
-        Promise.all(chainInstances.map((chainInstance, index) => {
+        return Promise.all(chainInstances.map((chainInstance, index) => {
             chainInstance.name = `${chainInstance.name}-${index}`;
-            this.database.putObject(Model.EventChainInstanceStoreName, chainInstance.json);
+            this.modelEventChain.createEventChainInstance(chainInstance);
         }));
     }
 
@@ -135,24 +129,26 @@ class ModelAnalyse {
     }
 
     getAnalyse() {
-        const promiseDeleteChains = this.modelEventChain.deleteAllEventChains();
+        const promiseDeleteChainInstances = this.modelEventChain.deleteAllEventChainsInstances();
+        const promiseAllEventChains = this.modelEventChain.getAllEventChains();
         const promiseAllConstraints = this.modelConstraint.getAllConstraints();
-        const promiseAllDependencies = this.modelDependency.getAllDependencies();
         const promiseAllDependencyInstances = this.modelDependency.getAllDependencyInstances();
             
-        // Get all constraints and all dependencies.
-        // Infer all event chains from each constraint, and store them in the model database.
-        // Retrieve the inferred event chains from the database, and transform them back into Chain objects.
-        const promiseAllInferredEventChains = Promise.all([promiseAllConstraints, promiseAllDependencies, promiseDeleteChains])
-            .then(([allConstraints, allDependencies, _]) => allConstraints
-                .forEach(constraint => this.createInferredEventChains(allDependencies, constraint.name, constraint.source, constraint.destination)))
-            .then(result => this.modelEventChain.getAllEventChains())
+//         // Get all constraints and all dependencies.
+//         // Infer all event chains from each constraint, and store them in the model database.
+//         // Retrieve the inferred event chains from the database, and transform them back into Chain objects.
+//         const promiseAllDependencies = this.modelDependency.getAllDependencies();
+//         const promiseAllInferredEventChains = Promise.all([promiseAllConstraints, promiseAllDependencies])
+//             .then(([allConstraints, allDependencies]) => allConstraints
+//                 .forEach(constraint => this.createInferredEventChains(allDependencies, constraint.name, constraint.source, constraint.destination)))
+//             .then(result => this.modelEventChain.getAllEventChains())
+
 
         // Get all event chains and all dependency instances.
         // Create all instances of each event chain, and store them in the model database.
         // Retrieve the event chain instances from the database, and transform them back into ChainInstance objects.
-        const promiseAllEventChainInstances = Promise.all([promiseAllInferredEventChains, promiseAllDependencyInstances])
-            .then(([allInferredEventChains, allDependencyInstances]) => allInferredEventChains
+        const promiseAllEventChainInstances = Promise.all([promiseAllEventChains, promiseAllDependencyInstances, promiseDeleteChainInstances])
+            .then(([allEventChains, allDependencyInstances, _]) => allEventChains
                 .forEach(chain => this.createEventChainInstances(allDependencyInstances, chain)))
             .then(result => this.modelEventChain.getAllEventChainsInstances())
         
@@ -167,7 +163,7 @@ class ModelAnalyse {
                 let results = { };
                 for (const constraint of allConstraints) {              
                     for (const chainName in chainsLatencies) {
-                        if (chainName.split('-')[0] == constraint.name) {
+                        if (chainName == constraint.eventChain) {
                             results[chainName] = {
                                 'min': Math.min(...chainsLatencies[chainName]),
                                 'max': Math.max(...chainsLatencies[chainName]),

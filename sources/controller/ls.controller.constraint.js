@@ -3,8 +3,6 @@
 class ControllerConstraint {
     _view = null;
     _model = null;
-    _modelTask = null;
-    _modelInterface = null;
     
     constructor() { }
 
@@ -37,28 +35,17 @@ class ControllerConstraint {
         return this._model;
     }
 
-    set modelTask(modelTask) {
-        this._modelTask = modelTask;
+    set modelEventChain(modelEventChain) {
+        this._modelEventChain = modelEventChain;
         
         // Register the model task with the model.
-        this._model.registerModelTask(this._modelTask);
+        this._model.registerModelEventChain(this._modelEventChain);
     }
     
-    get modelTask() {
-        return this._modelTask;
+    get modelEventChain() {
+        return this._modelEventChain;
     }
-    
-    set modelInterface(modelInterface) {
-        this._modelInterface = modelInterface;
-        
-        // Register the model interface with the model.
-        this._model.registerModelInterface(this._modelInterface);
-    }
-    
-    get modelInterface() {
-        return this._modelInterface;
-    }
-    
+
     
     // -----------------------------------------------------
     // Handlers for events from the view to the model
@@ -85,8 +72,8 @@ class ControllerConstraint {
     }
     
     // Callback for updating the displayed constraint selectors.
-    callbackUpdateConstraintSelectors = (taskParametersSet, systemInputs, systemOutputs) => {
-        this.view.updateConstraintSelectors(taskParametersSet, systemInputs, systemOutputs);
+    callbackUpdateConstraintSelectors = (eventChains) => {
+        this.view.updateConstraintSelectors(eventChains);
     }
     
     toString() {

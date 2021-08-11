@@ -4,7 +4,7 @@ class ControllerInterface {
     _view = null;
     _model = null;
     _modelDependency = null;
-    _modelConstraint = null;
+    _modelEventChain = null;
     
     constructor() { }
 
@@ -50,15 +50,15 @@ class ControllerInterface {
         return this._modelDependency;
     }
     
-    set modelConstraint(modelConstraint) {
-        this._modelConstraint = modelConstraint;
+    set modelEventChain(modelEventChain) {
+        this._modelEventChain = modelEventChain;
  
-         // Register the model constraint with the model.
-        this._model.registerModelConstraint(this._modelConstraint);
+         // Register the model event chain with the model.
+        this._model.registerModelEventChain(this._modelEventChain);
     }
     
-    get modelConstraint() {
-        return this._modelConstraint;
+    get modelEventChain() {
+        return this._modelEventChain;
     }
         
     

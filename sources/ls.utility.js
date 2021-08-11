@@ -95,35 +95,8 @@ class Utility {
     static FormatDependencyInstanceString(dependency) {
         return  `[${dependency.name}]: ${dependency.sendEvent.task}.${dependency.sendEvent.port}(${dependency.sendEvent.taskInstance}) -> ${dependency.receiveEvent.task}.${dependency.receiveEvent.port}(${dependency.receiveEvent.taskInstance})`;
     }
-
-    static FormatConstraints(rawConstraints) {
-        return rawConstraints.map(constraint => {
-            const sourceFullText = `${constraint.source.task}.${constraint.source.port}`;
-
-            const sourceText = (constraint.source.task == Model.SystemInterfaceName)
-                             ? `${constraint.source.port}`
-                             : sourceFullText;
-                             
-            const destinationFullText = `${constraint.destination.task}.${constraint.destination.port}`;
-
-            const destinationText = (constraint.destination.task == Model.SystemInterfaceName)
-                                  ? `${constraint.destination.port}`
-                                  : destinationFullText;
-                                  
-            return {
-                'name': constraint.name, 
-                'source': sourceText,
-                'sourceFull': sourceFullText,
-                'destination': destinationText,
-                'destinationFull': destinationFullText,
-                'relation': constraint.relation,
-                'time': constraint.time
-
-            };
-        });
-    }
     
-    static FormatChains(chains) {
+    static SimplifyChains(chains) {
         return chains.map(chain => {        
             return {
                 'name': chain.name,
