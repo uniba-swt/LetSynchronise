@@ -90,13 +90,13 @@ class ModelSchedule {
     }
 
     // Create all instances of a dependency.
-    createDependencyInstances(dependency) {
+    createDependencyInstances(dependency, makespan) {
         // Get all instances of the source and destination tasks
         // If one of the tasks is Model.SystemInterfaceName, we duplicate the other task
         return Promise.all([
             this.database.getObject(Model.TaskInstancesStoreName, dependency.source.task), 
             this.database.getObject(Model.TaskInstancesStoreName, dependency.destination.task)
-        ]).then(([sourceTaskInstances, destinationTaskInstances]) => {
+        ]).then(([sourceTaskInstances, destinationTaskInstances]) => {            
             let instances = [];
             if (dependency.source.task == Model.SystemInterfaceName) {
                 // Dependency is system input --> task
@@ -110,8 +110,9 @@ class ModelSchedule {
             } else if (dependency.destination.task == Model.SystemInterfaceName) {
                 // Dependency is task --> system output
                 const sourceInstances = sourceTaskInstances.value;
+                const numberOfInstances = sourceInstances.length - (sourceInstances[sourceInstances.length - 1].letEndTime > makespan);
                 
-                for (let sourceIndex = sourceInstances.length - 1; sourceIndex > -1;  sourceIndex--) {
+                for (let sourceIndex = numberOfInstances - 1; sourceIndex > -1;  sourceIndex--) {
                     // Make the destination index and instance of the system output the same as the source
                     const sourceInstance = sourceInstances[sourceIndex];
                     instances.unshift(this.createDependencyInstance(dependency, sourceIndex, sourceInstance, sourceIndex, {letStartTime: sourceInstance.letEndTime}));
@@ -146,7 +147,7 @@ class ModelSchedule {
             .then(result => this.database.getAllObjects(Model.TaskInstancesStoreName));
         
         const promiseAllDependenciesInstances = this.database.getAllObjects(Model.DependencyStoreName)
-            .then(dependencies => Promise.all(dependencies.map(dependency => this.createDependencyInstances(dependency))))
+            .then(dependencies => Promise.all(dependencies.map(dependency => this.createDependencyInstances(dependency, makespan))))
             .then(result => this.database.getAllObjects(Model.DependencyInstancesStoreName));
         
         return {
