@@ -50,6 +50,14 @@ class ControllerInterface {
         return this._modelDependency;
     }
     
+    set modelConstraint(modelConstraint) {
+        this._modelConstraint = modelConstraint;
+    }
+    
+    get modelConstraint() {
+        return this._modelConstraint;
+    }
+    
     set modelEventChain(modelEventChain) {
         this._modelEventChain = modelEventChain;
  
