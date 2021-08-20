@@ -38,31 +38,47 @@ class ModelTask {
     // -----------------------------------------------------
     // Class methods
 
-   /*async*/ createTask(parameters) {
+   async createTask(parameters) {
         // Store taskParameters into Database
         const logicalTask = ModelLogicalTask.CreateWithParameters(parameters);
-        
-        /* WORK in progress of issue 48 */
-        /*let dependencies = await this.modelDependency.getAllDependencies();
+        let dependenciesToRemove = [];
+        /* For all dependencies */
+        let dependencies = await this.modelDependency.getAllDependencies();
         for (const dependency of dependencies) {
+
+            /*The destination of the dependency is this task*/
             if (dependency.destination.task == logicalTask.name) { 
                 let vaild = false;
                 for (const input of logicalTask.inputs) {
-                    if (input.name = dependency.destination.port) {
+                    if (input == dependency.destination.port) {
                         vaild = true;
+                        break;
                     }
                 }
+                if (vaild == false) {
+                    /*remove dependency if no corresponding dependency found*/
+                    dependenciesToRemove.push(dependency);
+                }
             }
+
+            /*The source of the dependency is this task*/
             if (dependency.source.task == logicalTask.name) { 
                 let vaild = false;
-                for (const input of logicalTask.inputs) {
-                    if (input.name = dependency.source.port) {
+                for (const output of logicalTask.outputs) {
+                    if (output == dependency.source.port) {
                         vaild = true;
+                        break;
                     }
                 }
+                if (vaild == false) {
+                    /*remove dependency if no corresponding dependency found*/
+                    dependenciesToRemove.push(dependency);
+                }
             }
-        }*/
-        return this.database.putObject(Model.TaskStoreName, logicalTask.parameters)
+        }        
+
+        return Promise.all(dependenciesToRemove.map(dependency => this.modelDependency.deleteDependency(dependency.name)))
+            .then(this.database.putObject(Model.TaskStoreName, logicalTask.parameters))
             .then(this.refreshViews());
     }
     
