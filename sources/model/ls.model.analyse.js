@@ -157,9 +157,23 @@ class ModelAnalyse {
         const promiseAllEvaluations = Promise.all([promiseAllConstraints, promiseAllEventChainInstances])
             .then(([allConstraints, allChainInstances]) => {
                 let chainsLatencies = { };
+                
+                //Sort event chain instances because promises makes non-deterministic order
+                allChainInstances.sort(function(a, b){ 
+                    let eventChainName_x = a.name.substring(0,a.name.lastIndexOf("-"));
+                    let eventChainName_y = b.name.substring(0,b.name.lastIndexOf("-"));
+                    if (eventChainName_x < eventChainName_y) {return -1;}
+                    if (eventChainName_x > eventChainName_y) {return 1;}
+                    let eventChainInstance_x = a.name.substring(a.name.lastIndexOf("-")+1);
+                    let eventChainInstance_y = b.name.substring(b.name.lastIndexOf("-")+1);
+                    return eventChainInstance_x-eventChainInstance_y;
+                });
+                
+
                 allChainInstances.forEach(chainInstance => { chainsLatencies[chainInstance.chainName] = [] });
                 allChainInstances.forEach(chainInstance => { chainsLatencies[chainInstance.chainName].push(chainInstance.maxLatency) });
-
+                
+                
                 let results = { };
                 for (const constraint of allConstraints) {              
                     for (const chainName in chainsLatencies) {
