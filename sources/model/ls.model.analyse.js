@@ -162,8 +162,8 @@ class ModelAnalyse {
                 // Sort based on event chain name and then by instance number
                 allChainInstances.sort(function(a, b) { 
                 	// Sort based on event chain name
-                    if (a.eventChain < b.eventChain) { return -1; }
-                    if (a.eventChain > b.eventChain) { return 1; }
+                    if (a.chainName < b.chainName) { return -1; }
+                    if (a.chainName > b.chainName) { return 1; }
                     
                     // Sort based on instance if the event chain instances have the same name
                     return a.instance - b.instance;
@@ -171,7 +171,6 @@ class ModelAnalyse {
                 
                 allChainInstances.forEach(chainInstance => { chainsLatencies[chainInstance.chainName] = [] });
                 allChainInstances.forEach(chainInstance => { chainsLatencies[chainInstance.chainName].push(chainInstance.maxLatency) });
-                console.log(allChainInstances);
                 
                 let results = { };
                 for (const constraint of allConstraints) {              
