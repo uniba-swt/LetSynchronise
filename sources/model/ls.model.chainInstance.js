@@ -1,4 +1,4 @@
-// 'use strict';
+'use strict';
 
 class ChainInstance {
     name = null;
@@ -82,13 +82,6 @@ class ChainInstance {
         }
         
         return this.successor.last;
-    }
-    
-    get maxLatency() {
-        const startTime = this.segment.sendEvent.timestamp;
-        const endTime = this.last.segment.receiveEvent.timestamp;
-    
-        return endTime - startTime;
     }
     
     // Generator function for visiting each segment in the chain instance

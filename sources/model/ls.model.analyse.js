@@ -168,7 +168,7 @@ class ModelAnalyse {
                 });
                 
                 allChainInstances.forEach(chainInstance => { chainsLatencies[chainInstance.chainName] = [] });
-                allChainInstances.forEach(chainInstance => { chainsLatencies[chainInstance.chainName].push(chainInstance.maxLatency) });
+                allChainInstances.forEach(chainInstance => { chainsLatencies[chainInstance.chainName].push(MetricLatency.result(chainInstance)) });
                 
                 let results = { };
                 for (const constraint of allConstraints) {              
