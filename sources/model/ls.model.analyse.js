@@ -1,4 +1,3 @@
-
 'use strict';
 
 class ModelAnalyse {
@@ -158,14 +157,13 @@ class ModelAnalyse {
             .then(([allConstraints, allChainInstances]) => {
                 let chainsLatencies = { };
                 
-                // Sort event chain instances because promises makes non-deterministic order
-                // Sort based on event chain name and then by instance number
+                // Make sure that the event chains are sorted by chain name and then instance number.
                 allChainInstances.sort(function(a, b) { 
-                	// Sort based on event chain name
+                	// Sort based on event chain name.
                     if (a.chainName < b.chainName) { return -1; }
                     if (a.chainName > b.chainName) { return 1; }
                     
-                    // Sort based on instance if the event chain instances have the same name
+                    // Sort instances of the same event chain by their instance number.
                     return a.instance - b.instance;
                 });
                 

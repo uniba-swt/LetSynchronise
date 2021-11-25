@@ -1,3 +1,5 @@
+// 'use strict';
+
 class Chain {
     name = null;
     segment = null;    // Dependency

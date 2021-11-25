@@ -1,5 +1,3 @@
-//Database goes here
-
 'use strict';
 
 class ModelDatabase {

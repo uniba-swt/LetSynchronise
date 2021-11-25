@@ -1,7 +1,9 @@
+// 'use strict';
+
 class ChainInstance {
     name = null;
     segment = null;    // Dependency instance
-    successor = null;
+    successor = null;  // Chain instance
 
     constructor(chainName, dependency) {
         this.name = chainName;
