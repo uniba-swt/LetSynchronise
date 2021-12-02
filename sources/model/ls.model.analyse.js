@@ -151,11 +151,10 @@ class ModelAnalyse {
                 .forEach(chain => this.createEventChainInstances(allDependencyInstances, chain)))
             .then(result => this.modelEventChain.getAllEventChainsInstances())
         
-        // Get all constraints and all event chain instances.
+        // Get all event chain instances and all constraints.
         // Collect all the event chain instances of each constraint, and compute their maxLatency.
         const promiseAllEvaluations = Promise.all([promiseAllConstraints, promiseAllEventChainInstances])
             .then(([allConstraints, allChainInstances]) => {
-                let chainsLatencies = { };
                 
                 // Make sure that the event chains are sorted by chain name and then instance number.
                 allChainInstances.sort(function(a, b) { 
@@ -167,27 +166,37 @@ class ModelAnalyse {
                     return a.instance - b.instance;
                 });
                 
-                allChainInstances.forEach(chainInstance => { chainsLatencies[chainInstance.chainName] = [] });
-                allChainInstances.forEach(chainInstance => { chainsLatencies[chainInstance.chainName].push(MetricEnd2End.result(chainInstance)) });
+                // Compute all available metrics on every event chain instance, grouped by event chain name.
+                let groupedChainInstances = { };
+                allChainInstances.forEach(chainInstance => { groupedChainInstances[chainInstance.chainName] = [] });
+                allChainInstances.forEach(chainInstance => { groupedChainInstances[chainInstance.chainName].push(chainInstance) });
                 
-                allChainInstances.forEach(chainInstance => { console.log(MetricDataAge.result(chainInstance)) });
-                
+                // Iterate over the available plug-ins and compute metrics for all event chain instances, grouped by event chain name.
+                let metrics = { };
+                for (const chainName in groupedChainInstances) {
+                    if (!metrics.hasOwnProperty(MetricLatency.name)) {
+                        metrics[MetricLatency.name] = { };
+                    }
+                    
+                    // TODO: Iterate over the available plug-ins
+                    //for (const plugin in MetricPlugins) {
+                        let plugin = MetricLatency
+                        metrics[MetricLatency.name][chainName] = plugin.result(chainName, groupedChainInstances[chainName]);                    
+                    //}
+                }
+
+                // TODO: Use the computed metrics to evaluate each constraint
                 let results = { };
                 for (const constraint of allConstraints) {              
-                    for (const chainName in chainsLatencies) {
+                    for (const chainName in metrics[MetricLatency.name]) {
                         if (chainName == constraint.eventChain) {
-                            results[chainName] = {
-                                'min': Math.min(...chainsLatencies[chainName]),
-                                'max': Math.max(...chainsLatencies[chainName]),
-                                'eval': chainsLatencies[chainName].map(latency => {
-                                    const expression = `${latency} ${constraint.relation} ${constraint.time}`;                  
-                                    const result = eval(expression);
-                                    return `${expression} is ${result}`;
-                                })
-                            };
+                            results[chainName] = metrics[MetricLatency.name][chainName].raw.map(latency => {
+                                const expression = `${latency} ${constraint.relation} ${constraint.time}`;                  
+                                const result = eval(expression);
+                                return `${expression} is ${result}`;
+                            });
                         }
                     }
-                        
                 }
                 return results;
             });

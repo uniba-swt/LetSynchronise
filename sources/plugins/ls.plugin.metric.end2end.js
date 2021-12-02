@@ -2,8 +2,8 @@
 
 class MetricEnd2End {
     // Plug-in Metadata
-    static get Name()   { return 'End-to-End Response Time'; }
-    static get Author() { 'Eugene Yip'; }
+    static get Name()     { return 'End-to-End Response Time'; }
+    static get Author()   { 'Eugene Yip'; }
     static get Category() { 'EventChainInstance' };
     
     // Plug-ins are like utility classes that cannot be instantiated.
