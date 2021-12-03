@@ -1,12 +1,12 @@
 'use strict';
 
-class MetricEnd2End {
+class PluginMetricEnd2End {
     // Plug-in Metadata
     static get Name()     { return 'End-to-End Response Time'; }
     static get Author()   { return 'Eugene Yip'; }
-    static get Category() { return Metric.Category.Timing; }
-    static get Input()    { return Metric.Input.ChainInstances; }
-    static get Output()   { return Metric.Output.Latencies; }
+    static get Category() { return PluginMetric.Category.Timing; }
+    static get Input()    { return PluginMetric.Input.ChainInstances; }
+    static get Output()   { return PluginMetric.Output.Latencies; }
     
     
     // Plug-ins are like utility classes that cannot be instantiated.
@@ -18,7 +18,7 @@ class MetricEnd2End {
     // @Input event chain name, array of event chain instances.
     // @Output object with statistical result of metric.
     static result(chainName, chainInstances) {
-        let rawResults = chainInstances.map(chainInstance => MetricEnd2End.compute(chainInstance));
+        let rawResults = chainInstances.map(chainInstance => PluginMetricEnd2End.compute(chainInstance));
         rawResults = rawResults.filter(result => result !== undefined);
         
         return {

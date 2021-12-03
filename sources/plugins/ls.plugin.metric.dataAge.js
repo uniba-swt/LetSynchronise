@@ -1,12 +1,12 @@
 'use strict';
 
-class MetricDataAge {
+class PluginMetricDataAge {
     // Plug-in Metadata
     static get Name()     { return 'Data age'; }
     static get Author()   { return 'Eugene Yip'; }
-    static get Category() { return Metric.Category.Timing; }
-    static get Input()    { return Metric.Input.ChainInstances; }
-    static get Output()   { return Metric.Output.DataAges; }
+    static get Category() { return PluginMetric.Category.Timing; }
+    static get Input()    { return PluginMetric.Input.ChainInstances; }
+    static get Output()   { return PluginMetric.Output.DataAges; }
     
     
     // Plug-ins are like utility classes that cannot be instantiated.
@@ -21,7 +21,7 @@ class MetricDataAge {
         let rawResults = { };
         let statistics = { };
         
-        chainInstances.forEach(chainInstance => MetricDataAge.compute(chainInstance, rawResults));
+        chainInstances.forEach(chainInstance => PluginMetricDataAge.compute(chainInstance, rawResults));
         
         for (chainName in rawResults) {
             statistics[chainName] = {

@@ -1,6 +1,6 @@
 'use strict';
 
-class Exporter {
+class PluginExporter {
     static Category = class {
         static get LetSynchronise()  { return 'LetSynchronise'; }    // Export to a LetSynchronise JSON file
         static get External()        { return 'External'; }          // Export to an external tool

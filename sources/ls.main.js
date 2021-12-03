@@ -1,6 +1,6 @@
 'use strict';
 
-// Define the model implementations
+// Define the model implementations.
 let model = new Model();
 model.modelExportImport = new ModelExportImport();
 model.modelInterface = new ModelInterface();
@@ -12,7 +12,7 @@ model.modelEventChain = new ModelEventChain();
 model.modelAnalyse = new ModelAnalyse();
 model.modelDatabase = new ModelDatabase();
 
-// Define the view implementations
+// Define the view implementations.
 let view = new View();
 view.viewExportImport = new ViewExportImport();
 view.viewInterface = new ViewInterface();
@@ -23,7 +23,7 @@ view.viewConstraint = new ViewConstraint();
 view.viewAnalyse = new ViewAnalyse();
 view.viewEventChain = new ViewEventChain();
 
-// Define the controller implementations
+// Define the controller implementations.
 let controller = new Controller();
 controller.controllerExportImport = new ControllerExportImport();
 controller.controllerInterface = new ControllerInterface();
@@ -34,7 +34,7 @@ controller.controllerConstraint = new ControllerConstraint();
 controller.controllerEventChain = new ControllerEventChain();
 controller.controllerAnalyse = new ControllerAnalyse();
 
-// Link the models and views to their respective controllers
+// Link the models and views to their respective controllers.
 controller.controllerExportImport.view = view.viewExportImport;
 controller.controllerExportImport.model = model.modelExportImport;
 controller.controllerExportImport.modelInterface = model.modelInterface;
@@ -81,8 +81,15 @@ controller.controllerAnalyse.modelConstraint = model.modelConstraint;
 controller.controllerAnalyse.modelEventChain = model.modelEventChain;
 controller.controllerAnalyse.controllerSchedule = controller.controllerSchedule;
 
-
 console.log(controller.toString());
 
-// Bootstrap plugin for dynamic file input behaviour
+// Register plug-ins.
+PluginMetric.register(PluginMetricDataAge.name, PluginMetricDataAge);
+PluginMetric.register(PluginMetricEnd2End.name, PluginMetricEnd2End);
+PluginMetric.register(PluginMetricLatency.name, PluginMetricLatency);
+
+console.log(PluginMetric.toString());
+
+
+// Bootstrap plugin for dynamic file input behaviour.
 bsCustomFileInput.init();

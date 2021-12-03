@@ -1,6 +1,6 @@
 'use strict';
 
-class ExternalTool {
+class PluginExternalTool {
     static Category = class {
         static get Analsyer()  { return 'Analsyer'; }    // External tool is an (timing, utility, ...) analyser
         static get Generator() { return 'Generator'; }   // External tool is a (task, dependency, event chain, constraint, ...) generator

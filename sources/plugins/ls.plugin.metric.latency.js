@@ -1,12 +1,12 @@
 'use strict';
 
-class MetricLatency {
+class PluginMetricLatency {
     // Plug-in Metadata
     static get Name()     { return 'Latency'; }
     static get Author()   { return 'Eugene Yip'; }
-    static get Category() { return Metric.Category.Timing; }
-    static get Input()    { return Metric.Input.ChainInstances; }
-    static get Output()   { return Metric.Output.Latencies; }
+    static get Category() { return PluginMetric.Category.Timing; }
+    static get Input()    { return PluginMetric.Input.ChainInstances; }
+    static get Output()   { return PluginMetric.Output.Latencies; }
 
     
     // Plug-ins are like utility classes that cannot be instantiated.
@@ -18,7 +18,7 @@ class MetricLatency {
     // @Input event chain name, array of event chain instances.
     // @Output object with statistical result of metric.
     static result(chainName, chainInstances) {
-        const rawResults = chainInstances.map(chainInstance => MetricLatency.compute(chainInstance));
+        const rawResults = chainInstances.map(chainInstance => PluginMetricLatency.compute(chainInstance));
         
         return {
             'chainName': chainName,

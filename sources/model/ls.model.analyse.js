@@ -172,57 +172,30 @@ class ModelAnalyse {
                 allChainInstances.forEach(chainInstance => { groupedChainInstances[chainInstance.chainName].push(chainInstance) });
                                 
                 // Iterate over the available plug-ins and compute metrics for all event chain instances, grouped by event chain name.
-                let metrics = { };
+                const timingPlugins = PluginMetric.ofCategory(PluginMetric.Category.Timing);
+                const metrics = Object.fromEntries(Object.keys(timingPlugins).map(name => [name, { }]));
                 for (const chainName in groupedChainInstances) {
-
-                    // TODO: Iterate over the available plug-ins
-                    //for (const plugin in MetricPlugins) {
-                        let plugin = MetricLatency
-                        if (!metrics.hasOwnProperty(plugin.name)) {
-                            metrics[plugin.name] = { };
-                        }
-                        metrics[plugin.name][chainName] = plugin.result(chainName, groupedChainInstances[chainName]);                    
-
-                        plugin = MetricEnd2End
-                        if (!metrics.hasOwnProperty(plugin.name)) {
-                            metrics[plugin.name] = { };
-                        }
-                        metrics[plugin.name][chainName] = plugin.result(chainName, groupedChainInstances[chainName]);                    
-
-                        plugin = MetricDataAge
-                        if (!metrics.hasOwnProperty(plugin.name)) {
-                            metrics[plugin.name] = { };
-                        }
-                        metrics[plugin.name][chainName] = plugin.result(chainName, groupedChainInstances[chainName]);  
-                    //}
+                    for (const pluginName in timingPlugins) {
+                        metrics[pluginName][chainName] = timingPlugins[pluginName].result(chainName, groupedChainInstances[chainName]);                    
+                    }
                 }
                 
-                console.log(metrics);
-                console.log(`${MetricEnd2End.Category} ${MetricEnd2End.Input} ${MetricEnd2End.Output}`);
-
-                // TODO: Use the computed metrics to evaluate each constraint
-                let results = { };
-                results[MetricLatency.name] = { };
-                results[MetricEnd2End.name] = { };
-                for (const constraint of allConstraints) {              
-                    for (const chainName in metrics[MetricLatency.name]) {
-                        if (chainName == constraint.eventChain) {
-                            results[MetricLatency.name][chainName] = metrics[MetricLatency.name][chainName].raw.map(latency => {
-                                const expression = `${latency} ${constraint.relation} ${constraint.time}`;                  
-                                const result = eval(expression);
-                                return `${expression} is ${result}`;
-                            });
-                        }
-                    }
-
-
-                    for (const chainName in metrics[MetricEnd2End.name]) {
-                        if (chainName == constraint.eventChain) {
-                            results[MetricEnd2End.name][chainName] = metrics[MetricEnd2End.name][chainName].raw.map(latency => {
-                                const expression = `${latency} ${constraint.relation} ${constraint.time}`;                  
-                                const result = eval(expression);
-                                return `${expression} is ${result}`;
-                            });
+                // Evaluate each timing constraint on the latency metrics.
+                const latencyTimingPlugins = PluginMetric.ofOutput(timingPlugins, PluginMetric.Output.Latencies);
+                const results = Object.fromEntries(Object.keys(latencyTimingPlugins).map(name => [name, { }]));
+                for (const pluginName in latencyTimingPlugins) {
+                    for (const constraint of allConstraints) {
+                        for (const chainName in metrics[pluginName]) {
+                            if (chainName == constraint.eventChain) {
+                                results[pluginName][chainName] = {
+                                    'metrics': metrics[pluginName][chainName],
+                                    'constraint': metrics[pluginName][chainName].raw.map(latency => {
+                                        const expression = `${latency} ${constraint.relation} ${constraint.time}`;                  
+                                        const result = eval(expression);
+                                        return `${expression} is ${result}`;
+                                    })
+                                }
+                            }
                         }
                     }
                 }

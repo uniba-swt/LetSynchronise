@@ -1,6 +1,6 @@
 'use strict';
 
-class Importer {
+class PluginImporter {
     static Category = class {
         static get LetSynchronise()  { return 'LetSynchronise'; }    // Importer for LetSynchronise JSON files
         static get External()        { return 'External'; }          // Importer for externally generated files
