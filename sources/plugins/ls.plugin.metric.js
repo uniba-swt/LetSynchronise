@@ -1,13 +1,18 @@
 'use strict';
 
 class Metric {
-    static get Categories()   { 
-        return [
-            'Importer',             // Gives the plug-in control of the database
-            'Exporter',             // Gives the plug-in a copy of the database
-            'EventChainInstance',   // Gives the plug-in an event chain instance
-            'ExternalAnalyser'      // Gives the plug-in a copy of the database and waits for an external analyser to return results
-        ]; 
+    static Category = class {
+        static get Timing()  { return 'Timing'; }    // Metric is about a timing property
+        static get Utility() { return 'Utility'; }   // Metric is about a utility property
+    }
+    
+    static Input = class {
+        static get ChainInstances() { return 'ChainInstances'; }
+    }
+    
+    static Output = class {
+        static get Latencies() { return 'Latencies'; }
+        static get DataAges()  { return 'DataAges'; }
     }
     
     static plugins = [];

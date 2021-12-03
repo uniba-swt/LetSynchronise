@@ -170,12 +170,11 @@ class ModelAnalyse {
                 let groupedChainInstances = { };
                 allChainInstances.forEach(chainInstance => { groupedChainInstances[chainInstance.chainName] = [] });
                 allChainInstances.forEach(chainInstance => { groupedChainInstances[chainInstance.chainName].push(chainInstance) });
-                
+                                
                 // Iterate over the available plug-ins and compute metrics for all event chain instances, grouped by event chain name.
                 let metrics = { };
                 for (const chainName in groupedChainInstances) {
 
-                    
                     // TODO: Iterate over the available plug-ins
                     //for (const plugin in MetricPlugins) {
                         let plugin = MetricLatency
@@ -190,10 +189,16 @@ class ModelAnalyse {
                         }
                         metrics[plugin.name][chainName] = plugin.result(chainName, groupedChainInstances[chainName]);                    
 
+                        plugin = MetricDataAge
+                        if (!metrics.hasOwnProperty(plugin.name)) {
+                            metrics[plugin.name] = { };
+                        }
+                        metrics[plugin.name][chainName] = plugin.result(chainName, groupedChainInstances[chainName]);  
                     //}
                 }
                 
                 console.log(metrics);
+                console.log(`${MetricEnd2End.Category} ${MetricEnd2End.Input} ${MetricEnd2End.Output}`);
 
                 // TODO: Use the computed metrics to evaluate each constraint
                 let results = { };
@@ -211,7 +216,7 @@ class ModelAnalyse {
                     }
 
 
-                    for (const chainName in metrics[MetricLatency.name]) {
+                    for (const chainName in metrics[MetricEnd2End.name]) {
                         if (chainName == constraint.eventChain) {
                             results[MetricEnd2End.name][chainName] = metrics[MetricEnd2End.name][chainName].raw.map(latency => {
                                 const expression = `${latency} ${constraint.relation} ${constraint.time}`;                  
