@@ -3,8 +3,8 @@
 class MetricDataAge {
     // Plug-in Metadata
     static get Name()     { return 'Data age'; }
-    static get Author()   { 'Eugene Yip'; }
-    static get Category() { 'EventChainInstance' };
+    static get Author()   { return 'Eugene Yip'; }
+    static get Category() { return 'EventChainInstance' };
     
     // Plug-ins are like utility classes that cannot be instantiated.
     // All functions are static.

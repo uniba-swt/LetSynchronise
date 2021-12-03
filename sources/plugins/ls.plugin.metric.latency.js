@@ -3,8 +3,8 @@
 class MetricLatency {
     // Plug-in Metadata
     static get Name()     { return 'Latency'; }
-    static get Author()   { 'Eugene Yip'; }
-    static get Category() { 'EventChainInstance' };
+    static get Author()   { return 'Eugene Yip'; }
+    static get Category() { return 'EventChainInstance' };
     
     // Plug-ins are like utility classes that cannot be instantiated.
     // All functions are static.
@@ -17,13 +17,24 @@ class MetricLatency {
     static result(chainName, chainInstances) {
         const rawResults = chainInstances.map(chainInstance => MetricLatency.latency(chainInstance));
         
-        return {
-            'chainName': chainName,
-            'min': Math.min(...rawResults),
-            'avg': rawResults.reduce((a, b) => (a + b)) / rawResults.length,
-            'max': Math.max(...rawResults),
-            'num': rawResults.length,
-            'raw': rawResults
+        if (rawResults.length == 0) {
+            return {
+                'chainName': chainName,
+                'min': undefined,
+                'avg': undefined,
+                'max': undefined,
+                'num': 0,
+                'raw': rawResults
+            }
+        } else {
+            return {
+                'chainName': chainName,
+                'min': Math.min(...rawResults),
+                'avg': rawResults.reduce((a, b) => (a + b)) / rawResults.length,
+                'max': Math.max(...rawResults),
+                'num': rawResults.length,
+                'raw': rawResults
+            }
         }
     }
     

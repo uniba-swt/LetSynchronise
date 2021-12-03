@@ -174,23 +174,46 @@ class ModelAnalyse {
                 // Iterate over the available plug-ins and compute metrics for all event chain instances, grouped by event chain name.
                 let metrics = { };
                 for (const chainName in groupedChainInstances) {
-                    if (!metrics.hasOwnProperty(MetricLatency.name)) {
-                        metrics[MetricLatency.name] = { };
-                    }
+
                     
                     // TODO: Iterate over the available plug-ins
                     //for (const plugin in MetricPlugins) {
                         let plugin = MetricLatency
-                        metrics[MetricLatency.name][chainName] = plugin.result(chainName, groupedChainInstances[chainName]);                    
+                        if (!metrics.hasOwnProperty(plugin.name)) {
+                            metrics[plugin.name] = { };
+                        }
+                        metrics[plugin.name][chainName] = plugin.result(chainName, groupedChainInstances[chainName]);                    
+
+                        plugin = MetricEnd2End
+                        if (!metrics.hasOwnProperty(plugin.name)) {
+                            metrics[plugin.name] = { };
+                        }
+                        metrics[plugin.name][chainName] = plugin.result(chainName, groupedChainInstances[chainName]);                    
+
                     //}
                 }
+                
+                console.log(metrics);
 
                 // TODO: Use the computed metrics to evaluate each constraint
                 let results = { };
+                results[MetricLatency.name] = { };
+                results[MetricEnd2End.name] = { };
                 for (const constraint of allConstraints) {              
                     for (const chainName in metrics[MetricLatency.name]) {
                         if (chainName == constraint.eventChain) {
-                            results[chainName] = metrics[MetricLatency.name][chainName].raw.map(latency => {
+                            results[MetricLatency.name][chainName] = metrics[MetricLatency.name][chainName].raw.map(latency => {
+                                const expression = `${latency} ${constraint.relation} ${constraint.time}`;                  
+                                const result = eval(expression);
+                                return `${expression} is ${result}`;
+                            });
+                        }
+                    }
+
+
+                    for (const chainName in metrics[MetricLatency.name]) {
+                        if (chainName == constraint.eventChain) {
+                            results[MetricEnd2End.name][chainName] = metrics[MetricEnd2End.name][chainName].raw.map(latency => {
                                 const expression = `${latency} ${constraint.relation} ${constraint.time}`;                  
                                 const result = eval(expression);
                                 return `${expression} is ${result}`;
