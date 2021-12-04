@@ -149,7 +149,7 @@ class ViewInterface {
             .enter()
             .append('li')
                 .html(port => `<span>${port.name}</span> ${Utility.AddDeleteButton(port.name)}`)
-            .on('click', function(data) {
+            .on('click', function(event, data) {
                 element.node().querySelectorAll('li')
                     .forEach((port) => {
                         if (port !== this) { port.classList.remove('systemPortSelected'); }

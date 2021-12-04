@@ -193,7 +193,7 @@ class ViewConstraint {
             .enter()
             .append('li')
                 .html(constraint => `<span>${constraint.name}: ${constraint.eventChain} ${constraint.relation} ${constraint.time}</span> ${Utility.AddDeleteButton(constraint.name)}`)
-            .on('click', function(data) {
+            .on('click', function(event, data) {
                 thisRef.constraints.node().querySelectorAll('li')
                     .forEach((constraint) => {
                         if (constraint !== this) { constraint.classList.remove('constraintSelected'); }

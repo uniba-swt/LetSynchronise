@@ -192,9 +192,10 @@ class ViewSchedule {
                           tooltip.innerHTML = `${taskInstances.name} instance ${index}`;
                           tooltip.style.visibility = 'visible';
                       })
-                      .on('mousemove', function() {
-                          tooltip.style.top = `${d3.event.pageY - 2 * View.BarHeight}px`;
-                          tooltip.style.left = `${d3.event.pageX}px`;
+                      .on('mousemove', (event) => {
+                          let [pointerX, pointerY] = d3.pointer(event, window);
+                          tooltip.style.top = `${pointerY - 2 * View.BarHeight}px`;
+                          tooltip.style.left = `${pointerX}px`;
                       })
                       .on('mouseout', function() {
                           d3.select(this)
@@ -351,9 +352,10 @@ class ViewSchedule {
                tooltip.innerHTML = `${dependencyName}:<br/>${sendPortName} &rarr; ${receivePortName}`;
                tooltip.style.visibility = 'visible';
              })
-             .on('mousemove', function() {
-               tooltip.style.top = `${d3.event.pageY - View.SvgPadding}px`;
-               tooltip.style.left = `${d3.event.pageX + 2 * View.SvgPadding}px`;
+             .on('mousemove', (event) => {
+               let [pointerX, pointerY] = d3.pointer(event, window);
+               tooltip.style.top = `${pointerY - View.SvgPadding}px`;
+               tooltip.style.left = `${pointerX + 2 * View.SvgPadding}px`;
              })
              .on('mouseout', function() {
                d3.select(this)
