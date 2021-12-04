@@ -27,8 +27,35 @@ class ViewAnalyse {
     }
 
     async updateAnalyse(promise) {
-        const evaluations = await promise;
-        console.log(evaluations);
+        const results = await promise;
+        
+        
+        for (const chainName in results) {
+            let output = [`Event Chain: ${chainName}`, ``];
+            for (const pluginName in results[chainName]) {
+                const metrics = results[chainName][pluginName]['metrics'];
+                const constraints = results[chainName][pluginName]['constraints'];
+                const plugin = PluginMetric.getPlugin(pluginName);
+                
+                output.push(plugin.toString(metrics));
+                for (const constraintName in constraints) {
+                    output.push(this.formatConstraintResults(constraintName, constraints[constraintName]));
+                }
+                output.push('');
+            }
+            
+            console.log(output.join('\n'));
+        }
+    }
+    
+    formatConstraintResults(name, results) {
+        let output = Object.keys(results).map(chainInstance => `${this.getChainInstance(chainInstance)}: ${results[chainInstance]}`).join(', ');
+    
+        return `  ${name}: [${output}]`;
+    }
+    
+    getChainInstance(name) {
+        return parseInt(name.split('-')[1]);
     }
 
     toString() {

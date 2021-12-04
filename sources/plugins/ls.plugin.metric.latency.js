@@ -18,14 +18,15 @@ class PluginMetricLatency {
     // @Input event chain name, array of event chain instances.
     // @Output object with statistical result of metric.
     static result(chainName, chainInstances) {
-        const rawResults = chainInstances.map(chainInstance => PluginMetricLatency.compute(chainInstance));
+        const rawResults = Object.fromEntries(chainInstances.map(chainInstance => PluginMetricLatency.compute(chainInstance)));
+        const valuesOnly = PluginMetric.valuesOfObject(rawResults);
         
         return {
             'chainName': chainName,
-            'min': (rawResults.length == 0) ? undefined : Math.min(...rawResults),
-            'avg': (rawResults.length == 0) ? undefined : rawResults.reduce((a, b) => (a + b)) / rawResults.length,
-            'max': (rawResults.length == 0) ? undefined : Math.max(...rawResults),
-            'num': rawResults.length,
+            'min': PluginMetric.min(valuesOnly),
+            'avg': PluginMetric.avg(valuesOnly),
+            'max': PluginMetric.max(valuesOnly),
+            'num': valuesOnly.length,
             'raw': rawResults
         }
     }
@@ -35,6 +36,17 @@ class PluginMetricLatency {
         const startTime = chainInstance.segment.sendEvent.timestamp;
         const endTime = chainInstance.last.segment.receiveEvent.timestamp;
     
-        return endTime - startTime;
+        return [chainInstance.name, endTime - startTime];
+    }
+    
+    static toString(result) {
+        if (result == { }) {
+            return `${PluginMetricLatency.Name}: ${result.num} values`;
+        } else {
+            return [
+                `${PluginMetricLatency.Name}: (min, avg, max) = (${result.min}, ${result.avg}, ${result.max})`,
+                `  ${result.num} values: [${PluginMetric.valuesOfObject(result.raw).join(', ')}]`
+            ].join('\n');
+        }
     }
 }

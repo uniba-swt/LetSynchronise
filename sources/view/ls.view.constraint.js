@@ -123,6 +123,14 @@ class ViewConstraint {
             alert('Name cannot be blank.');
             return false;
         }
+        
+        const allConstraintNames = new Set();
+        const allConstraints = d3.select(this.eventChainField).selectAll('option')
+                                   .each(function(d,i) { allConstraintNames.add(d3.select(this).attr('value')); })
+        if (allConstraintNames.has(constraint.name)) {
+            alert('Name cannot be the same as an event chain.');
+            return false;
+        }
 
         if (constraint.eventChain == 'null ') {
             alert('Choose event chain of constraint.');

@@ -2,7 +2,7 @@
 
 class PluginMetricDataAge {
     // Plug-in Metadata
-    static get Name()     { return 'Data age'; }
+    static get Name()     { return 'Data Age'; }
     static get Author()   { return 'Eugene Yip'; }
     static get Category() { return PluginMetric.Category.Timing; }
     static get Input()    { return PluginMetric.Input.ChainInstances; }
@@ -24,12 +24,14 @@ class PluginMetricDataAge {
         chainInstances.forEach(chainInstance => PluginMetricDataAge.compute(chainInstance, rawResults));
         
         for (chainName in rawResults) {
+            const valuesOnly = PluginMetric.valuesOfObject(rawResults[chainName]);
+
             statistics[chainName] = {
                 'chainName': chainName,
-                'min': (rawResults[chainName].length == 0) ? undefined : Math.min(...rawResults[chainName]),
-                'avg': (rawResults[chainName].length == 0) ? undefined : rawResults[chainName].reduce((a, b) => (a + b)) / rawResults[chainName].length,
-                'max': (rawResults[chainName].length == 0) ? undefined : Math.max(...rawResults[chainName]),
-                'num': rawResults[chainName].length,
+                'min': PluginMetric.min(valuesOnly),
+                'avg': PluginMetric.avg(valuesOnly),
+                'max': PluginMetric.max(valuesOnly),
+                'num': valuesOnly.length,
                 'raw': rawResults[chainName]
             };
         }
@@ -45,11 +47,24 @@ class PluginMetricDataAge {
             const endTime = segment.receiveEvent.timestamp;
     
             if (!rawResults.hasOwnProperty(segment.name)) {
-                rawResults[segment.name] = [ ];
+                rawResults[segment.name] = { };
             }
-            rawResults[segment.name].push(endTime - startTime); 
+            rawResults[segment.name][chainInstance.name] = endTime - startTime; 
         }
         
         return rawResults;
+    }
+
+    static toString(result) {
+        let output = [`${PluginMetricDataAge.Name}: ${Object.keys(result).length} dependencies`];
+        
+        for (const chainName in result) {
+            output.push(
+                `  ${chainName}: (min, avg, max) = (${result[chainName].min}, ${result[chainName].avg}, ${result[chainName].max})`,
+                `    ${result[chainName].num} values: [${PluginMetric.valuesOfObject(result[chainName].raw).join(', ')}]`,
+            );
+        }
+        
+        return output.join('\n');
     }
 }

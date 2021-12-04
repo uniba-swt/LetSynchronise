@@ -18,15 +18,16 @@ class PluginMetricEnd2End {
     // @Input event chain name, array of event chain instances.
     // @Output object with statistical result of metric.
     static result(chainName, chainInstances) {
-        let rawResults = chainInstances.map(chainInstance => PluginMetricEnd2End.compute(chainInstance));
-        rawResults = rawResults.filter(result => result !== undefined);
+        let rawResults = Object.fromEntries(chainInstances.map(chainInstance => PluginMetricEnd2End.compute(chainInstance))
+                                                          .filter(result => result !== undefined));        
+        const valuesOnly = PluginMetric.valuesOfObject(rawResults);
         
         return {
             'chainName': chainName,
-            'min': (rawResults.length == 0) ? undefined : Math.min(...rawResults),
-            'avg': (rawResults.length == 0) ? undefined : rawResults.reduce((a, b) => (a + b)) / rawResults.length,
-            'max': (rawResults.length == 0) ? undefined : Math.max(...rawResults),
-            'num': rawResults.length,
+            'min': PluginMetric.min(valuesOnly),
+            'avg': PluginMetric.avg(valuesOnly),
+            'max': PluginMetric.max(valuesOnly),
+            'num': valuesOnly.length,
             'raw': rawResults
         }
     }
@@ -38,9 +39,20 @@ class PluginMetricEnd2End {
             const startTime = chainInstance.segment.sendEvent.timestamp;
             const endTime = chainInstance.last.segment.receiveEvent.timestamp;
     
-            return endTime - startTime;
+            return [chainInstance.name, endTime - startTime];
         }
         
         return undefined;
+    }
+
+    static toString(result) {
+        if (result.num == 0) {
+            return `${PluginMetricEnd2End.Name}: ${result.num} values`;
+        } else {
+            return [
+                `${PluginMetricEnd2End.Name}: (min, avg, max) = (${result.min}, ${result.avg}, ${result.max})`,
+                `  ${result.num} values: [${PluginMetric.valuesOfObject(result.raw).join(', ')}]`
+            ].join('\n');
+        }
     }
 }
