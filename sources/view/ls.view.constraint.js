@@ -142,7 +142,7 @@ class ViewConstraint {
             return false;
         }
         
-        if (constraint.time == null || !$.isNumeric(constraint.time)) {
+        if (constraint.time == null || isNaN(constraint.time)) {
             alert('Time has to be a decimal number.');
             return false;
         }
