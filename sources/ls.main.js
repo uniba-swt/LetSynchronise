@@ -90,6 +90,3 @@ PluginMetric.register(PluginMetricLatency.name, PluginMetricLatency);
 
 console.log(PluginMetric.toString());
 
-
-// Bootstrap plugin for dynamic file input behaviour.
-bsCustomFileInput.init();

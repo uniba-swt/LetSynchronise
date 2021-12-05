@@ -114,7 +114,7 @@ class ViewSchedule {
         const svgElement = this.schedule.append('svg');
         
         // Draw the task instances.
-        var taskIndices = {};
+        let taskIndices = {};
         for (const [index, taskInstances] of tasksInstances.entries()) {
             this.drawTaskInstances(taskInstances, svgElement, scale, index);
             taskIndices[taskInstances.name] = index;
@@ -188,7 +188,7 @@ class ViewSchedule {
                           d3.select(this)
                             .transition()
                             .ease(d3.easeLinear)
-                            .style('fill', 'var(--blue)');
+                            .style('fill', 'var(--bs-blue)');
                           tooltip.innerHTML = `${taskInstances.name} instance ${index}`;
                           tooltip.style.visibility = 'visible';
                       })
@@ -201,7 +201,7 @@ class ViewSchedule {
                           d3.select(this)
                             .transition()
                             .ease(d3.easeLinear)
-                            .style('fill', 'var(--gray)');
+                            .style('fill', 'var(--bs-gray)');
                           tooltip.style.visibility = 'hidden';
                       });
             
@@ -332,7 +332,7 @@ class ViewSchedule {
             { x: receiveEvent.timestamp,             y: yOffset + taskIndices[receiveEvent.task] * View.TaskHeight + adjustedReceiveTaskHeight }
         ]
 
-        var line = d3.line()
+        let line = d3.line()
                      .x((point) => point.x)
                      .y((point) => point.y)
                      .curve(d3.curveBundle);
@@ -348,7 +348,7 @@ class ViewSchedule {
                d3.select(this)
                  .transition()
                  .ease(d3.easeLinear)
-                 .style('stroke', 'var(--orange)');
+                 .style('stroke', 'var(--bs-orange)');
                tooltip.innerHTML = `${dependencyName}:<br/>${sendPortName} &rarr; ${receivePortName}`;
                tooltip.style.visibility = 'visible';
              })
@@ -361,7 +361,7 @@ class ViewSchedule {
                d3.select(this)
                  .transition()
                  .ease(d3.easeLinear)
-                 .style('stroke', 'var(--red)');
+                 .style('stroke', 'var(--bs-red)');
                tooltip.style.visibility = 'hidden';
              });
     }
