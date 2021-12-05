@@ -57,6 +57,18 @@ class ViewSchedule {
         this.makespanField.value = makespan;
     }
     
+    get schedulingParametersRaw() {
+    	return {
+    		'makespan': this.makespan
+    	};
+    }
+    
+    get schedulingParametersClean() {
+    	return {
+    		'makespan': parseFloat(this.makespan)
+    	};
+    }
+    
     
     // -----------------------------------------------------
     // Registration of handlers from the controller
@@ -66,9 +78,23 @@ class ViewSchedule {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
             event.preventDefault();
             
-            // Ask the model to give us the current task set via a callback.
-            getScheduleHandler(this.makespan);
+			// Ask the model to give us the current task set via a callback.
+			getScheduleHandler(this.schedulingParametersClean.makespan);
         });
+    }
+    
+    validateSchedulingParameters(schedulingParameters) {
+        if (schedulingParameters.makespan == null || isNaN(schedulingParameters.makespan)) {
+            alert('Makespan has to be a decimal number.');
+            return false;
+        }
+        const makespan = parseFloat(schedulingParameters.makespan);
+        if (makespan <= 0) {
+            alert('Makespan must be greater than zero');
+            return false;
+        }
+        
+        return true;
     }
     
     
@@ -151,6 +177,10 @@ class ViewSchedule {
                .attr('transform', `translate(0, ${index * View.TaskHeight + 2.5 * View.SvgPadding})`);
         
         const instances = taskInstances.value;
+        if (instances.length == 0) {
+            return;
+        }
+        
         const firstPeriodStartTime = instances[0].periodStartTime;
         const lastPeriodDuration = instances[instances.length -1].periodEndTime - instances[instances.length -1].periodStartTime;
 

@@ -17,23 +17,23 @@ class PluginMetricEnd2End {
     //
     // @Input event chain name, array of event chain instances.
     // @Output object with statistical result of metric.
-    static result(chainName, chainInstances) {
-        let rawResults = Object.fromEntries(chainInstances.map(chainInstance => PluginMetricEnd2End.compute(chainInstance))
+    static Result(chainName, chainInstances) {
+        let rawResults = Object.fromEntries(chainInstances.map(chainInstance => PluginMetricEnd2End.Compute(chainInstance))
                                                           .filter(result => result !== undefined));        
-        const valuesOnly = PluginMetric.valuesOfObject(rawResults);
+        const valuesOnly = PluginMetric.ValuesOfObject(rawResults);
         
         return {
             'chainName': chainName,
-            'min': PluginMetric.min(valuesOnly),
-            'avg': PluginMetric.avg(valuesOnly),
-            'max': PluginMetric.max(valuesOnly),
+            'min': PluginMetric.Min(valuesOnly),
+            'avg': PluginMetric.Avg(valuesOnly),
+            'max': PluginMetric.Max(valuesOnly),
             'num': valuesOnly.length,
             'raw': rawResults
         }
     }
 
     // Compute the end-to-end response time of one event chain instance.
-    static compute(chainInstance) {
+    static Compute(chainInstance) {
         if (chainInstance.segment.sendEvent.task == Model.SystemInterfaceName
                 && chainInstance.last.segment.receiveEvent.task == Model.SystemInterfaceName) {
             const startTime = chainInstance.segment.sendEvent.timestamp;
@@ -45,14 +45,26 @@ class PluginMetricEnd2End {
         return undefined;
     }
 
-    static toString(result) {
+	static ToHtml(result) {
+        if (result.num == 0) {
+            return `<h6>${PluginMetricEnd2End.Name}: ${result.num} values</h6>`;
+        } else {
+            return [
+                `<h6>${PluginMetricEnd2End.Name}: (min, avg, max) = (${result.min}, ${result.avg}, ${result.max})</h6>`,
+                `<ul><li>${result.num} values: [${PluginMetric.ValuesOfObject(result.raw).join(', ')}]</li></ul>`,
+            ].join('\n');
+        }
+	}
+
+    static ToString(result) {
         if (result.num == 0) {
             return `${PluginMetricEnd2End.Name}: ${result.num} values`;
         } else {
             return [
                 `${PluginMetricEnd2End.Name}: (min, avg, max) = (${result.min}, ${result.avg}, ${result.max})`,
-                `  ${result.num} values: [${PluginMetric.valuesOfObject(result.raw).join(', ')}]`
+                `  ${result.num} values: [${PluginMetric.ValuesOfObject(result.raw).join(', ')}]`
             ].join('\n');
         }
     }
+    
 }

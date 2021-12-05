@@ -101,33 +101,41 @@ class ModelSchedule {
             if (dependency.source.task == Model.SystemInterfaceName) {
                 // Dependency is system input --> task
                 const destinationInstances = destinationTaskInstances.value;
-
-                for (let destinationIndex = destinationInstances.length - 1; destinationIndex > -1;  destinationIndex--) {
-                    // Make the source index and instance of system input the same as the destination
-                    const destinationInstance = destinationInstances[destinationIndex];
-                    instances.unshift(this.createDependencyInstance(dependency, destinationIndex, {letEndTime: destinationInstance.letStartTime}, destinationIndex, destinationInstance));
+                
+                if (destinationInstances.length > 0) {
+					const numberOfInstances = destinationInstances.length - (destinationInstances[destinationInstances.length - 1].letStartTime > makespan);
+					for (let destinationIndex = numberOfInstances - 1; destinationIndex > -1;  destinationIndex--) {
+						// Make the source index and instance of system input the same as the destination
+						const destinationInstance = destinationInstances[destinationIndex];
+						instances.unshift(this.createDependencyInstance(dependency, destinationIndex, {letEndTime: destinationInstance.letStartTime}, destinationIndex, destinationInstance));
+					}
                 }
             } else if (dependency.destination.task == Model.SystemInterfaceName) {
                 // Dependency is task --> system output
                 const sourceInstances = sourceTaskInstances.value;
-                const numberOfInstances = sourceInstances.length - (sourceInstances[sourceInstances.length - 1].letEndTime > makespan);
                 
-                for (let sourceIndex = numberOfInstances - 1; sourceIndex > -1;  sourceIndex--) {
-                    // Make the destination index and instance of the system output the same as the source
-                    const sourceInstance = sourceInstances[sourceIndex];
-                    instances.unshift(this.createDependencyInstance(dependency, sourceIndex, sourceInstance, sourceIndex, {letStartTime: sourceInstance.letEndTime}));
+                if (sourceInstances.length > 0) {
+					const numberOfInstances = sourceInstances.length - (sourceInstances[sourceInstances.length - 1].letEndTime > makespan);
+					for (let sourceIndex = numberOfInstances - 1; sourceIndex > -1;  sourceIndex--) {
+						// Make the destination index and instance of the system output the same as the source
+						const sourceInstance = sourceInstances[sourceIndex];
+						instances.unshift(this.createDependencyInstance(dependency, sourceIndex, sourceInstance, sourceIndex, {letStartTime: sourceInstance.letEndTime}));
+					}
                 }
             } else {
-                // Dependency is between two tasks
+                // Dependency is task --> task
                 const sourceInstances = sourceTaskInstances.value;
                 const destinationInstances = destinationTaskInstances.value;
-        
-                for (let destinationIndex = destinationInstances.length - 1; destinationIndex > -1;  destinationIndex--) {
-                    // Find latest sourceInstance
-                    const destinationInstance = destinationInstances[destinationIndex];
-                    const [sourceIndex, sourceInstance] = this.getLatestLetEndTime(sourceInstances, destinationInstance.letStartTime);
-                
-                    instances.unshift(this.createDependencyInstance(dependency, sourceIndex, sourceInstance, destinationIndex, destinationInstance));
+
+                if (destinationInstances.length > 0) {
+					const numberOfInstances = destinationInstances.length - (destinationInstances[destinationInstances.length - 1].letStartTime > makespan);
+					for (let destinationIndex = numberOfInstances - 1; destinationIndex > -1;  destinationIndex--) {
+						// Find latest sourceInstance
+						const destinationInstance = destinationInstances[destinationIndex];
+						const [sourceIndex, sourceInstance] = this.getLatestLetEndTime(sourceInstances, destinationInstance.letStartTime);
+				
+						instances.unshift(this.createDependencyInstance(dependency, sourceIndex, sourceInstance, destinationIndex, destinationInstance));
+					}
                 }
             }
         

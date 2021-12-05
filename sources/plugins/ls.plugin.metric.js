@@ -18,52 +18,52 @@ class PluginMetric {
     
     
     // Plugin methods
-    static storedPlugins = { };
+    static StoredPlugins = { };
     
-    static getPlugin(name) {
-        return PluginMetric.storedPlugins[name];
+    static GetPlugin(name) {
+        return PluginMetric.StoredPlugins[name];
     }
     
-    static get plugins() {
-        return PluginMetric.storedPlugins;
+    static get Plugins() {
+        return PluginMetric.StoredPlugins;
     }
     
-    static ofCategory(category) {
-        return Object.fromEntries(Object.entries(PluginMetric.plugins).filter(([name, plugin]) => plugin.Category == category));
+    static OfCategory(category) {
+        return Object.fromEntries(Object.entries(PluginMetric.Plugins).filter(([name, plugin]) => plugin.Category == category));
     }
     
-    static ofOutput(plugins, output) {
+    static OfOutput(plugins, output) {
         return Object.fromEntries(Object.entries(plugins).filter(([name, plugin]) => plugin.Output == output));
     }
     
-    static reset() {
-        PluginMetric.storedPlugins = { };
+    static Reset() {
+        PluginMetric.StoredPlugins = { };
     }
     
-    static register(name, plugin) {
-        PluginMetric.storedPlugins[name] = plugin;
+    static Register(name, plugin) {
+        PluginMetric.StoredPlugins[name] = plugin;
     }
     
-    static toString() {
-        return 'Plug-ins loaded ...\n  ' + Object.keys(PluginMetric.plugins).join(',\n  ');
+    static ToString() {
+        return 'Plug-ins loaded ...\n  ' + Object.keys(PluginMetric.Plugins).join(',\n  ');
     }
     
     
     // Return the values of a key-value object
-    static valuesOfObject(object) {
+    static ValuesOfObject(object) {
         return Object.keys(object).map(instance => object[instance]);
     }
     
     // Mathematical operations
-    static min(array) {
+    static Min(array) {
         return (array.length == 0) ? undefined : Math.min(...array);
     }
     
-    static avg(array) {
+    static Avg(array) {
         return (array.length == 0) ? undefined : array.reduce((a, b) => (a + b)) / array.length;
     }
     
-    static max(array) {
+    static Max(array) {
         return (array.length == 0) ? undefined : Math.max(...array);
     }
 }

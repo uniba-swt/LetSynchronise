@@ -266,7 +266,7 @@
             <form class="row" id="view-schedule-details">
                 <div class="col-3">
                     <div class="input-group">
-                    	<span for="prologue" class="input-group-text">Prologue</span>
+                        <span for="prologue" class="input-group-text">Prologue</span>
                         <input required type="text" class="form-control" id="prologue" readonly/>
                         <span class="input-group-text">ms</span>
                     </div>
@@ -274,15 +274,15 @@
 
                 <div class="col-3">
                     <div class="input-group">
-						<span for="hyperperiod" class="input-group-text">Hyper-period</span>
-						<input required type="text" class="form-control" id="hyperperiod" readonly/>
-						<span class="input-group-text">ms</span>
+                        <span for="hyperperiod" class="input-group-text">Hyper-period</span>
+                        <input required type="text" class="form-control" id="hyperperiod" readonly/>
+                        <span class="input-group-text">ms</span>
                     </div>
                 </div>
                 
                 <div class="col-3">
                     <div class="input-group">
-                    	<span for="makespan" class="input-group-text">Makespan</span>
+                        <span for="makespan" class="input-group-text">Makespan</span>
                         <input required type="text" class="form-control" id="makespan" value="10"/>
                         <span class="input-group-text">ms</span>
                     </div>
@@ -304,55 +304,27 @@
                 </div>
                 
                 <!-- Modal for analysis results -->
-				<div class="modal fade" id="analyse-modal" tabindex="-1" aria-labelledby="analyse-modal-label" aria-hidden="true">
-					<div class="modal-dialog modal-lg modal-dialog-scrollable">
-						<div class="modal-content">
-							<div class="modal-header">
-								<h5 class="modal-title" id="analyse-modal-label">Analysis results</h5>
-								<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-							</div>
-							
-							<div class="modal-body">
-								<div class="accordion" id="analyse-modal-body">
-                                    <div class="accordion-item">
-
-										<h2 class="accordion-header">
-											<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1">
-												Event chain
-      										</button>
-    									</h2>
-										
-										<div id="collapse1" class="accordion-collapse collapse" data-bs-parent="#analyse-modal-body">
-											<div class="accordion-body">
-        										<strong>This is the first item's accordion
-        										body.</strong> It is shown by default, until
-        										the collapse plugin adds the appropriate classes
-        										that we use to style each element. These
-        										classes control the overall appearance, as
-        										well as the showing and hiding via CSS
-        										transitions. You can modify any of this with
-        										custom CSS or overriding our default variables.
-        										It's also worth noting that just about any HTML
-        										can go within the <code>.accordion-body</code>, 
-        										though the transition does limit overflow.
-												<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
-												<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
-												<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
-												<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
-												<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
-											</div>
-										</div>
-										
-									</div>
-								</div>
-							</div>
-							
-							<div class="modal-footer">
-								<button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-							</div>
-						</div>
-					</div>
-				</div>
+                <div class="modal fade" id="analyse-modal" tabindex="-1" aria-labelledby="analyse-modal-label" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="analyse-modal-label">Analysis results</h5>
+                            </div>
+                            
+                            <div class="modal-body">
+                                <div class="accordion" id="analyse-modal-body">
+                                    <div class="alert alert-danger" role="alert">
+                                        No analysis results!
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="modal-footer">
+                                <button id="analyseClose" type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="m-3"></div>
@@ -368,31 +340,31 @@
             <h3>Define Event Chains</h3>
 
             <form class="row gx-3 gy-2" id="view-analyse-event-chai-define">
-            	<div class="col-3">
-					<div class="input-group">
-						<span class="input-group-text" for="view-analyse-event-chain-name">Name</span>
-						<input required type="text" id="view-analyse-event-chain-name" class="form-control"/>
-					</div>
+                <div class="col-3">
+                    <div class="input-group">
+                        <span class="input-group-text" for="view-analyse-event-chain-name">Name</span>
+                        <input required type="text" id="view-analyse-event-chain-name" class="form-control"/>
+                    </div>
                 </div>
                 
-            	<div class="col-3">
-					<div class="input-group">
-						<span class="input-group-text" for="view-analyse-event-chain-dependency">Dependency</span>
-						<select id="view-analyse-event-chain-dependency" class="form-select">
-							<option disabled selected>Choose ...</option>
-						</select>
-					</div>
+                <div class="col-3">
+                    <div class="input-group">
+                        <span class="input-group-text" for="view-analyse-event-chain-dependency">Dependency</span>
+                        <select id="view-analyse-event-chain-dependency" class="form-select">
+                            <option disabled selected>Choose ...</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="col">
-                	<button id="nextDependency" type="submit" class="btn btn-outline-secondary">Next</button>
+                    <button id="nextDependency" type="submit" class="btn btn-outline-secondary">Next</button>
                 </div>
 
-            	<div class="col-6">
-					<div class="input-group">
-						<span class="input-group-text" for="view-analyse-event-chain-dependencies">Dependencies</span>
-						<span id="view-analyse-event-chain-dependencies" class="form-control"></span>
-					</div>
+                <div class="col-6">
+                    <div class="input-group">
+                        <span class="input-group-text" for="view-analyse-event-chain-dependencies">Dependencies</span>
+                        <span id="view-analyse-event-chain-dependencies" class="form-control"></span>
+                    </div>
                 </div>
                 
                 <div class="col">
@@ -415,45 +387,45 @@
             <form class="row" id="view-analyse-constraint-define">
                 <div class="col-3">
                     <div class="input-group">
-						<span class="input-group-text" for="view-analyse-constraint-name">Name</span>
-						<input required type="text" id="view-analyse-constraint-name" class="form-control"/>
-					</div>
-				</div>
+                        <span class="input-group-text" for="view-analyse-constraint-name">Name</span>
+                        <input required type="text" id="view-analyse-constraint-name" class="form-control"/>
+                    </div>
+                </div>
                 
                 <div class="col-3">
                     <div class="input-group">
-						<span class="input-group-text" for="view-analyse-constraint-event-chain">Event Chain</span>
-						<select id="view-analyse-constraint-event-chain" class="form-select">
-							<option disabled selected>Choose ...</option>
-						</select>
-					</div>
-				</div>
+                        <span class="input-group-text" for="view-analyse-constraint-event-chain">Event Chain</span>
+                        <select id="view-analyse-constraint-event-chain" class="form-select">
+                            <option disabled selected>Choose ...</option>
+                        </select>
+                    </div>
+                </div>
 
                 <div class="col-3">
                     <div class="input-group">
-						<span class="input-group-text" for="view-analyse-constraint-relation">Relation</span>
-						<select id="view-analyse-constraint-relation" class="form-select">
-							<option value="null " disabled selected>Choose ...</option>
-							<option value="<">&lt;</option>
-							<option value="<=">&le;</option>
-							<option vlaue="=">&equals;&equals;</option>
-							<option value=">=">&ge;</option>
-							<option value=">">&ge;</option>
-						</select>
-					</div>
-				</div>
+                        <span class="input-group-text" for="view-analyse-constraint-relation">Relation</span>
+                        <select id="view-analyse-constraint-relation" class="form-select">
+                            <option value="null " disabled selected>Choose ...</option>
+                            <option value="<">&lt;</option>
+                            <option value="<=">&le;</option>
+                            <option vlaue="=">&equals;&equals;</option>
+                            <option value=">=">&ge;</option>
+                            <option value=">">&ge;</option>
+                        </select>
+                    </div>
+                </div>
 
                 <div class="col-2">
                     <div class="input-group">
-						<span class="input-group-text" for="view-analyse-constraint-time">Time</span>
-						<input required type="text" class="form-control" id="view-analyse-constraint-time"/>
-						<span class="input-group-text">ms</span>
-					</div>
-				</div>
+                        <span class="input-group-text" for="view-analyse-constraint-time">Time</span>
+                        <input required type="text" class="form-control" id="view-analyse-constraint-time"/>
+                        <span class="input-group-text">ms</span>
+                    </div>
+                </div>
                 
                 <div class="col">
-	                <button id="submitConstraint" type="submit" class="btn btn-primary">Save</button>
-	            </div>
+                    <button id="submitConstraint" type="submit" class="btn btn-primary">Save</button>
+                </div>
             </form>
             
             <div class="m-3"></div>

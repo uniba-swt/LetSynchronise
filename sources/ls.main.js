@@ -84,9 +84,9 @@ controller.controllerAnalyse.controllerSchedule = controller.controllerSchedule;
 console.log(controller.toString());
 
 // Register plug-ins.
-PluginMetric.register(PluginMetricDataAge.name, PluginMetricDataAge);
-PluginMetric.register(PluginMetricEnd2End.name, PluginMetricEnd2End);
-PluginMetric.register(PluginMetricLatency.name, PluginMetricLatency);
+PluginMetric.Register(PluginMetricDataAge.name, PluginMetricDataAge);
+PluginMetric.Register(PluginMetricEnd2End.name, PluginMetricEnd2End);
+PluginMetric.Register(PluginMetricLatency.name, PluginMetricLatency);
 
-console.log(PluginMetric.toString());
+console.log(PluginMetric.ToString());
 

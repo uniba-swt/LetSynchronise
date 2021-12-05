@@ -17,20 +17,20 @@ class PluginMetricDataAge {
     //
     // @Input event chain name, array of event chain instances.
     // @Output object with statistical result of metric.
-    static result(chainName, chainInstances) {
+    static Result(chainName, chainInstances) {
         let rawResults = { };
         let statistics = { };
         
-        chainInstances.forEach(chainInstance => PluginMetricDataAge.compute(chainInstance, rawResults));
+        chainInstances.forEach(chainInstance => PluginMetricDataAge.Compute(chainInstance, rawResults));
         
         for (chainName in rawResults) {
-            const valuesOnly = PluginMetric.valuesOfObject(rawResults[chainName]);
+            const valuesOnly = PluginMetric.ValuesOfObject(rawResults[chainName]);
 
             statistics[chainName] = {
                 'chainName': chainName,
-                'min': PluginMetric.min(valuesOnly),
-                'avg': PluginMetric.avg(valuesOnly),
-                'max': PluginMetric.max(valuesOnly),
+                'min': PluginMetric.Min(valuesOnly),
+                'avg': PluginMetric.Avg(valuesOnly),
+                'max': PluginMetric.Max(valuesOnly),
                 'num': valuesOnly.length,
                 'raw': rawResults[chainName]
             };
@@ -40,7 +40,7 @@ class PluginMetricDataAge {
     }
     
     // Compute the data ages along one event chain instance.
-    static compute(chainInstance, rawResults) {        
+    static Compute(chainInstance, rawResults) {        
         let nextSegment = chainInstance.generator();
         for (const segment of nextSegment) {
             const startTime = segment.sendEvent.timestamp;
@@ -54,17 +54,31 @@ class PluginMetricDataAge {
         
         return rawResults;
     }
-
-    static toString(result) {
-        let output = [`${PluginMetricDataAge.Name}: ${Object.keys(result).length} dependencies`];
+    
+    static ToHtml(result) {
+        let output = [`<h6>${PluginMetricDataAge.Name}: ${Object.keys(result).length} dependencies</h6>`];
         
         for (const chainName in result) {
             output.push(
-                `  ${chainName}: (min, avg, max) = (${result[chainName].min}, ${result[chainName].avg}, ${result[chainName].max})`,
-                `    ${result[chainName].num} values: [${PluginMetric.valuesOfObject(result[chainName].raw).join(', ')}]`,
+                `${chainName}: (min, avg, max) = (${result[chainName].min}, ${result[chainName].avg}, ${result[chainName].max})`,
+                `<ul><li>${result[chainName].num} values: [${PluginMetric.ValuesOfObject(result[chainName].raw).join(', ')}]</li></ul>`
             );
         }
         
         return output.join('\n');
     }
+
+    static ToString(result) {
+        let output = [`${PluginMetricDataAge.Name}: ${Object.keys(result).length} dependencies`];
+        
+        for (const chainName in result) {
+            output.push(
+                `  ${chainName}: (min, avg, max) = (${result[chainName].min}, ${result[chainName].avg}, ${result[chainName].max})`,
+                `    ${result[chainName].num} values: [${PluginMetric.ValuesOfObject(result[chainName].raw).join(', ')}]`,
+            );
+        }
+        
+        return output.join('\n');
+    }
+    
 }

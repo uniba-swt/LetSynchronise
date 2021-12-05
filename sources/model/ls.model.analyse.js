@@ -158,7 +158,7 @@ class ModelAnalyse {
 
                 // Make sure that the event chains are sorted by chain name and then instance number.
                 allChainInstances.sort(function(a, b) {
-                	// Sort based on event chain name.
+                    // Sort based on event chain name.
                     if (a.chainName < b.chainName) { return -1; }
                     if (a.chainName > b.chainName) { return 1; }
 
@@ -172,26 +172,28 @@ class ModelAnalyse {
                 allChainInstances.forEach(chainInstance => { groupedChainInstances[chainInstance.chainName].push(chainInstance) });
 
                 // Iterate over the available plug-ins and compute metrics for all event chain instances, grouped by event chain name.
-                const timingPlugins = PluginMetric.ofCategory(PluginMetric.Category.Timing);
-                const results = Object.fromEntries(allConstraints.map(constraint => [constraint.eventChain, { }]));
+                const timingPlugins = PluginMetric.OfCategory(PluginMetric.Category.Timing);
+                const results = Object.fromEntries(Object.keys(groupedChainInstances).map(chainName => [chainName, { }]));
                 for (const chainName in groupedChainInstances) {
                     for (const pluginName in timingPlugins) {
-                        results[chainName][pluginName] = { 'metrics': timingPlugins[pluginName].result(chainName, groupedChainInstances[chainName])} ;
+                        results[chainName][pluginName] = { 'metrics': timingPlugins[pluginName].Result(chainName, groupedChainInstances[chainName])} ;
                     }
                 }
 
                 // Evaluate each timing constraint on the latency metrics.
-                const latencyTimingPlugins = PluginMetric.ofOutput(timingPlugins, PluginMetric.Output.Latencies);
+                const latencyTimingPlugins = PluginMetric.OfOutput(timingPlugins, PluginMetric.Output.Latencies);
                 for (const chainName in results) {
                     for (const pluginName in latencyTimingPlugins) {
                         results[chainName][pluginName]['constraints'] = { };
                         for (const constraint of allConstraints.filter(constraint => chainName == constraint.eventChain)) {
                             const metrics = results[chainName][pluginName]['metrics']['raw'];
-                            results[chainName][pluginName]['constraints'][constraint.name] = 
-                                Object.fromEntries(Object.keys(metrics).map(instance => [instance, eval(`${metrics[instance]} ${constraint.relation} ${constraint.time}`)]));
+                            results[chainName][pluginName]['constraints'][constraint.name] = Object.fromEntries(Object.keys(metrics)
+                                .map(instance => [instance, eval(`${metrics[instance]} ${constraint.relation} ${constraint.time}`)])
+                            );
                         }
                     }
                 }
+                
                 return results;
             });
 
