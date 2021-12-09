@@ -45,7 +45,7 @@ class PluginMetric {
     }
     
     static ToString() {
-        return 'Plug-ins loaded ...\n  ' + Object.keys(PluginMetric.Plugins).join(',\n  ');
+        return 'PluginMetric loaded ...\n  ' + Object.keys(PluginMetric.Plugins).join(',\n  ');
     }
     
     
