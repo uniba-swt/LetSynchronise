@@ -287,7 +287,6 @@ class ViewSchedule {
                         
                         // Update SVG style of dependencies
 						for (const dataflow of dataflows.value) {
-							console.log(d3.select(`#${dataflows.name}-${dataflow.instance}`))
 							d3.select(`#${dataflows.name}-${dataflow.instance}`)
 							  .node().style.visibility = this.classList.contains('active') ? 'visible' : 'hidden';
 						}
@@ -427,23 +426,27 @@ class ViewSchedule {
                         allMenuItem.node().classList.remove('active');
                         this.classList.toggle('active');
                         
+                        const strokeColour = this.classList.contains('active') ? 'var(--bs-blue)' : 'var(--bs-red)';
+                        const strokeWidth = this.classList.contains('active') ? 5 : 2;
+						const fillColour = this.classList.contains('active') ? 'var(--bs-blue)' : 'var(--bs-gray)';
+						const markerEnd = this.classList.contains('active') ? 'arrowBlue' : 'arrowRed'
+                        
                         // Update SVG style of dataflows and tasks
 						for (const dataflow of dataflows) {
 							d3.select(`#${dataflow}`)
 							  .transition()
 							  .ease(d3.easeLinear)
-							  .attr('marker-end', 'url(#arrowBlue)')
-							  .attr('stroke', 'var(--bs-blue)')
-							  .attr('stroke-width', 5)
+							  .attr('marker-end', `url(#${markerEnd})`)
+							  .attr('stroke', strokeColour)
+							  .attr('stroke-width', strokeWidth)
 							  .node().style.visibility = this.classList.contains('active') ? 'visible' : 'hidden';
-							
 						}
-		
+						
 						for (const task of tasks) {
 							d3.select(`#${task}`)
 							  .transition()
 							  .ease(d3.easeLinear)
-							  .style('fill', 'var(--bs-blue)');
+							  .style('fill', fillColour);
 						}
                     });
         }
