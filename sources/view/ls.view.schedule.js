@@ -425,7 +425,7 @@ class ViewSchedule {
                         // Update style of dropdown items
                         allMenuItem.node().classList.remove('active');
                         this.classList.toggle('active');
-                        
+                                                
                         const strokeColour = this.classList.contains('active') ? 'var(--bs-blue)' : 'var(--bs-red)';
                         const strokeWidth = this.classList.contains('active') ? 5 : 2;
 						const fillColour = this.classList.contains('active') ? 'var(--bs-blue)' : 'var(--bs-gray)';
