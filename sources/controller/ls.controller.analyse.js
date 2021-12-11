@@ -4,8 +4,8 @@ class ControllerAnalyse {
     _view = null;
     _viewSchedule = null;
     _model = null;
-    _modelDependency = null;
     _modelConstraint = null;
+    _modelEventChain = null;
     _controllerSchedule = null;
     
     constructor() { }
@@ -41,28 +41,6 @@ class ControllerAnalyse {
         return this._model;
     }
     
-    set modelTask(modelTask) {
-        this._modelTask = modelTask;
-        
-        // Register the model task with the model.
-        this._model.registerModelTask(this._modelTask);
-    }
-    
-    get modelTask() {
-        return this._modelTask;
-    }
-    
-    set modelDependency(modelDependency) {
-        this._modelDependency = modelDependency;
-        
-        // Register the model dependency with the model.
-        this._model.registerModelDependency(this._modelDependency);
-    }
-    
-    get modelDependency() {
-        return this._modelDependency;
-    }
-    
     set modelConstraint(modelConstraint) {
         this._modelConstraint = modelConstraint;
 
@@ -85,7 +63,6 @@ class ControllerAnalyse {
         return this._modelEventChain;
     }
     
-    registerModelEventChain
     
     set controllerSchedule(controllerSchedule) {
         this._controllerSchedule = controllerSchedule;

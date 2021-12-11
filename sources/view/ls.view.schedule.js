@@ -102,6 +102,8 @@ class ViewSchedule {
         const taskParametersSet = await promise['promiseAllTasks'];
         const tasksInstances = await promise['promiseAllTasksInstances'];
         const dataflowsSet = await promise['promiseAllDependenciesInstances'];
+        const eventChainInstances = await promise['promiseAllEventChainInstances'];
+        console.log(eventChainInstances)
         
         if (taskParametersSet.length < 1) {
             this.prologue = 0;
@@ -208,7 +210,7 @@ class ViewSchedule {
                    .attr('y2', `${View.BarHeight + View.BarMargin}`)
                    .attr('class', 'period');
 
-        for (const [index, instance] of instances.entries()) {
+        for (const instance of instances) {
             // Add the task's LET duration
             graphInfo.append('rect')
                        .attr('x', scale(instance.letStartTime))
@@ -219,7 +221,7 @@ class ViewSchedule {
                             .transition()
                             .ease(d3.easeLinear)
                             .style('fill', 'var(--bs-blue)');
-                          tooltip.innerHTML = `${taskInstances.name} instance ${index}`;
+                          tooltip.innerHTML = `${taskInstances.name} instance ${instance.instance}`;
                           tooltip.style.visibility = 'visible';
                       })
                       .on('mousemove', (event) => {
@@ -379,7 +381,7 @@ class ViewSchedule {
                  .transition()
                  .ease(d3.easeLinear)
                  .style('stroke', 'var(--bs-orange)');
-               tooltip.innerHTML = `${dependencyName}:<br/>${sendPortName} &rarr; ${receivePortName}`;
+               tooltip.innerHTML = `${dependencyName} instance ${dataflow.instance}:<br/>${sendPortName} &rarr; ${receivePortName}`;
                tooltip.style.visibility = 'visible';
              })
              .on('mousemove', (event) => {

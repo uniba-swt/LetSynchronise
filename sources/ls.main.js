@@ -61,7 +61,10 @@ controller.controllerDependency.modelEventChain = model.modelEventChain;
 
 controller.controllerSchedule.view = view.viewSchedule;
 controller.controllerSchedule.model = model.modelSchedule;
+controller.controllerSchedule.modelTask = model.modelTask;
 controller.controllerSchedule.modelDependency = model.modelDependency;
+controller.controllerSchedule.modelEventChain = model.modelEventChain;
+controller.controllerSchedule.modelConstraint = model.modelConstraint;
 
 controller.controllerEventChain.view = view.viewEventChain;
 controller.controllerEventChain.model = model.modelEventChain;
@@ -75,8 +78,6 @@ controller.controllerConstraint.modelEventChain = model.modelEventChain;
 controller.controllerAnalyse.view = view.viewAnalyse;
 controller.controllerAnalyse.viewSchedule = view.viewSchedule;
 controller.controllerAnalyse.model = model.modelAnalyse;
-controller.controllerAnalyse.modelTask = model.modelTask;
-controller.controllerAnalyse.modelDependency = model.modelDependency;
 controller.controllerAnalyse.modelConstraint = model.modelConstraint;
 controller.controllerAnalyse.modelEventChain = model.modelEventChain;
 controller.controllerAnalyse.controllerSchedule = controller.controllerSchedule;
