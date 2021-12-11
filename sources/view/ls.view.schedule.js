@@ -103,7 +103,6 @@ class ViewSchedule {
         const tasksInstances = await promise['promiseAllTasksInstances'];
         const dataflowsSet = await promise['promiseAllDependenciesInstances'];
         const eventChainInstances = await promise['promiseAllEventChainInstances'];
-        console.log(eventChainInstances)
         
         if (taskParametersSet.length < 1) {
             this.prologue = 0;
@@ -113,11 +112,14 @@ class ViewSchedule {
             this.updateHyperPeriod(taskParametersSet);
         }
         
-        // Draw new schedule.
+        // Draw new task schedule.
         const {svgElement, scale, taskIndices} = this.drawSchedule(tasksInstances);
         
         // Draw communication dependencies.
         this.drawDataflows(svgElement, scale, taskIndices, dataflowsSet);
+        
+        // Draw event chains.
+        this.drawEventChains(svgElement, scale, taskIndices, eventChainInstances);
     }
     
     updatePrologue(taskParametersSet) {
@@ -213,6 +215,7 @@ class ViewSchedule {
         for (const instance of instances) {
             // Add the task's LET duration
             graphInfo.append('rect')
+                       .attr('id', `${taskInstances.name}-${instance.instance}`)
                        .attr('x', scale(instance.letStartTime))
                        .attr('width', scale(instance.letEndTime - instance.letStartTime))
                        .attr('height', View.BarHeight)
@@ -266,10 +269,9 @@ class ViewSchedule {
                 .text('All');
     
         // Define arrow head of a dataflow line
-        const svgDefs =
         svgElement.append('defs')
                   .append('marker')
-                    .attr('id', 'arrow')
+                    .attr('id', 'arrowOrange')
                     .attr('viewBox', '0 -5 10 10')
                     .attr('refX', 5)
                     .attr('refY', 0)
@@ -277,9 +279,41 @@ class ViewSchedule {
                     .attr('markerHeight', 4)
                     .attr('orient', 'auto')
                   .append('path')
+                    .attr('class', 'arrowHeadOrange')
                     .attr('d', 'M0, -5L10, 0L0, 5')
-                    .attr('class', 'arrowHead');
-        
+                    .attr('stroke', 'context-stroke')
+                    .attr('fill', 'context-fill');
+
+        svgElement.append('defs')
+                  .append('marker')
+                    .attr('id', 'arrowRed')
+                    .attr('viewBox', '0 -5 10 10')
+                    .attr('refX', 5)
+                    .attr('refY', 0)
+                    .attr('markerWidth', 4)
+                    .attr('markerHeight', 4)
+                    .attr('orient', 'auto')
+                  .append('path')
+                    .attr('class', 'arrowHeadRed')
+                    .attr('d', 'M0, -5L10, 0L0, 5')
+                    .attr('stroke', 'context-stroke')
+                    .attr('fill', 'context-fill');
+
+        svgElement.append('defs')
+                  .append('marker')
+                    .attr('id', 'arrowBlue')
+                    .attr('viewBox', '0 -5 10 10')
+                    .attr('refX', 5)
+                    .attr('refY', 0)
+                    .attr('markerWidth', 4)
+                    .attr('markerHeight', 4)
+                    .attr('orient', 'auto')
+                  .append('path')
+                    .attr('class', 'arrowHeadBlue')
+                    .attr('d', 'M0, -5L10, 0L0, 5')
+                    .attr('stroke', 'context-stroke')
+                    .attr('fill', 'context-fill');
+
         let svgGroups = [];
         for (const dataflows of dataflowsSet) {
             const svgGroup = 
@@ -331,6 +365,7 @@ class ViewSchedule {
         const xOffset = 20;
         const tooltip = this.dataflowTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
         
+        const dataflowId = `${dependencyName}-${dataflow.instance}`;
         const sendEvent = dataflow.sendEvent;
         const receiveEvent = dataflow.receiveEvent;
         let sendPortName = Utility.TaskPorts(sendEvent.task, [sendEvent.port]);
@@ -374,13 +409,15 @@ class ViewSchedule {
                     .attr('transform', `translate(${View.SvgPadding}, ${View.SvgPadding})`);
         
         group.append('path')
+               .attr('id', dataflowId)
                .attr('d', line(points))
-               .attr('marker-end', 'url(#arrow)')
+               .attr('marker-end', 'url(#arrowRed)')
              .on('mouseover', function() {
                d3.select(this)
                  .transition()
                  .ease(d3.easeLinear)
-                 .style('stroke', 'var(--bs-orange)');
+                 .attr('marker-end', 'url(#arrowOrange)')
+                 .attr('stroke', 'var(--bs-orange)');
                tooltip.innerHTML = `${dependencyName} instance ${dataflow.instance}:<br/>${sendPortName} &rarr; ${receivePortName}`;
                tooltip.style.visibility = 'visible';
              })
@@ -393,9 +430,68 @@ class ViewSchedule {
                d3.select(this)
                  .transition()
                  .ease(d3.easeLinear)
-                 .style('stroke', 'var(--bs-red)');
+                 .attr('marker-end', 'url(#arrowRed)')
+                 .attr('stroke', 'var(--bs-red)');
                tooltip.style.visibility = 'hidden';
              });
+    }
+    
+    drawEventChains(svgElement, scale, taskIndices, eventChainInstances) {
+        // Flatten the event chain instance information
+        const instancesData = { };
+        for (const eventChainInstanceJson of eventChainInstances) {
+            const eventChainInstance = ChainInstance.FromJson(eventChainInstanceJson);
+            if (!instancesData.hasOwnProperty(eventChainInstance.chainName)) {
+                instancesData[eventChainInstance.chainName] = [ ];
+            }
+            
+            let dataflows = [ ];
+            let tasks = new Set();
+            for (const dataflow of eventChainInstance.generator()) {
+                dataflows.push(`${dataflow.name}-${dataflow.instance}`);
+                tasks.add(`${dataflow.receiveEvent.task}-${dataflow.receiveEvent.taskInstance}`)
+                tasks.add(`${dataflow.sendEvent.task}-${dataflow.sendEvent.taskInstance}`)
+            }
+            
+            let data = {
+                'instance': eventChainInstance.instance,
+                'dataflows': dataflows,
+                'tasks': tasks
+            }
+            
+            instancesData[eventChainInstance.chainName].push(data);
+        }
+        
+        // Test the drawing of one event chain instance
+        console.log(instancesData);
+        
+        const firstEventChainName = Object.keys(instancesData)[0];
+        const firstEventChainInstance = instancesData[firstEventChainName][0];
+        
+        console.log(firstEventChainName)
+        console.log(firstEventChainInstance)
+        
+        // Highlight each segment of the event chain.
+        for (const dataflow of firstEventChainInstance.dataflows) {
+            d3.select(`#${dataflow}`)
+              .transition()
+              .ease(d3.easeLinear)
+              .attr('marker-end', 'url(#arrowBlue)')
+              .attr('stroke', 'var(--bs-blue)')
+              .attr('stroke-width', 5);
+        }
+        
+        // Highlight the tasks involved.
+        for (const task of firstEventChainInstance.tasks) {
+            d3.select(`#${task}`)
+              .transition()
+              .ease(d3.easeLinear)
+              .style('fill', 'var(--bs-blue)');
+        }
+    }
+    
+    drawEventChain(svgElement, scale, taskIndices, eventChainInstance) {
+    
     }
     
     toString() {
