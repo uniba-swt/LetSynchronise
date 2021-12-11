@@ -35,6 +35,7 @@ class ModelTask {
         this.modelEventChain = modelEventChain;
     }
     
+    
     // -----------------------------------------------------
     // Class methods
 
@@ -42,23 +43,23 @@ class ModelTask {
         // Store taskParameters into Database
         const logicalTask = ModelLogicalTask.CreateWithParameters(parameters);
         
+        // Delete dependencies that relied on task ports that are no longer exist.
         let dependenciesToRemove = [];
         let dependencies = await this.modelDependency.getAllDependencies();
-        /* For all dependencies */
         for (const dependency of dependencies) {
 
-            /* The destination of the dependency is this task */
+            // Check whether the dependency destination is this task.
             if (dependency.destination.task == logicalTask.name) { 
+                // Check whether the task port still exists.
                 if (logicalTask.inputs.some(input => (input == dependency.destination.port)) == false) {
-                    /* remove dependency if no corresponding dependency found*/
                     dependenciesToRemove.push(dependency);
                 }
             }
 
-            /* The source of the dependency is this task */
+            // Check whether the dependency source is this task.
             if (dependency.source.task == logicalTask.name) { 
+                // Check whether the task port still exists.
                 if (logicalTask.outputs.some(output => (output == dependency.source.port)) == false) {
-                    /* remove dependency if no corresponding dependency found */
                     dependenciesToRemove.push(dependency);
                 }
             }
