@@ -293,37 +293,45 @@
             
             <div class="m-2"></div>
             
-            <div>
-                <button id="update" type="submit" class="btn btn-primary">Update</button>
-                <button id="analyse" type="submit" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#analyse-modal">Analyse</button>
-                <div id="view-schedule-dependencies" class="dropdown">
-                    <button class="btn btn-danger dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Dependencies
-                    </button>
-                    <div id="view-schedule-dependencies-menu" class="dropdown-menu">
-                        <a class="dropdown-item">None</a>
-                    </div>
+            <button id="update" type="submit" class="btn btn-primary">Update</button>
+            <button id="analyse" type="submit" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#analyse-modal">Analyse</button>
+        
+            <div id="view-schedule-dependencies" class="dropdown">
+                <button class="btn btn-danger dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Dependencies
+                </button>
+                <div id="view-schedule-dependencies-menu" class="dropdown-menu">
+                    <a class="dropdown-item">None</a>
                 </div>
-                
-                <!-- Modal for analysis results -->
-                <div class="modal fade" id="analyse-modal" tabindex="-1" aria-labelledby="analyse-modal-label" aria-hidden="true">
-                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="analyse-modal-label">Analysis results</h5>
-                            </div>
-                            
-                            <div class="modal-body">
-                                <div class="accordion" id="analyse-modal-body">
-                                    <div class="alert alert-danger" role="alert">
-                                        No analysis results!
-                                    </div>
+            </div>
+
+            <div id="view-schedule-event-chains" class="dropdown">
+                <button class="btn btn-danger dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Event Chains
+                </button>
+                <div id="view-schedule-event-chains-menu" class="dropdown-menu">
+                    <a class="dropdown-item">None</a>
+                </div>
+            </div>
+            
+            <!-- Modal for analysis results -->
+            <div class="modal fade" id="analyse-modal" tabindex="-1" aria-labelledby="analyse-modal-label" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="analyse-modal-label">Analysis results</h5>
+                        </div>
+                        
+                        <div class="modal-body">
+                            <div class="accordion" id="analyse-modal-body">
+                                <div class="alert alert-danger" role="alert">
+                                    No analysis results!
                                 </div>
                             </div>
-                            
-                            <div class="modal-footer">
-                                <button id="analyseClose" type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-                            </div>
+                        </div>
+                        
+                        <div class="modal-footer">
+                            <button id="analyseClose" type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </div>
@@ -332,6 +340,19 @@
             <div class="m-5"></div>
             
             <div id="view-schedule"></div>
+            <svg id="view-schedule-svg-defs">
+                <defs>
+                    <marker id="arrowOrange" viewBox="0 -5 10 10" refX="5" refY="0" markerWidth="4" markerHeight="4" orient="auto">
+                        <path class="arrowHeadOrange" d="M0, -5L10, 0L0, 5" stroke="context-stroke" fill="context-fill"/>
+                    </marker>
+                    <marker id="arrowRed" viewBox="0 -5 10 10" refX="5" refY="0" markerWidth="4" markerHeight="4" orient="auto">
+                        <path class="arrowHeadRed" d="M0, -5L10, 0L0, 5" stroke="context-stroke" fill="context-fill"/>
+                    </marker>
+                    <marker id="arrowBlue" viewBox="0 -5 10 10" refX="5" refY="0" markerWidth="4" markerHeight="4" orient="auto">
+                        <path class="arrowHeadBlue" d="M0, -5L10, 0L0, 5" stroke="context-stroke" fill="context-fill"/>
+                    </marker>
+                </defs>
+            </svg>
             
             <div id="view-schedule-task-tooltip"></div>
             <div id="view-schedule-dataflow-tooltip"></div>

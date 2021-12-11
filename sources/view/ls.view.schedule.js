@@ -11,6 +11,7 @@ class ViewSchedule {
 
     schedule = null;
     dependencies = null;
+    eventChains = null;
     scheduleTooltip = null;
     dataflowTooltip = null;
 
@@ -26,6 +27,7 @@ class ViewSchedule {
 
         this.schedule = d3.select('#view-schedule');
         this.dependencies = d3.select('#view-schedule-dependencies-menu');
+        this.eventChains = d3.select('#view-schedule-event-chains-menu');
         this.scheduleTooltip = this.root.querySelector('#view-schedule-task-tooltip');
         this.dataflowTooltip = this.root.querySelector('#view-schedule-dataflow-tooltip');
 
@@ -119,7 +121,7 @@ class ViewSchedule {
         this.drawDataflows(svgElement, scale, taskIndices, dataflowsSet);
         
         // Draw event chains.
-        this.drawEventChains(svgElement, scale, taskIndices, eventChainInstances);
+        this.drawEventChains(eventChainInstances);
     }
     
     updatePrologue(taskParametersSet) {
@@ -268,59 +270,12 @@ class ViewSchedule {
                 .attr('class', 'dropdown-item active')
                 .text('All');
     
-        // Define arrow head of a dataflow line
-        svgElement.append('defs')
-                  .append('marker')
-                    .attr('id', 'arrowOrange')
-                    .attr('viewBox', '0 -5 10 10')
-                    .attr('refX', 5)
-                    .attr('refY', 0)
-                    .attr('markerWidth', 4)
-                    .attr('markerHeight', 4)
-                    .attr('orient', 'auto')
-                  .append('path')
-                    .attr('class', 'arrowHeadOrange')
-                    .attr('d', 'M0, -5L10, 0L0, 5')
-                    .attr('stroke', 'context-stroke')
-                    .attr('fill', 'context-fill');
-
-        svgElement.append('defs')
-                  .append('marker')
-                    .attr('id', 'arrowRed')
-                    .attr('viewBox', '0 -5 10 10')
-                    .attr('refX', 5)
-                    .attr('refY', 0)
-                    .attr('markerWidth', 4)
-                    .attr('markerHeight', 4)
-                    .attr('orient', 'auto')
-                  .append('path')
-                    .attr('class', 'arrowHeadRed')
-                    .attr('d', 'M0, -5L10, 0L0, 5')
-                    .attr('stroke', 'context-stroke')
-                    .attr('fill', 'context-fill');
-
-        svgElement.append('defs')
-                  .append('marker')
-                    .attr('id', 'arrowBlue')
-                    .attr('viewBox', '0 -5 10 10')
-                    .attr('refX', 5)
-                    .attr('refY', 0)
-                    .attr('markerWidth', 4)
-                    .attr('markerHeight', 4)
-                    .attr('orient', 'auto')
-                  .append('path')
-                    .attr('class', 'arrowHeadBlue')
-                    .attr('d', 'M0, -5L10, 0L0, 5')
-                    .attr('stroke', 'context-stroke')
-                    .attr('fill', 'context-fill');
-
-        let svgGroups = [];
+        let svgGroups = [ ];
         for (const dataflows of dataflowsSet) {
-            const svgGroup = 
-            svgElement.append('g')
-                        .attr('class', `dependency view-dependency-${dataflows.name}`);
-            svgGroups.push(svgGroup);
-            
+            dataflows.value.forEach(dataflow => this.drawDataflow(svgElement, scale, taskIndices, dataflows.name, dataflow));              
+
+            svgGroups.push(...dataflows.value.map(dataflow => d3.select(`#${dataflows.name}-${dataflow.instance}`)));
+                        
             this.dependencies
                 .append('a')
                     .attr('class', 'dropdown-item active')
@@ -331,12 +286,12 @@ class ViewSchedule {
                         this.classList.toggle('active');
                         
                         // Update SVG style of dependencies
-                        svgGroup.node().style.visibility = this.classList.contains('active') ? 'visible' : 'hidden';
+						for (const dataflow of dataflows.value) {
+							console.log(d3.select(`#${dataflows.name}-${dataflow.instance}`))
+							d3.select(`#${dataflows.name}-${dataflow.instance}`)
+							  .node().style.visibility = this.classList.contains('active') ? 'visible' : 'hidden';
+						}
                     });
-
-            for (const dataflow of dataflows.value) {
-                this.drawDataflow(svgGroup, scale, taskIndices, dataflows.name, dataflow);              
-            }
         }
         
         allMenuItem
@@ -406,6 +361,7 @@ class ViewSchedule {
         
         const group =
         svgElement.append('g')
+                    .attr('class', 'dependency')
                     .attr('transform', `translate(${View.SvgPadding}, ${View.SvgPadding})`);
         
         group.append('path')
@@ -436,14 +392,21 @@ class ViewSchedule {
              });
     }
     
-    drawEventChains(svgElement, scale, taskIndices, eventChainInstances) {
-        // Flatten the event chain instance information
-        const instancesData = { };
+    drawEventChains(eventChainInstances) {
+        this.eventChains.selectAll('*').remove();
+        
+        const allMenuItem = 
+        this.eventChains
+            .append('a')
+                .attr('class', 'dropdown-item')
+                .text('All');
+                
+        let svgGroups = [ ];
+    
         for (const eventChainInstanceJson of eventChainInstances) {
+            // Flatten the event chain instance information
             const eventChainInstance = ChainInstance.FromJson(eventChainInstanceJson);
-            if (!instancesData.hasOwnProperty(eventChainInstance.chainName)) {
-                instancesData[eventChainInstance.chainName] = [ ];
-            }
+            const name = eventChainInstance.name;
             
             let dataflows = [ ];
             let tasks = new Set();
@@ -453,45 +416,57 @@ class ViewSchedule {
                 tasks.add(`${dataflow.sendEvent.task}-${dataflow.sendEvent.taskInstance}`)
             }
             
-            let data = {
-                'instance': eventChainInstance.instance,
-                'dataflows': dataflows,
-                'tasks': tasks
-            }
-            
-            instancesData[eventChainInstance.chainName].push(data);
+			svgGroups.push(...dataflows.map(dataflow => d3.select(`#${dataflow}`)));
+
+            this.eventChains
+                .append('a')
+                    .attr('class', 'dropdown-item')
+                    .text(name)
+                    .on('click', function() {
+                        // Update style of dropdown items
+                        allMenuItem.node().classList.remove('active');
+                        this.classList.toggle('active');
+                        
+                        // Update SVG style of dataflows and tasks
+						for (const dataflow of dataflows) {
+							d3.select(`#${dataflow}`)
+							  .transition()
+							  .ease(d3.easeLinear)
+							  .attr('marker-end', 'url(#arrowBlue)')
+							  .attr('stroke', 'var(--bs-blue)')
+							  .attr('stroke-width', 5)
+							  .node().style.visibility = this.classList.contains('active') ? 'visible' : 'hidden';
+							
+						}
+		
+						for (const task of tasks) {
+							d3.select(`#${task}`)
+							  .transition()
+							  .ease(d3.easeLinear)
+							  .style('fill', 'var(--bs-blue)');
+						}
+                    });
         }
-        
-        // Test the drawing of one event chain instance
-        console.log(instancesData);
-        
-        const firstEventChainName = Object.keys(instancesData)[0];
-        const firstEventChainInstance = instancesData[firstEventChainName][0];
-        
-        console.log(firstEventChainName)
-        console.log(firstEventChainInstance)
-        
-        // Highlight each segment of the event chain.
-        for (const dataflow of firstEventChainInstance.dataflows) {
-            d3.select(`#${dataflow}`)
-              .transition()
-              .ease(d3.easeLinear)
-              .attr('marker-end', 'url(#arrowBlue)')
-              .attr('stroke', 'var(--bs-blue)')
-              .attr('stroke-width', 5);
-        }
-        
-        // Highlight the tasks involved.
-        for (const task of firstEventChainInstance.tasks) {
-            d3.select(`#${task}`)
-              .transition()
-              .ease(d3.easeLinear)
-              .style('fill', 'var(--bs-blue)');
-        }
-    }
-    
-    drawEventChain(svgElement, scale, taskIndices, eventChainInstance) {
-    
+
+        allMenuItem
+            .on('click', function() {
+                // Update style of dropdown items
+                this.classList.toggle('active');
+                
+                this.parentNode.querySelectorAll('a').forEach(item => {
+                    if (item != this) {
+                        if (this.classList.contains('active')) {
+                            item.classList.add('active');
+                        } else {
+                            item.classList.remove('active');
+                        }
+                    }
+                    
+                    svgGroups.forEach(svgGroup => {
+                        svgGroup.node().style.visibility = this.classList.contains('active') ? 'visible' : 'hidden';
+                    });
+                });
+            });
     }
     
     toString() {
