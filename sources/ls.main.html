@@ -292,34 +292,42 @@
             </form>
             
             <div class="m-2"></div>
-            
-            <button id="update" type="submit" class="btn btn-primary">Update</button>
-            <button id="analyse" type="submit" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#analyse-modal">Analyse</button>
-        
-            <div id="view-schedule-dependencies" class="dropdown">
-                <button class="btn btn-danger dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Dependencies
-                </button>
-                <div id="view-schedule-dependencies-menu" class="dropdown-menu">
-                    <a class="dropdown-item">None</a>
-                </div>
-            </div>
 
-            <div class="col-3">
-                <div class="input-group">
-					<span class="input-group-text" for="view-schedule-event-chain">Event Chain</span>
-					<select id="view-schedule-event-chain" class="form-select">
-						<option disabled selected>Choose ...</option>
-					</select>
+            <form class="row">
+                <div class="col-auto">
+                    <button id="update" type="submit" class="btn btn-primary">Update</button>
+                    <button id="analyse" type="submit" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#analyse-modal">Analyse</button>
                 </div>
-            </div>
+        
+                <div class="col-auto">
+                    <div id="view-schedule-dependencies" class="dropdown">
+                        <button class="btn btn-danger dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Dependencies
+                        </button>
+                        <div id="view-schedule-dependencies-menu" class="dropdown-menu">
+                            <a class="dropdown-item">None</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-3">
+                    <div class="input-group">
+                        <span class="input-group-text" for="view-schedule-event-chain">Event Chain</span>
+                        <select id="view-schedule-event-chain" class="form-select">
+                            <option disabled selected>Choose ...</option>
+                        </select>
+                    </div>
+                </div>
             
-            <div id="view-schedule-event-chains-instance" class="col-3">
-                <div class="input-group">
-                    <span for="makespan" class="input-group-text">Instance</span>
-                    <input type="range" class="form-range" min="0" max="0" id="instance" value="0"/>
+                <div class="col-3">
+                    <div id="view-schedule-event-chains-instance">
+                        <div class="input-group">
+                            <span for="makespan" class="input-group-text">Instance</span>
+                            <input type="range" class="form-control form-range" min="0" max="0" id="instance" value="0"/>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </form>
             
             <!-- Modal for analysis results -->
             <div class="modal fade" id="analyse-modal" tabindex="-1" aria-labelledby="analyse-modal-label" aria-hidden="true">
@@ -469,4 +477,3 @@
 
 </body>
 </html>
-
