@@ -156,6 +156,20 @@ html {
     cursor: pointer;
 }
 
+#view-schedule path.dependencyVisible,
+#view-schedule path.eventChainVisible {
+	visibility: visible;
+}
+
+#view-schedule path.dependencyHidden
+#view-schedule path.eventChainVisible {
+	visibility: hidden;
+}
+
+#view-schedule path.dependencyVisible:hover {
+	stroke: var(--bs-orange);
+}
+
 #view-schedule-svg-defs .arrowHeadOrange {
     fill: var(--bs-orange);
 }
@@ -174,7 +188,7 @@ html {
 }
 
 #view-schedule-task-tooltip,
-#view-schedule-dataflow-tooltip {
+#view-schedule-dependency-tooltip {
     position: absolute;
     z-index: 999;
     visibility: hidden;
@@ -189,7 +203,7 @@ html {
     border-color: var(--bs-blue);
 }
 
-#view-schedule-dataflow-tooltip {
+#view-schedule-dependency-tooltip {
     color: var(--bs-orange);
     border-color: var(--bs-orange);
 }

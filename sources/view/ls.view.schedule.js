@@ -13,7 +13,7 @@ class ViewSchedule {
     dependencies = null;
     eventChains = null;
     scheduleTooltip = null;
-    dataflowTooltip = null;
+    dependencyTooltip = null;
 
     constructor() {
         this.root = document.querySelector('#nav-analyse');
@@ -29,7 +29,7 @@ class ViewSchedule {
         this.dependencies = d3.select('#view-schedule-dependencies-menu');
         this.eventChains = d3.select('#view-schedule-event-chains-menu');
         this.scheduleTooltip = this.root.querySelector('#view-schedule-task-tooltip');
-        this.dataflowTooltip = this.root.querySelector('#view-schedule-dataflow-tooltip');
+        this.dependencyTooltip = this.root.querySelector('#view-schedule-dependency-tooltip');
 
         // Set the default makespan
         this.makespan = 10;
@@ -103,7 +103,7 @@ class ViewSchedule {
     async updateSchedule(promise) {
         const taskParametersSet = await promise['promiseAllTasks'];
         const tasksInstances = await promise['promiseAllTasksInstances'];
-        const dataflowsSet = await promise['promiseAllDependenciesInstances'];
+        const dependenciesSet = await promise['promiseAllDependenciesInstances'];
         const eventChainInstances = await promise['promiseAllEventChainInstances'];
         
         if (taskParametersSet.length < 1) {
@@ -118,7 +118,7 @@ class ViewSchedule {
         const {svgElement, scale, taskIndices} = this.drawSchedule(tasksInstances);
         
         // Draw communication dependencies.
-        this.drawDataflows(svgElement, scale, taskIndices, dataflowsSet);
+        this.drawDependencies(svgElement, scale, taskIndices, dependenciesSet);
         
         // Draw event chains.
         this.drawEventChains(eventChainInstances);
@@ -260,8 +260,8 @@ class ViewSchedule {
                  .call(g => g.select('.domain').remove());
     }
     
-    drawDataflows(svgElement, scale, taskIndices, dataflowsSet) {
-        const dependencyNames = dataflowsSet.map(dataflows => dataflows.name);
+    drawDependencies(svgElement, scale, taskIndices, dependenciesSet) {
+        const dependencyNames = dependenciesSet.map(dependencies => dependencies.name);
         this.dependencies.selectAll('*').remove();
         
         const allMenuItem = 
@@ -271,23 +271,23 @@ class ViewSchedule {
                 .text('All');
     
         let svgGroups = [ ];
-        for (const dataflows of dataflowsSet) {
-            dataflows.value.forEach(dataflow => this.drawDataflow(svgElement, scale, taskIndices, dataflows.name, dataflow));              
+        for (const dependencies of dependenciesSet) {
+            dependencies.value.forEach(dependency => this.drawDependency(svgElement, scale, taskIndices, dependencies.name, dependency));              
 
-            svgGroups.push(...dataflows.value.map(dataflow => d3.select(`#${dataflows.name}-${dataflow.instance}`)));
+            svgGroups.push(...dependencies.value.map(dependency => d3.select(`#${dependencies.name}-${dependency.instance}`)));
                         
             this.dependencies
                 .append('a')
                     .attr('class', 'dropdown-item active')
-                    .text(dataflows.name)
+                    .text(dependencies.name)
                     .on('click', function() {
                         // Update style of dropdown items
                         allMenuItem.node().classList.remove('active');
                         this.classList.toggle('active');
                         
                         // Update SVG style of dependencies
-						for (const dataflow of dataflows.value) {
-							d3.select(`#${dataflows.name}-${dataflow.instance}`)
+						for (const dependency of dependencies.value) {
+							d3.select(`#${dependencies.name}-${dependency.instance}`)
 							  .node().style.visibility = this.classList.contains('active') ? 'visible' : 'hidden';
 						}
                     });
@@ -314,14 +314,14 @@ class ViewSchedule {
             });
     }
         
-    drawDataflow(svgElement, scale, taskIndices, dependencyName, dataflow) {
+    drawDependency(svgElement, scale, taskIndices, dependencyName, dependency) {
         const yOffset = 0.5 * View.BarHeight + 2.5 * View.SvgPadding;
         const xOffset = 20;
-        const tooltip = this.dataflowTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
+        const tooltip = this.dependencyTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
         
-        const dataflowId = `${dependencyName}-${dataflow.instance}`;
-        const sendEvent = dataflow.sendEvent;
-        const receiveEvent = dataflow.receiveEvent;
+        const dependencyId = `${dependencyName}-${dependency.instance}`;
+        const sendEvent = dependency.sendEvent;
+        const receiveEvent = dependency.receiveEvent;
         let sendPortName = Utility.TaskPorts(sendEvent.task, [sendEvent.port]);
         let receivePortName = Utility.TaskPorts(receiveEvent.task, [receiveEvent.port]);
         sendEvent.timestamp = scale(sendEvent.timestamp);
@@ -364,7 +364,7 @@ class ViewSchedule {
                     .attr('transform', `translate(${View.SvgPadding}, ${View.SvgPadding})`);
         
         group.append('path')
-               .attr('id', dataflowId)
+               .attr('id', dependencyId)
                .attr('d', line(points))
                .attr('marker-end', 'url(#arrowRed)')
              .on('mouseover', function() {
@@ -373,7 +373,7 @@ class ViewSchedule {
                  .ease(d3.easeLinear)
                  .attr('marker-end', 'url(#arrowOrange)')
                  .attr('stroke', 'var(--bs-orange)');
-               tooltip.innerHTML = `${dependencyName} instance ${dataflow.instance}:<br/>${sendPortName} &rarr; ${receivePortName}`;
+               tooltip.innerHTML = `${dependencyName} instance ${dependency.instance}:<br/>${sendPortName} &rarr; ${receivePortName}`;
                tooltip.style.visibility = 'visible';
              })
              .on('mousemove', (event) => {
@@ -407,15 +407,15 @@ class ViewSchedule {
             const eventChainInstance = ChainInstance.FromJson(eventChainInstanceJson);
             const name = eventChainInstance.name;
             
-            let dataflows = [ ];
+            let dependencies = [ ];
             let tasks = new Set();
-            for (const dataflow of eventChainInstance.generator()) {
-                dataflows.push(`${dataflow.name}-${dataflow.instance}`);
-                tasks.add(`${dataflow.receiveEvent.task}-${dataflow.receiveEvent.taskInstance}`)
-                tasks.add(`${dataflow.sendEvent.task}-${dataflow.sendEvent.taskInstance}`)
+            for (const dependency of eventChainInstance.generator()) {
+                dependencies.push(`${dependency.name}-${dependency.instance}`);
+                tasks.add(`${dependency.receiveEvent.task}-${dependency.receiveEvent.taskInstance}`)
+                tasks.add(`${dependency.sendEvent.task}-${dependency.sendEvent.taskInstance}`)
             }
             
-			svgGroups.push(...dataflows.map(dataflow => d3.select(`#${dataflow}`)));
+			svgGroups.push(...dependencies.map(dependency => d3.select(`#${dependency}`)));
 
             this.eventChains
                 .append('a')
@@ -431,9 +431,9 @@ class ViewSchedule {
 						const fillColour = this.classList.contains('active') ? 'var(--bs-blue)' : 'var(--bs-gray)';
 						const markerEnd = this.classList.contains('active') ? 'arrowBlue' : 'arrowRed'
                         
-                        // Update SVG style of dataflows and tasks
-						for (const dataflow of dataflows) {
-							d3.select(`#${dataflow}`)
+                        // Update SVG style of dependencies and tasks
+						for (const dependency of dependencies) {
+							d3.select(`#${dependency}`)
 							  .transition()
 							  .ease(d3.easeLinear)
 							  .attr('marker-end', `url(#${markerEnd})`)
