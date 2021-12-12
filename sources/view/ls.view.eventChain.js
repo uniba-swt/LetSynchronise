@@ -207,7 +207,7 @@ class ViewEventChain {
                     const dependencies = eventChain.segments.join(` ${ViewEventChain.ArrowSeparator} `);
                     return `<span>${eventChain.name}: ${dependencies}</span> ${Utility.AddDeleteButton(eventChain.name)}`;
                 })
-            .on('click', function(data) {
+            .on('click', function(event, data) {
                 thisRef.eventChains.node().querySelectorAll('li')
                     .forEach(eventChain => {
                         if (eventChain !== this) { eventChain.classList.remove('eventChainSelected'); }

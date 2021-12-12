@@ -51,6 +51,9 @@ class ViewExportImport {
         
             fileReader.onload = (event) => { 
                 const result = JSON.parse(event.target.result);
+                
+                // TODO: Convert the import file using the selected importer plugin.
+    
                 handler(result);
             }
         });

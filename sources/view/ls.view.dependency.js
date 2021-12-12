@@ -186,7 +186,7 @@ class ViewDependency {
             .enter()
             .append('li')
                 .html(dependency => `<span>${dependency.name}: ${dependency.source} &rarr; ${dependency.destination}</span> ${Utility.AddDeleteButton(dependency.name)}`)
-            .on('click', function(data) {
+            .on('click', function(event, data) {
                 thisRef.taskDependencies.node().querySelectorAll('li')
                     .forEach((dependency) => {
                         if (dependency !== this) { dependency.classList.remove('dependencySelected'); }

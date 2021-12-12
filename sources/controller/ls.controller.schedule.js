@@ -3,7 +3,11 @@
 class ControllerSchedule {
     _view = null;
     _model = null;
-    
+    _modelTask = null;
+    _modelDependency = null;
+    _modelEventChain = null;
+    _modelConstraint = null;
+        
     constructor() { }
 
     set view(view) {
@@ -29,6 +33,50 @@ class ControllerSchedule {
     
     get model() {
         return this._model;
+    }
+    
+    set modelTask(modelTask) {
+        this._modelTask = modelTask;
+        
+        // Register the model task with the model.
+        this._model.registerModelTask(this._modelTask);
+    }
+    
+    get modelTask() {
+        return this._modelTask;
+    }
+    
+    set modelDependency(modelDependency) {
+        this._modelDependency = modelDependency;
+        
+        // Register the model dependency with the model.
+        this._model.registerModelDependency(this._modelDependency);
+    }
+    
+    get modelDependency() {
+        return this._modelDependency;
+    }
+    
+    set modelEventChain(modelEventChain) {
+        this._modelEventChain = modelEventChain;
+
+        // Register the model event chain with the model.
+        this._model.registerModelEventChain(this._modelEventChain);
+    }
+    
+    get modelEventChain() {
+        return this._modelEventChain;
+    }
+    
+    set modelConstraint(modelConstraint) {
+        this._modelConstraint = modelConstraint;
+
+        // Register the model constraint with the model.
+        this._model.registerModelConstraint(this._modelConstraint);
+    }
+    
+    get modelConstraint() {
+        return this._modelConstraint;
     }
     
     
