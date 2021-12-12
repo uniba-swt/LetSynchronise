@@ -6,12 +6,17 @@ class ViewSchedule {
     prologueField = null;
     hyperPeriodField = null;
     makespanField = null;
+    
+    eventChainField = null;
+    instanceField = null;
+    
+    eventChainInstances = null;
+    currentEventChainInstance = null;
 
     updateButton = null;
 
     schedule = null;
     dependencies = null;
-    eventChains = null;
     scheduleTooltip = null;
     dependencyTooltip = null;
 
@@ -22,17 +27,23 @@ class ViewSchedule {
         this.prologueField = this.root.querySelector('#prologue');
         this.hyperPeriodField = this.root.querySelector('#hyperperiod');
         this.makespanField = this.root.querySelector('#makespan');
+        
+        this.instanceField = this.root.querySelector('#instance');
 
         this.updateButton = this.root.querySelector('#update');
 
         this.schedule = d3.select('#view-schedule');
         this.dependencies = d3.select('#view-schedule-dependencies-menu');
-        this.eventChains = d3.select('#view-schedule-event-chains-menu');
+        this.eventChainField = this.root.querySelector('#view-schedule-event-chain');
         this.scheduleTooltip = this.root.querySelector('#view-schedule-task-tooltip');
         this.dependencyTooltip = this.root.querySelector('#view-schedule-dependency-tooltip');
 
         // Set the default makespan
         this.makespan = 10;
+        
+        // Listeners
+        this.setupEventChainListener();
+        this.setupInstanceInputListener();
     }
     
     get prologue() {
@@ -59,6 +70,30 @@ class ViewSchedule {
         this.makespanField.value = makespan;
     }
     
+    get eventChain() {
+        return this.eventChainField.value;
+    }
+    
+    set eventChain(eventChain) {
+        this.eventChainField.value = eventChain;
+    }
+    
+    get instance() {
+        return this.instanceField.value;
+    }
+    
+    set instance(instance) {
+        this.instanceField.value = instance;
+    }
+    
+    get instanceMax() {
+        this.instanceField.getAttribute('max');
+    }
+    
+    set instanceMax(max) {
+        this.instanceField.setAttribute('max', max);
+    }
+    
     get schedulingParametersRaw() {
         return {
             'makespan': this.makespan
@@ -69,6 +104,34 @@ class ViewSchedule {
         return {
             'makespan': parseFloat(this.makespan)
         };
+    }
+
+
+    // -----------------------------------------------------
+    // Setup listeners
+    
+    setupEventChainListener() {
+        this.eventChainField.addEventListener('change', event => {
+            // Prevent the default behaviour of submitting the form and the reloading of the webpage.
+            event.preventDefault();
+            
+			// Update the instance range.
+			this.instance = 0;
+			this.instanceMax = this.eventChainInstances[this.eventChain] - 1;
+
+            // Call the handler.
+            this.updateEventChain(this.eventChain, 0);
+        });
+    }
+    
+    setupInstanceInputListener() {
+        this.instanceField.addEventListener('input', event => {
+            // Prevent the default behaviour of submitting the form and the reloading of the webpage.
+            event.preventDefault();
+            
+            // Call the handler.
+            this.updateEventChain(this.eventChain, this.instance);
+        });
     }
     
     
@@ -120,8 +183,8 @@ class ViewSchedule {
         // Draw communication dependencies.
         this.drawDependencies(svgElement, scale, taskIndices, dependenciesSet);
         
-        // Draw event chains.
-        this.drawEventChains(eventChainInstances);
+        // Update list of event chains.
+        this.updateEventChains(eventChainInstances);
     }
     
     updatePrologue(taskParametersSet) {
@@ -298,11 +361,9 @@ class ViewSchedule {
                 
                 this.parentNode.querySelectorAll('a').forEach(item => {
                     if (item != this) {
-                        if (this.classList.contains('active')) {
-                            item.classList.add('active');
-                        } else {
-                            item.classList.remove('active');
-                        }
+                        (this.classList.contains('active'))
+                            ? item.classList.add('active')
+                            : item.classList.remove('active');
                     }
                 });
                 
@@ -382,94 +443,84 @@ class ViewSchedule {
                   });
     }
     
-    drawEventChains(eventChainInstances) {
-        this.eventChains.selectAll('*').remove();
-        
-        const allMenuItem = 
-        this.eventChains
-            .append('a')
-                .attr('class', 'dropdown-item')
-                .text('All');
-                
-        let svgDependencies = [ ];
-        let svgTasks = [ ];
-
-        for (const eventChainInstanceJson of eventChainInstances) {
-            // Flatten the event chain instance information
+    updateEventChains(eventChainInstancesJson) {
+        this.eventChainInstances = { };
+    
+        const eventChainNames = new Set();
+        for (const eventChainInstanceJson of eventChainInstancesJson) {
             const eventChainInstance = ChainInstance.FromJson(eventChainInstanceJson);
-            const name = eventChainInstance.name;
+            const instanceName = eventChainInstance.name;
             
-            let dependencies = [ ];
-            let tasks = new Set();
+            // Flatten the event chain instance information
+            this.eventChainInstances[instanceName] = { };
+            this.eventChainInstances[instanceName]['dependencies'] = [ ];
+            this.eventChainInstances[instanceName]['tasks'] = new Set();
             for (const dependency of eventChainInstance.generator()) {
-                dependencies.push(d3.select(`#${dependency.name}-${dependency.instance}`));
-                tasks.add(d3.select(`#${dependency.receiveEvent.task}-${dependency.receiveEvent.taskInstance}`));
-                tasks.add(d3.select(`#${dependency.sendEvent.task}-${dependency.sendEvent.taskInstance}`));
+                this.eventChainInstances[instanceName]['dependencies'].push(d3.select(`#${dependency.name}-${dependency.instance}`));
+                this.eventChainInstances[instanceName]['tasks'].add(d3.select(`#${dependency.receiveEvent.task}-${dependency.receiveEvent.taskInstance}`));
+                this.eventChainInstances[instanceName]['tasks'].add(d3.select(`#${dependency.sendEvent.task}-${dependency.sendEvent.taskInstance}`));
             }
 
-            svgDependencies.push(...dependencies);
-            svgTasks.push(...tasks)
-
-            this.eventChains
-                .append('a')
-                    .attr('class', 'dropdown-item')
-                    .text(name)
-                    .on('click', function() {
-                        // Update style of dropdown items
-                        allMenuItem.node().classList.remove('active');
-                        this.classList.toggle('active');
-                        
-                        // Update SVG style of dependencies and tasks
-                        for (const dependency of dependencies) {
-                            if (this.classList.contains('active')) {
-                                dependency.node().classList.add('eventChainVisible');
-                            } else {
-                                dependency.node().classList.remove('eventChainVisible');
-                            }
-                        }
-                        
-                        for (const task of tasks) {
-                            if (this.classList.contains('active')) {
-                                task.style('fill', 'var(--bs-blue)');
-                            } else {
-                                task.style('fill', 'var(--bs-gray)');
-                            }
-                        }
-                    });
+            eventChainNames.add(eventChainInstance.chainName);
+            (!this.eventChainInstances.hasOwnProperty(eventChainInstance.chainName))
+            	? this.eventChainInstances[eventChainInstance.chainName] = 1
+            	: this.eventChainInstances[eventChainInstance.chainName]++;
         }
-
-        allMenuItem
-            .on('click', function() {
-                // Update style of dropdown items
-                this.classList.toggle('active');
+        
+        // Create list of available event chains
+        const parentElement = d3.select(this.eventChainField);
+        parentElement.selectAll('*').remove();
+        parentElement
+            .append('option')
+                .property('disabled', true)
+                .property('selected', true)
+                .property('hidden', true)
+                .attr('value', 'null ')
+                .text('Choose ...')
                 
-                this.parentNode.querySelectorAll('a').forEach(item => {
-                    if (item != this) {
-                        if (this.classList.contains('active')) {
-                            item.classList.add('active');
-                        } else {
-                            item.classList.remove('active');
-                        }
-                    }
-                });
-               
-                svgDependencies.forEach(dependency => {
-                    if (this.classList.contains('active')) {
-                        dependency.node().classList.add('eventChainVisible');
-                    } else {
-                        dependency.node().classList.remove('eventChainVisible');
-                    }
-                });
+        parentElement
+            .append('option')
+                .attr('value', 'none ')
+                .text('None');
+        
+        for (const name of eventChainNames) {
+            parentElement
+                .append('option')
+                  .attr('value', name)
+                  .text(name);
+        }
+    }
+    
+    updateEventChain(eventChainName, instance) {
+    	// Clear the SVG style of the current event chain instance.
+    	if (this.currentEventChainInstance != null) {
+			for (const dependency of this.currentEventChainInstance.dependencies) {
+				dependency.node().classList.remove('eventChainVisible');
+			}
+		
+			for (const task of this.currentEventChainInstance.tasks) {
+				task.style('fill', 'var(--bs-gray)');
+			}   
+    	}
+    
+    	// Highlight the selected event chain instance.
+    	if (eventChainName == "none ") {
+    		this.instance = 0;
+    		this.instanceMax = 0;
+    		this.currentEventChainInstance = null;
+    	} else {
+			const instanceName = `${eventChainName}-${instance}`;
+			this.currentEventChainInstance = this.eventChainInstances[instanceName];
 
-                // Update SVG style of dependencies and tasks
-                svgTasks.forEach(task => {
-                    if (this.classList.contains('active')) {
-                        task.style('fill', 'var(--bs-blue)');
-                    } else {
-                        task.style('fill', 'var(--bs-gray)');
-                    }
-                });
-        });
+			// Update SVG style of dependencies and tasks
+			for (const dependency of this.currentEventChainInstance.dependencies) {
+				dependency.node().classList.add('eventChainVisible');
+			}
+		
+			for (const task of this.currentEventChainInstance.tasks) {
+				task.style('fill', 'var(--bs-blue)');
+			}
+    	}
     }
     
     toString() {
