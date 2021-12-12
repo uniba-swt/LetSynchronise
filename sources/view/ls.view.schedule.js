@@ -60,15 +60,15 @@ class ViewSchedule {
     }
     
     get schedulingParametersRaw() {
-    	return {
-    		'makespan': this.makespan
-    	};
+        return {
+            'makespan': this.makespan
+        };
     }
     
     get schedulingParametersClean() {
-    	return {
-    		'makespan': parseFloat(this.makespan)
-    	};
+        return {
+            'makespan': parseFloat(this.makespan)
+        };
     }
     
     
@@ -222,24 +222,16 @@ class ViewSchedule {
                        .attr('width', scale(instance.letEndTime - instance.letStartTime))
                        .attr('height', View.BarHeight)
                       .on('mouseover', function() {
-                          d3.select(this)
-                            .transition()
-                            .ease(d3.easeLinear)
-                            .style('fill', 'var(--bs-blue)');
-                          tooltip.innerHTML = `${taskInstances.name} instance ${instance.instance}`;
-                          tooltip.style.visibility = 'visible';
+                        tooltip.innerHTML = `${taskInstances.name} instance ${instance.instance}`;
+                        tooltip.style.visibility = 'visible';
                       })
                       .on('mousemove', (event) => {
-                          let [pointerX, pointerY] = d3.pointer(event, window);
-                          tooltip.style.top = `${pointerY - 2 * View.BarHeight}px`;
-                          tooltip.style.left = `${pointerX}px`;
+                        let [pointerX, pointerY] = d3.pointer(event, window);
+                        tooltip.style.top = `${pointerY - 2 * View.BarHeight}px`;
+                        tooltip.style.left = `${pointerX}px`;
                       })
                       .on('mouseout', function() {
-                          d3.select(this)
-                            .transition()
-                            .ease(d3.easeLinear)
-                            .style('fill', 'var(--bs-gray)');
-                          tooltip.style.visibility = 'hidden';
+                        tooltip.style.visibility = 'hidden';
                       });
             
             // Add vertical line at the start of the period
@@ -286,10 +278,16 @@ class ViewSchedule {
                         this.classList.toggle('active');
                         
                         // Update SVG style of dependencies
-						for (const dependency of dependencies.value) {
-							d3.select(`#${dependencies.name}-${dependency.instance}`)
-							  .node().style.visibility = this.classList.contains('active') ? 'visible' : 'hidden';
-						}
+                        for (const dependency of dependencies.value) {
+                            const dependencyNode = d3.select(`#${dependencies.name}-${dependency.instance}`).node();
+                            if (this.classList.contains('active')) {
+                                dependencyNode.classList.remove('dependencyHidden');
+                                dependencyNode.classList.add('dependencyVisible');
+                            } else {
+                                dependencyNode.classList.remove('dependencyVisible');
+                                dependencyNode.classList.add('dependencyHidden');
+                            }
+                        }
                     });
         }
         
@@ -306,10 +304,17 @@ class ViewSchedule {
                             item.classList.remove('active');
                         }
                     }
-                    
-                    svgGroups.forEach(svgGroup => {
-                        svgGroup.node().style.visibility = this.classList.contains('active') ? 'visible' : 'hidden';
-                    });
+                });
+                
+                // Update SVG style of dependencies
+                svgGroups.forEach(svgGroup => {
+                    if (this.classList.contains('active')) {
+                        svgGroup.node().classList.remove('dependencyHidden');
+                        svgGroup.node().classList.add('dependencyVisible');
+                    } else {
+                        svgGroup.node().classList.remove('dependencyVisible');
+                        svgGroup.node().classList.add('dependencyHidden');
+                    }
                 });
             });
     }
@@ -358,37 +363,23 @@ class ViewSchedule {
                      .y((point) => point.y)
                      .curve(d3.curveBundle);
         
-        const group =
-        svgElement.append('g')
-                    .attr('class', 'dependency')
-                    .attr('transform', `translate(${View.SvgPadding}, ${View.SvgPadding})`);
-        
-        group.append('path')
-               .attr('id', dependencyId)
-               .attr('d', line(points))
-               .attr('marker-end', 'url(#arrowRed)')
-             .on('mouseover', function() {
-               d3.select(this)
-                 .transition()
-                 .ease(d3.easeLinear)
-                 .attr('marker-end', 'url(#arrowOrange)')
-                 .attr('stroke', 'var(--bs-orange)');
-               tooltip.innerHTML = `${dependencyName} instance ${dependency.instance}:<br/>${sendPortName} &rarr; ${receivePortName}`;
-               tooltip.style.visibility = 'visible';
-             })
-             .on('mousemove', (event) => {
-               let [pointerX, pointerY] = d3.pointer(event, window);
-               tooltip.style.top = `${pointerY - View.SvgPadding}px`;
-               tooltip.style.left = `${pointerX + 2 * View.SvgPadding}px`;
-             })
-             .on('mouseout', function() {
-               d3.select(this)
-                 .transition()
-                 .ease(d3.easeLinear)
-                 .attr('marker-end', 'url(#arrowRed)')
-                 .attr('stroke', 'var(--bs-red)');
-               tooltip.style.visibility = 'hidden';
-             });
+        svgElement.append('path')
+                    .attr('id', dependencyId)
+                    .attr('d', line(points))
+                    .attr('transform', `translate(${View.SvgPadding}, ${View.SvgPadding})`)
+                    .attr('class', 'dependency dependencyVisible')
+                  .on('mouseover', function() {
+                    tooltip.innerHTML = `${dependencyName} instance ${dependency.instance}:<br/>${sendPortName} &rarr; ${receivePortName}`;
+                    tooltip.style.visibility = 'visible';
+                  })
+                  .on('mousemove', (event) => {
+                    let [pointerX, pointerY] = d3.pointer(event, window);
+                    tooltip.style.top = `${pointerY - View.SvgPadding}px`;
+                    tooltip.style.left = `${pointerX + 2 * View.SvgPadding}px`;
+                  })
+                  .on('mouseout', function() {
+                    tooltip.style.visibility = 'hidden';
+                  });
     }
     
     drawEventChains(eventChainInstances) {
@@ -400,8 +391,9 @@ class ViewSchedule {
                 .attr('class', 'dropdown-item')
                 .text('All');
                 
-        let svgGroups = [ ];
-    
+        let svgDependencies = [ ];
+        let svgTasks = [ ];
+
         for (const eventChainInstanceJson of eventChainInstances) {
             // Flatten the event chain instance information
             const eventChainInstance = ChainInstance.FromJson(eventChainInstanceJson);
@@ -410,12 +402,13 @@ class ViewSchedule {
             let dependencies = [ ];
             let tasks = new Set();
             for (const dependency of eventChainInstance.generator()) {
-                dependencies.push(`${dependency.name}-${dependency.instance}`);
-                tasks.add(`${dependency.receiveEvent.task}-${dependency.receiveEvent.taskInstance}`)
-                tasks.add(`${dependency.sendEvent.task}-${dependency.sendEvent.taskInstance}`)
+                dependencies.push(d3.select(`#${dependency.name}-${dependency.instance}`));
+                tasks.add(d3.select(`#${dependency.receiveEvent.task}-${dependency.receiveEvent.taskInstance}`));
+                tasks.add(d3.select(`#${dependency.sendEvent.task}-${dependency.sendEvent.taskInstance}`));
             }
-            
-			svgGroups.push(...dependencies.map(dependency => d3.select(`#${dependency}`)));
+
+            svgDependencies.push(...dependencies);
+            svgTasks.push(...tasks)
 
             this.eventChains
                 .append('a')
@@ -425,29 +418,23 @@ class ViewSchedule {
                         // Update style of dropdown items
                         allMenuItem.node().classList.remove('active');
                         this.classList.toggle('active');
-                                                
-                        const strokeColour = this.classList.contains('active') ? 'var(--bs-blue)' : 'var(--bs-red)';
-                        const strokeWidth = this.classList.contains('active') ? 5 : 2;
-						const fillColour = this.classList.contains('active') ? 'var(--bs-blue)' : 'var(--bs-gray)';
-						const markerEnd = this.classList.contains('active') ? 'arrowBlue' : 'arrowRed'
                         
                         // Update SVG style of dependencies and tasks
-						for (const dependency of dependencies) {
-							d3.select(`#${dependency}`)
-							  .transition()
-							  .ease(d3.easeLinear)
-							  .attr('marker-end', `url(#${markerEnd})`)
-							  .attr('stroke', strokeColour)
-							  .attr('stroke-width', strokeWidth)
-							  .node().style.visibility = this.classList.contains('active') ? 'visible' : 'hidden';
-						}
-						
-						for (const task of tasks) {
-							d3.select(`#${task}`)
-							  .transition()
-							  .ease(d3.easeLinear)
-							  .style('fill', fillColour);
-						}
+                        for (const dependency of dependencies) {
+                            if (this.classList.contains('active')) {
+                                dependency.node().classList.add('eventChainVisible');
+                            } else {
+                                dependency.node().classList.remove('eventChainVisible');
+                            }
+                        }
+                        
+                        for (const task of tasks) {
+                            if (this.classList.contains('active')) {
+                                task.style('fill', 'var(--bs-blue)');
+                            } else {
+                                task.style('fill', 'var(--bs-gray)');
+                            }
+                        }
                     });
         }
 
@@ -464,12 +451,25 @@ class ViewSchedule {
                             item.classList.remove('active');
                         }
                     }
-                    
-                    svgGroups.forEach(svgGroup => {
-                        svgGroup.node().style.visibility = this.classList.contains('active') ? 'visible' : 'hidden';
-                    });
                 });
-            });
+               
+                svgDependencies.forEach(dependency => {
+                    if (this.classList.contains('active')) {
+                        dependency.node().classList.add('eventChainVisible');
+                    } else {
+                        dependency.node().classList.remove('eventChainVisible');
+                    }
+                });
+
+                // Update SVG style of dependencies and tasks
+                svgTasks.forEach(task => {
+                    if (this.classList.contains('active')) {
+                        task.style('fill', 'var(--bs-blue)');
+                    } else {
+                        task.style('fill', 'var(--bs-gray)');
+                    }
+                });
+        });
     }
     
     toString() {

@@ -149,25 +149,36 @@ html {
     cursor: pointer;
 }
 
+#view-schedule rect:hover {
+    fill: var(--bs-blue);
+}
+
 #view-schedule .dependency {
-    stroke: var(--bs-red);
-    stroke-width: 2px;
     fill: none;
     cursor: pointer;
 }
 
-#view-schedule path.dependencyVisible,
-#view-schedule path.eventChainVisible {
-	visibility: visible;
-}
-
-#view-schedule path.dependencyHidden
-#view-schedule path.eventChainVisible {
-	visibility: hidden;
+#view-schedule path.dependencyVisible {
+    stroke: var(--bs-red);
+    stroke-width: 2px;
+    marker-end: url(#arrowRed);
+    visibility: visible;
 }
 
 #view-schedule path.dependencyVisible:hover {
-	stroke: var(--bs-orange);
+    stroke: var(--bs-orange);
+    marker-end: url(#arrowOrange);
+}
+
+#view-schedule path.dependencyHidden {
+    visibility: hidden;
+}
+
+#view-schedule path.eventChainVisible {
+    stroke: var(--bs-blue);
+    stroke-width: 5px;
+    marker-end: url(#arrowBlue);
+    visibility: visible;
 }
 
 #view-schedule-svg-defs .arrowHeadOrange {
