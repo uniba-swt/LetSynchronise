@@ -2,9 +2,11 @@
 
 class ControllerEventChain {
     _view = null;
+    _viewSchedule = null;
     _model = null;
     _modelDependency = null;
     _modelConstraint = null;
+    _controllerSchedule = null;
     
     constructor() { }
 
@@ -20,6 +22,14 @@ class ControllerEventChain {
 
     get view() {
         return this._view;
+    }
+    
+    set viewSchedule(viewSchedule) {
+        this._viewSchedule = viewSchedule;
+    }
+    
+    get viewSchedule() {
+        return this._viewSchedule;
     }
     
     set model(model) {
@@ -61,6 +71,14 @@ class ControllerEventChain {
         return this._modelConstraint;
     }
     
+    set controllerSchedule(controllerSchedule) {
+        this._controllerSchedule = controllerSchedule;
+    }
+    
+    get controllerSchedule() {
+        return this._controllerSchedule;
+    }
+    
     
     // -----------------------------------------------------
     // Handlers for events from the view to the model
@@ -97,6 +115,8 @@ class ControllerEventChain {
     // Callback for updating the displayed event chains.
     callbackUpdateEventChains = (eventChains) => {
         this.view.updateEventChains(eventChains);
+        
+        const promises = this.controllerSchedule.handleGetSchedule(this.viewSchedule.makespan);
     }
     
     // Callback for updating the displayed event chain selectors.

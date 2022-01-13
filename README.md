@@ -8,10 +8,8 @@ LetSynchronise is an interactive tool for defining a set of LET tasks and analys
 
 
 ## Dependencies
-* [D3 Data-Driven Documents v5.16.0](https://d3js.org): Charting
-* [Bootstrap v4.5.2](https://getbootstrap.com): User interface and layout
-   * [JQuery v3.5.1](https://jquery.com): DOM traversal and manipulation, event handling, animation, and Ajax
-   * [Popper v2.4.4](https://popper.js.org): Tooltip and popover positioning engine
+* [D3 Data-Driven Documents v7.2.0](https://d3js.org): Charting
+* [Bootstrap v5.1.3](https://getbootstrap.com): User interface and layout
 
 
 ## Directory Layout

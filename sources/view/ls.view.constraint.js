@@ -123,6 +123,14 @@ class ViewConstraint {
             alert('Name cannot be blank.');
             return false;
         }
+        
+        const allConstraintNames = new Set();
+        const allConstraints = d3.select(this.eventChainField).selectAll('option')
+                                   .each(function(d,i) { allConstraintNames.add(d3.select(this).attr('value')); })
+        if (allConstraintNames.has(constraint.name)) {
+            alert('Name cannot be the same as an event chain.');
+            return false;
+        }
 
         if (constraint.eventChain == 'null ') {
             alert('Choose event chain of constraint.');
@@ -134,7 +142,7 @@ class ViewConstraint {
             return false;
         }
         
-        if (constraint.time == null || !$.isNumeric(constraint.time)) {
+        if (constraint.time == null || isNaN(constraint.time)) {
             alert('Time has to be a decimal number.');
             return false;
         }
@@ -185,7 +193,7 @@ class ViewConstraint {
             .enter()
             .append('li')
                 .html(constraint => `<span>${constraint.name}: ${constraint.eventChain} ${constraint.relation} ${constraint.time}</span> ${Utility.AddDeleteButton(constraint.name)}`)
-            .on('click', function(data) {
+            .on('click', function(event, data) {
                 thisRef.constraints.node().querySelectorAll('li')
                     .forEach((constraint) => {
                         if (constraint !== this) { constraint.classList.remove('constraintSelected'); }

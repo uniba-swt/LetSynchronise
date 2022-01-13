@@ -84,9 +84,10 @@ class ModelEventChain {
 
     deleteEventChain(name) {
         const promiseDeleteEventChainInstances = this.deleteEventChainInstances(name);
+        const promiseDeleteConstraints = this.modelConstraint.deleteConstraintsOfEventChain(name);
         const promiseDeleteEventChain = this.database.deleteObject(Model.EventChainStoreName, name);
 
-        return Promise.all([promiseDeleteEventChain, promiseDeleteEventChainInstances])
+        return Promise.all([promiseDeleteEventChain, promiseDeleteConstraints, promiseDeleteEventChainInstances])
             .then(this.refreshViews());
     }
     

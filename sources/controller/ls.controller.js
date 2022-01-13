@@ -20,7 +20,7 @@ class Controller {
                 `  ${this.controllerDependency}, `,
                 `  ${this.controllerSchedule}, `,
                 `  ${this.controllerConstraint},`,
-                `  ${this.controllerEventChain}, and`,
+                `  ${this.controllerEventChain},`,
                 `  ${this.controllerAnalyse}`].join('\n');
     }
     

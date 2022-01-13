@@ -1,6 +1,6 @@
 'use strict';
 
-// Define the model implementations
+// Define the model implementations.
 let model = new Model();
 model.modelExportImport = new ModelExportImport();
 model.modelInterface = new ModelInterface();
@@ -12,7 +12,7 @@ model.modelEventChain = new ModelEventChain();
 model.modelAnalyse = new ModelAnalyse();
 model.modelDatabase = new ModelDatabase();
 
-// Define the view implementations
+// Define the view implementations.
 let view = new View();
 view.viewExportImport = new ViewExportImport();
 view.viewInterface = new ViewInterface();
@@ -23,7 +23,7 @@ view.viewConstraint = new ViewConstraint();
 view.viewAnalyse = new ViewAnalyse();
 view.viewEventChain = new ViewEventChain();
 
-// Define the controller implementations
+// Define the controller implementations.
 let controller = new Controller();
 controller.controllerExportImport = new ControllerExportImport();
 controller.controllerInterface = new ControllerInterface();
@@ -34,7 +34,7 @@ controller.controllerConstraint = new ControllerConstraint();
 controller.controllerEventChain = new ControllerEventChain();
 controller.controllerAnalyse = new ControllerAnalyse();
 
-// Link the models and views to their respective controllers
+// Link the models and views to their respective controllers.
 controller.controllerExportImport.view = view.viewExportImport;
 controller.controllerExportImport.model = model.modelExportImport;
 controller.controllerExportImport.modelInterface = model.modelInterface;
@@ -61,12 +61,17 @@ controller.controllerDependency.modelEventChain = model.modelEventChain;
 
 controller.controllerSchedule.view = view.viewSchedule;
 controller.controllerSchedule.model = model.modelSchedule;
+controller.controllerSchedule.modelTask = model.modelTask;
 controller.controllerSchedule.modelDependency = model.modelDependency;
+controller.controllerSchedule.modelEventChain = model.modelEventChain;
+controller.controllerSchedule.modelConstraint = model.modelConstraint;
 
 controller.controllerEventChain.view = view.viewEventChain;
+controller.controllerEventChain.viewSchedule = view.viewSchedule;
 controller.controllerEventChain.model = model.modelEventChain;
 controller.controllerEventChain.modelDependency = model.modelDependency;
 controller.controllerEventChain.modelConstraint = model.modelConstraint;
+controller.controllerEventChain.controllerSchedule = controller.controllerSchedule;
 
 controller.controllerConstraint.view = view.viewConstraint;
 controller.controllerConstraint.model = model.modelConstraint;
@@ -75,14 +80,21 @@ controller.controllerConstraint.modelEventChain = model.modelEventChain;
 controller.controllerAnalyse.view = view.viewAnalyse;
 controller.controllerAnalyse.viewSchedule = view.viewSchedule;
 controller.controllerAnalyse.model = model.modelAnalyse;
-controller.controllerAnalyse.modelTask = model.modelTask;
-controller.controllerAnalyse.modelDependency = model.modelDependency;
 controller.controllerAnalyse.modelConstraint = model.modelConstraint;
 controller.controllerAnalyse.modelEventChain = model.modelEventChain;
 controller.controllerAnalyse.controllerSchedule = controller.controllerSchedule;
 
-
 console.log(controller.toString());
 
-// Bootstrap plugin for dynamic file input behaviour
-bsCustomFileInput.init();
+
+// Register plug-ins.
+PluginImporter.Register(PluginImporterTool1.Name, PluginImporterTool1);
+
+console.log(PluginImporter.ToString())
+
+PluginMetric.Register(PluginMetricDataAge.Name, PluginMetricDataAge);
+PluginMetric.Register(PluginMetricEnd2End.Name, PluginMetricEnd2End);
+PluginMetric.Register(PluginMetricLatency.Name, PluginMetricLatency);
+
+console.log(PluginMetric.ToString());
+

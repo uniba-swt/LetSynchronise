@@ -207,7 +207,7 @@ class ViewTask {
             return false;
         }
         
-        if (taskParameters.initialOffset == null || !$.isNumeric(taskParameters.initialOffset)) {
+        if (taskParameters.initialOffset == null || isNaN(taskParameters.initialOffset)) {
             alert('Initial offset has to be a decimal number.');
             return false;
         }
@@ -217,7 +217,7 @@ class ViewTask {
             return false;
         }
 
-        if (taskParameters.activationOffset == null || !$.isNumeric(taskParameters.activationOffset)) {
+        if (taskParameters.activationOffset == null || isNaN(taskParameters.activationOffset)) {
             alert('Activation offset has to be a decimal number.');
             return false;
         }
@@ -227,7 +227,7 @@ class ViewTask {
             return false;
         }
 
-        if (taskParameters.duration == null || !$.isNumeric(taskParameters.duration)) {
+        if (taskParameters.duration == null || isNaN(taskParameters.duration)) {
             alert('Duration offset has to be a decimal number.');
             return false;
         }
@@ -238,7 +238,7 @@ class ViewTask {
             return false;
         }
         
-        if (taskParameters.period == null || !$.isNumeric(taskParameters.period)) {
+        if (taskParameters.period == null || isNaN(taskParameters.period)) {
             alert('Period offset has to be a decimal number.');
             return false;
         }

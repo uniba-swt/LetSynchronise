@@ -6,13 +6,19 @@ class ViewSchedule {
     prologueField = null;
     hyperPeriodField = null;
     makespanField = null;
+    
+    eventChainField = null;
+    instanceField = null;
+    
+    eventChainInstances = null;
+    currentEventChainInstance = null;
 
     updateButton = null;
 
     schedule = null;
     dependencies = null;
     scheduleTooltip = null;
-    dataflowTooltip = null;
+    dependencyTooltip = null;
 
     constructor() {
         this.root = document.querySelector('#nav-analyse');
@@ -21,16 +27,23 @@ class ViewSchedule {
         this.prologueField = this.root.querySelector('#prologue');
         this.hyperPeriodField = this.root.querySelector('#hyperperiod');
         this.makespanField = this.root.querySelector('#makespan');
+        
+        this.instanceField = this.root.querySelector('#instance');
 
         this.updateButton = this.root.querySelector('#update');
 
         this.schedule = d3.select('#view-schedule');
         this.dependencies = d3.select('#view-schedule-dependencies-menu');
+        this.eventChainField = this.root.querySelector('#view-schedule-event-chain');
         this.scheduleTooltip = this.root.querySelector('#view-schedule-task-tooltip');
-        this.dataflowTooltip = this.root.querySelector('#view-schedule-dataflow-tooltip');
+        this.dependencyTooltip = this.root.querySelector('#view-schedule-dependency-tooltip');
 
         // Set the default makespan
         this.makespan = 10;
+        
+        // Listeners
+        this.setupEventChainListener();
+        this.setupInstanceInputListener();
     }
     
     get prologue() {
@@ -57,6 +70,70 @@ class ViewSchedule {
         this.makespanField.value = makespan;
     }
     
+    get eventChain() {
+        return this.eventChainField.value;
+    }
+    
+    set eventChain(eventChain) {
+        this.eventChainField.value = eventChain;
+    }
+    
+    get instance() {
+        return this.instanceField.value;
+    }
+    
+    set instance(instance) {
+        this.instanceField.value = instance;
+    }
+    
+    get instanceMax() {
+        this.instanceField.getAttribute('max');
+    }
+    
+    set instanceMax(max) {
+        this.instanceField.setAttribute('max', max);
+    }
+    
+    get schedulingParametersRaw() {
+        return {
+            'makespan': this.makespan
+        };
+    }
+    
+    get schedulingParametersClean() {
+        return {
+            'makespan': parseFloat(this.makespan)
+        };
+    }
+
+
+    // -----------------------------------------------------
+    // Setup listeners
+    
+    setupEventChainListener() {
+        this.eventChainField.addEventListener('change', event => {
+            // Prevent the default behaviour of submitting the form and the reloading of the webpage.
+            event.preventDefault();
+            
+            // Update the instance range.
+            this.instance = 0;
+            this.instanceMax = this.eventChainInstances[this.eventChain] - 1;
+
+            // Call the handler.
+            this.updateEventChain(this.eventChain, 0);
+        });
+    }
+    
+    setupInstanceInputListener() {
+        this.instanceField.addEventListener('input', event => {
+            // Prevent the default behaviour of submitting the form and the reloading of the webpage.
+            event.preventDefault();
+            
+            // Call the handler.
+            this.updateEventChain(this.eventChain, this.instance);
+        });
+    }
+    
     
     // -----------------------------------------------------
     // Registration of handlers from the controller
@@ -67,15 +144,30 @@ class ViewSchedule {
             event.preventDefault();
             
             // Ask the model to give us the current task set via a callback.
-            getScheduleHandler(this.makespan);
+            getScheduleHandler(this.schedulingParametersClean.makespan);
         });
+    }
+    
+    validateSchedulingParameters(schedulingParameters) {
+        if (schedulingParameters.makespan == null || isNaN(schedulingParameters.makespan)) {
+            alert('Makespan has to be a decimal number.');
+            return false;
+        }
+        const makespan = parseFloat(schedulingParameters.makespan);
+        if (makespan <= 0) {
+            alert('Makespan must be greater than zero');
+            return false;
+        }
+        
+        return true;
     }
     
     
     async updateSchedule(promise) {
         const taskParametersSet = await promise['promiseAllTasks'];
         const tasksInstances = await promise['promiseAllTasksInstances'];
-        const dataflowsSet = await promise['promiseAllDependenciesInstances'];
+        const dependenciesSet = await promise['promiseAllDependenciesInstances'];
+        const eventChainInstances = await promise['promiseAllEventChainInstances'];
         
         if (taskParametersSet.length < 1) {
             this.prologue = 0;
@@ -85,11 +177,14 @@ class ViewSchedule {
             this.updateHyperPeriod(taskParametersSet);
         }
         
-        // Draw new schedule.
+        // Draw new task schedule.
         const {svgElement, scale, taskIndices} = this.drawSchedule(tasksInstances);
         
         // Draw communication dependencies.
-        this.drawDataflows(svgElement, scale, taskIndices, dataflowsSet);
+        this.drawDependencies(svgElement, scale, taskIndices, dependenciesSet);
+        
+        // Update list of event chains.
+        this.updateEventChains(eventChainInstances);
     }
     
     updatePrologue(taskParametersSet) {
@@ -114,7 +209,7 @@ class ViewSchedule {
         const svgElement = this.schedule.append('svg');
         
         // Draw the task instances.
-        var taskIndices = {};
+        let taskIndices = {};
         for (const [index, taskInstances] of tasksInstances.entries()) {
             this.drawTaskInstances(taskInstances, svgElement, scale, index);
             taskIndices[taskInstances.name] = index;
@@ -151,6 +246,10 @@ class ViewSchedule {
                .attr('transform', `translate(0, ${index * View.TaskHeight + 2.5 * View.SvgPadding})`);
         
         const instances = taskInstances.value;
+        if (instances.length == 0) {
+            return;
+        }
+        
         const firstPeriodStartTime = instances[0].periodStartTime;
         const lastPeriodDuration = instances[instances.length -1].periodEndTime - instances[instances.length -1].periodStartTime;
 
@@ -178,30 +277,24 @@ class ViewSchedule {
                    .attr('y2', `${View.BarHeight + View.BarMargin}`)
                    .attr('class', 'period');
 
-        for (const [index, instance] of instances.entries()) {
+        for (const instance of instances) {
             // Add the task's LET duration
             graphInfo.append('rect')
+                       .attr('id', `${taskInstances.name}-${instance.instance}`)
                        .attr('x', scale(instance.letStartTime))
                        .attr('width', scale(instance.letEndTime - instance.letStartTime))
                        .attr('height', View.BarHeight)
                       .on('mouseover', function() {
-                          d3.select(this)
-                            .transition()
-                            .ease(d3.easeLinear)
-                            .style('fill', 'var(--blue)');
-                          tooltip.innerHTML = `${taskInstances.name} instance ${index}`;
-                          tooltip.style.visibility = 'visible';
+                        tooltip.innerHTML = `${taskInstances.name} instance ${instance.instance}`;
+                        tooltip.style.visibility = 'visible';
                       })
-                      .on('mousemove', function() {
-                          tooltip.style.top = `${d3.event.pageY - 2 * View.BarHeight}px`;
-                          tooltip.style.left = `${d3.event.pageX}px`;
+                      .on('mousemove', (event) => {
+                        let [pointerX, pointerY] = d3.pointer(event, window);
+                        tooltip.style.top = `${pointerY - 2 * View.BarHeight}px`;
+                        tooltip.style.left = `${pointerX}px`;
                       })
                       .on('mouseout', function() {
-                          d3.select(this)
-                            .transition()
-                            .ease(d3.easeLinear)
-                            .style('fill', 'var(--gray)');
-                          tooltip.style.visibility = 'hidden';
+                        tooltip.style.visibility = 'hidden';
                       });
             
             // Add vertical line at the start of the period
@@ -222,8 +315,8 @@ class ViewSchedule {
                  .call(g => g.select('.domain').remove());
     }
     
-    drawDataflows(svgElement, scale, taskIndices, dataflowsSet) {
-        const dependencyNames = dataflowsSet.map(dataflows => dataflows.name);
+    drawDependencies(svgElement, scale, taskIndices, dependenciesSet) {
+        const dependencyNames = dependenciesSet.map(dependencies => dependencies.name);
         this.dependencies.selectAll('*').remove();
         
         const allMenuItem = 
@@ -232,44 +325,33 @@ class ViewSchedule {
                 .attr('class', 'dropdown-item active')
                 .text('All');
     
-        // Define arrow head of a dataflow line
-        const svgDefs =
-        svgElement.append('defs')
-                  .append('marker')
-                    .attr('id', 'arrow')
-                    .attr('viewBox', '0 -5 10 10')
-                    .attr('refX', 5)
-                    .attr('refY', 0)
-                    .attr('markerWidth', 4)
-                    .attr('markerHeight', 4)
-                    .attr('orient', 'auto')
-                  .append('path')
-                    .attr('d', 'M0, -5L10, 0L0, 5')
-                    .attr('class', 'arrowHead');
-        
-        let svgGroups = [];
-        for (const dataflows of dataflowsSet) {
-            const svgGroup = 
-            svgElement.append('g')
-                        .attr('class', `dependency view-dependency-${dataflows.name}`);
-            svgGroups.push(svgGroup);
-            
+        let svgGroups = [ ];
+        for (const dependencies of dependenciesSet) {
+            dependencies.value.forEach(dependency => this.drawDependency(svgElement, scale, taskIndices, dependencies.name, dependency));              
+
+            svgGroups.push(...dependencies.value.map(dependency => d3.select(`#${dependencies.name}-${dependency.instance}`)));
+                        
             this.dependencies
                 .append('a')
                     .attr('class', 'dropdown-item active')
-                    .text(dataflows.name)
+                    .text(dependencies.name)
                     .on('click', function() {
                         // Update style of dropdown items
                         allMenuItem.node().classList.remove('active');
                         this.classList.toggle('active');
                         
                         // Update SVG style of dependencies
-                        svgGroup.node().style.visibility = this.classList.contains('active') ? 'visible' : 'hidden';
+                        for (const dependency of dependencies.value) {
+                            const dependencyNode = d3.select(`#${dependencies.name}-${dependency.instance}`).node();
+                            if (this.classList.contains('active')) {
+                                dependencyNode.classList.remove('dependencyHidden');
+                                dependencyNode.classList.add('dependencyVisible');
+                            } else {
+                                dependencyNode.classList.remove('dependencyVisible');
+                                dependencyNode.classList.add('dependencyHidden');
+                            }
+                        }
                     });
-
-            for (const dataflow of dataflows.value) {
-                this.drawDataflow(svgGroup, scale, taskIndices, dataflows.name, dataflow);              
-            }
         }
         
         allMenuItem
@@ -279,27 +361,33 @@ class ViewSchedule {
                 
                 this.parentNode.querySelectorAll('a').forEach(item => {
                     if (item != this) {
-                        if (this.classList.contains('active')) {
-                            item.classList.add('active');
-                        } else {
-                            item.classList.remove('active');
-                        }
+                        (this.classList.contains('active'))
+                            ? item.classList.add('active')
+                            : item.classList.remove('active');
                     }
-                    
-                    svgGroups.forEach(svgGroup => {
-                        svgGroup.node().style.visibility = this.classList.contains('active') ? 'visible' : 'hidden';
-                    });
+                });
+                
+                // Update SVG style of dependencies
+                svgGroups.forEach(svgGroup => {
+                    if (this.classList.contains('active')) {
+                        svgGroup.node().classList.remove('dependencyHidden');
+                        svgGroup.node().classList.add('dependencyVisible');
+                    } else {
+                        svgGroup.node().classList.remove('dependencyVisible');
+                        svgGroup.node().classList.add('dependencyHidden');
+                    }
                 });
             });
     }
         
-    drawDataflow(svgElement, scale, taskIndices, dependencyName, dataflow) {
+    drawDependency(svgElement, scale, taskIndices, dependencyName, dependency) {
         const yOffset = 0.5 * View.BarHeight + 2.5 * View.SvgPadding;
         const xOffset = 20;
-        const tooltip = this.dataflowTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
+        const tooltip = this.dependencyTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
         
-        const sendEvent = dataflow.sendEvent;
-        const receiveEvent = dataflow.receiveEvent;
+        const dependencyId = `${dependencyName}-${dependency.instance}`;
+        const sendEvent = dependency.sendEvent;
+        const receiveEvent = dependency.receiveEvent;
         let sendPortName = Utility.TaskPorts(sendEvent.task, [sendEvent.port]);
         let receivePortName = Utility.TaskPorts(receiveEvent.task, [receiveEvent.port]);
         sendEvent.timestamp = scale(sendEvent.timestamp);
@@ -331,37 +419,108 @@ class ViewSchedule {
             { x: receiveEvent.timestamp,             y: yOffset + taskIndices[receiveEvent.task] * View.TaskHeight + adjustedReceiveTaskHeight }
         ]
 
-        var line = d3.line()
+        let line = d3.line()
                      .x((point) => point.x)
                      .y((point) => point.y)
                      .curve(d3.curveBundle);
         
-        const group =
-        svgElement.append('g')
-                    .attr('transform', `translate(${View.SvgPadding}, ${View.SvgPadding})`);
+        svgElement.append('path')
+                    .attr('id', dependencyId)
+                    .attr('d', line(points))
+                    .attr('transform', `translate(${View.SvgPadding}, ${View.SvgPadding})`)
+                    .attr('class', 'dependency dependencyVisible')
+                  .on('mouseover', function() {
+                    tooltip.innerHTML = `${dependencyName} instance ${dependency.instance}:<br/>${sendPortName} &rarr; ${receivePortName}`;
+                    tooltip.style.visibility = 'visible';
+                  })
+                  .on('mousemove', (event) => {
+                    let [pointerX, pointerY] = d3.pointer(event, window);
+                    tooltip.style.top = `${pointerY - View.SvgPadding}px`;
+                    tooltip.style.left = `${pointerX + 2 * View.SvgPadding}px`;
+                  })
+                  .on('mouseout', function() {
+                    tooltip.style.visibility = 'hidden';
+                  });
+    }
+    
+    updateEventChains(eventChainInstancesJson) {
+        this.eventChainInstances = { };
+    
+        const eventChainNames = new Set();
+        for (const eventChainInstanceJson of eventChainInstancesJson) {
+            const eventChainInstance = ChainInstance.FromJson(eventChainInstanceJson);
+            const instanceName = eventChainInstance.name;
+            
+            // Flatten the event chain instance information
+            this.eventChainInstances[instanceName] = { };
+            this.eventChainInstances[instanceName]['dependencies'] = [ ];
+            this.eventChainInstances[instanceName]['tasks'] = new Set();
+            for (const dependency of eventChainInstance.generator()) {
+                this.eventChainInstances[instanceName]['dependencies'].push(d3.select(`#${dependency.name}-${dependency.instance}`));
+                this.eventChainInstances[instanceName]['tasks'].add(d3.select(`#${dependency.receiveEvent.task}-${dependency.receiveEvent.taskInstance}`));
+                this.eventChainInstances[instanceName]['tasks'].add(d3.select(`#${dependency.sendEvent.task}-${dependency.sendEvent.taskInstance}`));
+            }
+
+            eventChainNames.add(eventChainInstance.chainName);
+            (!this.eventChainInstances.hasOwnProperty(eventChainInstance.chainName))
+                ? this.eventChainInstances[eventChainInstance.chainName] = 1
+                : this.eventChainInstances[eventChainInstance.chainName]++;
+        }
         
-        group.append('path')
-               .attr('d', line(points))
-               .attr('marker-end', 'url(#arrow)')
-             .on('mouseover', function() {
-               d3.select(this)
-                 .transition()
-                 .ease(d3.easeLinear)
-                 .style('stroke', 'var(--orange)');
-               tooltip.innerHTML = `${dependencyName}:<br/>${sendPortName} &rarr; ${receivePortName}`;
-               tooltip.style.visibility = 'visible';
-             })
-             .on('mousemove', function() {
-               tooltip.style.top = `${d3.event.pageY - View.SvgPadding}px`;
-               tooltip.style.left = `${d3.event.pageX + 2 * View.SvgPadding}px`;
-             })
-             .on('mouseout', function() {
-               d3.select(this)
-                 .transition()
-                 .ease(d3.easeLinear)
-                 .style('stroke', 'var(--red)');
-               tooltip.style.visibility = 'hidden';
-             });
+        // Create list of available event chains
+        const parentElement = d3.select(this.eventChainField);
+        parentElement.selectAll('*').remove();
+        parentElement
+            .append('option')
+                .property('disabled', true)
+                .property('selected', true)
+                .property('hidden', true)
+                .attr('value', 'null ')
+                .text('Choose ...')
+                
+        parentElement
+            .append('option')
+                .attr('value', 'none ')
+                .text('* None *');
+        
+        for (const name of eventChainNames) {
+            parentElement
+                .append('option')
+                  .attr('value', name)
+                  .text(name);
+        }
+    }
+    
+    updateEventChain(eventChainName, instance) {
+        // Clear the SVG style of the current event chain instance.
+        if (this.currentEventChainInstance != null) {
+            for (const dependency of this.currentEventChainInstance.dependencies) {
+                dependency.node().classList.remove('eventChainVisible');
+            }
+        
+            for (const task of this.currentEventChainInstance.tasks) {
+                task.style('fill', 'var(--bs-gray)');
+            }   
+        }
+    
+        // Highlight the selected event chain instance.
+        if (eventChainName == "none ") {
+            this.instance = 0;
+            this.instanceMax = 0;
+            this.currentEventChainInstance = null;
+        } else {
+            const instanceName = `${eventChainName}-${instance}`;
+            this.currentEventChainInstance = this.eventChainInstances[instanceName];
+
+            // Update SVG style of dependencies and tasks
+            for (const dependency of this.currentEventChainInstance.dependencies) {
+                dependency.node().classList.add('eventChainVisible');
+            }
+        
+            for (const task of this.currentEventChainInstance.tasks) {
+                task.style('fill', 'var(--bs-blue)');
+            }
+        }
     }
     
     toString() {

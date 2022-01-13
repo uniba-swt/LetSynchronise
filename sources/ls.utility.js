@@ -109,4 +109,24 @@ class Utility {
         return `<button id="${id}" type="submit" class="btn btn-danger btn-sm delete">Delete</button>`;
     }
     
+    static CreateAccordionHeader(data, index) {
+        return [
+            `<h2 class="accordion-header">`,
+            `    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${index}">`,
+            `        ${data}`,
+            `    </button>`,
+            `</h2>`
+        ].join('\n');
+    }
+
+    static CreateAccordionBody(data, index) {
+        return [
+            `<div id="collapse${index}" class="accordion-collapse collapse" data-bs-parent="#analyse-model-body">`,
+            `    <div class="accordion-body">`,
+            `    ${data}`,
+            `    </div>`,
+            `</div>`
+        ].join('\n');
+    }
+    
 }

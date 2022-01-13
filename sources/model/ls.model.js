@@ -27,7 +27,7 @@ class Model {
     static get EventChainStoreName()          { return 'EventChainStore'; }
     static get EventChainInstanceStoreName()  { return 'EventChainInstanceStore'; }
     
-    static get SystemInterfaceName() { return '__system'; }
+    static get SystemInterfaceName()          { return '__system'; }
 
 
     get modelExportImport() {

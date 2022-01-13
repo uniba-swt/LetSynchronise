@@ -4,8 +4,8 @@ class ControllerAnalyse {
     _view = null;
     _viewSchedule = null;
     _model = null;
-    _modelDependency = null;
     _modelConstraint = null;
+    _modelEventChain = null;
     _controllerSchedule = null;
     
     constructor() { }
@@ -15,6 +15,7 @@ class ControllerAnalyse {
         
         // Register the handlers when setting the view.
         this._view.registerAnalyseHandler(this.handleGetAnalyse);
+        this._view.registerAnalyseCloseHandler(this.handleCloseAnalyse);
     }
 
     get view() {
@@ -40,28 +41,6 @@ class ControllerAnalyse {
         return this._model;
     }
     
-    set modelTask(modelTask) {
-        this._modelTask = modelTask;
-        
-        // Register the model task with the model.
-        this._model.registerModelTask(this._modelTask);
-    }
-    
-    get modelTask() {
-        return this._modelTask;
-    }
-    
-    set modelDependency(modelDependency) {
-        this._modelDependency = modelDependency;
-        
-        // Register the model dependency with the model.
-        this._model.registerModelDependency(this._modelDependency);
-    }
-    
-    get modelDependency() {
-        return this._modelDependency;
-    }
-    
     set modelConstraint(modelConstraint) {
         this._modelConstraint = modelConstraint;
 
@@ -84,7 +63,6 @@ class ControllerAnalyse {
         return this._modelEventChain;
     }
     
-    registerModelEventChain
     
     set controllerSchedule(controllerSchedule) {
         this._controllerSchedule = controllerSchedule;
@@ -108,6 +86,10 @@ class ControllerAnalyse {
         });
     }
     
+    handleCloseAnalyse = () => {
+        this.callbackCloseAnalyse();
+    }
+    
     
     // -----------------------------------------------------
     // Callbacks for events from the model to the view
@@ -115,6 +97,10 @@ class ControllerAnalyse {
     // Callback for updating the schedule analysis.
     callbackGetAnalyse = (promise) => {
         this.view.updateAnalyse(promise);
+    }
+    
+    callbackCloseAnalyse = () => {
+        this.view.clearAnalyseModal();
     }
     
     toString() {

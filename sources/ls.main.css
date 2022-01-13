@@ -12,21 +12,22 @@ html {
 }
 
 /* Design tab */
-#view-task-preview,
-#view-task-preview svg,
-#view-task-set li svg {
-    width: 620px;
-    height: 130px;
+#view-task-define {
+    width: 700px;
 }
 
 #view-task-preview,
-#view-task-set li {
-    margin: 20px 0px;
+#view-task-preview svg,
+#view-task-set li svg {
+    width: 640px;
+    height: 145px;
+    padding: 10px 10px 5px 10px;
+    border-radius: 10px;
 }
 
 #view-task-preview rect,
 #view-task-set rect {
-    fill: var(--blue);
+    fill: var(--bs-blue);
 }
 
 #view-task-preview .initialOffset, .period, .boundary,
@@ -79,7 +80,6 @@ html {
 #view-analyse-event-chains li {
     float: left;
     clear: both;
-    line-height: 3;
     cursor: pointer;
 }
 
@@ -89,6 +89,8 @@ html {
 #view-analyse-constraints li span,
 #view-analyse-event-chains li span {
     display: inline-block;
+    padding: 5px 10px;
+    border-radius: 10px;
 }
 
 #view-system-inputs li span:hover,
@@ -132,28 +134,67 @@ html {
 
 
 /* Analyse tab */
-#view-schedule-dependencies {
-    display: inline-block;
-}
-
 #view-schedule-dependencies .dropdown-item {
     cursor: default;
 }
 
+#view-schedule-event-chains-instance input {
+    height: 38px;
+    padding: 0 10px;
+}
+
 #view-schedule rect {
-    fill: var(--gray);
+    fill: var(--bs-gray);
     cursor: pointer;
 }
 
+#view-schedule rect:hover {
+    fill: var(--bs-blue);
+}
+
 #view-schedule .dependency {
-    stroke: var(--red);
-    stroke-width: 2px;
     fill: none;
     cursor: pointer;
 }
 
-#view-schedule .arrowHead {
-    fill: var(--red);
+#view-schedule path.dependencyVisible {
+    stroke: var(--bs-red);
+    stroke-width: 2px;
+    marker-end: url(#arrowRed);
+    visibility: visible;
+}
+
+#view-schedule path.dependencyVisible:hover {
+    stroke: var(--bs-orange);
+    marker-end: url(#arrowOrange);
+}
+
+#view-schedule path.dependencyHidden {
+    visibility: hidden;
+}
+
+#view-schedule path.eventChainVisible {
+    stroke: var(--bs-blue);
+    stroke-width: 5px;
+    marker-end: url(#arrowBlue);
+    visibility: visible;
+}
+
+#view-schedule-svg-defs {
+    height: 0px;
+    width: 0px;
+}
+
+#view-schedule-svg-defs .arrowHeadOrange {
+    fill: var(--bs-orange);
+}
+
+#view-schedule-svg-defs .arrowHeadRed {
+    fill: var(--bs-red);
+}
+
+#view-schedule-svg-defs .arrowHeadBlue {
+    fill: var(--bs-blue);
 }
 
 #view-schedule {
@@ -162,7 +203,7 @@ html {
 }
 
 #view-schedule-task-tooltip,
-#view-schedule-dataflow-tooltip {
+#view-schedule-dependency-tooltip {
     position: absolute;
     z-index: 999;
     visibility: hidden;
@@ -173,11 +214,11 @@ html {
 }
 
 #view-schedule-task-tooltip {
-    color: var(--blue);
-    border-color: var(--blue);
+    color: var(--bs-blue);
+    border-color: var(--bs-blue);
 }
 
-#view-schedule-dataflow-tooltip {
-    color: var(--orange);
-    border-color: var(--orange);
+#view-schedule-dependency-tooltip {
+    color: var(--bs-orange);
+    border-color: var(--bs-orange);
 }
