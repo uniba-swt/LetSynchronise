@@ -88,9 +88,12 @@ console.log(controller.toString());
 
 
 // Register plug-ins.
+PluginImporter.Register(PluginImporterNative.Name, PluginImporterNative);
 PluginImporter.Register(PluginImporterTool1.Name, PluginImporterTool1);
+view.viewExportImport.updateImporters();
 
 console.log(PluginImporter.ToString())
+
 
 PluginMetric.Register(PluginMetricDataAge.Name, PluginMetricDataAge);
 PluginMetric.Register(PluginMetricEnd2End.Name, PluginMetricEnd2End);
