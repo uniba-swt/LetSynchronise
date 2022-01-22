@@ -379,12 +379,12 @@ class ViewTask {
         }
         
         if (wcet < acet || acet < bcet) {
-            alert(`ACET cannot be less than BCET or greater than WCET.`);
+            alert('ACET cannot be less than BCET or greater than WCET.');
             return false;
         }
         
         if (taskParameters.distribution == 'null ') {
-            alert(`Choose type of execution time distribution.`);
+            alert('Choose type of execution time distribution.');
             return false;
         }
         
