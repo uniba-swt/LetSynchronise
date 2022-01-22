@@ -499,7 +499,7 @@ class ViewSchedule {
             }
         
             for (const task of this.currentEventChainInstance.tasks) {
-                task.style('fill', 'var(--bs-gray-500)');
+                task.style('fill', null);
             }   
         }
     
