@@ -155,7 +155,7 @@ class ViewSchedule {
         }
         const makespan = parseFloat(schedulingParameters.makespan);
         if (makespan <= 0) {
-            alert('Makespan must be greater than zero');
+            alert('Makespan must be greater than zero.');
             return false;
         }
         
@@ -257,15 +257,15 @@ class ViewSchedule {
         graphInfo.append('line')
                    .attr('x1', 0)
                    .attr('x2', scale(firstPeriodStartTime))
-                   .attr('y1', `${View.BarHeight + View.BarMargin}`)
-                   .attr('y2', `${View.BarHeight + View.BarMargin}`)
+                   .attr('y1', View.BarHeight + View.BarMargin)
+                   .attr('y2', View.BarHeight + View.BarMargin)
                    .attr('class', 'initialOffset');
         
         // Add vertical line at the start of the initial offset
         graphInfo.append('line')
                    .attr('x1', 0)
                    .attr('x2', 0)
-                   .attr('y1', `${View.BarHeight + View.TickHeight + View.BarMargin}`)
+                   .attr('y1', View.BarHeight + View.TickHeight + View.BarMargin)
                    .attr('y2', `0`)
                    .attr('class', 'boundary');
         
@@ -273,8 +273,8 @@ class ViewSchedule {
         graphInfo.append('line')
                    .attr('x1', scale(firstPeriodStartTime))
                    .attr('x2', scale(this.makespan + lastPeriodDuration))
-                   .attr('y1', `${View.BarHeight + View.BarMargin}`)
-                   .attr('y2', `${View.BarHeight + View.BarMargin}`)
+                   .attr('y1', View.BarHeight + View.BarMargin)
+                   .attr('y2', View.BarHeight + View.BarMargin)
                    .attr('class', 'period');
 
         for (const instance of instances) {
@@ -289,21 +289,28 @@ class ViewSchedule {
                         tooltip.style.visibility = 'visible';
                       })
                       .on('mousemove', (event) => {
-                        let [pointerX, pointerY] = d3.pointer(event, window);
+                        const [pointerX, pointerY] = d3.pointer(event, window);
                         tooltip.style.top = `${pointerY - 2 * View.BarHeight}px`;
                         tooltip.style.left = `${pointerX}px`;
                       })
                       .on('mouseout', function() {
                         tooltip.style.visibility = 'hidden';
                       });
+            // Add the task's execution time
+            graphInfo.append('rect')
+                       .attr('x', scale(instance.letStartTime))
+                       .attr('y', View.BarHeight - View.ExecutionHeight)
+                       .attr('width', scale(instance.executionTime))
+                       .attr('height', View.ExecutionHeight)
+                       .attr('class', 'time');
             
             // Add vertical line at the start of the period
             graphInfo.append('line')
-                     .attr('x1', scale(instance.periodStartTime))
-                     .attr('x2', scale(instance.periodStartTime))
-                     .attr('y1', `${View.BarHeight + View.TickHeight + View.BarMargin}`)
-                     .attr('y2', `0`)
-                     .attr('class', 'boundary');
+                       .attr('x1', scale(instance.periodStartTime))
+                       .attr('x2', scale(instance.periodStartTime))
+                       .attr('y1', View.BarHeight + View.TickHeight + View.BarMargin)
+                       .attr('y2', 0)
+                       .attr('class', 'boundary');
         }
         
         // Create x-axis with correct scale.

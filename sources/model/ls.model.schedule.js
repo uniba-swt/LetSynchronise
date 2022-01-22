@@ -50,12 +50,17 @@ class ModelSchedule {
 
     // Create a single task instance.
     createTaskInstance(index, parameters, timePoint) {
+        // TODO: Scheduler should create execution intervals
+        const executionTime = Utility.Random(parameters.bcet, parameters.acet, parameters.wcet, parameters.distribution);
+    
         return {
-            'instance'       : index,
-            'periodStartTime': timePoint,
-            'letStartTime'   : timePoint + parameters.activationOffset,
-            'letEndTime'     : timePoint + parameters.activationOffset + parameters.duration,
-            'periodEndTime'  : timePoint + parameters.period
+            'instance'          : index,
+            'periodStartTime'   : timePoint,
+            'letStartTime'      : timePoint + parameters.activationOffset,
+            'letEndTime'        : timePoint + parameters.activationOffset + parameters.duration,
+            'periodEndTime'     : timePoint + parameters.period,
+            'executionTime'     : executionTime,
+            'executionIntervals': [ executionTime ]
         };
     }
     

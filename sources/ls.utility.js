@@ -46,6 +46,37 @@ class Utility {
             return Utility.LeastCommonMultiple(a, b);
         }) / scaling;
     }
+    
+    // TODO: Approximation of a normal distribution.
+    static NormalDistribution(samples) {
+        let random = 0.0;
+        
+        for (let i = 0; i < samples; i += 1) {
+            random += Math.random();
+        }
+        
+        return random / samples;
+    }
+    
+    // TODO: Create actual distribution
+    static WeibullDistribution() {
+        return 0;
+    }
+    
+    static Random(min, avg, max, distribution) {
+        const range = max - min;
+        
+        let delta = 0;
+        if (distribution == 'Normal') {
+            delta = range * Utility.NormalDistribution(6);
+        } else if (distribution == 'Uniform') {
+            delta = range * Math.random();
+        } else if (distribution == 'Weibull') {
+            delta = range * Utility.WeibullDistribution();
+        }
+        
+        return min + delta;
+    }
                              
 
     static TaskPorts(taskName, taskPorts) {
