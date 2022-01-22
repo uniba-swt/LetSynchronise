@@ -368,6 +368,11 @@ class ViewTask {
             return false;
         }
         
+        if (duration < wcet) {
+            alert('WCET cannot be greater than duration.');
+            return false;
+        }
+        
         if (wcet < bcet) {
             alert('WCET cannot be less than BCET.');
             return false;
@@ -544,10 +549,14 @@ class ViewTask {
         this.period = taskParameters.period;
         this.inputs = taskParameters.inputs;
         this.outputs = taskParameters.outputs;
+        this.wcet = taskParameters.wcet;
+        this.acet = taskParameters.acet;
+        this.bcet = taskParameters.bcet;
+        this.distribution = taskParameters.distribution;
     }
         
     formatTaskParametersInfo(taskParameters) {
-        return `${taskParameters.name}: initial offset = ${taskParameters.initialOffset}, activation offset = ${taskParameters.activationOffset}, duration = ${taskParameters.duration}, period = ${taskParameters.period}, inputs = ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.inputs)}, outputs = ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.outputs)}`;
+        return `${taskParameters.name}: initial offset = ${taskParameters.initialOffset}, activation offset = ${taskParameters.activationOffset}, duration = ${taskParameters.duration}, period = ${taskParameters.period}, inputs = ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.inputs)}, outputs = ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.outputs)}, wcet = ${taskParameters.wcet}, acet = ${taskParameters.acet}, bcet = ${taskParameters.bcet}, distribution = ${taskParameters.distribution}`;
     }
     
     toString() {
