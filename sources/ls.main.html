@@ -63,6 +63,7 @@
     <script src="sources/plugins/ls.plugin.metric.latency.js"></script>
     
     <script src="sources/plugins/ls.plugin.importer.js"></script>
+    <script src="sources/plugins/ls.plugin.importer.native.js"></script>
     <script src="sources/plugins/ls.plugin.importer.tool1.js"></script>
     
     <script src="sources/plugins/ls.plugin.exporter.js"></script>
@@ -100,6 +101,12 @@
                         <div class="input-group">
                             <input id="import-system-file" type="file" accept=".json" class="form-control"/>
                             <button id="import-system" type="submit" class="btn btn-primary">Import</button>
+                            <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
+                                <span class="visually-hidden">Importer Dropdown</span>
+                            </button>
+                            <div id="import-importers" class="dropdown-menu">
+                                <a class="dropdown-item active" href="#">LetSyncrhonise Importer</a>
+                            </div>
                         </div>
                     </div>
                     
@@ -337,7 +344,7 @@
         
                 <div class="col-auto">
                     <div id="view-schedule-dependencies" class="dropdown">
-                        <button class="btn btn-danger dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <button class="btn btn-danger dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
                             Dependencies
                         </button>
                         <div id="view-schedule-dependencies-menu" class="dropdown-menu">
