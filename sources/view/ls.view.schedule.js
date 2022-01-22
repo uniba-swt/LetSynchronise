@@ -266,7 +266,7 @@ class ViewSchedule {
                    .attr('x1', 0)
                    .attr('x2', 0)
                    .attr('y1', `${View.BarHeight + View.TickHeight + View.BarMargin}`)
-                   .attr('y2', `${View.BarHeight - View.TickHeight}`)
+                   .attr('y2', `0`)
                    .attr('class', 'boundary');
         
         // Add horizontal line for the task's periods
@@ -302,7 +302,7 @@ class ViewSchedule {
                      .attr('x1', scale(instance.periodStartTime))
                      .attr('x2', scale(instance.periodStartTime))
                      .attr('y1', `${View.BarHeight + View.TickHeight + View.BarMargin}`)
-                     .attr('y2', `${View.BarHeight - View.TickHeight}`)
+                     .attr('y2', `0`)
                      .attr('class', 'boundary');
         }
         
@@ -499,7 +499,7 @@ class ViewSchedule {
             }
         
             for (const task of this.currentEventChainInstance.tasks) {
-                task.style('fill', 'var(--bs-gray)');
+                task.style('fill', 'var(--bs-gray-500)');
             }   
         }
     

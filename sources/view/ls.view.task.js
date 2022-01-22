@@ -10,6 +10,10 @@ class ViewTask {
     periodField = null;
     inputsField = null;
     outputsField = null;
+    wcetField = null;
+    acetField = null;
+    bcetField = null;
+    distributionField = null;
     
     previewButton = null;
     submitButton = null;
@@ -33,6 +37,10 @@ class ViewTask {
         this.periodField = this.root.querySelector('#period');
         this.inputsField = this.root.querySelector('#inputs');
         this.outputsField = this.root.querySelector('#outputs');
+        this.wcetField = this.root.querySelector('#wcet');
+        this.acetField = this.root.querySelector('#acet');
+        this.bcetField = this.root.querySelector('#bcet');
+        this.distributionField = this.root.querySelector('#distribution');
         
         this.previewButton = this.root.querySelector('#previewTask');
         this.submitButton = this.root.querySelector('#submitTask');
@@ -61,7 +69,7 @@ class ViewTask {
     }
 
     set initialOffset(initialOffset) {
-        return this.initialOffsetField.value = initialOffset;
+        this.initialOffsetField.value = initialOffset;
     }
     
     get activationOffset() {
@@ -69,7 +77,7 @@ class ViewTask {
     }
 
     set activationOffset(activationOffset) {
-        return this.activationOffsetField.value = activationOffset;
+        this.activationOffsetField.value = activationOffset;
     }
     
     get duration() {
@@ -77,7 +85,7 @@ class ViewTask {
     }
     
     set duration(duration) {
-        return this.durationField.value = duration;
+        this.durationField.value = duration;
     }
     
     get period() {
@@ -85,7 +93,7 @@ class ViewTask {
     }
     
     set period(period) {
-        return this.periodField.value = period;
+        this.periodField.value = period;
     }
     
     get inputs() {
@@ -93,7 +101,7 @@ class ViewTask {
     }
     
     set inputs(inputs) {
-        return this.inputsField.value = inputs;
+        this.inputsField.value = inputs;
     }
     
     get outputs() {
@@ -101,7 +109,39 @@ class ViewTask {
     }
     
     set outputs(outputs) {
-        return this.outputsField.value = outputs;
+        this.outputsField.value = outputs;
+    }
+    
+    get wcet() {
+        return this.wcetField.value;
+    }
+    
+    set wcet(wcet) {
+        this.wcetField.value = wcet;
+    }
+
+    get acet() {
+        return this.acetField.value;
+    }
+    
+    set acet(acet) {
+        this.acetField.value = acet;
+    }
+    
+    get bcet() {
+        return this.bcetField.value;
+    }
+    
+    set bcet(bcet) {
+        this.bcetField.value = bcet;
+    }
+    
+    get distribution() {
+        return this.distributionField.value;
+    }
+    
+    set distribution(distribution) {
+        this.distributionField.value = distribution;
     }
     
     get taskParametersRaw() {
@@ -113,7 +153,11 @@ class ViewTask {
             'duration': this.duration,
             'period': this.period,
             'inputs': this.inputs,
-            'outputs': this.outputs
+            'outputs': this.outputs,
+            'wcet': this.wcet,
+            'acet': this.acet,
+            'bcet': this.bcet,
+            'distribution': this.distribution
         };
     }
     
@@ -126,7 +170,11 @@ class ViewTask {
             'duration': parseFloat(this.duration),
             'period': parseFloat(this.period),
             'inputs': this.inputs.split(',').map(item => item.trim()).filter(Boolean),
-            'outputs': this.outputs.split(',').map(item => item.trim()).filter(Boolean)
+            'outputs': this.outputs.split(',').map(item => item.trim()).filter(Boolean),
+            'wcet': parseFloat(this.wcet),
+            'acet': parseFloat(this.acet),
+            'bcet': parseFloat(this.bcet),
+            'distribution': this.distribution.trim()
         };
     }
     
@@ -160,6 +208,10 @@ class ViewTask {
             this.period = '';
             this.inputs = '';
             this.outputs = '';
+            this.wcet = '';
+            this.acet = '';
+            this.bcet = '';
+            this.distribution = 'null ';
             
             // Clear the preview.
             this.clearPreview();
@@ -283,6 +335,54 @@ class ViewTask {
             return false;
         }
         
+        if (taskParameters.wcet == null || isNaN(taskParameters.wcet)) {
+            alert('WCET has to be a decimal number.');
+            return false;
+        }
+        
+        const wcet = parseFloat(taskParameters.wcet);
+        if (wcet <= 0) {
+            alert('WCET has to be greater than 0.');
+            return false;
+        }
+        
+        if (taskParameters.acet == null || isNaN(taskParameters.acet)) {
+            alert('ACET has to be a decimal number.');
+            return false;
+        }
+        
+        const acet = parseFloat(taskParameters.acet);
+        if (acet <= 0) {
+            alert('ACET has to be greater than 0.');
+            return false;
+        }
+        
+        if (taskParameters.bcet == null || isNaN(taskParameters.bcet)) {
+            alert('BCET has to be a decimal number.');
+            return false;
+        }
+        
+        const bcet = parseFloat(taskParameters.bcet);
+        if (bcet <= 0) {
+            alert('BCET has to be greater than 0.');
+            return false;
+        }
+        
+        if (wcet < bcet) {
+            alert('WCET cannot be less than BCET.');
+            return false;
+        }
+        
+        if (wcet < acet || acet < bcet) {
+            alert(`ACET cannot be less than BCET or greater than WCET.`);
+            return false;
+        }
+        
+        if (taskParameters.distribution == 'null ') {
+            alert(`Choose type of execution time distribution.`);
+            return false;
+        }
+        
         return true;
     }
     
@@ -348,6 +448,16 @@ class ViewTask {
                 .attr('dy', '2.6em')
                 .text(`Outputs: ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.outputs)}`);
 
+        // Add the task's execution times
+        textInfo.append('text')
+                .attr('dx', '300px')
+                .attr('dy', '0em')
+                .text(`WCET, ACET, BCET: ${taskParameters.wcet}, ${taskParameters.acet}, ${taskParameters.bcet}`);
+        textInfo.append('text')
+                .attr('dx', '300px')
+                .attr('dy', '1.3em')
+                .text(`Distribution: ${taskParameters.distribution}`);
+
         // -----------------------------
         // Group for graphical information
         const graphInfo =
@@ -381,19 +491,19 @@ class ViewTask {
                  .attr('x1', 0)
                  .attr('x2', 0)
                  .attr('y1', `${View.BarHeight + View.TickHeight + View.BarMargin}`)
-                 .attr('y2', `${View.BarHeight - View.TickHeight}`)
+                 .attr('y2', `0`)
                  .attr('class', 'boundary');
         graphInfo.append('line')
                  .attr('x1', scale(taskParameters.initialOffset))
                  .attr('x2', scale(taskParameters.initialOffset))
                  .attr('y1', `${View.BarHeight + View.TickHeight + View.BarMargin}`)
-                 .attr('y2', `${View.BarHeight - View.TickHeight}`)
+                 .attr('y2', `0`)
                  .attr('class', 'boundary');
         graphInfo.append('line')
                  .attr('x1', scale(taskParameters.initialOffset + taskParameters.period))
                  .attr('x2', scale(taskParameters.initialOffset + taskParameters.period))
                  .attr('y1', `${View.BarHeight + View.TickHeight + View.BarMargin}`)
-                 .attr('y2', `${View.BarHeight - View.TickHeight}`)
+                 .attr('y2', `0`)
                  .attr('class', 'boundary');
         
         graphInfo.append('g')
