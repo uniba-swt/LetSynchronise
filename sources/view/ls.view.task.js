@@ -475,40 +475,55 @@ class ViewTask {
                  .attr('width', scale(taskParameters.duration))
                  .attr('height', View.BarHeight);
         
+        // Add the task's execution time
+        graphInfo.append('rect')
+                 .attr('x', scale(taskParameters.initialOffset + taskParameters.activationOffset))
+                 .attr('y', View.BarHeight - View.ExecutionHeight)
+                 .attr('width', scale(taskParameters.wcet))
+                 .attr('height', View.ExecutionHeight)
+                 .attr('class', 'wcet');
+        graphInfo.append('rect')
+                 .attr('x', scale(taskParameters.initialOffset + taskParameters.activationOffset))
+                 .attr('y', View.BarHeight - View.ExecutionHeight)
+                 .attr('width', scale(taskParameters.bcet))
+                 .attr('height', View.ExecutionHeight)
+                 .attr('class', 'bcet');
+
+        
         // Add horizontal line for the task's initial offset
         graphInfo.append('line')
                  .attr('x1', 0)
                  .attr('x2', scale(taskParameters.initialOffset))
-                 .attr('y1', `${View.BarHeight + View.BarMargin}`)
-                 .attr('y2', `${View.BarHeight + View.BarMargin}`)
+                 .attr('y1', View.BarHeight + View.BarMargin)
+                 .attr('y2', View.BarHeight + View.BarMargin)
                  .attr('class', 'initialOffset');
 
         // Add horizontal line for the task's period
         graphInfo.append('line')
                  .attr('x1', scale(taskParameters.initialOffset))
                  .attr('x2', scale(taskParameters.initialOffset + taskParameters.period))
-                 .attr('y1', `${View.BarHeight + View.BarMargin}`)
-                 .attr('y2', `${View.BarHeight + View.BarMargin}`)
+                 .attr('y1', View.BarHeight + View.BarMargin)
+                 .attr('y2', View.BarHeight + View.BarMargin)
                  .attr('class', 'period');
 
         // Add vertical lines around the initial offset and period
         graphInfo.append('line')
                  .attr('x1', 0)
                  .attr('x2', 0)
-                 .attr('y1', `${View.BarHeight + View.TickHeight + View.BarMargin}`)
+                 .attr('y1', View.BarHeight + View.TickHeight + View.BarMargin)
                  .attr('y2', `0`)
                  .attr('class', 'boundary');
         graphInfo.append('line')
                  .attr('x1', scale(taskParameters.initialOffset))
                  .attr('x2', scale(taskParameters.initialOffset))
-                 .attr('y1', `${View.BarHeight + View.TickHeight + View.BarMargin}`)
+                 .attr('y1', View.BarHeight + View.TickHeight + View.BarMargin)
                  .attr('y2', `0`)
                  .attr('class', 'boundary');
         graphInfo.append('line')
                  .attr('x1', scale(taskParameters.initialOffset + taskParameters.period))
                  .attr('x2', scale(taskParameters.initialOffset + taskParameters.period))
-                 .attr('y1', `${View.BarHeight + View.TickHeight + View.BarMargin}`)
-                 .attr('y2', `0`)
+                 .attr('y1', View.BarHeight + View.TickHeight + View.BarMargin)
+                 .attr('y2', 0)
                  .attr('class', 'boundary');
         
         graphInfo.append('g')
@@ -527,8 +542,8 @@ class ViewTask {
             const taskListItem = this.taskSet.append('li');
             const anchor = this.draw(taskListItem, taskParameters);
             taskListItem.append('span')
-                        .html(dependency => `${Utility.AddDeleteButton(taskParameters.name)}`);
-            this.setupDeleteButtonListener(`${taskParameters.name}`);
+                        .html(dependency => Utility.AddDeleteButton(taskParameters.name));
+            this.setupDeleteButtonListener(taskParameters.name);
             
             // Click listener
             anchor.on('click', () => {
