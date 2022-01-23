@@ -41,14 +41,14 @@ class Utility {
         const decimalPlaces = Utility.MaxOfArray(array.map(element => Utility.DecimalPlaces(element)));
         const scaling = Math.pow(10, decimalPlaces);
         const arrayScaled = array.map(element => element*scaling);
-                
+        
         return arrayScaled.reduce(function(a, b) {
             return Utility.LeastCommonMultiple(a, b);
         }) / scaling;
     }
     
-    // TODO: Approximation of a normal distribution.
-    static NormalDistribution(samples) {
+    // Geenrate samples from a normal distribution.
+    static NormalSample(samples) {
         let random = 0.0;
         
         for (let i = 0; i < samples; i += 1) {
@@ -58,9 +58,18 @@ class Utility {
         return random / samples;
     }
     
-    // TODO: Create actual distribution
-    static WeibullDistribution() {
-        return 0;
+    // Generate samples from a Weibull distribution.
+    static WeibullSample(scale, shape, upperBound) {
+        function WeibullCumulativeDistribution(scale, shape, variable) {
+            return 1 - Math.exp(-Math.pow(variable / scale, shape));
+        }
+        
+        // Limit the Weibull distribution to the interval [0, upperBound].
+        const random = Math.random() * WeibullCumulativeDistribution(scale, shape, upperBound);
+        
+        // Take a sample from the Weibull distribution (from the inverse CDF)
+        // and scale it to the interval [0, upperBound].
+        return scale * Math.pow(-Math.log(1 - random), 1 / shape) / upperBound;
     }
     
     static Random(min, avg, max, distribution) {
@@ -68,11 +77,11 @@ class Utility {
         
         let delta = 0;
         if (distribution == 'Normal') {
-            delta = range * Utility.NormalDistribution(6);
+            delta = range * Utility.NormalSample(6);
         } else if (distribution == 'Uniform') {
             delta = range * Math.random();
         } else if (distribution == 'Weibull') {
-            delta = range * Utility.WeibullDistribution();
+            delta = range * Utility.WeibullSample(1, 2, 3);
         }
         
         return min + delta;
@@ -87,7 +96,7 @@ class Utility {
             return `${time.toFixed(digits)}`;
         }
     }
-                             
+    
 
     static TaskPorts(taskName, taskPorts) {
         return taskPorts.map(port => `${taskName}.${port}`);
