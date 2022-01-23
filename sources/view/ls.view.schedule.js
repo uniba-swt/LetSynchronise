@@ -285,24 +285,27 @@ class ViewSchedule {
                        .attr('width', scale(instance.letEndTime - instance.letStartTime))
                        .attr('height', View.BarHeight)
                       .on('mouseover', function() {
-                        tooltip.innerHTML = `${taskInstances.name} instance ${instance.instance}`;
+                        tooltip.innerHTML = `${taskInstances.name} instance ${instance.instance} <br/> Execution time: ${Utility.FormatTimeString(instance.executionTime, 2)}`;
                         tooltip.style.visibility = 'visible';
                       })
                       .on('mousemove', (event) => {
                         const [pointerX, pointerY] = d3.pointer(event, window);
-                        tooltip.style.top = `${pointerY - 2 * View.BarHeight}px`;
+                        tooltip.style.top = `${pointerY - 3 * View.BarHeight}px`;
                         tooltip.style.left = `${pointerX}px`;
                       })
                       .on('mouseout', function() {
                         tooltip.style.visibility = 'hidden';
                       });
             // Add the task's execution time
-            graphInfo.append('rect')
-                       .attr('x', scale(instance.letStartTime))
-                       .attr('y', View.BarHeight - View.ExecutionHeight)
-                       .attr('width', scale(instance.executionTime))
-                       .attr('height', View.ExecutionHeight)
-                       .attr('class', 'time');
+            const executionIntervals = instance.executionIntervals.map(interval => Utility.Interval.FromJson(interval));
+            for (const interval of executionIntervals) {
+                graphInfo.append('rect')
+                           .attr('x', scale(interval.startTime))
+                           .attr('y', View.BarHeight - View.ExecutionHeight)
+                           .attr('width', scale(interval.duration))
+                           .attr('height', View.ExecutionHeight)
+                           .attr('class', 'time');
+            }
             
             // Add vertical line at the start of the period
             graphInfo.append('line')

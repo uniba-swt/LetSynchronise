@@ -60,7 +60,8 @@ class ModelSchedule {
             'letEndTime'        : timePoint + parameters.activationOffset + parameters.duration,
             'periodEndTime'     : timePoint + parameters.period,
             'executionTime'     : executionTime,
-            'executionIntervals': [ executionTime ]
+            'executionIntervals': [ new Utility.Interval(timePoint + parameters.activationOffset, timePoint + parameters.activationOffset + executionTime/2),
+                                    new Utility.Interval(timePoint + parameters.activationOffset + parameters.duration - executionTime/2, timePoint + parameters.activationOffset + parameters.duration) ]
         };
     }
     

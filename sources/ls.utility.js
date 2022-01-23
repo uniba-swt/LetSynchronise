@@ -77,6 +77,16 @@ class Utility {
         
         return min + delta;
     }
+    
+    static FormatTimeString(time, digits) {
+        if (Number.isInteger(time)) {
+            return `${parseInt(time)}`;
+        } else if (time < 1) {
+            return `${time.toPrecision(digits)}`;
+        } else {
+            return `${time.toFixed(digits)}`;
+        }
+    }
                              
 
     static TaskPorts(taskName, taskPorts) {
@@ -161,3 +171,46 @@ class Utility {
     }
     
 }
+
+Utility.Interval = class {
+    startTime = null;
+    endTime = null;
+    
+    constructor(startTime, endTime) {
+        if (startTime > endTime) {
+            throw `Interval start time (${startTime}) is greater than its end time (${endTime})!`;
+        }
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+    
+    static FromJson(json) {
+        return new Utility.Interval(json.startTime, json.endTime);
+    }
+    
+    get startTime() {
+        return this.startTime;
+    }
+    
+    set startTime(time) {
+        this.startTime = time;
+    }
+    
+    get endTime() {
+        return this.endTime;
+    }
+    
+    set endTime(time) {
+        this.endTime = time;
+    }
+    
+    get duration() {
+        return this.endTime - this.startTime;
+    }
+    
+    overlaps(other) {
+        //                 |<--- this --->|
+        // |<--- other --->|              |<--- other --->|
+        return this.startTime < other.endTime && this.endTime > other.startTime;
+    }
+};
