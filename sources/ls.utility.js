@@ -46,6 +46,47 @@ class Utility {
             return Utility.LeastCommonMultiple(a, b);
         }) / scaling;
     }
+    
+    // TODO: Approximation of a normal distribution.
+    static NormalDistribution(samples) {
+        let random = 0.0;
+        
+        for (let i = 0; i < samples; i += 1) {
+            random += Math.random();
+        }
+        
+        return random / samples;
+    }
+    
+    // TODO: Create actual distribution
+    static WeibullDistribution() {
+        return 0;
+    }
+    
+    static Random(min, avg, max, distribution) {
+        const range = max - min;
+        
+        let delta = 0;
+        if (distribution == 'Normal') {
+            delta = range * Utility.NormalDistribution(6);
+        } else if (distribution == 'Uniform') {
+            delta = range * Math.random();
+        } else if (distribution == 'Weibull') {
+            delta = range * Utility.WeibullDistribution();
+        }
+        
+        return min + delta;
+    }
+    
+    static FormatTimeString(time, digits) {
+        if (Number.isInteger(time)) {
+            return `${parseInt(time)}`;
+        } else if (time < 1) {
+            return `${time.toPrecision(digits)}`;
+        } else {
+            return `${time.toFixed(digits)}`;
+        }
+    }
                              
 
     static TaskPorts(taskName, taskPorts) {
@@ -130,3 +171,46 @@ class Utility {
     }
     
 }
+
+Utility.Interval = class {
+    startTime = null;
+    endTime = null;
+    
+    constructor(startTime, endTime) {
+        if (startTime > endTime) {
+            throw `Interval start time (${startTime}) is greater than its end time (${endTime})!`;
+        }
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+    
+    static FromJson(json) {
+        return new Utility.Interval(json.startTime, json.endTime);
+    }
+    
+    get startTime() {
+        return this.startTime;
+    }
+    
+    set startTime(time) {
+        this.startTime = time;
+    }
+    
+    get endTime() {
+        return this.endTime;
+    }
+    
+    set endTime(time) {
+        this.endTime = time;
+    }
+    
+    get duration() {
+        return this.endTime - this.startTime;
+    }
+    
+    overlaps(other) {
+        //                 |<--- this --->|
+        // |<--- other --->|              |<--- other --->|
+        return this.startTime < other.endTime && this.endTime > other.startTime;
+    }
+};
