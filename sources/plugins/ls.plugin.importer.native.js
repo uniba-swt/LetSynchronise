@@ -1,11 +1,11 @@
 'use strict';
 
-class PluginImporterTool1 {
+class PluginImporterNative {
     // Plug-in Metadata
-    static get Name()     { return 'Tool1'; }
+    static get Name()     { return 'LetSynchronise'; }
     static get Author()   { return 'Eugene Yip'; }
-    static get Category() { return PluginImporter.Category.Tool1; }
-    static get Input()    { return PluginImporter.Input.Xml1; }
+    static get Category() { return PluginImporter.Category.Native; }
+    static get Input()    { return PluginImporter.Input.Json; }
     static get Output()   { return PluginImporter.Output.Json; }
 
     
@@ -14,15 +14,11 @@ class PluginImporterTool1 {
     
     // Returns a native JSON representation of a given system.
     //
-    // @Input system defined in XML1 format.
+    // @Input system defined in native JSON format.
     // @Output system defined in the native JSON format.
     static Result(system) {
-        let json = '';
-        
-        // TODO: Walk through system and generate the required json.
-        alert(this.Name);
-        
-        return json;
+        // Simply returns the system.
+        return system;
     }
     
     

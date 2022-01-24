@@ -8,7 +8,7 @@ class ViewExportImport {
     resetButton = null;
     
     importSelector = null;
-    importSelectorLabel = null;
+    importersDropdown = null;
 
 
     constructor() {
@@ -20,8 +20,15 @@ class ViewExportImport {
         this.resetButton = this.root.querySelector('#reset-system');
 
         this.importSelector = this.root.querySelector('#import-system-file');
-        this.importSelectorLabel = this.root.querySelector('#import-system-file-label');
+        this.importersDropdown = d3.select('#import-importers');
     }
+    
+    
+    get importer() {
+        const element = this.importersDropdown.select('.active');
+        return (element.node() != null) ? element.node().text : null;
+    }
+    
     
     // -----------------------------------------------------
     // Registration of handlers from the controller
@@ -31,7 +38,6 @@ class ViewExportImport {
             event.preventDefault();
             
             this.importSelector.value = null;
-            this.importSelectorLabel.innerText = "Choose system JSON file";
         
             handler();
         });
@@ -49,12 +55,12 @@ class ViewExportImport {
             const fileReader = new FileReader();
             fileReader.readAsText(this.importSelector.files.item(0));
         
-            fileReader.onload = (event) => { 
-                const result = JSON.parse(event.target.result);
+            fileReader.onload = (event) => {
+                const pluginImporter = PluginImporter.GetPlugin(this.importer);
                 
-                // TODO: Convert the import file using the selected importer plugin.
-    
-                handler(result);
+                const result = JSON.parse(event.target.result);
+                const convertedResult = pluginImporter.Result(result);
+                handler(convertedResult);
             }
         });
     }
@@ -64,6 +70,39 @@ class ViewExportImport {
             event.preventDefault();
             handler();
         });
+    }
+    
+    updateImporters() {
+        const thisRef = this;
+        
+        // Choose one of the native plugins as the default importer.
+        const nativePlugins = PluginImporter.OfCategory(PluginImporter.Category.Native);
+        const nativePlugin = Object.keys(nativePlugins).length > 0 ? Object.keys(nativePlugins)[0] : null;
+        const remainingPlugins = Object.keys(PluginImporter.Plugins);
+        
+        this.importersDropdown.selectAll('*').remove();
+        this.importersDropdown
+            .append('a')
+                .attr('class', 'dropdown-item active')
+                .text(nativePlugin)
+            .on('click', function(event, data) {
+                thisRef.importersDropdown.node().querySelectorAll('a')
+                    .forEach(importer => importer.classList.remove('active'));
+                this.classList.add('active');
+            });
+        
+        this.importersDropdown
+            .selectAll('a')
+            .data(remainingPlugins)
+            .enter()
+            .append('a')
+                .attr('class', 'dropdown-item')
+                .text(remainingPlugin => remainingPlugin)
+            .on('click', function(event, data) {
+                thisRef.importersDropdown.node().querySelectorAll('a')
+                    .forEach(importer => importer.classList.remove('active'));
+                this.classList.add('active');
+            });
     }
     
     toString() {

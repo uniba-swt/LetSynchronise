@@ -41,12 +41,62 @@ class Utility {
         const decimalPlaces = Utility.MaxOfArray(array.map(element => Utility.DecimalPlaces(element)));
         const scaling = Math.pow(10, decimalPlaces);
         const arrayScaled = array.map(element => element*scaling);
-                
+        
         return arrayScaled.reduce(function(a, b) {
             return Utility.LeastCommonMultiple(a, b);
         }) / scaling;
     }
-                             
+    
+    // Geenrate samples from a normal distribution.
+    static NormalSample(samples) {
+        let random = 0.0;
+        
+        for (let i = 0; i < samples; i += 1) {
+            random += Math.random();
+        }
+        
+        return random / samples;
+    }
+    
+    // Generate samples from a Weibull distribution.
+    static WeibullSample(scale, shape, upperBound) {
+        function WeibullCumulativeDistribution(scale, shape, variable) {
+            return 1 - Math.exp(-Math.pow(variable / scale, shape));
+        }
+        
+        // Limit the Weibull distribution to the interval [0, upperBound].
+        const random = Math.random() * WeibullCumulativeDistribution(scale, shape, upperBound);
+        
+        // Take a sample from the Weibull distribution (from the inverse CDF)
+        // and scale it to the interval [0, upperBound].
+        return scale * Math.pow(-Math.log(1 - random), 1 / shape) / upperBound;
+    }
+    
+    static Random(min, avg, max, distribution) {
+        const range = max - min;
+        
+        let delta = 0;
+        if (distribution == 'Normal') {
+            delta = range * Utility.NormalSample(6);
+        } else if (distribution == 'Uniform') {
+            delta = range * Math.random();
+        } else if (distribution == 'Weibull') {
+            delta = range * Utility.WeibullSample(1, 2, 3);
+        }
+        
+        return min + delta;
+    }
+    
+    static FormatTimeString(time, digits) {
+        if (Number.isInteger(time)) {
+            return `${parseInt(time)}`;
+        } else if (time < 1) {
+            return `${time.toPrecision(digits)}`;
+        } else {
+            return `${time.toFixed(digits)}`;
+        }
+    }
+    
 
     static TaskPorts(taskName, taskPorts) {
         return taskPorts.map(port => `${taskName}.${port}`);
@@ -130,3 +180,46 @@ class Utility {
     }
     
 }
+
+Utility.Interval = class {
+    startTime = null;
+    endTime = null;
+    
+    constructor(startTime, endTime) {
+        if (startTime > endTime) {
+            throw `Interval start time (${startTime}) is greater than its end time (${endTime})!`;
+        }
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+    
+    static FromJson(json) {
+        return new Utility.Interval(json.startTime, json.endTime);
+    }
+    
+    get startTime() {
+        return this.startTime;
+    }
+    
+    set startTime(time) {
+        this.startTime = time;
+    }
+    
+    get endTime() {
+        return this.endTime;
+    }
+    
+    set endTime(time) {
+        this.endTime = time;
+    }
+    
+    get duration() {
+        return this.endTime - this.startTime;
+    }
+    
+    overlaps(other) {
+        //                 |<--- this --->|
+        // |<--- other --->|              |<--- other --->|
+        return this.startTime < other.endTime && this.endTime > other.startTime;
+    }
+};

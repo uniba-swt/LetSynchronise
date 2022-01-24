@@ -40,33 +40,30 @@ class ModelTask {
     // Class methods
 
    async createTask(parameters) {
-        // Store taskParameters into Database
-        const logicalTask = ModelLogicalTask.CreateWithParameters(parameters);
-        
         // Delete dependencies that relied on task ports that are no longer exist.
         let dependenciesToRemove = [];
         let dependencies = await this.modelDependency.getAllDependencies();
         for (const dependency of dependencies) {
-
             // Check whether the dependency destination is this task.
-            if (dependency.destination.task == logicalTask.name) { 
+            if (dependency.destination.task == parameters.name) {
                 // Check whether the task port still exists.
-                if (logicalTask.inputs.some(input => (input == dependency.destination.port)) == false) {
+                if (parameters.inputs.some(input => (input == dependency.destination.port)) == false) {
                     dependenciesToRemove.push(dependency);
                 }
             }
 
             // Check whether the dependency source is this task.
-            if (dependency.source.task == logicalTask.name) { 
+            if (dependency.source.task == parameters.name) {
                 // Check whether the task port still exists.
-                if (logicalTask.outputs.some(output => (output == dependency.source.port)) == false) {
+                if (parameters.outputs.some(output => (output == dependency.source.port)) == false) {
                     dependenciesToRemove.push(dependency);
                 }
             }
         }        
 
+        // Store task parameters into Database
         return Promise.all(dependenciesToRemove.map(dependency => this.modelDependency.deleteDependency(dependency.name)))
-            .then(this.database.putObject(Model.TaskStoreName, logicalTask.parameters))
+            .then(this.database.putObject(Model.TaskStoreName, parameters))
             .then(this.refreshViews());
     }
     

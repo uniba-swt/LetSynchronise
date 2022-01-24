@@ -27,7 +27,6 @@
     <script src="sources/model/ls.model.dependency.js"></script>
     <script src="sources/model/ls.model.schedule.js"></script>
     <script src="sources/model/ls.model.task.js"></script>
-    <script src="sources/model/ls.model.logical.task.js"></script>
     <script src="sources/model/ls.model.constraint.js"></script>
     <script src="sources/model/ls.model.eventChain.js"></script>
     <script src="sources/model/ls.model.chain.js"></script>
@@ -63,6 +62,7 @@
     <script src="sources/plugins/ls.plugin.metric.latency.js"></script>
     
     <script src="sources/plugins/ls.plugin.importer.js"></script>
+    <script src="sources/plugins/ls.plugin.importer.native.js"></script>
     <script src="sources/plugins/ls.plugin.importer.tool1.js"></script>
     
     <script src="sources/plugins/ls.plugin.exporter.js"></script>
@@ -100,6 +100,12 @@
                         <div class="input-group">
                             <input id="import-system-file" type="file" accept=".json" class="form-control"/>
                             <button id="import-system" type="submit" class="btn btn-primary">Import</button>
+                            <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
+                                <span class="visually-hidden">Importer Dropdown</span>
+                            </button>
+                            <div id="import-importers" class="dropdown-menu">
+                                <a class="dropdown-item active" href="#">LetSyncrhonise Importer</a>
+                            </div>
                         </div>
                     </div>
                     
@@ -146,9 +152,9 @@
             <h3>Define or Edit a LET Task</h3>
             
             <form class="row gx-3 gy-2" id="view-task-define">
-                <div class="col-8">
+                <div class="col-12">
                     <div class="input-group">
-                        <span for="name" class="input-group-text col-3">Name</span>
+                        <span for="name" class="input-group-text col-2">Name</span>
                         <input required type="text" class="form-control" id="name" value="t1"/>
                     </div>
                 </div>
@@ -337,7 +343,7 @@
         
                 <div class="col-auto">
                     <div id="view-schedule-dependencies" class="dropdown">
-                        <button class="btn btn-danger dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <button class="btn btn-danger dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
                             Dependencies
                         </button>
                         <div id="view-schedule-dependencies-menu" class="dropdown-menu">
