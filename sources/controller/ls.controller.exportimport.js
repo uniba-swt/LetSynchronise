@@ -16,6 +16,7 @@ class ControllerExportImport {
         // Register the handlers when setting the view.
         this._view.registerExportButtonHandler(this.handleExport);
         this._view.registerImportButtonHandler(this.handleImport);
+        this._view.registerimportSelectorHandeler(this.handleImportSelector)
         this._view.registerResetButtonHandler(this.handleReset);
     }
     
@@ -89,6 +90,10 @@ class ControllerExportImport {
     handleImport = (system) => {
         this.model.importSystem(system);
     }
+
+    //handleImportSelector = () => {
+    //    this.model.handleImportSelectorSystem();
+    //}
     
     // Handler for resetting a system
     handleReset = () => {

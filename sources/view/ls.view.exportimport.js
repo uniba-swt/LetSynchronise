@@ -46,9 +46,9 @@ class ViewExportImport {
     registerImportButtonHandler(handler) {
         this.importButton.addEventListener('click', event => {
             event.preventDefault(); 
-            
+            const pluginImporter = PluginImporter.GetPlugin(this.importer);
             if (this.importSelector.files.length < 1) {
-                alert("Select a system JSON file!");
+                alert(pluginImporter.name+": Select a "+pluginImporter.Input+" system file!");
                 return;
             }
         
@@ -58,13 +58,25 @@ class ViewExportImport {
             fileReader.onload = (event) => {
                 const pluginImporter = PluginImporter.GetPlugin(this.importer);
                 
-                const result = JSON.parse(event.target.result);
-                const convertedResult = pluginImporter.Result(result);
-                handler(convertedResult);
+                if (pluginImporter.Input == PluginImporter.Input.JSON) {
+                    const result = JSON.parse(event.target.result);
+                    const convertedResult = pluginImporter.Result(result);
+                    handler(convertedResult);
+                }else{
+                    const convertedResult = pluginImporter.Result(event.target.result);
+                    handler(convertedResult);
+                }
             }
         });
     }
     
+    registerimportSelectorHandeler(handler) {
+        this.importSelector.addEventListener('click', event => {
+            const pluginImporter = PluginImporter.GetPlugin(this.importer);
+            this.importSelector.accept = "."+pluginImporter.Input; //filter acceptable file type based on plugin
+        });
+    }
+
     registerResetButtonHandler(handler) {
         this.resetButton.addEventListener('click', event => {
             event.preventDefault();

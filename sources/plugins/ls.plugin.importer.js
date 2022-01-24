@@ -6,11 +6,13 @@ class PluginImporter {
     static Category = class {
         static get Native() { return 'Native'; }    // Importer for native LetSynchronise JSON files
         static get Tool1()  { return 'Tool1'; }     // Importer for Tool1 generated files
+        static get End2End() {return 'End2End'}
     }
 
     static Input = class {
         static get Json() { return 'Json'; }
         static get Xml1() { return 'Xml1'; }
+        static get Txt() { return 'Txt'; }
     }
     
     static Output = class {
