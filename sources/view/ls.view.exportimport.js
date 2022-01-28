@@ -58,7 +58,7 @@ class ViewExportImport {
             fileReader.onload = (event) => {
                 const pluginImporter = PluginImporter.GetPlugin(this.importer);
                 
-                if (pluginImporter.Input == PluginImporter.Input.JSON) {
+                if (pluginImporter.Input == PluginImporter.Input.Json) {
                     const result = JSON.parse(event.target.result);
                     const convertedResult = pluginImporter.Result(result);
                     handler(convertedResult);
