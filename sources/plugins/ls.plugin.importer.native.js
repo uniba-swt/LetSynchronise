@@ -16,10 +16,10 @@ class PluginImporterNative {
     //
     // @Input system defined in native JSON format.
     // @Output system defined in the native JSON format.
-    static Result(system) {
+    static Result(rawSystem) {
         // Simply returns the system.
-        return system;
+        
+        return JSON.parse(rawSystem);
     }
-    
     
 }

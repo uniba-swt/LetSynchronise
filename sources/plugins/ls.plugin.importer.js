@@ -4,13 +4,15 @@
 
 class PluginImporter {
     static Category = class {
-        static get Native() { return 'Native'; }    // Importer for native LetSynchronise JSON files
-        static get Tool1()  { return 'Tool1'; }     // Importer for Tool1 generated files
+        static get Native() { return 'Native'; }   // Importer for native LetSynchronise JSON files
+        static get Tool1()  { return 'Tool1'; }    // Importer for Tool1 generated files
+        static get TudE2e() { return 'TudE2e'; }   // Importer for TU Dortmund End-to-End analyser
     }
 
     static Input = class {
         static get Json() { return 'Json'; }
         static get Xml1() { return 'Xml1'; }
+        static get Txt()  { return 'Txt'; }
     }
     
     static Output = class {

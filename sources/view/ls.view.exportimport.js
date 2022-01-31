@@ -21,12 +21,27 @@ class ViewExportImport {
 
         this.importSelector = this.root.querySelector('#import-system-file');
         this.importersDropdown = d3.select('#import-importers');
+        
+        // Listeners
+        this.setupImportSelectorListener();
     }
     
     
     get importer() {
         const element = this.importersDropdown.select('.active');
         return (element.node() != null) ? element.node().text : null;
+    }
+    
+    
+    // -----------------------------------------------------
+    // Setup listeners
+    
+    setupImportSelectorListener() {
+        this.importSelector.addEventListener('click', event => {
+            // Filter the acceptable file types based on the selected plugin.
+            const pluginImporter = PluginImporter.GetPlugin(this.importer);
+            this.importSelector.accept = `.${pluginImporter.Input}`;
+        });
     }
     
     
@@ -45,10 +60,11 @@ class ViewExportImport {
 
     registerImportButtonHandler(handler) {
         this.importButton.addEventListener('click', event => {
-            event.preventDefault(); 
+            event.preventDefault();
             
+            const pluginImporter = PluginImporter.GetPlugin(this.importer);
             if (this.importSelector.files.length < 1) {
-                alert("Select a system JSON file!");
+                alert(`${pluginImporter.Name} system importer requires a *.${pluginImporter.Input.toLowerCase()} file to be selected!`);
                 return;
             }
         
@@ -56,15 +72,12 @@ class ViewExportImport {
             fileReader.readAsText(this.importSelector.files.item(0));
         
             fileReader.onload = (event) => {
-                const pluginImporter = PluginImporter.GetPlugin(this.importer);
-                
-                const result = JSON.parse(event.target.result);
-                const convertedResult = pluginImporter.Result(result);
-                handler(convertedResult);
+                const result = pluginImporter.Result(event.target.result);
+                handler(result);
             }
         });
     }
-    
+
     registerResetButtonHandler(handler) {
         this.resetButton.addEventListener('click', event => {
             event.preventDefault();

@@ -89,7 +89,7 @@ class ControllerExportImport {
     handleImport = (system) => {
         this.model.importSystem(system);
     }
-    
+
     // Handler for resetting a system
     handleReset = () => {
         this.model.resetSystem();
