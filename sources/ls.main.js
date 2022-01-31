@@ -90,7 +90,7 @@ console.log(controller.toString());
 // Register plug-ins.
 PluginImporter.Register(PluginImporterNative.Name, PluginImporterNative);
 PluginImporter.Register(PluginImporterTool1.Name, PluginImporterTool1);
-PluginImporter.Register(PluginImporterEnd2End.Name, PluginImporterEnd2End);
+PluginImporter.Register(PluginImporterTudE2e.Name, PluginImporterTudE2e);
 view.viewExportImport.updateImporters();
 
 console.log(PluginImporter.ToString())
