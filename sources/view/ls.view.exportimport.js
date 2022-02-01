@@ -11,6 +11,7 @@ class ViewExportImport {
     importSystemSelector = null;
     importerSystemDropdown = null;
     
+    exportScheduleButton = null;
     importScheduleButton = null;
     
     importScheduleSelector = null;
@@ -29,6 +30,7 @@ class ViewExportImport {
         this.importerSystemDropdown = d3.select('#import-system-importers');
         
         // Schedule import.
+        this.exportScheduleButton = this.rootAnalyse.querySelector('#export-schedule');
         this.importScheduleButton = this.rootAnalyse.querySelector('#import-schedule');
 
         this.importScheduleSelector = this.rootAnalyse.querySelector('#import-schedule-file');
@@ -92,6 +94,16 @@ class ViewExportImport {
     registerResetSystemButtonHandler(handler) {
         this.resetSystemButton.addEventListener('click', event => {
             event.preventDefault();
+            handler();
+        });
+    }
+
+    registerExportScheduleButtonHandler(handler) {
+        this.exportScheduleButton.addEventListener('click', event => {
+            event.preventDefault();
+            
+            this.importScheduleSelector.value = null;
+            
             handler();
         });
     }

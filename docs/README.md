@@ -1,3 +1,10 @@
+# LET Task Set
+
+The task set of a LET system is specified by the user.
+
+An example task set of a LET system in JSON format can be found at `example/example1-system.json`.
+
+
 # LET Task Schedule
 
 The task schedule is recomputed every time the **Update** button is pressed. 
@@ -8,6 +15,8 @@ However, recomputing the entire task schedule is not necessary when task depende
 They have no impact on the task set. 
 Only when the tasks are created or edited does the task schedule need to be recomputed.
 When this is necessary, the **Update** button will turn red and remain red until it has be clicked, triggering a recomputation of the task schedule.
+
+An example schedule in JSON format can be found at `example/example1-schedule.json`.
 
 
 # System Plugins
@@ -51,4 +60,4 @@ The JSON string is then converted into a JSON object using the method `JSON.pars
 LetSynchronise clears its database and stores the JSON object in the database. 
 
 An import plugin may also be used to import LET task schedules, but the plugin shall guarantee that the task, dependency, and event chain instances are consistent with their definitions in the LetSynchronise database (SystemInputStore, SystemOutputStore, TaskStore, DependencyStore, ConstraintStore, EventChainStore).
-Note that portions of a task schedule (e.g., only task instances) can be imported without affecting deleting other scheduling information (e.g., dependencies instances).  
+Note that portions of a task schedule (e.g., only task instances) can be imported without modifying other scheduling information (e.g., dependencies instances).  
