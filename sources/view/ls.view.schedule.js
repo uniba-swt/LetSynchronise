@@ -143,8 +143,11 @@ class ViewSchedule {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
             event.preventDefault();
             
-            // Ask the model to give us the current task set via a callback.
-            getScheduleHandler(this.schedulingParametersClean.makespan);
+            // Validate the inputs.
+            if (this.validateSchedulingParameters(this.schedulingParametersRaw)) {
+                // Ask the model to give us the current task set via a callback.
+                getScheduleHandler(this.schedulingParametersClean.makespan, true);
+            }
         });
     }
     

@@ -1,8 +1,6 @@
 'use strict';
 
-class ModelSchedule {
-    updateSchedule = null;              // Callback to function in ls.view.schedule
-    
+class ModelSchedule {    
     database = null;
 
     modelTask = null;
@@ -12,14 +10,6 @@ class ModelSchedule {
 
     constructor() { }
 
-    
-    // -----------------------------------------------------
-    // Registration of callbacks from the controller
-    
-    registerUpdateScheduleCallback(callback) {
-        this.updateSchedule = callback;
-    }
-    
     
     // -----------------------------------------------------
     // Registration of model database
@@ -129,7 +119,7 @@ class ModelSchedule {
             let instances = [];
             if (dependency.source.task == Model.SystemInterfaceName) {
                 // Dependency is system input --> task
-                const destinationInstances = destinationTaskInstances.value;
+                const destinationInstances = destinationTaskInstances ? destinationTaskInstances.value : 0;
                 
                 if (destinationInstances.length > 0) {
 					const numberOfInstances = destinationInstances.length - (destinationInstances[destinationInstances.length - 1].letStartTime > makespan);
@@ -141,7 +131,7 @@ class ModelSchedule {
                 }
             } else if (dependency.destination.task == Model.SystemInterfaceName) {
                 // Dependency is task --> system output
-                const sourceInstances = sourceTaskInstances.value;
+                const sourceInstances = sourceTaskInstances ? sourceTaskInstances.value : 0;
                 
                 if (sourceInstances.length > 0) {
 					const numberOfInstances = sourceInstances.length - (sourceInstances[sourceInstances.length - 1].letEndTime > makespan);
@@ -153,8 +143,8 @@ class ModelSchedule {
                 }
             } else {
                 // Dependency is task --> task
-                const sourceInstances = sourceTaskInstances.value;
-                const destinationInstances = destinationTaskInstances.value;
+                const sourceInstances = sourceTaskInstances ? sourceTaskInstances.value : 0;
+                const destinationInstances = destinationTaskInstances ? destinationTaskInstances.value : 0;
 
                 if (destinationInstances.length > 0) {
 					const numberOfInstances = destinationInstances.length - (destinationInstances[destinationInstances.length - 1].letStartTime > makespan);
@@ -270,16 +260,25 @@ class ModelSchedule {
             .then(([allConstraints, allDependencies]) => allConstraints
                 .forEach(constraint => this.createInferredEventChains(allDependencies, constraint.name, constraint.source, constraint.destination)))
             .then(result => this.modelEventChain.getAllEventChains())
+        
+        return promiseAllInferredEventChains;
     }
     
     
-    // Get task schedule for given makespan.
-    getSchedule(makespan) {
+    reinstantiateTasks(makespan) {
         // Generate task instances.
         const promiseAllTasks = this.modelTask.getAllTasks();
         const promiseAllTasksInstances = promiseAllTasks
             .then(tasks => Promise.all(tasks.map(task => this.createTaskInstances(task, makespan))))
             .then(result => this.database.getAllObjects(Model.TaskInstancesStoreName));
+        
+        return promiseAllTasksInstances;
+    }
+    
+    // Get task schedule for given makespan.
+    getSchedule(makespan) {
+        const promiseAllTasks = this.modelTask.getAllTasks();
+        const promiseAllTasksInstances = this.database.getAllObjects(Model.TaskInstancesStoreName);
         
         // Generate dependency instances.
         const promiseAllDependenciesInstances = this.modelDependency.getAllDependencies()
