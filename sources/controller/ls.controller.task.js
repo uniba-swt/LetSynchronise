@@ -2,6 +2,7 @@
 
 class ControllerTask {
     _view = null;
+    _viewSchedule = null;
     _model = null;
     _modelDependency = null;
     _modelEventChain = null;
@@ -20,11 +21,20 @@ class ControllerTask {
         return this._view;
     }
     
+    set viewSchedule(viewSchedule) {
+        this._viewSchedule = viewSchedule;
+    }
+    
+    get viewSchedule() {
+        return this._viewSchedule;
+    }
+    
     set model(model) {
         this._model = model;
         
         // Register the handlers when setting the model.
         this._model.registerUpdateTasksCallback(this.callbackUpdateTasks);
+        this._model.registerNotifyChangesCallback(this.callbackNotifyChanges);
         
         // Hack to populate the View with tasks once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
@@ -85,6 +95,11 @@ class ControllerTask {
         this.view.updateTasks(tasks);
     }
 
+    // Callback for notifying the schedule view that tasks have changed.
+    callbackNotifyChanges = () => {
+        this.viewSchedule.notifyChanges();
+    }
+    
     
     toString() {
         return `ControllerTask with ${this.view} and ${this.model}`;

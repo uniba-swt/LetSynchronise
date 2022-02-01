@@ -121,11 +121,11 @@ class ModelDatabase {
     }
     
 
-    // System export
+    // System export and import.
     
     exportSystem = async function() {
-        var system = { };
-        var necessaryStoreNames = [ ];
+        let system = { };
+        let necessaryStoreNames = [ ];
         
         const allStoreNames = this.db.objectStoreNames;
         for (const storeName of allStoreNames) {
@@ -139,7 +139,7 @@ class ModelDatabase {
     }
     
     deleteSystem = function() {
-        var deletePromises = [ ];
+        let deletePromises = [ ];
         
         const allStoreNames = this.db.objectStoreNames;
         for (const storeName of allStoreNames) {
@@ -153,11 +153,58 @@ class ModelDatabase {
         let importPromises = [ ];
         
         for (const [storeName, objects] of Object.entries(system)) {
-            for (const object of objects) {
-                importPromises.push(this.putObject(storeName, object));
+            if (!storeName.includes('Instance')) {
+                for (const object of objects) {
+                    importPromises.push(this.putObject(storeName, object));
+                }
             }
         }
 
+        return Promise.all(importPromises);
+    }
+    
+    // Schedule export and import.
+    
+    exportSchedule = async function() {
+        let schedule = { };
+        let necessaryStoreNames = [ ];
+        
+        const allStoreNames = this.db.objectStoreNames;
+        for (const storeName of allStoreNames) {
+            if (storeName.includes('Instance')) {
+                necessaryStoreNames.push(storeName);
+                schedule[storeName] = await this.getAllObjects(storeName);
+            }
+        }
+        
+        return schedule;
+    }
+    
+    deleteSchedule = function() {
+        let deletePromises = [ ];
+        
+        const instancesStoreNames = [
+            Model.TaskInstancesStoreName
+        ];
+        for (const instancesStoreName of instancesStoreNames) {
+            deletePromises.push(this.deleteAllObjects(instancesStoreName));
+        }
+        
+        return Promise.all(deletePromises);
+    }
+    
+    importSchedule = function(schedule) {
+        let importPromises = [ ];
+        
+        for (const [storeName, objects] of Object.entries(schedule)) {
+            if (storeName.includes('Instance')) {
+                for (const object of objects) {
+                    importPromises.push(this.putObject(storeName, object));
+                    console.log(storeName, object);
+                }
+            }
+        }
+        
         return Promise.all(importPromises);
     }
     

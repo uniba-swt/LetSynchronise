@@ -49,6 +49,7 @@ controller.controllerInterface.modelConstraint = model.modelConstraint;
 controller.controllerInterface.modelEventChain = model.modelEventChain;
 
 controller.controllerTask.view = view.viewTask;
+controller.controllerTask.viewSchedule = view.viewSchedule;
 controller.controllerTask.model = model.modelTask;
 controller.controllerTask.modelDependency = model.modelDependency;
 controller.controllerTask.modelEventChain = model.modelEventChain;
@@ -91,7 +92,7 @@ console.log(controller.toString());
 PluginImporter.Register(PluginImporterNative.Name, PluginImporterNative);
 PluginImporter.Register(PluginImporterTool1.Name, PluginImporterTool1);
 PluginImporter.Register(PluginImporterTudE2e.Name, PluginImporterTudE2e);
-view.viewExportImport.updateImporters();
+view.viewExportImport.updateSystemImporters();
 
 console.log(PluginImporter.ToString())
 

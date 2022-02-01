@@ -62,6 +62,25 @@ class ModelExportImport {
             .then(this.refreshViews());
     }
     
+    exportSchedule(schedule) {
+        this.database.exportSchedule()
+            .then(system => {
+                const json = JSON.stringify(system);
+                const link = document.createElement("a");
+                const file = new Blob([json], { type: 'application/json' });
+                link.href = URL.createObjectURL(file);
+                link.download = 'schedule.json';
+                link.click();
+                URL.revokeObjectURL(link.href);
+            });
+    }
+    
+    // Importing a schedule overwrites the existing task, dependency, and event chain instances.
+    importSchedule(schedule) {
+        this.database.importSchedule(schedule)
+            .then(this.refreshViews());
+    }
+    
     refreshViews() {
         return this.modelInterface.refreshViews()
             .then(this.modelTask.refreshViews())
