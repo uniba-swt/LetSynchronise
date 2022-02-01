@@ -259,7 +259,7 @@ class ViewTask {
             return false;
         }
         
-        if (taskParameters.initialOffset == null || isNaN(taskParameters.initialOffset)) {
+        if (taskParameters.initialOffset == null || taskParameters.initialOffset.trim() == '' || isNaN(taskParameters.initialOffset)) {
             alert('Initial offset has to be a decimal number.');
             return false;
         }
@@ -269,7 +269,7 @@ class ViewTask {
             return false;
         }
 
-        if (taskParameters.activationOffset == null || isNaN(taskParameters.activationOffset)) {
+        if (taskParameters.activationOffset == null || taskParameters.activationOffset.trim() == '' || isNaN(taskParameters.activationOffset)) {
             alert('Activation offset has to be a decimal number.');
             return false;
         }
@@ -279,34 +279,31 @@ class ViewTask {
             return false;
         }
 
-        if (taskParameters.duration == null || isNaN(taskParameters.duration)) {
+        if (taskParameters.duration == null || taskParameters.duration.trim() == '' || isNaN(taskParameters.duration)) {
             alert('Duration offset has to be a decimal number.');
             return false;
         }
-        
         const duration = parseFloat(taskParameters.duration);
         if (duration <= 0) {
             alert('Duration has to be greater than 0.');
             return false;
         }
         
-        if (taskParameters.period == null || isNaN(taskParameters.period)) {
+        if (taskParameters.period == null || taskParameters.period.trim() == '' || isNaN(taskParameters.period)) {
             alert('Period offset has to be a decimal number.');
             return false;
         }
-        
         const period = parseFloat(taskParameters.period);
         if (period <= 0) {
             alert('Period has to be greater than 0.');
             return false;
         }
-        
         if ((activationOffset + duration) > period) {
             alert('Period is shorter than the combined activation offset and LET duration.');
             return false;
         }
         
-        if (taskParameters.inputs == null || taskParameters.inputs == '') {
+        if (taskParameters.inputs == null || taskParameters.inputs.trim() == '') {
             alert('Specify at least one input.');
             return false;
         }
@@ -317,7 +314,7 @@ class ViewTask {
             return false;
         }
         
-        if (taskParameters.outputs == null || taskParameters.outputs == '') {
+        if (taskParameters.outputs == null || taskParameters.outputs.trim() == '') {
             alert('Specify at least one output.');
             return false;
         }
@@ -335,33 +332,30 @@ class ViewTask {
             return false;
         }
         
-        if (taskParameters.wcet == null || isNaN(taskParameters.wcet)) {
+        if (taskParameters.wcet == null || taskParameters.wcet.trim() == '' || isNaN(taskParameters.wcet)) {
             alert('WCET has to be a decimal number.');
             return false;
         }
-        
         const wcet = parseFloat(taskParameters.wcet);
         if (wcet <= 0) {
             alert('WCET has to be greater than 0.');
             return false;
         }
         
-        if (taskParameters.acet == null || isNaN(taskParameters.acet)) {
+        if (taskParameters.acet == null || taskParameters.acet.trim() == '' || isNaN(taskParameters.acet)) {
             alert('ACET has to be a decimal number.');
             return false;
         }
-        
         const acet = parseFloat(taskParameters.acet);
         if (acet <= 0) {
             alert('ACET has to be greater than 0.');
             return false;
         }
         
-        if (taskParameters.bcet == null || isNaN(taskParameters.bcet)) {
+        if (taskParameters.bcet == null || taskParameters.bcet.trim() == '' || isNaN(taskParameters.bcet)) {
             alert('BCET has to be a decimal number.');
             return false;
         }
-        
         const bcet = parseFloat(taskParameters.bcet);
         if (bcet <= 0) {
             alert('BCET has to be greater than 0.');
@@ -372,18 +366,16 @@ class ViewTask {
             alert('WCET cannot be greater than duration.');
             return false;
         }
-        
         if (wcet < bcet) {
             alert('WCET cannot be less than BCET.');
             return false;
         }
-        
         if (wcet < acet || acet < bcet) {
             alert('ACET cannot be less than BCET or greater than WCET.');
             return false;
         }
         
-        if (taskParameters.distribution == 'null ') {
+        if (taskParameters.distribution == null || taskParameters.distribution.trim() == '' || taskParameters.distribution == 'null ') {
             alert('Choose type of execution time distribution.');
             return false;
         }

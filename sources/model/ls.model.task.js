@@ -2,7 +2,7 @@
 
 class ModelTask {
     updateTasks = null;                 // Callback to function in ls.view.task
-    updateGui = null;
+    notifyChanges = null;               // Callback to function in ls.view.schedule
 
     database = null;
     storeName = null;
@@ -85,7 +85,8 @@ class ModelTask {
     
     refreshViews() {
         return this.getAllTasks()
-            .then(result => this.updateTasks(result));
+            .then(result => this.updateTasks(result))
+            .then(this.notifyChanges());
     }
     
     toString() {
