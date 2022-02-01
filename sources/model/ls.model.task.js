@@ -2,6 +2,7 @@
 
 class ModelTask {
     updateTasks = null;                 // Callback to function in ls.view.task
+    notifyChanges = null;               // Callback to function in ls.view.schedule
 
     database = null;
     storeName = null;
@@ -17,6 +18,10 @@ class ModelTask {
 
     registerUpdateTasksCallback(callback) {
         this.updateTasks = callback;
+    }
+    
+    registerNotifyChangesCallback(callback) {
+        this.notifyChanges = callback;
     }
     
     
@@ -78,13 +83,14 @@ class ModelTask {
     deleteTask(name) {
         return this.modelDependency.deleteDependenciesOfTask(name)
             .then(this.database.deleteObject(Model.TaskStoreName, name))
-            .then(this.database.deleteAllObjects(Model.TaskInstancesStoreName, name))
+            .then(this.database.deleteObject(Model.TaskInstancesStoreName, name))
             .then(result => this.refreshViews());
     }
     
     refreshViews() {
         return this.getAllTasks()
-            .then(result => this.updateTasks(result));
+            .then(result => this.updateTasks(result))
+            .then(this.notifyChanges());
     }
     
     toString() {

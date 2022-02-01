@@ -124,8 +124,8 @@ class ModelDatabase {
     // System export
     
     exportSystem = async function() {
-        var system = { };
-        var necessaryStoreNames = [ ];
+        let system = { };
+        let necessaryStoreNames = [ ];
         
         const allStoreNames = this.db.objectStoreNames;
         for (const storeName of allStoreNames) {
@@ -139,7 +139,7 @@ class ModelDatabase {
     }
     
     deleteSystem = function() {
-        var deletePromises = [ ];
+        let deletePromises = [ ];
         
         const allStoreNames = this.db.objectStoreNames;
         for (const storeName of allStoreNames) {
