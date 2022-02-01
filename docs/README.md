@@ -38,9 +38,10 @@ In addition to the meta-data, a minimal importer plugin only needs to define the
 which returns a JSON object:
 ```javascript
 static Result(rawSystem) {
-    // Simply returns the system.
+    // Convert rawSystem into a JSON string.
     const jsonString = ' ... ';
     
+    // Parse the JSON string into an object.
     return JSON.parse(jsonString);
 }
 ```
