@@ -121,7 +121,7 @@ class ModelDatabase {
     }
     
 
-    // System export and import
+    // System export and import.
     
     exportSystem = async function() {
         let system = { };
@@ -149,6 +149,37 @@ class ModelDatabase {
         return Promise.all(deletePromises);
     }
     
+    importSystem = function(system) {
+        let importPromises = [ ];
+        
+        for (const [storeName, objects] of Object.entries(system)) {
+            if (!storeName.includes('Instance')) {
+                for (const object of objects) {
+                    importPromises.push(this.putObject(storeName, object));
+                }
+            }
+        }
+
+        return Promise.all(importPromises);
+    }
+    
+    // Schedule export and import.
+    
+    exportSchedule = async function() {
+        let schedule = { };
+        let necessaryStoreNames = [ ];
+        
+        const allStoreNames = this.db.objectStoreNames;
+        for (const storeName of allStoreNames) {
+            if (storeName.includes('Instance')) {
+                necessaryStoreNames.push(storeName);
+                schedule[storeName] = await this.getAllObjects(storeName);
+            }
+        }
+        
+        return schedule;
+    }
+    
     deleteSchedule = function() {
         let deletePromises = [ ];
         
@@ -160,18 +191,6 @@ class ModelDatabase {
         }
         
         return Promise.all(deletePromises);
-    }
-    
-    importSystem = function(system) {
-        let importPromises = [ ];
-        
-        for (const [storeName, objects] of Object.entries(system)) {
-            for (const object of objects) {
-                importPromises.push(this.putObject(storeName, object));
-            }
-        }
-
-        return Promise.all(importPromises);
     }
     
     importSchedule = function(schedule) {

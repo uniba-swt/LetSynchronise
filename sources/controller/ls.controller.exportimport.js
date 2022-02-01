@@ -18,6 +18,7 @@ class ControllerExportImport {
         this._view.registerImportSystemButtonHandler(this.handleImportSystem);
         this._view.registerResetSystemButtonHandler(this.handleResetSystem);
         
+        this._view.registerExportScheduleButtonHandler(this.handleExportSchedule);
         this._view.registerImportScheduleButtonHandler(this.handleImportSchedule);
     }
     
@@ -95,6 +96,11 @@ class ControllerExportImport {
     // Handler for resetting a system
     handleResetSystem = () => {
         this.model.resetSystem();
+    }
+
+    // Handler for exporting a schedule
+    handleExportSchedule = (schedule) => {
+        this.model.exportSchedule(schedule);
     }
     
     // Handler for importing a schedule
