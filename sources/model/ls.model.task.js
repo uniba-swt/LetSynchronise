@@ -20,6 +20,10 @@ class ModelTask {
         this.updateTasks = callback;
     }
     
+    registerNotifyChangesCallback(callback) {
+        this.notifyChanges = callback;
+    }
+    
     
     // -----------------------------------------------------
     // Registration of models

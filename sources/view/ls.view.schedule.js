@@ -147,6 +147,9 @@ class ViewSchedule {
             if (this.validateSchedulingParameters(this.schedulingParametersRaw)) {
                 // Ask the model to give us the current task set via a callback.
                 getScheduleHandler(this.schedulingParametersClean.makespan, true);
+                
+                this.updateButton.classList.remove('btn-danger');
+                this.updateButton.classList.add('btn-primary');
             }
         });
     }
@@ -163,6 +166,12 @@ class ViewSchedule {
         }
         
         return true;
+    }
+    
+    // Callback for task model to notify us of changes to the task set.
+    notifyChanges() {
+        this.updateButton.classList.remove('btn-primary');
+        this.updateButton.classList.add('btn-danger');
     }
     
     

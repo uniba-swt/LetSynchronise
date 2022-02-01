@@ -49,6 +49,7 @@ controller.controllerInterface.modelConstraint = model.modelConstraint;
 controller.controllerInterface.modelEventChain = model.modelEventChain;
 
 controller.controllerTask.view = view.viewTask;
+controller.controllerTask.viewSchedule = view.viewSchedule;
 controller.controllerTask.model = model.modelTask;
 controller.controllerTask.modelDependency = model.modelDependency;
 controller.controllerTask.modelEventChain = model.modelEventChain;
