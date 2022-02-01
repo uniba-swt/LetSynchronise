@@ -121,7 +121,7 @@ class ModelDatabase {
     }
     
 
-    // System export
+    // System export and import
     
     exportSystem = async function() {
         let system = { };
@@ -149,6 +149,19 @@ class ModelDatabase {
         return Promise.all(deletePromises);
     }
     
+    deleteSchedule = function() {
+        let deletePromises = [ ];
+        
+        const instancesStoreNames = [
+            Model.TaskInstancesStoreName
+        ];
+        for (const instancesStoreName of instancesStoreNames) {
+            deletePromises.push(this.deleteAllObjects(instancesStoreName));
+        }
+        
+        return Promise.all(deletePromises);
+    }
+    
     importSystem = function(system) {
         let importPromises = [ ];
         
@@ -158,6 +171,21 @@ class ModelDatabase {
             }
         }
 
+        return Promise.all(importPromises);
+    }
+    
+    importSchedule = function(schedule) {
+        let importPromises = [ ];
+        
+        for (const [storeName, objects] of Object.entries(schedule)) {
+            if (storeName.includes('Instance')) {
+                for (const object of objects) {
+                    importPromises.push(this.putObject(storeName, object));
+                    console.log(storeName, object);
+                }
+            }
+        }
+        
         return Promise.all(importPromises);
     }
     

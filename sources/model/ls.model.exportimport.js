@@ -62,6 +62,12 @@ class ModelExportImport {
             .then(this.refreshViews());
     }
     
+    // Importing a schedule overwrites the existing task, dependency, and event chain instances.
+    importSchedule(schedule) {
+        this.database.importSchedule(schedule)
+            .then(this.refreshViews());
+    }
+    
     refreshViews() {
         return this.modelInterface.refreshViews()
             .then(this.modelTask.refreshViews())

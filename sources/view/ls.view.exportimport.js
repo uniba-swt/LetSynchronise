@@ -1,34 +1,45 @@
 'use strict';
 
 class ViewExportImport {
-    root = null;
+    rootDesign = null;
+    rootAnalyse = null;
 
-    exportButton = null;
-    importButton = null;
-    resetButton = null;
+    exportSystemButton = null;
+    importSystemButton = null;
+    resetSystemButton = null;
     
-    importSelector = null;
-    importersDropdown = null;
+    importSystemSelector = null;
+    importerSystemDropdown = null;
+    
+    importScheduleButton = null;
+    
+    importScheduleSelector = null;
 
 
     constructor() {
-        this.root = document.querySelector('#nav-design');
+        this.rootDesign = document.querySelector('#nav-design');
+        this.rootAnalyse = document.querySelector('#nav-analyse');
 
-        // System export or import
-        this.exportButton = this.root.querySelector('#export-system');
-        this.importButton = this.root.querySelector('#import-system');
-        this.resetButton = this.root.querySelector('#reset-system');
+        // System export or import.
+        this.exportSystemButton = this.rootDesign.querySelector('#export-system');
+        this.importSystemButton = this.rootDesign.querySelector('#import-system');
+        this.resetSystemButton = this.rootDesign.querySelector('#reset-system');
 
-        this.importSelector = this.root.querySelector('#import-system-file');
-        this.importersDropdown = d3.select('#import-importers');
+        this.importSystemSelector = this.rootDesign.querySelector('#import-system-file');
+        this.importerSystemDropdown = d3.select('#import-system-importers');
+        
+        // Schedule import.
+        this.importScheduleButton = this.rootAnalyse.querySelector('#import-schedule');
+
+        this.importScheduleSelector = this.rootAnalyse.querySelector('#import-schedule-file');
         
         // Listeners
-        this.setupImportSelectorListener();
+        this.setupImportSystemSelectorListener();
     }
     
     
     get importer() {
-        const element = this.importersDropdown.select('.active');
+        const element = this.importerSystemDropdown.select('.active');
         return (element.node() != null) ? element.node().text : null;
     }
     
@@ -36,11 +47,11 @@ class ViewExportImport {
     // -----------------------------------------------------
     // Setup listeners
     
-    setupImportSelectorListener() {
-        this.importSelector.addEventListener('click', event => {
+    setupImportSystemSelectorListener() {
+        this.importSystemSelector.addEventListener('click', event => {
             // Filter the acceptable file types based on the selected plugin.
             const pluginImporter = PluginImporter.GetPlugin(this.importer);
-            this.importSelector.accept = `.${pluginImporter.Input}`;
+            this.importSystemSelector.accept = `.${pluginImporter.Input}`;
         });
     }
     
@@ -48,28 +59,28 @@ class ViewExportImport {
     // -----------------------------------------------------
     // Registration of handlers from the controller
     
-    registerExportButtonHandler(handler) {
-        this.exportButton.addEventListener('click', event => {
+    registerExportSystemButtonHandler(handler) {
+        this.exportSystemButton.addEventListener('click', event => {
             event.preventDefault();
             
-            this.importSelector.value = null;
+            this.importSystemSelector.value = null;
         
             handler();
         });
     }
 
-    registerImportButtonHandler(handler) {
-        this.importButton.addEventListener('click', event => {
+    registerImportSystemButtonHandler(handler) {
+        this.importSystemButton.addEventListener('click', event => {
             event.preventDefault();
             
             const pluginImporter = PluginImporter.GetPlugin(this.importer);
-            if (this.importSelector.files.length < 1) {
+            if (this.importSystemSelector.files.length < 1) {
                 alert(`${pluginImporter.Name} system importer requires a *.${pluginImporter.Input.toLowerCase()} file to be selected!`);
                 return;
             }
         
             const fileReader = new FileReader();
-            fileReader.readAsText(this.importSelector.files.item(0));
+            fileReader.readAsText(this.importSystemSelector.files.item(0));
         
             fileReader.onload = (event) => {
                 const result = pluginImporter.Result(event.target.result);
@@ -78,14 +89,35 @@ class ViewExportImport {
         });
     }
 
-    registerResetButtonHandler(handler) {
-        this.resetButton.addEventListener('click', event => {
+    registerResetSystemButtonHandler(handler) {
+        this.resetSystemButton.addEventListener('click', event => {
             event.preventDefault();
             handler();
         });
     }
     
-    updateImporters() {
+    registerImportScheduleButtonHandler(handler) {
+        this.importScheduleButton.addEventListener('click', event => {
+            event.preventDefault();
+            
+            const pluginImporter = PluginImporter.GetPlugin('LetSynchronise');
+            if (this.importScheduleSelector.files.length < 1) {
+                alert(`${pluginImporter.Name} schedule importer requires a *.${pluginImporter.Input.toLowerCase()} file to be selected!`);
+                return;
+            }
+            
+            const fileReader = new FileReader();
+            fileReader.readAsText(this.importScheduleSelector.files.item(0));
+            
+            fileReader.onload = (event) => {
+                const result = pluginImporter.Result(event.target.result);
+                handler(result);
+            }
+        });
+    }
+    
+    
+    updateSystemImporters() {
         const thisRef = this;
         
         // Choose one of the native plugins as the default importer.
@@ -93,18 +125,18 @@ class ViewExportImport {
         const nativePlugin = Object.keys(nativePlugins).length > 0 ? Object.keys(nativePlugins)[0] : null;
         const remainingPlugins = Object.keys(PluginImporter.Plugins);
         
-        this.importersDropdown.selectAll('*').remove();
-        this.importersDropdown
+        this.importerSystemDropdown.selectAll('*').remove();
+        this.importerSystemDropdown
             .append('a')
                 .attr('class', 'dropdown-item active')
                 .text(nativePlugin)
             .on('click', function(event, data) {
-                thisRef.importersDropdown.node().querySelectorAll('a')
+                thisRef.importerSystemDropdown.node().querySelectorAll('a')
                     .forEach(importer => importer.classList.remove('active'));
                 this.classList.add('active');
             });
         
-        this.importersDropdown
+        this.importerSystemDropdown
             .selectAll('a')
             .data(remainingPlugins)
             .enter()
@@ -112,7 +144,7 @@ class ViewExportImport {
                 .attr('class', 'dropdown-item')
                 .text(remainingPlugin => remainingPlugin)
             .on('click', function(event, data) {
-                thisRef.importersDropdown.node().querySelectorAll('a')
+                thisRef.importerSystemDropdown.node().querySelectorAll('a')
                     .forEach(importer => importer.classList.remove('active'));
                 this.classList.add('active');
             });

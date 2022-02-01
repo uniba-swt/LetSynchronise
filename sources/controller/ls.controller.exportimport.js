@@ -14,9 +14,11 @@ class ControllerExportImport {
         this._view = view;
 
         // Register the handlers when setting the view.
-        this._view.registerExportButtonHandler(this.handleExport);
-        this._view.registerImportButtonHandler(this.handleImport);
-        this._view.registerResetButtonHandler(this.handleReset);
+        this._view.registerExportSystemButtonHandler(this.handleExportSystem);
+        this._view.registerImportSystemButtonHandler(this.handleImportSystem);
+        this._view.registerResetSystemButtonHandler(this.handleResetSystem);
+        
+        this._view.registerImportScheduleButtonHandler(this.handleImportSchedule);
     }
     
     get view() {
@@ -81,18 +83,23 @@ class ControllerExportImport {
     
     // Handler for exporting a system
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
-    handleExport = () => {
+    handleExportSystem = () => {
         this.model.exportSystem();
     }
 
     // Handler for importing a system
-    handleImport = (system) => {
+    handleImportSystem = (system) => {
         this.model.importSystem(system);
     }
 
     // Handler for resetting a system
-    handleReset = () => {
+    handleResetSystem = () => {
         this.model.resetSystem();
+    }
+    
+    // Handler for importing a schedule
+    handleImportSchedule = (schedule) => {
+        this.model.importSchedule(schedule);
     }
     
     

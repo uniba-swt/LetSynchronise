@@ -104,8 +104,8 @@
                             <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
                                 <span class="visually-hidden">Importer Dropdown</span>
                             </button>
-                            <div id="import-importers" class="dropdown-menu">
-                                <a class="dropdown-item active" href="#">LetSyncrhonise Importer</a>
+                            <div id="import-system-importers" class="dropdown-menu">
+                                <a class="dropdown-item active" href="#">LetSynchronise Importer</a>
                             </div>
                         </div>
                     </div>
@@ -335,10 +335,17 @@
             </form>
             
             <div class="m-2"></div>
-
+            
             <form class="row">
                 <div class="col-auto">
                     <button id="update" type="submit" class="btn btn-primary">Update</button>
+                </div>
+                
+                <div class="col-auto">
+                    <div class="input-group">
+                        <input id="import-schedule-file" type="file" accept=".json" class="form-control"/>
+                        <button id="import-schedule" type="submit" class="btn btn-primary">Import</button>
+                    </div>
                 </div>
             </form>
 
@@ -348,6 +355,7 @@
                 <div class="col-auto">
                     <button id="analyse" type="submit" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#analyse-modal">Analyse</button>
                 </div>
+                
                 <div class="col-auto">
                     <div id="view-schedule-dependencies" class="dropdown">
                         <button class="btn btn-danger dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
