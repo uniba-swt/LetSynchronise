@@ -36,7 +36,7 @@ Note that the output of all importer plugins shall be `PluginImporter.Output.Jso
 
 In addition to the meta-data, a minimal importer plugin only needs to define the static method `Result(rawSystem)`
 which returns a JSON object:
-```json
+```javascript
 static Result(rawSystem) {
     // Simply returns the system.
     const jsonString = ' ... ';
