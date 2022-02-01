@@ -1,245 +1,245 @@
 {
-	"ConstraintStore": [
-		{
-			"name": "TestConstraint1",
-			"eventChain": "Test",
-			"relation": "<",
-			"time": 3
-		},
-		{
-			"name": "TestConstraint2",
-			"eventChain": "Test",
-			"relation": "<",
-			"time": 3
-		},
-		{
-			"name": "TimingConstraint1",
-			"eventChain": "EventChain1",
-			"relation": "<=",
-			"time": 4
-		},
-		{
-			"name": "TimingConstraint2",
-			"eventChain": "EventChain2",
-			"relation": "<=",
-			"time": 5
-		}
-	],
-	"DependencyStore": [
-		{
-			"name": "alpha",
-			"source": {
-				"task": "__system",
-				"port": "SystemInput"
-			},
-			"destination": {
-				"task": "task-a",
-				"port": "in"
-			}
-		},
-		{
-			"name": "beta",
-			"source": {
-				"task": "task-a",
-				"port": "out"
-			},
-			"destination": {
-				"task": "task-c",
-				"port": "in1"
-			}
-		},
-		{
-			"name": "delta",
-			"source": {
-				"task": "task-c",
-				"port": "out"
-			},
-			"destination": {
-				"task": "__system",
-				"port": "SystemOutput"
-			}
-		},
-		{
-			"name": "gamma",
-			"source": {
-				"task": "task-b",
-				"port": "out"
-			},
-			"destination": {
-				"task": "task-c",
-				"port": "in2"
-			}
-		},
-		{
-			"name": "theta",
-			"source": {
-				"task": "__system",
-				"port": "SystemInput"
-			},
-			"destination": {
-				"task": "task-b",
-				"port": "in"
-			}
-		}
-	],
-	"EventChainStore": [
-		{
-			"segment": {
-				"name": "alpha",
-				"source": {
-					"task": "__system",
-					"port": "SystemInput"
-				},
-				"destination": {
-					"task": "task-a",
-					"port": "in"
-				}
-			},
-			"name": "EventChain1",
-			"successor": {
-				"segment": {
-					"name": "beta",
-					"source": {
-						"task": "task-a",
-						"port": "out"
-					},
-					"destination": {
-						"task": "task-c",
-						"port": "in1"
-					}
-				},
-				"successor": {
-					"segment": {
-						"name": "delta",
-						"source": {
-							"task": "task-c",
-							"port": "out"
-						},
-						"destination": {
-							"task": "__system",
-							"port": "SystemOutput"
-						}
-					}
-				}
-			}
-		},
-		{
-			"segment": {
-				"name": "theta",
-				"source": {
-					"task": "__system",
-					"port": "SystemInput"
-				},
-				"destination": {
-					"task": "task-b",
-					"port": "in"
-				}
-			},
-			"name": "EventChain2",
-			"successor": {
-				"segment": {
-					"name": "gamma",
-					"source": {
-						"task": "task-b",
-						"port": "out"
-					},
-					"destination": {
-						"task": "task-c",
-						"port": "in2"
-					}
-				},
-				"successor": {
-					"segment": {
-						"name": "delta",
-						"source": {
-							"task": "task-c",
-							"port": "out"
-						},
-						"destination": {
-							"task": "__system",
-							"port": "SystemOutput"
-						}
-					}
-				}
-			}
-		},
-		{
-			"segment": {
-				"name": "gamma",
-				"source": {
-					"task": "task-b",
-					"port": "out"
-				},
-				"destination": {
-					"task": "task-c",
-					"port": "in2"
-				}
-			},
-			"name": "Test"
-		}
-	],
-	"SystemInputStore": [
-		{
-			"name": "SystemInput"
-		}
-	],
-	"SystemOutputStore": [
-		{
-			"name": "SystemOutput"
-		}
-	],
-	"TaskStore": [
-		{
-			"name": "task-a",
-			"initialOffset": 0,
-			"activationOffset": 1,
-			"duration": 2,
-			"period": 3,
-			"inputs": [
-				"in"
-			],
-			"outputs": [
-				"out"
-			],
-			"wcet": 1.5,
-			"acet": 1,
-			"bcet": 0.5,
-			"distribution": "Normal"
-		},
-		{
-			"name": "task-b",
-			"initialOffset": 0,
-			"activationOffset": 0,
-			"duration": 1,
-			"period": 2,
-			"inputs": [
-				"in"
-			],
-			"outputs": [
-				"out"
-			],
-			"wcet": 0.9,
-			"acet": 0.5,
-			"bcet": 0.3,
-			"distribution": "Uniform"
-		},
-		{
-			"name": "task-c",
-			"initialOffset": 0,
-			"activationOffset": 1,
-			"duration": 1,
-			"period": 2,
-			"inputs": [
-				"in1",
-				"in2"
-			],
-			"outputs": [
-				"out"
-			],
-			"wcet": 0.1,
-			"acet": 0.1,
-			"bcet": 0.1,
-			"distribution": "Weibull"
-		}
-	]
+    "ConstraintStore": [
+        {
+            "name": "TestConstraint1",
+            "eventChain": "Test",
+            "relation": "<",
+            "time": 3
+        },
+        {
+            "name": "TestConstraint2",
+            "eventChain": "Test",
+            "relation": "<",
+            "time": 3
+        },
+        {
+            "name": "TimingConstraint1",
+            "eventChain": "EventChain1",
+            "relation": "<=",
+            "time": 4
+        },
+        {
+            "name": "TimingConstraint2",
+            "eventChain": "EventChain2",
+            "relation": "<=",
+            "time": 5
+        }
+    ],
+    "DependencyStore": [
+        {
+            "name": "alpha",
+            "source": {
+                "task": "__system",
+                "port": "SystemInput"
+            },
+            "destination": {
+                "task": "task-a",
+                "port": "in"
+            }
+        },
+        {
+            "name": "beta",
+            "source": {
+                "task": "task-a",
+                "port": "out"
+            },
+            "destination": {
+                "task": "task-c",
+                "port": "in1"
+            }
+        },
+        {
+            "name": "delta",
+            "source": {
+                "task": "task-c",
+                "port": "out"
+            },
+            "destination": {
+                "task": "__system",
+                "port": "SystemOutput"
+            }
+        },
+        {
+            "name": "gamma",
+            "source": {
+                "task": "task-b",
+                "port": "out"
+            },
+            "destination": {
+                "task": "task-c",
+                "port": "in2"
+            }
+        },
+        {
+            "name": "theta",
+            "source": {
+                "task": "__system",
+                "port": "SystemInput"
+            },
+            "destination": {
+                "task": "task-b",
+                "port": "in"
+            }
+        }
+    ],
+    "EventChainStore": [
+        {
+            "segment": {
+                "name": "alpha",
+                "source": {
+                    "task": "__system",
+                    "port": "SystemInput"
+                },
+                "destination": {
+                    "task": "task-a",
+                    "port": "in"
+                }
+            },
+            "name": "EventChain1",
+            "successor": {
+                "segment": {
+                    "name": "beta",
+                    "source": {
+                        "task": "task-a",
+                        "port": "out"
+                    },
+                    "destination": {
+                        "task": "task-c",
+                        "port": "in1"
+                    }
+                },
+                "successor": {
+                    "segment": {
+                        "name": "delta",
+                        "source": {
+                            "task": "task-c",
+                            "port": "out"
+                        },
+                        "destination": {
+                            "task": "__system",
+                            "port": "SystemOutput"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "segment": {
+                "name": "theta",
+                "source": {
+                    "task": "__system",
+                    "port": "SystemInput"
+                },
+                "destination": {
+                    "task": "task-b",
+                    "port": "in"
+                }
+            },
+            "name": "EventChain2",
+            "successor": {
+                "segment": {
+                    "name": "gamma",
+                    "source": {
+                        "task": "task-b",
+                        "port": "out"
+                    },
+                    "destination": {
+                        "task": "task-c",
+                        "port": "in2"
+                    }
+                },
+                "successor": {
+                    "segment": {
+                        "name": "delta",
+                        "source": {
+                            "task": "task-c",
+                            "port": "out"
+                        },
+                        "destination": {
+                            "task": "__system",
+                            "port": "SystemOutput"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "segment": {
+                "name": "gamma",
+                "source": {
+                    "task": "task-b",
+                    "port": "out"
+                },
+                "destination": {
+                    "task": "task-c",
+                    "port": "in2"
+                }
+            },
+            "name": "Test"
+        }
+    ],
+    "SystemInputStore": [
+        {
+            "name": "SystemInput"
+        }
+    ],
+    "SystemOutputStore": [
+        {
+            "name": "SystemOutput"
+        }
+    ],
+    "TaskStore": [
+        {
+            "name": "task-a",
+            "initialOffset": 0,
+            "activationOffset": 1,
+            "duration": 2,
+            "period": 3,
+            "inputs": [
+                "in"
+            ],
+            "outputs": [
+                "out"
+            ],
+            "wcet": 1.5,
+            "acet": 1,
+            "bcet": 0.5,
+            "distribution": "Normal"
+        },
+        {
+            "name": "task-b",
+            "initialOffset": 0,
+            "activationOffset": 0,
+            "duration": 1,
+            "period": 2,
+            "inputs": [
+                "in"
+            ],
+            "outputs": [
+                "out"
+            ],
+            "wcet": 0.9,
+            "acet": 0.5,
+            "bcet": 0.3,
+            "distribution": "Uniform"
+        },
+        {
+            "name": "task-c",
+            "initialOffset": 0,
+            "activationOffset": 1,
+            "duration": 1,
+            "period": 2,
+            "inputs": [
+                "in1",
+                "in2"
+            ],
+            "outputs": [
+                "out"
+            ],
+            "wcet": 0.1,
+            "acet": 0.1,
+            "bcet": 0.1,
+            "distribution": "Weibull"
+        }
+    ]
 }
