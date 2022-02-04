@@ -75,9 +75,10 @@ class ModelExportImport {
             });
     }
     
-    // Importing a schedule overwrites the existing task, dependency, and event chain instances.
+    // Importing a schedule first clears the instance stores that the schedule will define.
     importSchedule(schedule) {
-        this.database.importSchedule(schedule)
+        this.database.deleteSchedule(Object.keys(schedule))
+            .then(this.database.importSchedule(schedule))
             .then(this.refreshViews());
     }
     

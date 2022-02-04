@@ -46,7 +46,7 @@ Note that the output of all importer plugins shall be `PluginImporter.Output.Jso
 In addition to the meta-data, a minimal importer plugin only needs to define the static method `Result(rawSystem)`
 which returns a JSON object:
 ```javascript
-static Result(rawSystem) {
+static async Result(rawSystem) {
     // Convert rawSystem into a JSON string.
     const jsonString = ' ... ';
     
@@ -60,4 +60,9 @@ The JSON string is then converted into a JSON object using the method `JSON.pars
 LetSynchronise clears its database and stores the JSON object in the database. 
 
 An import plugin may also be used to import LET task schedules, but the plugin shall guarantee that the task, dependency, and event chain instances are consistent with their definitions in the LetSynchronise database (SystemInputStore, SystemOutputStore, TaskStore, DependencyStore, ConstraintStore, EventChainStore).
-Note that portions of a task schedule (e.g., only task instances) can be imported without modifying other scheduling information (e.g., dependencies instances).  
+Use the static method `DatabaseContents` in `` to retrieve a copy of the database contents as an object:
+```javascript
+const databaseContents = await PluginImporter.DatabaseContents;
+```  
+
+Note that portions of a task schedule (e.g., only task instances) can be imported without modifying other scheduling information (e.g., dependencies instances).

@@ -20,7 +20,7 @@ class PluginImporter {
     }
 
 
-    // Plugin methods
+    // Plugin methods.
     static StoredPlugins = { };
     
     static GetPlugin(name) {
@@ -46,6 +46,23 @@ class PluginImporter {
     static Register(name, plugin) {
         PluginImporter.StoredPlugins[name] = plugin;
     }
+    
+    
+    // Plugin helper methods.
+    static _ModelDatabase = null;
+    
+    static set ModelDatabase(ModelDatabase) {
+        PluginImporter._ModelDatabase = ModelDatabase;
+    }
+    
+    static get ModelDatabase() {
+        return PluginImporter._ModelDatabase;
+    }
+    
+    static get DatabaseContents() {
+        return PluginImporter.ModelDatabase.exportSystem();
+    }
+    
     
     static ToString() {
         return 'PluginImporter loaded ...\n  ' + Object.keys(PluginImporter.Plugins).join(',\n  ');

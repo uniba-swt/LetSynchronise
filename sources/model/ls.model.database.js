@@ -180,12 +180,14 @@ class ModelDatabase {
         return schedule;
     }
     
-    deleteSchedule = function() {
+    deleteSchedule = function(instancesStoreNames) {
         let deletePromises = [ ];
-        
-        const instancesStoreNames = [
-            Model.TaskInstancesStoreName
-        ];
+
+        if (instancesStoreNames == null) {
+            instancesStoreNames = [... this.db.objectStoreNames];
+        }
+        instancesStoreNames = instancesStoreNames.filter(name => name.includes('Instance'));
+
         for (const instancesStoreName of instancesStoreNames) {
             deletePromises.push(this.deleteAllObjects(instancesStoreName));
         }
