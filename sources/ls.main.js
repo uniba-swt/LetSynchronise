@@ -88,7 +88,8 @@ controller.controllerAnalyse.controllerSchedule = controller.controllerSchedule;
 console.log(controller.toString());
 
 
-// Register plug-ins.
+// Register importer plug-ins.
+PluginImporter.ModelDatabase = model.modelDatabase;
 PluginImporter.Register(PluginImporterNative.Name, PluginImporterNative);
 PluginImporter.Register(PluginImporterTool1.Name, PluginImporterTool1);
 PluginImporter.Register(PluginImporterTudE2e.Name, PluginImporterTudE2e);
@@ -96,7 +97,7 @@ view.viewExportImport.updateSystemImporters();
 
 console.log(PluginImporter.ToString())
 
-
+// Register metric plug-ins.
 PluginMetric.Register(PluginMetricDataAge.Name, PluginMetricDataAge);
 PluginMetric.Register(PluginMetricEnd2End.Name, PluginMetricEnd2End);
 PluginMetric.Register(PluginMetricLatency.Name, PluginMetricLatency);

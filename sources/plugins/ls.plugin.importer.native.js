@@ -16,7 +16,7 @@ class PluginImporterNative {
     //
     // @Input system defined in native JSON format.
     // @Output system defined in the native JSON format.
-    static Result(rawSystem) {
+    static async Result(rawSystem) {
         // Simply returns the system.
         
         return JSON.parse(rawSystem);
