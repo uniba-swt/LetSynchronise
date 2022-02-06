@@ -266,6 +266,9 @@ class ModelSchedule {
     
     
     reinstantiateTasks(makespan) {
+        // Delete all task, dependency, and event chain instances.
+        this.database.deleteSchedule();
+        
         // Generate task instances.
         const promiseAllTasks = this.modelTask.getAllTasks();
         const promiseAllTasksInstances = promiseAllTasks

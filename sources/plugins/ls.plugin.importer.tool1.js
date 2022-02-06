@@ -16,10 +16,14 @@ class PluginImporterTool1 {
     //
     // @Input system defined in XML1 format.
     // @Output system defined in the native JSON format.
-    static Result(system) {
+    static async Result(rawSystem) {
+        // Get a copy of the database contents.
+        const databaseContents = await PluginImporter.DatabaseContents;
+
         let json = '';
         
         // TODO: Walk through system and generate the required json.
+        // TODO: If needed, compare rawSystem contents with existing databaseContents to ensure consistency!
         alert(this.Name);
         
         return json;

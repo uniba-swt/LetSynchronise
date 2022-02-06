@@ -85,8 +85,7 @@ class ViewExportImport {
             fileReader.readAsText(this.importSystemSelector.files.item(0));
         
             fileReader.onload = (event) => {
-                const result = pluginImporter.Result(event.target.result);
-                handler(result);
+                pluginImporter.Result(event.target.result).then(result => handler(result));
             }
         });
     }
@@ -122,8 +121,7 @@ class ViewExportImport {
             fileReader.readAsText(this.importScheduleSelector.files.item(0));
             
             fileReader.onload = (event) => {
-                const result = pluginImporter.Result(event.target.result);
-                handler(result);
+                pluginImporter.Result(event.target.result).then(result => handler(result));
             }
         });
     }

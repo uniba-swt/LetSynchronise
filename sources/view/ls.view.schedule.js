@@ -489,7 +489,7 @@ class ViewSchedule {
                 : this.eventChainInstances[eventChainInstance.chainName]++;
         }
         
-        // Create list of available event chains
+        // Create list of available event chains.
         const parentElement = d3.select(this.eventChainField);
         parentElement.selectAll('*').remove();
         parentElement
@@ -511,6 +511,10 @@ class ViewSchedule {
                   .attr('value', name)
                   .text(name);
         }
+        
+        // Reset the instance slider.
+        this.instance = 0;
+        this.instanceMax = 0;
     }
     
     updateEventChain(eventChainName, instance) {

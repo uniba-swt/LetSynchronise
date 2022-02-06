@@ -16,10 +16,14 @@ class PluginImporterTudE2e {
     //
     // @Input system defined in TXT format.
     // @Output system defined in the native JSON format.
-    static Result(rawSystem) {
+    static async Result(rawSystem) {
+        const databaseContents = await PluginImporter.DatabaseContents;
+        console.log(databaseContents);
+        
         alert(PluginImporterTudE2e.Name);
 
         // TODO: Parse rawSystem into a JSON string
+        // TODO: If needed, compare rawSystem contents with existing databaseContents to ensure consistency!
         const system =
         '{                                  \
             "TaskStore": [                  \
