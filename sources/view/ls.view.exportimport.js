@@ -1,8 +1,7 @@
 'use strict';
 
 class ViewExportImport {
-    rootDesign = null;
-    rootAnalyse = null;
+    root = null;
 
     exportSystemButton = null;
     importSystemButton = null;
@@ -18,22 +17,21 @@ class ViewExportImport {
 
 
     constructor() {
-        this.rootDesign = document.querySelector('#nav-design');
-        this.rootAnalyse = document.querySelector('#nav-analyse');
+        this.root = document.querySelector('#nav-exportimport');
 
         // System export or import.
-        this.exportSystemButton = this.rootDesign.querySelector('#export-system');
-        this.importSystemButton = this.rootDesign.querySelector('#import-system');
-        this.resetSystemButton = this.rootDesign.querySelector('#reset-system');
+        this.exportSystemButton = this.root.querySelector('#export-system');
+        this.importSystemButton = this.root.querySelector('#import-system');
+        this.resetSystemButton = this.root.querySelector('#reset-system');
 
-        this.importSystemSelector = this.rootDesign.querySelector('#import-system-file');
+        this.importSystemSelector = this.root.querySelector('#import-system-file');
         this.importerSystemDropdown = d3.select('#import-system-importers');
         
         // Schedule import.
-        this.exportScheduleButton = this.rootAnalyse.querySelector('#export-schedule');
-        this.importScheduleButton = this.rootAnalyse.querySelector('#import-schedule');
+        this.exportScheduleButton = this.root.querySelector('#export-schedule');
+        this.importScheduleButton = this.root.querySelector('#import-schedule');
 
-        this.importScheduleSelector = this.rootAnalyse.querySelector('#import-schedule-file');
+        this.importScheduleSelector = this.root.querySelector('#import-schedule-file');
         
         // Listeners
         this.setupImportSystemSelectorListener();
