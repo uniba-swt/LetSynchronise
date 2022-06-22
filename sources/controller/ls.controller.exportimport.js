@@ -96,18 +96,18 @@ class ControllerExportImport {
     
     // Handler for exporting a system
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
-    handleExportSystem = (selectedElements) => {
-        this.model.exportSystem(selectedElements);
+    handleExportSystem = (elementsSelected) => {
+        this.model.exportSystem(elementsSelected);
     }
 
     // Handler for importing a system
-    handleImportSystem = (system, selectedElements) => {
-        this.model.importSystem(system, selectedElements);
+    handleImportSystem = (system, elementsSelected) => {
+        this.model.importSystem(system, elementsSelected);
     }
 
     // Handler for resetting a system
-    handleResetSystem = () => {
-        this.model.resetSystem();
+    handleResetSystem = (elementsSelected) => {
+        this.model.resetSystem(elementsSelected);
     }
 
     // Handler for exporting a schedule

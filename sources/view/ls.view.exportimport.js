@@ -77,10 +77,11 @@ class ViewExportImport {
     }
     
     get elementsSelected() {
-        const keys = [];
+        let keys = [];
         
         if (this.inputsOutputsChecked) {
-            keys.push("inputsOutputs");
+            keys.push("inputs");
+            keys.push("outputs");
         }
         if (this.tasksChecked) {
             keys.push("tasks");
@@ -91,7 +92,7 @@ class ViewExportImport {
         if (this.scheduleChecked) {
             keys.push("schedule");
         }
-        if (this.eventChainsCheckbox) {
+        if (this.eventChainsChecked) {
             keys.push("eventChains");
         }
         if (this.constraintsChecked) {
@@ -154,7 +155,7 @@ class ViewExportImport {
     registerResetSystemButtonHandler(handler) {
         this.resetSystemButton.addEventListener('click', event => {
             event.preventDefault();
-            handler();
+            handler(this.elementsSelected);
         });
     }
 

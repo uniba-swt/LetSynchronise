@@ -43,13 +43,13 @@ class ModelExportImport {
     // -----------------------------------------------------
     // Class methods
     
-    resetSystem() {
-        this.database.deleteSystem()
+    resetSystem(elementsSelected) {
+        this.database.deleteSystem(elementsSelected)
             .then(this.refreshViews());
     }
 
-    exportSystem(selectedElements) {
-        this.database.exportSystem(selectedElements)
+    exportSystem(elementsSelected) {
+        this.database.exportSystem(elementsSelected)
             .then(system => {
                 const json = JSON.stringify(system);
                 const link = document.createElement("a");
@@ -61,9 +61,9 @@ class ModelExportImport {
             });
     }
 
-    importSystem(system, selectedElements) {
-        this.database.deleteSystem()
-            .then(this.database.importSystem(system, selectedElements))
+    importSystem(system, elementsSelected) {
+        this.database.deleteSystem(elementsSelected)
+            .then(this.database.importSystem(system, elementsSelected))
             .then(this.refreshViews());
     }
     
