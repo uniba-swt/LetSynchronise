@@ -159,9 +159,12 @@ class ModelDatabase {
     deleteSystem = function(elementsSelected) {
         let deletePromises = [ ];
         
+        const storeNames = this.getObjectStoreNames(elementsSelected);
         const allStoreNames = this.db.objectStoreNames;
-        for (const storeName of allStoreNames) {
-            deletePromises.push(this.deleteAllObjects(storeName));
+        for (const storeName of storeNames) {
+            if (allStoreNames.contains(storeName)) {
+                deletePromises.push(this.deleteAllObjects(storeName));
+            }
         }
         
         return Promise.all(deletePromises);
@@ -197,20 +200,20 @@ class ModelDatabase {
 //        return schedule;
 //    }
 //
-//    deleteSchedule = function(instancesStoreNames) {
-//        let deletePromises = [ ];
-//
-//        if (instancesStoreNames == null) {
-//            instancesStoreNames = [... this.db.objectStoreNames];
-//        }
-//        instancesStoreNames = instancesStoreNames.filter(name => name.includes('Instance'));
-//
-//        for (const instancesStoreName of instancesStoreNames) {
-//            deletePromises.push(this.deleteAllObjects(instancesStoreName));
-//        }
-//
-//        return Promise.all(deletePromises);
-//    }
+    deleteSchedule = function(instancesStoreNames) {
+        let deletePromises = [ ];
+
+        if (instancesStoreNames == null) {
+            instancesStoreNames = [... this.db.objectStoreNames];
+        }
+        instancesStoreNames = instancesStoreNames.filter(name => name.includes('Instance'));
+
+        for (const instancesStoreName of instancesStoreNames) {
+            deletePromises.push(this.deleteAllObjects(instancesStoreName));
+        }
+
+        return Promise.all(deletePromises);
+    }
 //
 //    importSchedule = function(schedule) {
 //        let importPromises = [ ];
