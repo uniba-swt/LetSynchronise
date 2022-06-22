@@ -2,6 +2,13 @@
 
 class ViewExportImport {
     root = null;
+    
+    inputsOutputsCheckbox = null;
+    tasksCheckbox = null;
+    dependenciesCheckbox = null;
+    scheduleCheckbox = null;
+    eventChainsCheckbox = null;
+    constraintsCheckbox = null;
 
     exportSystemButton = null;
     importSystemButton = null;
@@ -18,7 +25,15 @@ class ViewExportImport {
 
     constructor() {
         this.root = document.querySelector('#nav-management');
-
+        
+        // System elements to consider for export or import.
+        this.inputsOutputsCheckbox = this.root.querySelector('#exportimport-inputs-outputs');
+        this.tasksCheckbox = this.root.querySelector('#exportimport-tasks');
+        this.dependenciesCheckbox = this.root.querySelector('#exportimport-dependencies');
+        this.scheduleCheckbox = this.root.querySelector('#exportimport-schedule');
+        this.eventChainsCheckbox = this.root.querySelector('#exportimport-event-chains');
+        this.constraintsCheckbox = this.root.querySelector('#exportimport-constraints');
+                
         // System export or import.
         this.exportSystemButton = this.root.querySelector('#export-system');
         this.importSystemButton = this.root.querySelector('#import-system');
@@ -37,6 +52,54 @@ class ViewExportImport {
         this.setupImportSystemSelectorListener();
     }
     
+    get inputsOutputsChecked() {
+        return this.inputsOutputsCheckbox.checked;
+    }
+    
+    get tasksChecked() {
+        return this.tasksCheckbox.checked;
+    }
+    
+    get dependenciesChecked() {
+        return this.dependenciesCheckbox.checked;
+    }
+    
+    get scheduleChecked() {
+        return this.scheduleCheckbox.checked;
+    }
+    
+    get eventChainsChecked() {
+        return this.eventChainsCheckbox.checked;
+    }
+    
+    get constraintsChecked() {
+        return this.constraintsCheckbox.checked;
+    }
+    
+    get elementsSelected() {
+        const keys = [];
+        
+        if (this.inputsOutputsChecked) {
+            keys.push("inputsOutputs");
+        }
+        if (this.tasksChecked) {
+            keys.push("tasks");
+        }
+        if (this.dependenciesChecked) {
+            keys.push("dependencies");
+        }
+        if (this.scheduleChecked) {
+            keys.push("schedule");
+        }
+        if (this.eventChainsCheckbox) {
+            keys.push("eventChains");
+        }
+        if (this.constraintsChecked) {
+            keys.push("constraints");
+        }
+        
+        return keys;
+    }
     
     get importer() {
         const element = this.importerSystemDropdown.select('.active');
@@ -64,8 +127,8 @@ class ViewExportImport {
             event.preventDefault();
             
             this.importSystemSelector.value = null;
-        
-            handler();
+
+            handler(this.elementsSelected);
         });
     }
 
@@ -83,7 +146,7 @@ class ViewExportImport {
             fileReader.readAsText(this.importSystemSelector.files.item(0));
         
             fileReader.onload = (event) => {
-                pluginImporter.Result(event.target.result).then(result => handler(result));
+                pluginImporter.Result(event.target.result).then(result => handler(result, this.elementsSelected));
             }
         });
     }

@@ -123,14 +123,12 @@ class ModelDatabase {
 
     // System export and import.
     
-    exportSystem = async function() {
+    exportSystem = async function(selectedElements) {
         let system = { };
-        let necessaryStoreNames = [ ];
         
         const allStoreNames = this.db.objectStoreNames;
         for (const storeName of allStoreNames) {
             if (!storeName.includes('Instance')) {
-                necessaryStoreNames.push(storeName);
                 system[storeName] = await this.getAllObjects(storeName);
             }
         }
@@ -149,10 +147,10 @@ class ModelDatabase {
         return Promise.all(deletePromises);
     }
     
-    importSystem = function(system) {
+    importSystem = function(system, selectedElements) {
         let importPromises = [ ];
         
-        for (const [storeName, objects] of Object.entries(system)) {
+        for (const [storeName, objects] of Object.entries(system, selectedElements)) {
             if (!storeName.includes('Instance')) {
                 for (const object of objects) {
                     importPromises.push(this.putObject(storeName, object));
@@ -167,12 +165,10 @@ class ModelDatabase {
     
     exportSchedule = async function() {
         let schedule = { };
-        let necessaryStoreNames = [ ];
         
         const allStoreNames = this.db.objectStoreNames;
         for (const storeName of allStoreNames) {
             if (storeName.includes('Instance')) {
-                necessaryStoreNames.push(storeName);
                 schedule[storeName] = await this.getAllObjects(storeName);
             }
         }
