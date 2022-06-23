@@ -1,8 +1,14 @@
 'use strict';
 
 class ViewExportImport {
-    rootDesign = null;
-    rootAnalyse = null;
+    root = null;
+    
+    inputsOutputsCheckbox = null;
+    tasksCheckbox = null;
+    dependenciesCheckbox = null;
+    scheduleCheckbox = null;
+    eventChainsCheckbox = null;
+    constraintsCheckbox = null;
 
     exportSystemButton = null;
     importSystemButton = null;
@@ -11,34 +17,79 @@ class ViewExportImport {
     importSystemSelector = null;
     importerSystemDropdown = null;
     
-    exportScheduleButton = null;
-    importScheduleButton = null;
-    
-    importScheduleSelector = null;
-
 
     constructor() {
-        this.rootDesign = document.querySelector('#nav-design');
-        this.rootAnalyse = document.querySelector('#nav-analyse');
-
-        // System export or import.
-        this.exportSystemButton = this.rootDesign.querySelector('#export-system');
-        this.importSystemButton = this.rootDesign.querySelector('#import-system');
-        this.resetSystemButton = this.rootDesign.querySelector('#reset-system');
-
-        this.importSystemSelector = this.rootDesign.querySelector('#import-system-file');
-        this.importerSystemDropdown = d3.select('#import-system-importers');
+        this.root = document.querySelector('#nav-management');
         
-        // Schedule import.
-        this.exportScheduleButton = this.rootAnalyse.querySelector('#export-schedule');
-        this.importScheduleButton = this.rootAnalyse.querySelector('#import-schedule');
+        // System elements to consider for export or import.
+        this.inputsOutputsCheckbox = this.root.querySelector('#exportimport-inputs-outputs');
+        this.tasksCheckbox = this.root.querySelector('#exportimport-tasks');
+        this.dependenciesCheckbox = this.root.querySelector('#exportimport-dependencies');
+        this.scheduleCheckbox = this.root.querySelector('#exportimport-schedule');
+        this.eventChainsCheckbox = this.root.querySelector('#exportimport-event-chains');
+        this.constraintsCheckbox = this.root.querySelector('#exportimport-constraints');
+                
+        // System export or import.
+        this.exportSystemButton = this.root.querySelector('#export-system');
+        this.importSystemButton = this.root.querySelector('#import-system');
+        this.resetSystemButton = this.root.querySelector('#reset-system');
 
-        this.importScheduleSelector = this.rootAnalyse.querySelector('#import-schedule-file');
+        this.importSystemSelector = this.root.querySelector('#import-system-file');
+        this.importerSystemDropdown = d3.select('#import-system-importers');
         
         // Listeners
         this.setupImportSystemSelectorListener();
     }
     
+    get inputsOutputsChecked() {
+        return this.inputsOutputsCheckbox.checked;
+    }
+    
+    get tasksChecked() {
+        return this.tasksCheckbox.checked;
+    }
+    
+    get dependenciesChecked() {
+        return this.dependenciesCheckbox.checked;
+    }
+    
+    get scheduleChecked() {
+        return this.scheduleCheckbox.checked;
+    }
+    
+    get eventChainsChecked() {
+        return this.eventChainsCheckbox.checked;
+    }
+    
+    get constraintsChecked() {
+        return this.constraintsCheckbox.checked;
+    }
+    
+    get elementsSelected() {
+        let keys = [];
+        
+        if (this.inputsOutputsChecked) {
+            keys.push("inputs");
+            keys.push("outputs");
+        }
+        if (this.tasksChecked) {
+            keys.push("tasks");
+        }
+        if (this.dependenciesChecked) {
+            keys.push("dependencies");
+        }
+        if (this.scheduleChecked) {
+            keys.push("schedule");
+        }
+        if (this.eventChainsChecked) {
+            keys.push("eventChains");
+        }
+        if (this.constraintsChecked) {
+            keys.push("constraints");
+        }
+        
+        return keys;
+    }
     
     get importer() {
         const element = this.importerSystemDropdown.select('.active');
@@ -66,8 +117,8 @@ class ViewExportImport {
             event.preventDefault();
             
             this.importSystemSelector.value = null;
-        
-            handler();
+
+            handler(this.elementsSelected);
         });
     }
 
@@ -85,7 +136,7 @@ class ViewExportImport {
             fileReader.readAsText(this.importSystemSelector.files.item(0));
         
             fileReader.onload = (event) => {
-                pluginImporter.Result(event.target.result).then(result => handler(result));
+                pluginImporter.Result(event.target.result).then(result => handler(result, this.elementsSelected));
             }
         });
     }
@@ -93,39 +144,9 @@ class ViewExportImport {
     registerResetSystemButtonHandler(handler) {
         this.resetSystemButton.addEventListener('click', event => {
             event.preventDefault();
-            handler();
+            handler(this.elementsSelected);
         });
-    }
-
-    registerExportScheduleButtonHandler(handler) {
-        this.exportScheduleButton.addEventListener('click', event => {
-            event.preventDefault();
-            
-            this.importScheduleSelector.value = null;
-            
-            handler();
-        });
-    }
-    
-    registerImportScheduleButtonHandler(handler) {
-        this.importScheduleButton.addEventListener('click', event => {
-            event.preventDefault();
-            
-            const pluginImporter = PluginImporter.GetPlugin('LetSynchronise');
-            if (this.importScheduleSelector.files.length < 1) {
-                alert(`${pluginImporter.Name} schedule importer requires a *.${pluginImporter.Input.toLowerCase()} file to be selected!`);
-                return;
-            }
-            
-            const fileReader = new FileReader();
-            fileReader.readAsText(this.importScheduleSelector.files.item(0));
-            
-            fileReader.onload = (event) => {
-                pluginImporter.Result(event.target.result).then(result => handler(result));
-            }
-        });
-    }
-    
+    }   
     
     updateSystemImporters() {
         const thisRef = this;

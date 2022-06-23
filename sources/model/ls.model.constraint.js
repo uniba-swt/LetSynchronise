@@ -62,10 +62,14 @@ class ModelConstraint {
             .then(this.refreshViews());
     }
     
-    deleteConstraintsOfEventChain(eventChainName) {
-        return this.getAllConstraints()
-            .then(allConstraints => allConstraints.filter(constraint => (constraint.eventChain == eventChainName)))
-            .then(constraintsToDelete => Promise.all(constraintsToDelete.map(constraint => this.deleteConstraint(constraint.name))));
+    
+    // Validate constraints against event chains.
+    validate() {
+        return Promise.all([this.getAllConstraints(), this.modelEventChain.getAllEventChains()])
+            .then(([allConstraints, allEventChains]) => [allConstraints, allEventChains.map(eventChain => eventChain.name)])
+            .then(([allConstraints, allEventChains]) => allConstraints.filter(constraint => (!allEventChains.includes(constraint.eventChain))))
+            .then(constraintsToDelete => Promise.all(constraintsToDelete.map(constraint => this.deleteConstraint(constraint.name))))
+            .then(this.refreshViews());
     }
     
     refreshViews() {

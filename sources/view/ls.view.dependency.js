@@ -119,7 +119,11 @@ class ViewDependency {
             alert('Name cannot be blank.');
             return false;
         }
-
+        if (!Utility.ValidName(taskDependency.name.trim())) {
+            alert('Task dependency name can only start with an alphabetical or underscore character, and continue with alphanumerical or underscore characters.');
+            return false;
+        }
+        
         if (taskDependency.source == 'null ') {
             alert(`Choose source of dependency.`);
             return false;
@@ -143,8 +147,8 @@ class ViewDependency {
         const destinations = taskParametersSet.map(taskParameters => Utility.TaskPorts(taskParameters.name, taskParameters.inputs)).flat();
         
         // Create list of available sources and destinations
-        this.updateTaskDependencyPorts(d3.select(this.sourceField), sources, systemInputs);
-        this.updateTaskDependencyPorts(d3.select(this.destinationField), destinations, systemOutputs);
+        this.updateTaskDependencyPorts(d3.select(this.sourceField), sources.sort(), systemInputs.sort());
+        this.updateTaskDependencyPorts(d3.select(this.destinationField), destinations.sort(), systemOutputs.sort());
     }
         
     updateTaskDependencyPorts(parentElement, taskPorts, systemPorts) {

@@ -123,6 +123,10 @@ class ViewConstraint {
             alert('Name cannot be blank.');
             return false;
         }
+        if (!Utility.ValidName(constraint.name.trim())) {
+            alert('Constraint name can only start with an alphabetical or underscore character, and continue with alphanumerical or underscore characters.');
+            return false;
+        }
         
         const allConstraintNames = new Set();
         const allConstraints = d3.select(this.eventChainField).selectAll('option')

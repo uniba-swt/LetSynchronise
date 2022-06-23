@@ -6,6 +6,7 @@ class ControllerExportImport {
     _modelInterface = null;
     _modelTask = null;
     _modelDependency = null;
+    _modelEventChain = null;
     _modelConstraint = null;
     
     constructor() { }
@@ -17,9 +18,6 @@ class ControllerExportImport {
         this._view.registerExportSystemButtonHandler(this.handleExportSystem);
         this._view.registerImportSystemButtonHandler(this.handleImportSystem);
         this._view.registerResetSystemButtonHandler(this.handleResetSystem);
-        
-        this._view.registerExportScheduleButtonHandler(this.handleExportSchedule);
-        this._view.registerImportScheduleButtonHandler(this.handleImportSchedule);
     }
     
     get view() {
@@ -32,6 +30,17 @@ class ControllerExportImport {
     
     get model() {
         return this._model;
+    }
+    
+    set modelInterface(modelInterface) {
+        this._modelInterface = modelInterface;
+        
+        // Register the model interface with the model.
+        this._model.registerModelInterface(this._modelInterface);
+    }
+    
+    get modelInterface() {
+        return this._modelInterface;
     }
     
     set modelTask(modelTask) {
@@ -56,15 +65,15 @@ class ControllerExportImport {
         return this._modelDependency;
     }
     
-    set modelInterface(modelInterface) {
-        this._modelInterface = modelInterface;
+    set modelEventChain(modelEventChain) {
+        this._modelEventChain = modelEventChain;
         
-        // Register the model interface with the model.
-        this._model.registerModelInterface(this._modelInterface);
+        // Register the model event chain with the model.
+        this._model.registerModelEventChain(this._modelEventChain);
     }
     
-    get modelInterface() {
-        return this._modelInterface;
+    get modelEventChain() {
+        return this._modelEventChain;
     }
     
     set modelConstraint(modelConstraint) {
@@ -84,28 +93,18 @@ class ControllerExportImport {
     
     // Handler for exporting a system
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
-    handleExportSystem = () => {
-        this.model.exportSystem();
+    handleExportSystem = (elementsSelected) => {
+        this.model.exportSystem(elementsSelected);
     }
 
     // Handler for importing a system
-    handleImportSystem = (system) => {
-        this.model.importSystem(system);
+    handleImportSystem = (system, elementsSelected) => {
+        this.model.importSystem(system, elementsSelected);
     }
 
     // Handler for resetting a system
-    handleResetSystem = () => {
-        this.model.resetSystem();
-    }
-
-    // Handler for exporting a schedule
-    handleExportSchedule = (schedule) => {
-        this.model.exportSchedule(schedule);
-    }
-    
-    // Handler for importing a schedule
-    handleImportSchedule = (schedule) => {
-        this.model.importSchedule(schedule);
+    handleResetSystem = (elementsSelected) => {
+        this.model.resetSystem(elementsSelected);
     }
     
     

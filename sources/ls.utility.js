@@ -2,6 +2,10 @@
 
 class Utility {
     
+    static ValidName(name) {
+        return (/^([A-Za-z]|_)([A-Za-z0-9]|_)*$/).test(name);
+    }
+    
     static MaxOfArray(array) {
         return array.reduce(function(a, b) {
             return Math.max(a, b);
@@ -23,7 +27,7 @@ class Utility {
             return Math.abs((x / Utility.GreatestCommonDivisor(x, y)) * y);
         }
     }
-                                         
+    
     static GreatestCommonDivisor(x, y) {
         x = Math.abs(x);
         y = Math.abs(y);
@@ -46,6 +50,7 @@ class Utility {
             return Utility.LeastCommonMultiple(a, b);
         }) / scaling;
     }
+    
     
     // Geenrate samples from a normal distribution.
     static NormalSample(samples) {
@@ -103,7 +108,7 @@ class Utility {
     }
 
     static FormatTaskPorts(taskName, taskPorts) {
-        return Utility.TaskPorts(taskName, taskPorts).join(', ');
+        return Utility.TaskPorts(taskName, taskPorts.sort()).join(', ');
     }
                              
     static GetTask(taskPort) {

@@ -58,22 +58,19 @@ class ModelInterface {
     }
     
     deleteInput(name) {
-        return this.modelDependency.deleteDependenciesOfSystem(name)
-        //    .then(this.modelEventChain.deleteEventChainsOfSystem(name))
-            .then(this.database.deleteObject(Model.SystemInputStoreName, name))
+        return this.database.deleteObject(Model.SystemInputStoreName, name)
             .then(this.refreshViews());
     }
     
     deleteOutput(name) {
-        return this.modelDependency.deleteDependenciesOfSystem(name)
-        //    .then(this.modelEventChain.deleteEventChainsOfSystem(name))
-            .then(this.database.deleteObject(Model.SystemOutputStoreName, name))
+        return this.database.deleteObject(Model.SystemOutputStoreName, name)
             .then(this.refreshViews());
     }
 
     refreshViews() {
         return Promise.all([this.getAllInputs(), this.getAllOutputs()])
             .then(([inputs, outputs]) => this.updateInterface(inputs, outputs))
+            .then(result => this.modelDependency.validate());
     }
     
     toString() {
