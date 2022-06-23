@@ -127,6 +127,10 @@ class ViewInterface {
             alert('Name cannot be blank.');
             return false;
         }
+        if (!Utility.ValidName(name.trim())) {
+            alert('Name can only start with an alphabetical or underscore character, and continue with alphanumerical or underscore characters.');
+            return false;
+        }
         
         return true;
     }

@@ -131,7 +131,8 @@ class ModelEventChain {
                         }
                     }
                 })
-            }));
+            }))
+            .then(this.refreshViews());
     }
     
     refreshViews() {

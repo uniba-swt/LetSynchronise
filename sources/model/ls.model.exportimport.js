@@ -69,10 +69,7 @@ class ModelExportImport {
     
     refreshViews() {
         return this.modelInterface.refreshViews()
-            .then(this.modelTask.refreshViews())
-            .then(this.modelDependency.refreshViews())
-            .then(this.modelEventChain.refreshViews())
-            .then(this.modelConstraint.refreshViews());
+            .then(this.modelTask.refreshViews());
     }
     
     

@@ -67,8 +67,7 @@ class ModelTask {
         }        
 
         // Store task parameters into Database
-        return Promise.all(dependenciesToRemove.map(dependency => this.modelDependency.deleteDependency(dependency.name)))
-            .then(this.database.putObject(Model.TaskStoreName, parameters))
+        return this.database.putObject(Model.TaskStoreName, parameters)
             .then(this.refreshViews())
             .then(this.notifyChanges());
    }

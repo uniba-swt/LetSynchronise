@@ -115,7 +115,8 @@ class ModelDependency {
             }
         }
         
-        return Promise.all(dependenciesToRemove.map(dependency => this.deleteDependency(dependency.name)));
+        return Promise.all(dependenciesToRemove.map(dependency => this.deleteDependency(dependency.name)))
+            .then(this.refreshViews());
     }
 
     refreshViews() {

@@ -15,7 +15,7 @@ class ViewEventChain {
     
     deleteHandler = null;
     
-    static get ArrowSeparator() {return '--&gt;' };
+    static get ArrowSeparator() { return '&rarr;' };
     
     constructor() {
         this.root = document.querySelector('#nav-analyse');
@@ -146,9 +146,8 @@ class ViewEventChain {
             alert('Name cannot be blank.');
             return false;
         }
-        
-        if (eventChain.name.split('-').length > 1 || eventChain.name.split('_').length > 1) {
-            alert('Name cannot contain a dash \'-\' or underscore \'_\'.');
+        if (!(/^[A-Za-z][A-Za-z0-9]+$/).test(eventChain.name.trim())) {
+            alert('Event chain name can only start with an alphabetical character, and continue with alphanumerical characters.');
             return false;
         }
 
