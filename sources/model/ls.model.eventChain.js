@@ -175,16 +175,19 @@ class ModelEventChain {
             });
     }
 
-    synchroniseWithDependencies(dependencies) {        
+    // Validate event chains against task dependencies.
+    validate() {
         return this.getAllEventChains()
             .then(allEventChains => allEventChains.forEach(eventChain => {
+                this.modelDependency.getAllDependencies().then(dependencies => {
                 for (const segment of eventChain.segments) {
                     if (!dependencies.some(dependency => (dependency.name == segment.name))) {
                         this.deleteEventChain(eventChain.name);
                         break;
                     }
-                }
+                }})
             }))
+            .then(this.modelConstraint.validate())
             .then(this.refreshViews());
     }
     
@@ -193,7 +196,6 @@ class ModelEventChain {
             .then(result => this.updateEventChains(result))
             .then(result => this.modelDependency.getAllDependencies())
             .then(result => this.updateEventChainSelectors(result));
-
     }
     
     toString() {

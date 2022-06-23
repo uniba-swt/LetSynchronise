@@ -106,10 +106,40 @@ class ModelDependency {
             .then(([sourceDependency, allDependencies]) => allDependencies
                 .filter(dependency => (dependency.source.task == sourceDependency.destination.task)));
     }
+    
+    // Validate task dependencies against system and task inputs and outputs.
+    async validate() {
+        // Get all the available inputs and outputs.
+        let allSources = { };
+        let allDestinations = { };
+        (await this.modelTask.getAllTasks()).map(task => {
+            allSources[task.name] = task.outputs;
+            allDestinations[task.name] = task.inputs;
+        });
+
+        allSources[Model.SystemInterfaceName] = (await this.modelInterface.getAllInputs()).map(port => port.name);
+        allDestinations[Model.SystemInterfaceName] = (await this.modelInterface.getAllOutputs()).map(port => port.name);
+
+        // Check dependencies to remove.
+        let dependenciesToRemove = [];
+        const allDependencies = await this.getAllDependencies();
+        for (const dependency of allDependencies) {
+            if (!allSources.hasOwnProperty(dependency.source.task)
+                  || !allDestinations.hasOwnProperty(dependency.destination.task)) {
+                dependenciesToRemove.push(dependency);
+            } else if (!allSources[dependency.source.task].includes(dependency.source.port)
+                         || !allDestinations[dependency.destination.task].includes(dependency.destination.port)) {
+                dependenciesToRemove.push(dependency);
+            }
+        }
+        
+        return Promise.all(dependenciesToRemove.map(dependency => this.deleteDependency(dependency.name)));
+    }
 
     refreshViews() {
         return this.getAllDependencies()
-            .then(result => { this.updateDependencies(result); this.modelEventChain.synchroniseWithDependencies(result); })
+            .then(result => this.updateDependencies(result))
+            .then(result => this.modelEventChain.validate())
             .then(result => Promise.all([this.modelTask.getAllTasks(), this.modelInterface.getAllInputs(), this.modelInterface.getAllOutputs()]))
             .then(([tasks, systemInputs, systemOutputs]) => this.updateDependencySelectors(tasks, systemInputs, systemOutputs));
     }

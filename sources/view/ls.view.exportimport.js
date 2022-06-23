@@ -17,11 +17,6 @@ class ViewExportImport {
     importSystemSelector = null;
     importerSystemDropdown = null;
     
-//     exportScheduleButton = null;
-//     importScheduleButton = null;
-    
-//     importScheduleSelector = null;
-
 
     constructor() {
         this.root = document.querySelector('#nav-management');
@@ -41,12 +36,6 @@ class ViewExportImport {
 
         this.importSystemSelector = this.root.querySelector('#import-system-file');
         this.importerSystemDropdown = d3.select('#import-system-importers');
-        
-        // Schedule import.
-//         this.exportScheduleButton = this.root.querySelector('#export-schedule');
-//         this.importScheduleButton = this.root.querySelector('#import-schedule');
-// 
-//         this.importScheduleSelector = this.root.querySelector('#import-schedule-file');
         
         // Listeners
         this.setupImportSystemSelectorListener();
@@ -157,37 +146,7 @@ class ViewExportImport {
             event.preventDefault();
             handler(this.elementsSelected);
         });
-    }
-
-//     registerExportScheduleButtonHandler(handler) {
-//         this.exportScheduleButton.addEventListener('click', event => {
-//             event.preventDefault();
-//             
-//             this.importScheduleSelector.value = null;
-//             
-//             handler();
-//         });
-//     }
-    
-//     registerImportScheduleButtonHandler(handler) {
-//         this.importScheduleButton.addEventListener('click', event => {
-//             event.preventDefault();
-//             
-//             const pluginImporter = PluginImporter.GetPlugin('LetSynchronise');
-//             if (this.importScheduleSelector.files.length < 1) {
-//                 alert(`${pluginImporter.Name} schedule importer requires a *.${pluginImporter.Input.toLowerCase()} file to be selected!`);
-//                 return;
-//             }
-//             
-//             const fileReader = new FileReader();
-//             fileReader.readAsText(this.importScheduleSelector.files.item(0));
-//             
-//             fileReader.onload = (event) => {
-//                 pluginImporter.Result(event.target.result).then(result => handler(result));
-//             }
-//         });
-//     }
-    
+    }   
     
     updateSystemImporters() {
         const thisRef = this;

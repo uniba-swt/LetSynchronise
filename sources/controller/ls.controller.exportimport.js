@@ -18,9 +18,6 @@ class ControllerExportImport {
         this._view.registerExportSystemButtonHandler(this.handleExportSystem);
         this._view.registerImportSystemButtonHandler(this.handleImportSystem);
         this._view.registerResetSystemButtonHandler(this.handleResetSystem);
-        
-//        this._view.registerExportScheduleButtonHandler(this.handleExportSchedule);
-//        this._view.registerImportScheduleButtonHandler(this.handleImportSchedule);
     }
     
     get view() {
@@ -109,16 +106,6 @@ class ControllerExportImport {
     handleResetSystem = (elementsSelected) => {
         this.model.resetSystem(elementsSelected);
     }
-
-    // Handler for exporting a schedule
-//    handleExportSchedule = (schedule) => {
-//        this.model.exportSchedule(schedule);
-//    }
-    
-    // Handler for importing a schedule
-//    handleImportSchedule = (schedule) => {
-//        this.model.importSchedule(schedule);
-//    }
     
     
     toString() {

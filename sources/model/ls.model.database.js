@@ -186,20 +186,7 @@ class ModelDatabase {
     }
     
     // Schedule export and import.
-    
-//    exportSchedule = async function() {
-//        let schedule = { };
-//
-//        const allStoreNames = this.db.objectStoreNames;
-//        for (const storeName of allStoreNames) {
-//            if (storeName.includes('Instance')) {
-//                schedule[storeName] = await this.getAllObjects(storeName);
-//            }
-//        }
-//
-//        return schedule;
-//    }
-//
+
     deleteSchedule = function(instancesStoreNames) {
         let deletePromises = [ ];
 
@@ -214,20 +201,6 @@ class ModelDatabase {
 
         return Promise.all(deletePromises);
     }
-//
-//    importSchedule = function(schedule) {
-//        let importPromises = [ ];
-//
-//        for (const [storeName, objects] of Object.entries(schedule)) {
-//            if (storeName.includes('Instance')) {
-//                for (const object of objects) {
-//                    importPromises.push(this.putObject(storeName, object));
-//                }
-//            }
-//        }
-//
-//        return Promise.all(importPromises);
-//    }
     
 
     toString() {

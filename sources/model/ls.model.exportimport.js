@@ -45,6 +45,7 @@ class ModelExportImport {
     
     resetSystem(elementsSelected) {
         this.database.deleteSystem(elementsSelected)
+            .then(this.validateModels())
             .then(this.refreshViews());
     }
 
@@ -64,34 +65,19 @@ class ModelExportImport {
     importSystem(system, elementsSelected) {
         this.database.deleteSystem(elementsSelected)
             .then(this.database.importSystem(system, elementsSelected))
+            .then(this.validateModels())
             .then(this.refreshViews());
     }
     
-//    exportSchedule(schedule) {
-//        this.database.exportSchedule()
-//            .then(system => {
-//                const json = JSON.stringify(system);
-//                const link = document.createElement("a");
-//                const file = new Blob([json], { type: 'application/json' });
-//                link.href = URL.createObjectURL(file);
-//                link.download = 'schedule.json';
-//                link.click();
-//                URL.revokeObjectURL(link.href);
-//            });
-//    }
-    
-    // Importing a schedule first clears the instance stores that the schedule will define.
-//    importSchedule(schedule) {
-//        this.database.deleteSchedule(Object.keys(schedule))
-//            .then(this.database.importSchedule(schedule))
-//            .then(this.refreshViews());
-//    }
+    validateModels() {
+        return this.modelDependency.validate();
+    }
     
     refreshViews() {
         return this.modelInterface.refreshViews()
             .then(this.modelTask.refreshViews())
             .then(this.modelDependency.refreshViews())
-            .then(this.modelConstraint.refreshViews())
+            .then(this.modelConstraint.refreshViews());
     }
     
     
