@@ -69,7 +69,6 @@ class ModelDependency {
     deleteDependency(name) {
         return this.database.deleteObject(Model.DependencyInstancesStoreName, name)
             .then(this.database.deleteObject(Model.DependencyStoreName, name))
-            .then(this.modelEventChain.deleteEventChainsOfDependency(name))
             .then(this.refreshViews());
     }
     
@@ -77,23 +76,6 @@ class ModelDependency {
         return this.database.deleteAllObjects(Model.DependencyInstancesStoreName)
             .then(this.database.deleteAllObjects(Model.DependencyStoreName))
             .then(this.refreshViews());
-    }
-    
-    deleteDependenciesOfTask(taskName) {
-        return this.getAllDependencies()
-            .then(dependencies => Promise.all(
-                dependencies.filter(dependency => (dependency.destination.task == taskName || dependency.source.task == taskName))
-                    .map(dependency => this.deleteDependency(dependency.name))
-            ));
-    }
-    
-    deleteDependenciesOfSystem(portName) {
-        return this.getAllDependencies()
-            .then(dependencies => Promise.all(
-                dependencies.filter(dependency => ((dependency.destination.task == Model.SystemInterfaceName || dependency.source.task == Model.SystemInterfaceName)
-                        && (dependency.destination.port == portName || dependency.source.port == portName)))
-                    .map(dependency => this.deleteDependency(dependency.name))
-            ));
     }
     
     getSuccessorDependencies(name) {
@@ -139,9 +121,9 @@ class ModelDependency {
     refreshViews() {
         return this.getAllDependencies()
             .then(result => this.updateDependencies(result))
-            .then(result => this.modelEventChain.validate())
             .then(result => Promise.all([this.modelTask.getAllTasks(), this.modelInterface.getAllInputs(), this.modelInterface.getAllOutputs()]))
-            .then(([tasks, systemInputs, systemOutputs]) => this.updateDependencySelectors(tasks, systemInputs, systemOutputs));
+            .then(([tasks, systemInputs, systemOutputs]) => this.updateDependencySelectors(tasks, systemInputs, systemOutputs))
+            .then(result => this.modelEventChain.validate());
     }
 
     toString() {

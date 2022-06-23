@@ -84,10 +84,9 @@ class ModelEventChain {
 
     deleteEventChain(name) {
         const promiseDeleteEventChainInstances = this.deleteEventChainInstances(name);
-        const promiseDeleteConstraints = this.modelConstraint.deleteConstraintsOfEventChain(name);
         const promiseDeleteEventChain = this.database.deleteObject(Model.EventChainStoreName, name);
 
-        return Promise.all([promiseDeleteEventChain, promiseDeleteConstraints, promiseDeleteEventChainInstances])
+        return Promise.all([promiseDeleteEventChain, promiseDeleteEventChainInstances])
             .then(this.refreshViews());
     }
     
@@ -120,82 +119,27 @@ class ModelEventChain {
         return this.database.deleteAllObjects(Model.EventChainInstanceStoreName);
     }
 
-    deleteEventChainsOfTask(taskName) {
-        return this.getAllEventChains()
-            .then(eventChains => {
-                let deletePromises = [];
-                for (const eventChain of eventChains) {
-                    for (const segment of eventChain.generator()) {
-                        if (segment.destination.task == taskName || segment.source.task == taskName) {
-                            deletePromises.push(this.deleteEventChain(eventChain.name));
-                            deletePromises.push(this.modelConstraint.deleteConstraintsOfEventChain(eventChain.name));
-                            break;
-                        }
-                    }
-                }
-                
-                return Promise.all(deletePromises);
-            });
-    }
-    
-    deleteEventChainsOfSystem(portName) {
-        return this.getAllEventChains()
-            .then(eventChains => {
-                let deletePromises = [];
-                for (const eventChain of eventChains) {
-                    for (const segment of eventChain.generator()) {
-                        if ((segment.destination.task == Model.SystemInterfaceName || segment.source.task == Model.SystemInterfaceName)
-                                && (segment.destination.port == portName || segment.source.port == portName)) {
-                            deletePromises.push(this.deleteEventChain(eventChain.name));
-                            deletePromises.push(this.modelConstraint.deleteConstraintsOfEventChain(eventChain.name));
-                            break;
-                        }
-                    }
-                }
-                
-                return Promise.all(deletePromises);
-            });
-    }
-    
-    deleteEventChainsOfDependency(dependencyName) {
-        return this.getAllEventChains()
-            .then(eventChains => {
-                let deletePromises = [];
-                for (const eventChain of eventChains) {
-                    for (const segment of eventChain.generator()) {
-                        if (segment.name == dependencyName) {
-                            deletePromises.push(this.deleteEventChain(eventChain.name));
-                            deletePromises.push(this.modelConstraint.deleteConstraintsOfEventChain(eventChain.name));
-                            break;
-                        }
-                    }
-                }
-                
-                return Promise.all(deletePromises);
-            });
-    }
-
     // Validate event chains against task dependencies.
     validate() {
         return this.getAllEventChains()
             .then(allEventChains => allEventChains.forEach(eventChain => {
                 this.modelDependency.getAllDependencies().then(dependencies => {
-                for (const segment of eventChain.segments) {
-                    if (!dependencies.some(dependency => (dependency.name == segment.name))) {
-                        this.deleteEventChain(eventChain.name);
-                        break;
+                    for (const segment of eventChain.segments) {
+                        if (!dependencies.some(dependency => (dependency.name == segment.name))) {
+                            this.deleteEventChain(eventChain.name);
+                            break;
+                        }
                     }
-                }})
-            }))
-            .then(this.modelConstraint.validate())
-            .then(this.refreshViews());
+                })
+            }));
     }
     
     refreshViews() {
         return this.getAllEventChains()
             .then(result => this.updateEventChains(result))
             .then(result => this.modelDependency.getAllDependencies())
-            .then(result => this.updateEventChainSelectors(result));
+            .then(result => this.updateEventChainSelectors(result))
+            .then(result => this.modelConstraint.validate());
     }
     
     toString() {

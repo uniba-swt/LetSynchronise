@@ -45,7 +45,6 @@ class ModelExportImport {
     
     resetSystem(elementsSelected) {
         this.database.deleteSystem(elementsSelected)
-            .then(this.validateModels())
             .then(this.refreshViews());
     }
 
@@ -65,18 +64,14 @@ class ModelExportImport {
     importSystem(system, elementsSelected) {
         this.database.deleteSystem(elementsSelected)
             .then(this.database.importSystem(system, elementsSelected))
-            .then(this.validateModels())
             .then(this.refreshViews());
-    }
-    
-    validateModels() {
-        return this.modelDependency.validate();
     }
     
     refreshViews() {
         return this.modelInterface.refreshViews()
             .then(this.modelTask.refreshViews())
             .then(this.modelDependency.refreshViews())
+            .then(this.modelEventChain.refreshViews())
             .then(this.modelConstraint.refreshViews());
     }
     

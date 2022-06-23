@@ -40,6 +40,7 @@ controller.controllerExportImport.model = model.modelExportImport;
 controller.controllerExportImport.modelInterface = model.modelInterface;
 controller.controllerExportImport.modelTask = model.modelTask;
 controller.controllerExportImport.modelDependency = model.modelDependency;
+controller.controllerExportImport.modelEventChain = model.modelEventChain;
 controller.controllerExportImport.modelConstraint = model.modelConstraint;
 
 controller.controllerInterface.view = view.viewInterface;
