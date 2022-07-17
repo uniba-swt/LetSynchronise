@@ -60,7 +60,7 @@ class PluginImporter {
     }
     
     static get DatabaseContents() {
-        return PluginImporter.ModelDatabase.exportSystem();
+        return PluginImporter.ModelDatabase.exportSystem(Model.ShortStoreNames);
     }
     
     

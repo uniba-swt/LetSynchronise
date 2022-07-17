@@ -19,6 +19,10 @@ class ViewSchedule {
     dependencies = null;
     scheduleTooltip = null;
     dependencyTooltip = null;
+    
+    goalField = null;
+    schedulerField = null;
+    autoSyncButton = null;
 
     constructor() {
         this.root = document.querySelector('#nav-analyse');
@@ -40,6 +44,11 @@ class ViewSchedule {
 
         // Set the default makespan
         this.makespan = 10;
+        
+        // AutoSync
+        this.goalField = this.root.querySelector('#view-autosync-goal');
+        this.schedulerField = this.root.querySelector('#view-autosync-scheduler');
+        this.autoSyncButton = this.root.querySelector('#autosync');
         
         // Listeners
         this.setupEventChainListener();
@@ -105,6 +114,36 @@ class ViewSchedule {
             'makespan': parseFloat(this.makespan)
         };
     }
+    
+    get goal() {
+        return this.goalField.value;
+    }
+    
+    set goal(goal) {
+        this.goalField.value = goal;
+    }
+    
+    get scheduler() {
+        return this.schedulerField.value;
+    }
+    
+    set scheduler(scheduler) {
+        this.schedulerField.value = scheduler;
+    }
+    
+    get autoSyncParametersRaw() {
+        return {
+            'goal': this.goal,
+            'scheduler': this.scheduler
+        };
+    }
+    
+    get autoSyncParametersClean() {
+        return {
+            'goal': this.goal.trim(),
+            'scheduler': this.scheduler.trim()
+        };
+    }
 
 
     // -----------------------------------------------------
@@ -154,6 +193,21 @@ class ViewSchedule {
         });
     }
     
+    registerAutoSyncHandler(handler) {
+        this.autoSyncButton.addEventListener('click', event => {
+            // Prevent the default behaviour of submitting the form and the reloading of the webpage.
+            event.preventDefault();
+            
+            // Validate the inputs.
+            if (this.validateSchedulingParameters(this.schedulingParametersRaw)
+                && this.validateAutoSyncParameters(this.autoSyncParametersRaw)) {
+                // Call the handler.
+                handler(this.schedulingParametersClean.makespan, this.autoSyncParametersClean);
+            }
+        });
+    }
+    
+    
     validateSchedulingParameters(schedulingParameters) {
         if (schedulingParameters.makespan == null || isNaN(schedulingParameters.makespan)) {
             alert('Makespan has to be a decimal number.');
@@ -162,6 +216,20 @@ class ViewSchedule {
         const makespan = parseFloat(schedulingParameters.makespan);
         if (makespan <= 0) {
             alert('Makespan must be greater than zero.');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    validateAutoSyncParameters(autoSyncParameters) {
+        if (autoSyncParameters.goal == 'null ') {
+            alert('Choose an optimisation goal.');
+            return false;
+        }
+        
+        if (autoSyncParameters.scheduler == 'null ') {
+            alert('Choose a task scheduling policy.');
             return false;
         }
         

@@ -15,6 +15,7 @@ class ControllerSchedule {
         
         // Register the handlers when setting the view.
         this._view.registerUpdateHandler(this.handleGetSchedule);
+        this._view.registerAutoSyncHandler(this.handleAutoSync);
     }
 
     get view() {
@@ -94,6 +95,12 @@ class ControllerSchedule {
             const promiseSchedule = this.model.getSchedule(makespan);
             this.callbackGetSchedule(promiseSchedule);
         }
+    }
+    
+    // Handler for optimising the task set and schedule.
+    handleAutoSync = (makespan, autoSyncParameters) => {
+        this.model.autoSync(makespan, autoSyncParameters)
+            .then(this.handleGetSchedule(makespan, true));
     }
     
     
