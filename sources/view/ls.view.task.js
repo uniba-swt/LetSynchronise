@@ -375,8 +375,8 @@ class ViewTask {
             return false;
         }
         const bcet = parseFloat(taskParameters.bcet);
-        if (bcet <= 0) {
-            alert('BCET has to be greater than 0.');
+        if (bcet < 0) {
+            alert('BCET has to be greater than or equal to 0.');
             return false;
         }
         
