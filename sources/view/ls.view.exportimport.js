@@ -118,7 +118,7 @@ class ViewExportImport {
             
             this.importSystemSelector.value = null;
 
-            handler(this.elementsSelected);
+            handler(this.elementsSelected, PluginExporterNative);
         });
     }
 

@@ -93,8 +93,8 @@ class ControllerExportImport {
     
     // Handler for exporting a system
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
-    handleExportSystem = (elementsSelected) => {
-        this.model.exportSystem(elementsSelected);
+    handleExportSystem = (elementsSelected, PluginExporter) => {
+        this.model.exportSystem(elementsSelected, PluginExporter);
     }
 
     // Handler for importing a system

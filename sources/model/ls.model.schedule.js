@@ -306,23 +306,6 @@ class ModelSchedule {
         };
     }
     
-    async autoSync(makespan, parameters) {
-        const taskElementSelected = ['tasks'];
-        const system = await this.database.exportSystem(taskElementSelected);
-        let tasks = system[Model.TaskStoreName];
-        for (let task of tasks) {
-            const maxActivationOffset = task.period - task.wcet;
-            const newActivationOffset = maxActivationOffset * Math.random();
-            
-            const maxDuration = task.period - newActivationOffset;
-            const newDuration = (maxDuration - task.wcet) * Math.random() + task.wcet;
-            
-            task.activationOffset = newActivationOffset;
-            task.duration = newDuration;
-        }
-        await this.database.deleteSystem(taskElementSelected);
-        await this.database.importSystem(system, taskElementSelected);
-    }
     
     toString() {
         return "ModelSchedule";

@@ -40,8 +40,8 @@ class PluginMetric {
         PluginMetric.StoredPlugins = { };
     }
     
-    static Register(name, plugin) {
-        PluginMetric.StoredPlugins[name] = plugin;
+    static Register(Plugin) {
+        PluginMetric.StoredPlugins[Plugin.Name] = Plugin;
     }
     
     static ToString() {

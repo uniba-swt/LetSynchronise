@@ -43,8 +43,8 @@ class PluginImporter {
         PluginImporter.StoredPlugins = { };
     }
     
-    static Register(name, plugin) {
-        PluginImporter.StoredPlugins[name] = plugin;
+    static Register(Plugin) {
+        PluginImporter.StoredPlugins[Plugin.Name] = Plugin;
     }
     
     

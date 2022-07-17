@@ -201,8 +201,12 @@ class ViewSchedule {
             // Validate the inputs.
             if (this.validateSchedulingParameters(this.schedulingParametersRaw)
                 && this.validateAutoSyncParameters(this.autoSyncParametersRaw)) {
+                // Get the plugins for the AutoSync goal and scheduler.
+                const pluginGoal = PluginAutoSyncRandom;
+                const pluginScheduler = null;
+                
                 // Call the handler.
-                handler(this.schedulingParametersClean.makespan, this.autoSyncParametersClean);
+                handler(this.schedulingParametersClean.makespan, pluginGoal, pluginScheduler);
             }
         });
     }
