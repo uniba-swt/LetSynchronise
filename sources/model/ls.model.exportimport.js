@@ -7,6 +7,7 @@ class ModelExportImport {
     modelDependency = null;
     modelConstraint = null;
     modelInterface = null;
+    modelEventChain = null;
     
     constructor() { }
     
@@ -34,17 +35,21 @@ class ModelExportImport {
         this.modelConstraint = modelConstraint;
     }
     
+    registerModelEventChain(modelEventChain) {
+        this.modelEventChain = modelEventChain;
+    }
+    
     
     // -----------------------------------------------------
     // Class methods
     
-    resetSystem() {
-        this.database.deleteSystem()
+    resetSystem(elementsSelected) {
+        this.database.deleteSystem(elementsSelected)
             .then(this.refreshViews());
     }
 
-    exportSystem() {
-        this.database.exportSystem()
+    exportSystem(elementsSelected) {
+        this.database.exportSystem(elementsSelected)
             .then(system => {
                 const json = JSON.stringify(system);
                 const link = document.createElement("a");
@@ -56,37 +61,15 @@ class ModelExportImport {
             });
     }
 
-    importSystem(system) {
-        this.database.deleteSystem()
-            .then(this.database.importSystem(system))
-            .then(this.refreshViews());
-    }
-    
-    exportSchedule(schedule) {
-        this.database.exportSchedule()
-            .then(system => {
-                const json = JSON.stringify(system);
-                const link = document.createElement("a");
-                const file = new Blob([json], { type: 'application/json' });
-                link.href = URL.createObjectURL(file);
-                link.download = 'schedule.json';
-                link.click();
-                URL.revokeObjectURL(link.href);
-            });
-    }
-    
-    // Importing a schedule first clears the instance stores that the schedule will define.
-    importSchedule(schedule) {
-        this.database.deleteSchedule(Object.keys(schedule))
-            .then(this.database.importSchedule(schedule))
+    importSystem(system, elementsSelected) {
+        this.database.deleteSystem(elementsSelected)
+            .then(this.database.importSystem(system, elementsSelected))
             .then(this.refreshViews());
     }
     
     refreshViews() {
         return this.modelInterface.refreshViews()
-            .then(this.modelTask.refreshViews())
-            .then(this.modelDependency.refreshViews())
-            .then(this.modelConstraint.refreshViews())
+            .then(this.modelTask.refreshViews());
     }
     
     

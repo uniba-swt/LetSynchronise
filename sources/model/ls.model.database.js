@@ -123,14 +123,32 @@ class ModelDatabase {
 
     // System export and import.
     
-    exportSystem = async function() {
-        let system = { };
-        let necessaryStoreNames = [ ];
+    getObjectStoreNames(elements) {
+        const elementMap = {
+            "constraints"  : Model.ConstraintStoreName,
+            "dependencies" : Model.DependencyStoreName,
+            "eventChains"  : Model.EventChainStoreName,
+            "inputs"       : Model.SystemInputStoreName,
+            "outputs"      : Model.SystemOutputStoreName,
+            "tasks"        : Model.TaskStoreName,
+            "schedule"     : [
+                                Model.ConstraintInstancesStoreName,
+                                Model.DependencyInstancesStoreName,
+                                Model.EventChainInstanceStoreName,
+                                Model.TaskInstancesStoreName
+                             ]
+        };
         
+        return elements.flatMap(element => elementMap[element]);
+    }
+    
+    exportSystem = async function(elementsSelected) {
+        let system = { };
+        
+        const storeNames = this.getObjectStoreNames(elementsSelected);
         const allStoreNames = this.db.objectStoreNames;
-        for (const storeName of allStoreNames) {
-            if (!storeName.includes('Instance')) {
-                necessaryStoreNames.push(storeName);
+        for (const storeName of storeNames) {
+            if (allStoreNames.contains(storeName)) {
                 system[storeName] = await this.getAllObjects(storeName);
             }
         }
@@ -138,23 +156,27 @@ class ModelDatabase {
         return system;
     }
     
-    deleteSystem = function() {
+    deleteSystem = function(elementsSelected) {
         let deletePromises = [ ];
         
+        const storeNames = this.getObjectStoreNames(elementsSelected);
         const allStoreNames = this.db.objectStoreNames;
-        for (const storeName of allStoreNames) {
-            deletePromises.push(this.deleteAllObjects(storeName));
+        for (const storeName of storeNames) {
+            if (allStoreNames.contains(storeName)) {
+                deletePromises.push(this.deleteAllObjects(storeName));
+            }
         }
         
         return Promise.all(deletePromises);
     }
     
-    importSystem = function(system) {
+    importSystem = function(system, elementsSelected) {
         let importPromises = [ ];
         
-        for (const [storeName, objects] of Object.entries(system)) {
-            if (!storeName.includes('Instance')) {
-                for (const object of objects) {
+        const storeNames = this.getObjectStoreNames(elementsSelected);
+        for (const storeName of storeNames) {
+            if (storeName in system) {
+                for (const object of system[storeName]) {
                     importPromises.push(this.putObject(storeName, object));
                 }
             }
@@ -164,22 +186,7 @@ class ModelDatabase {
     }
     
     // Schedule export and import.
-    
-    exportSchedule = async function() {
-        let schedule = { };
-        let necessaryStoreNames = [ ];
-        
-        const allStoreNames = this.db.objectStoreNames;
-        for (const storeName of allStoreNames) {
-            if (storeName.includes('Instance')) {
-                necessaryStoreNames.push(storeName);
-                schedule[storeName] = await this.getAllObjects(storeName);
-            }
-        }
-        
-        return schedule;
-    }
-    
+
     deleteSchedule = function(instancesStoreNames) {
         let deletePromises = [ ];
 
@@ -191,23 +198,8 @@ class ModelDatabase {
         for (const instancesStoreName of instancesStoreNames) {
             deletePromises.push(this.deleteAllObjects(instancesStoreName));
         }
-        
+
         return Promise.all(deletePromises);
-    }
-    
-    importSchedule = function(schedule) {
-        let importPromises = [ ];
-        
-        for (const [storeName, objects] of Object.entries(schedule)) {
-            if (storeName.includes('Instance')) {
-                for (const object of objects) {
-                    importPromises.push(this.putObject(storeName, object));
-                    console.log(storeName, object);
-                }
-            }
-        }
-        
-        return Promise.all(importPromises);
     }
     
 

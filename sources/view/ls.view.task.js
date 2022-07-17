@@ -258,6 +258,10 @@ class ViewTask {
             alert('Name cannot be blank.');
             return false;
         }
+        if (!Utility.ValidName(taskParameters.name.trim())) {
+            alert('Task name can only start with an alphabetical or underscore character, and continue with alphanumerical or underscore characters.');
+            return false;
+        }
         
         if (taskParameters.initialOffset == null || taskParameters.initialOffset.trim() == '' || isNaN(taskParameters.initialOffset)) {
             alert('Initial offset has to be a decimal number.');
@@ -313,6 +317,13 @@ class ViewTask {
             alert(`Remove duplicate input ports: ${duplicateInputs.join(', ')}.`);
             return false;
         }
+        const invalidInputs = inputs.filter(input => !Utility.ValidName(input));
+        if (invalidInputs.length > 0) {
+            alert('Input names can only start with an alphabetical or underscore character, '
+                   + 'and continue with alphanumerical or underscore characters. '
+                   + `Invalid names: ${invalidInputs.join(', ')}.`);
+            return false;
+        }
         
         if (taskParameters.outputs == null || taskParameters.outputs.trim() == '') {
             alert('Specify at least one output.');
@@ -322,6 +333,13 @@ class ViewTask {
         const duplicateOutputs = outputs.filter((port, index, self) => self.indexOf(port) !== index);
         if (duplicateOutputs.length != 0) {
             alert(`Remove duplicate output ports: ${duplicateOutputs.join(', ')}.`);
+            return false;
+        }
+        const invalidOutputs = outputs.filter(output => !Utility.ValidName(output));
+        if (invalidOutputs.length > 0) {
+            alert('Output names can only start with an alphabetical or underscore character, '
+                  + 'and continue with alphanumerical or underscore characters. '
+                  + `Invalid names: ${invalidOutputs.join(', ')}.`);
             return false;
         }
         

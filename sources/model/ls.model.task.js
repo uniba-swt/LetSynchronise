@@ -67,8 +67,7 @@ class ModelTask {
         }        
 
         // Store task parameters into Database
-        return Promise.all(dependenciesToRemove.map(dependency => this.modelDependency.deleteDependency(dependency.name)))
-            .then(this.database.putObject(Model.TaskStoreName, parameters))
+        return this.database.putObject(Model.TaskStoreName, parameters)
             .then(this.refreshViews())
             .then(this.notifyChanges());
    }
@@ -82,15 +81,15 @@ class ModelTask {
     }
 
     deleteTask(name) {
-        return this.modelDependency.deleteDependenciesOfTask(name)
-            .then(this.database.deleteObject(Model.TaskStoreName, name))
+        return this.database.deleteObject(Model.TaskStoreName, name)
             .then(this.database.deleteObject(Model.TaskInstancesStoreName, name))
             .then(result => this.refreshViews());
     }
     
     refreshViews() {
         return this.getAllTasks()
-            .then(result => this.updateTasks(result));
+            .then(result => this.updateTasks(result))
+            .then(result => this.modelDependency.validate());
     }
     
     toString() {
