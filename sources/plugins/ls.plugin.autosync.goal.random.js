@@ -1,10 +1,10 @@
 'use strict';
 
-class PluginAutoSyncRandom {
+class PluginAutoSyncGoalRandom {
     // Plug-in Metadata
     static get Name()     { return 'Randomise Task Parameters'; }
     static get Author()   { return 'Eugene Yip'; }
-    static get Category() { return PluginAutoSync.Category.Random; }
+    static get Category() { return PluginAutoSync.Category.Goal; }
 
     
     // Randomises the task activation offsets and durations.

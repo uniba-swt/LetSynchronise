@@ -100,6 +100,7 @@ class ControllerSchedule {
     // Handler for optimising the task set and schedule.
     handleAutoSync = (makespan, pluginGoal, pluginScheduler) => {
         pluginGoal.Result()
+            .then(result => pluginScheduler.Result())
             .then(result => this.modelTask.refreshViews())
             .then(result => this.handleGetSchedule(makespan, true));
     }

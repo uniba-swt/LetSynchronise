@@ -201,10 +201,10 @@ class ViewSchedule {
             // Validate the inputs.
             if (this.validateSchedulingParameters(this.schedulingParametersRaw)
                 && this.validateAutoSyncParameters(this.autoSyncParametersRaw)) {
-                // Get the plugins for the AutoSync goal and scheduler.
-                const pluginGoal = PluginAutoSyncRandom;
-                const pluginScheduler = null;
-                
+                // Get the AutoSync goal and scheduler plug-ins.
+                const pluginGoal = PluginAutoSync.GetPlugin(this.goal);
+                const pluginScheduler = PluginAutoSync.GetPlugin(this.scheduler);
+
                 // Call the handler.
                 handler(this.schedulingParametersClean.makespan, pluginGoal, pluginScheduler);
             }
@@ -619,6 +619,32 @@ class ViewSchedule {
                 task.style('fill', 'var(--bs-blue)');
             }
         }
+    }
+    
+    updateAutoSyncPluginSelectors() {
+        const pluginsGoal = Object.keys(PluginAutoSync.OfCategory(PluginAutoSync.Category.Goal));
+        this.updateAutoSyncPluginSelector(d3.select(this.goalField), pluginsGoal);
+        
+        const pluginsScheduler = Object.keys(PluginAutoSync.OfCategory(PluginAutoSync.Category.Scheduler));
+        this.updateAutoSyncPluginSelector(d3.select(this.schedulerField), pluginsScheduler);
+    }
+    
+    updateAutoSyncPluginSelector(parentElement, plugins) {
+        parentElement.selectAll('*').remove();
+        parentElement
+            .append('option')
+                .property('disabled', true)
+                .property('selected', true)
+                .property('hidden', true)
+                .attr('value', 'null ')
+                .text('Choose ...');
+        
+        plugins.forEach(Plugin =>
+            parentElement
+                .append('option')
+                    .attr('value', `${Plugin}`)
+                    .text(Plugin)
+            );
     }
     
     toString() {

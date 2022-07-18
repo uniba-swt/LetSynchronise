@@ -2,11 +2,8 @@
 
 class PluginAutoSync {
     static Category = class {
-        static get End2EndMax() { return 'End2EndMax'; }
-        static get End2EndMin() { return 'End2EndMin'; }
-        static get DataAgeMax() { return 'DataAgeMax'; }
-        static get DataAgeMin() { return 'DataAgeMin'; }
-        static get Random()     { return 'Random'; }
+        static get Goal()      { return 'Goal'; }
+        static get Scheduler() { return 'Scheduler'; }
     }
 
 

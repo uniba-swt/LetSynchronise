@@ -113,7 +113,9 @@ console.log(PluginMetric.ToString());
 
 // Register AutoSync plug-ins.
 PluginAutoSync.ModelDatabase = model.modelDatabase;
-PluginAutoSync.Register(PluginAutoSyncEnd2EndMax);
-PluginAutoSync.Register(PluginAutoSyncRandom);
+PluginAutoSync.Register(PluginAutoSyncGoalEnd2EndMax);
+PluginAutoSync.Register(PluginAutoSyncGoalRandom);
+PluginAutoSync.Register(PluginAutoSyncSchedulerRandom);
+view.viewSchedule.updateAutoSyncPluginSelectors();
 
 console.log(PluginAutoSync.ToString());

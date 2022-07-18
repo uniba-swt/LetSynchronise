@@ -1,10 +1,10 @@
 'use strict';
 
-class PluginAutoSyncEnd2EndMax {
+class PluginAutoSyncGoalEnd2EndMax {
     // Plug-in Metadata
     static get Name()     { return 'Maximise End-to-End Response Times'; }
     static get Author()   { return 'Eugene Yip'; }
-    static get Category() { return PluginAutoSync.Category.End2EndMax; }
+    static get Category() { return PluginAutoSync.Category.Goal; }
 
     
     // Updates the task parameters to maximise end-to-end reponse times.
@@ -16,8 +16,8 @@ class PluginAutoSyncEnd2EndMax {
             task.activationOffset = 0;
             task.duration = task.period;
         }
-        return this.database.deleteSystem(taskElementSelected)
-            .then(this.database.importSystem(system, taskElementSelected));
+        return PluginAutoSync.DatabaseContentsDelete(taskElementSelected)
+            .then(PluginAutoSync.DatabaseContentsSet(system, taskElementSelected));
     }
     
 }
