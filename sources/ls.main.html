@@ -67,7 +67,14 @@
     <script src="sources/plugins/ls.plugin.importer.tudE2e.js"></script>
     
     <script src="sources/plugins/ls.plugin.exporter.js"></script>
+    <script src="sources/plugins/ls.plugin.exporter.native.js"></script>
+
     <script src="sources/plugins/ls.plugin.externalTool.js"></script>
+
+    <script src="sources/plugins/ls.plugin.autosync.js"></script>
+    <script src="sources/plugins/ls.plugin.autosync.goal.end2endMax.js"></script>
+    <script src="sources/plugins/ls.plugin.autosync.goal.random.js"></script>
+    <script src="sources/plugins/ls.plugin.autosync.scheduler.random.js"></script>
 
     <script defer src="sources/ls.main.js"></script>
 </head>
@@ -420,6 +427,24 @@
                         </select>
                         <span for="makespan" class="input-group-text">Instance</span>
                         <input type="range" class="form-control form-range w-25" min="0" max="0" id="instance" value="0"/>
+                    </div>
+                </div>
+            </form>
+
+            <div class="m-2"></div>
+            
+            <form class="row">
+                <div class="col-6">
+                    <div class="input-group">
+                        <span class="input-group-text" for="view-autosync-goal">Goal</span>
+                        <select id="view-autosync-goal" class="form-select">
+                            <option disabled selected>Choose ...</option>
+                        </select>
+                        <span class="input-group-text" for="view-autosync-scheduler">Scheduler</span>
+                        <select id="view-autosync-scheduler" class="form-select">
+                            <option disabled selected>Choose ...</option>
+                        </select>
+                        <button id="autosync" type="submit" class="btn btn-primary">AutoSync</button>
                     </div>
                 </div>
             </form>

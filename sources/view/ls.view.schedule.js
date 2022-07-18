@@ -19,6 +19,10 @@ class ViewSchedule {
     dependencies = null;
     scheduleTooltip = null;
     dependencyTooltip = null;
+    
+    goalField = null;
+    schedulerField = null;
+    autoSyncButton = null;
 
     constructor() {
         this.root = document.querySelector('#nav-analyse');
@@ -40,6 +44,11 @@ class ViewSchedule {
 
         // Set the default makespan
         this.makespan = 10;
+        
+        // AutoSync
+        this.goalField = this.root.querySelector('#view-autosync-goal');
+        this.schedulerField = this.root.querySelector('#view-autosync-scheduler');
+        this.autoSyncButton = this.root.querySelector('#autosync');
         
         // Listeners
         this.setupEventChainListener();
@@ -105,6 +114,36 @@ class ViewSchedule {
             'makespan': parseFloat(this.makespan)
         };
     }
+    
+    get goal() {
+        return this.goalField.value;
+    }
+    
+    set goal(goal) {
+        this.goalField.value = goal;
+    }
+    
+    get scheduler() {
+        return this.schedulerField.value;
+    }
+    
+    set scheduler(scheduler) {
+        this.schedulerField.value = scheduler;
+    }
+    
+    get autoSyncParametersRaw() {
+        return {
+            'goal': this.goal,
+            'scheduler': this.scheduler
+        };
+    }
+    
+    get autoSyncParametersClean() {
+        return {
+            'goal': this.goal.trim(),
+            'scheduler': this.scheduler.trim()
+        };
+    }
 
 
     // -----------------------------------------------------
@@ -154,6 +193,25 @@ class ViewSchedule {
         });
     }
     
+    registerAutoSyncHandler(handler) {
+        this.autoSyncButton.addEventListener('click', event => {
+            // Prevent the default behaviour of submitting the form and the reloading of the webpage.
+            event.preventDefault();
+            
+            // Validate the inputs.
+            if (this.validateSchedulingParameters(this.schedulingParametersRaw)
+                && this.validateAutoSyncParameters(this.autoSyncParametersRaw)) {
+                // Get the AutoSync goal and scheduler plug-ins.
+                const pluginGoal = PluginAutoSync.GetPlugin(this.goal);
+                const pluginScheduler = PluginAutoSync.GetPlugin(this.scheduler);
+
+                // Call the handler.
+                handler(this.schedulingParametersClean.makespan, pluginGoal, pluginScheduler);
+            }
+        });
+    }
+    
+    
     validateSchedulingParameters(schedulingParameters) {
         if (schedulingParameters.makespan == null || isNaN(schedulingParameters.makespan)) {
             alert('Makespan has to be a decimal number.');
@@ -162,6 +220,20 @@ class ViewSchedule {
         const makespan = parseFloat(schedulingParameters.makespan);
         if (makespan <= 0) {
             alert('Makespan must be greater than zero.');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    validateAutoSyncParameters(autoSyncParameters) {
+        if (autoSyncParameters.goal == 'null ') {
+            alert('Choose an optimisation goal.');
+            return false;
+        }
+        
+        if (autoSyncParameters.scheduler == 'null ') {
+            alert('Choose a task scheduling policy.');
             return false;
         }
         
@@ -547,6 +619,32 @@ class ViewSchedule {
                 task.style('fill', 'var(--bs-blue)');
             }
         }
+    }
+    
+    updateAutoSyncPluginSelectors() {
+        const pluginsGoal = Object.keys(PluginAutoSync.OfCategory(PluginAutoSync.Category.Goal));
+        this.updateAutoSyncPluginSelector(d3.select(this.goalField), pluginsGoal);
+        
+        const pluginsScheduler = Object.keys(PluginAutoSync.OfCategory(PluginAutoSync.Category.Scheduler));
+        this.updateAutoSyncPluginSelector(d3.select(this.schedulerField), pluginsScheduler);
+    }
+    
+    updateAutoSyncPluginSelector(parentElement, plugins) {
+        parentElement.selectAll('*').remove();
+        parentElement
+            .append('option')
+                .property('disabled', true)
+                .property('selected', true)
+                .property('hidden', true)
+                .attr('value', 'null ')
+                .text('Choose ...');
+        
+        plugins.forEach(Plugin =>
+            parentElement
+                .append('option')
+                    .attr('value', `${Plugin}`)
+                    .text(Plugin)
+            );
     }
     
     toString() {

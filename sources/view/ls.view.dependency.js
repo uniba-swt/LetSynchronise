@@ -125,12 +125,12 @@ class ViewDependency {
         }
         
         if (taskDependency.source == 'null ') {
-            alert(`Choose source of dependency.`);
+            alert('Choose source of dependency.');
             return false;
         }
 
         if (taskDependency.destination == 'null ') {
-            alert(`Choose destination of dependency.`);
+            alert('Choose destination of dependency.');
             return false;
         }
         

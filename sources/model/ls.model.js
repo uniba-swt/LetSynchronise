@@ -27,6 +27,18 @@ class Model {
     static get EventChainStoreName()          { return 'EventChainStore'; }
     static get EventChainInstanceStoreName()  { return 'EventChainInstanceStore'; }
     
+    static get ShortStoreNames() {
+        return [
+            'inputs',
+            'outputs',
+            'tasks',
+            'dependencies',
+            'constraints',
+            'eventChains',
+            'schedule'
+        ];
+    }
+    
     static get SystemInterfaceName()          { return '__system'; }
 
 

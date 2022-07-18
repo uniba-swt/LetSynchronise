@@ -60,7 +60,7 @@ The JSON string is then converted into a JSON object using the method `JSON.pars
 LetSynchronise clears its database and stores the JSON object in the database. 
 
 An import plugin may also be used to import LET task schedules, but the plugin shall guarantee that the task, dependency, and event chain instances are consistent with their definitions in the LetSynchronise database (SystemInputStore, SystemOutputStore, TaskStore, DependencyStore, ConstraintStore, EventChainStore).
-Use the static method `DatabaseContents` in `` to retrieve a copy of the database contents as an object:
+Use the static method `DatabaseContents` in `ls.plugin.importer.js` to retrieve a copy of the database contents as an object:
 ```javascript
 const databaseContents = await PluginImporter.DatabaseContents;
 ```  

@@ -14,7 +14,7 @@ class PluginExternalTool {
         plugins = [];
     }
     
-    static register(name, func) {
-        plugins[name] = func;
+    static register(Plugin) {
+        plugins[Plugin.Name] = Plugin;
     }
 }
