@@ -11,9 +11,13 @@ class PluginAutoSyncSchedulerRandom {
     static async Result() {
         // TODO: Create task instances and execution times.
         
-        // TODO: Create execution intervals.
         
         return null;
+    }
+    
+    static Algorithm() {
+        // TODO: Create execution intervals.
+    
     }
     
 }
