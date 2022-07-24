@@ -247,11 +247,12 @@ class ViewSchedule {
     }
     
     
-    async updateSchedule(promise) {
-        const taskParametersSet = await promise['promiseAllTasks'];
-        const tasksInstances = await promise['promiseAllTasksInstances'];
-        const dependenciesSet = await promise['promiseAllDependenciesInstances'];
-        const eventChainInstances = await promise['promiseAllEventChainInstances'];
+    async updateSchedule(promiseSchedule) {
+        const schedule = await promiseSchedule;
+        const taskParametersSet = await schedule['promiseAllTasks'];
+        const tasksInstances = await schedule['promiseAllTasksInstances'];
+        const dependenciesSet = await schedule['promiseAllDependenciesInstances'];
+        const eventChainInstances = await schedule['promiseAllEventChainInstances'];
         
         if (taskParametersSet.length < 1) {
             this.prologue = 0;

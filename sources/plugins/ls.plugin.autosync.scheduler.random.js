@@ -8,9 +8,13 @@ class PluginAutoSyncSchedulerRandom {
 
     
     // Randomises the scheduling of task execution.
-    static async Result() {
+    static async Result(makespan) {
         // TODO: Create task instances and execution times.
+        await PluginAutoSync.DeleteSchedule();
+        await PluginAutoSync.CreateAllTaskInstances(makespan);
+        await PluginAutoSync.ModelDatabase.CreateAllDependencyAndEventChainInstances(makespan);
         
+        PluginAutoSyncSchedulerRandom.Algorithm();
         
         return null;
     }

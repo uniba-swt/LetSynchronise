@@ -62,7 +62,21 @@ class PluginAutoSync {
         return PluginAutoSync.ModelDatabase.deleteSystem(elementsSelected);
     }
     
+
+    // Scheduler helper methods.
+    static DeleteSchedule() {
+        PluginAutoSync.ModelDatabase.deleteSchedule();
+    }
     
+    static CreateAllTaskInstances(makespan) {
+        PluginAutoSync.ModelDatabase.createAllTaskInstances(makespan);
+    }
+    
+    static CreateAllDependencyAndEventChainInstances(makespan) {
+        PluginAutoSync.ModelDatabase.createAllEventChainInstances(makespan);
+    }
+    
+
     static ToString() {
         return 'PluginAutoSync loaded ...\n  ' + Object.keys(PluginAutoSync.Plugins).join(',\n  ');
     }

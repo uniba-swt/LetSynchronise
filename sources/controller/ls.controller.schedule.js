@@ -88,12 +88,15 @@ class ControllerSchedule {
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleGetSchedule = (makespan, reinstantiateTasks) => {
         if (reinstantiateTasks) {
-            this.model.reinstantiateTasks(makespan)
-                .then(result => this.model.getSchedule(makespan))
+            this.model.deleteSchedule()
+                .then(result => this.model.createAllTaskInstances(makespan))
+                .then(result => this.model.createAllDependencyAndEventChainInstances(makespan))
+                .then(result => this.model.getSchedule())
                 .then(result => this.callbackGetSchedule(result));
         } else {
-            const promiseSchedule = this.model.getSchedule(makespan);
-            this.callbackGetSchedule(promiseSchedule);
+            this.model.createAllDependencyAndEventChainInstances(makespan)
+                .then(result => this.model.getSchedule())
+                .then(result => this.callbackGetSchedule(result));
         }
     }
     
@@ -102,7 +105,8 @@ class ControllerSchedule {
         pluginGoal.Result()
             .then(result => pluginScheduler.Result())
             .then(result => this.modelTask.refreshViews())
-            .then(result => this.handleGetSchedule(makespan, true));
+            .then(result => this.model.getSchedule(makespan))
+            .then(result => this.callbackGetSchedule(result));
     }
     
     
