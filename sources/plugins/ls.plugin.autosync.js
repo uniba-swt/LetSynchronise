@@ -74,15 +74,19 @@ class PluginAutoSync {
 
     // Scheduler helper methods.
     static DeleteSchedule() {
-        PluginAutoSync.ModelDatabase.deleteSchedule();
+        return PluginAutoSync.ModelDatabase.deleteSchedule();
     }
     
     static CreateAllTaskInstances(makespan) {
-        PluginAutoSync.ModelSchedule.createAllTaskInstances(makespan);
+        return PluginAutoSync.ModelSchedule.createAllTaskInstances(makespan);
     }
     
     static CreateAllDependencyAndEventChainInstances(makespan) {
-        PluginAutoSync.ModelSchedule.createAllDependencyAndEventChainInstances(makespan);
+        return PluginAutoSync.ModelSchedule.createAllDependencyAndEventChainInstances(makespan);
+    }
+    
+    static GetSchedule() {
+        return PluginAutoSync.ModelSchedule.getSchedule();
     }
     
 

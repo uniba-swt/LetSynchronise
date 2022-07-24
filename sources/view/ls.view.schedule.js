@@ -123,12 +123,20 @@ class ViewSchedule {
         this.goalField.value = goal;
     }
     
+    get pluginGoal() {
+        return PluginAutoSync.GetPlugin(this.goal);
+    }
+    
     get scheduler() {
         return this.schedulerField.value;
     }
     
     set scheduler(scheduler) {
         this.schedulerField.value = scheduler;
+    }
+    
+    get pluginScheduler() {
+        return PluginAutoSync.GetPlugin(this.scheduler);
     }
     
     get autoSyncParametersRaw() {
@@ -185,7 +193,7 @@ class ViewSchedule {
             // Validate the inputs.
             if (this.validateSchedulingParameters(this.schedulingParametersRaw)) {
                 // Ask the model to give us the current task set via a callback.
-                getScheduleHandler(this.schedulingParametersClean.makespan, true);
+                getScheduleHandler(true, true);
                 
                 this.updateButton.classList.remove('btn-danger');
                 this.updateButton.classList.add('btn-primary');
@@ -201,12 +209,8 @@ class ViewSchedule {
             // Validate the inputs.
             if (this.validateSchedulingParameters(this.schedulingParametersRaw)
                 && this.validateAutoSyncParameters(this.autoSyncParametersRaw)) {
-                // Get the AutoSync goal and scheduler plug-ins.
-                const pluginGoal = PluginAutoSync.GetPlugin(this.goal);
-                const pluginScheduler = PluginAutoSync.GetPlugin(this.scheduler);
-
                 // Call the handler.
-                handler(this.schedulingParametersClean.makespan, pluginGoal, pluginScheduler);
+                handler();
             }
         });
     }
@@ -253,7 +257,7 @@ class ViewSchedule {
         const tasksInstances = await schedule['promiseAllTasksInstances'];
         const dependenciesSet = await schedule['promiseAllDependenciesInstances'];
         const eventChainInstances = await schedule['promiseAllEventChainInstances'];
-        
+                
         if (taskParametersSet.length < 1) {
             this.prologue = 0;
             this.hyperPeriod = 0;

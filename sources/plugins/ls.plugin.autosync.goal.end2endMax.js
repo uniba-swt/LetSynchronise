@@ -10,7 +10,7 @@ class PluginAutoSyncGoalEnd2EndMax {
     // Updates the task parameters to maximise end-to-end reponse times.
     static async Result() {
         const taskElementSelected = ['tasks'];
-        const system = await PluginExporter.DatabaseContentsGet(taskElementSelected);
+        const system = await PluginAutoSync.DatabaseContentsGet(taskElementSelected);
         let tasks = system[Model.TaskStoreName];
         
         PluginAutoSyncGoalEnd2EndMax.Algorithm(tasks);

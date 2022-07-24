@@ -69,7 +69,6 @@ controller.controllerSchedule.modelEventChain = model.modelEventChain;
 controller.controllerSchedule.modelConstraint = model.modelConstraint;
 
 controller.controllerEventChain.view = view.viewEventChain;
-controller.controllerEventChain.viewSchedule = view.viewSchedule;
 controller.controllerEventChain.model = model.modelEventChain;
 controller.controllerEventChain.modelDependency = model.modelDependency;
 controller.controllerEventChain.modelConstraint = model.modelConstraint;

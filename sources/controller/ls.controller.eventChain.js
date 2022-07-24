@@ -2,7 +2,6 @@
 
 class ControllerEventChain {
     _view = null;
-    _viewSchedule = null;
     _model = null;
     _modelDependency = null;
     _modelConstraint = null;
@@ -22,14 +21,6 @@ class ControllerEventChain {
 
     get view() {
         return this._view;
-    }
-    
-    set viewSchedule(viewSchedule) {
-        this._viewSchedule = viewSchedule;
-    }
-    
-    get viewSchedule() {
-        return this._viewSchedule;
     }
     
     set model(model) {
@@ -116,7 +107,7 @@ class ControllerEventChain {
     callbackUpdateEventChains = (eventChains) => {
         this.view.updateEventChains(eventChains);
         
-        this.controllerSchedule.handleGetSchedule(this.viewSchedule.makespan, false);
+        this.controllerSchedule.handleGetSchedule(false, false);
     }
     
     // Callback for updating the displayed event chain selectors.
