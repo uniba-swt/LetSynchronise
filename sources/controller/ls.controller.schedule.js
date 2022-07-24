@@ -87,7 +87,11 @@ class ControllerSchedule {
     // Handler for updating the task schedule.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleGetSchedule = (reinstantiateTasks, reschedule) => {
-        // TODO: Determine if schedule needs to be recomputed.
+        // TODO: Determine the parts of the schedule need to be recomputed.
+        // Makespan: Truncate or extend schedule
+        // Dependencies/event-chains: Only update dependency/event-chain instances
+        // Scheduler: Only update task execution intervals
+        // Task execution times: Only update task execution intervals
             
         const makespan = this.view.schedulingParametersClean.makespan;
         
