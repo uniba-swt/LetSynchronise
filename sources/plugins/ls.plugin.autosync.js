@@ -37,9 +37,18 @@ class PluginAutoSync {
     
     // Plugin helper methods.
     static _ModelDatabase = null;
+    static _ModelSchedule = null;
     
     static set ModelDatabase(ModelDatabase) {
         PluginAutoSync._ModelDatabase = ModelDatabase;
+    }
+    
+    static get ModelSchedule() {
+        return PluginAutoSync._ModelSchedule;
+    }
+    
+    static set ModelSchedule(ModelSchedule) {
+        PluginAutoSync._ModelSchedule = ModelSchedule;
     }
     
     static get ModelDatabase() {
@@ -69,11 +78,11 @@ class PluginAutoSync {
     }
     
     static CreateAllTaskInstances(makespan) {
-        PluginAutoSync.ModelDatabase.createAllTaskInstances(makespan);
+        PluginAutoSync.ModelSchedule.createAllTaskInstances(makespan);
     }
     
     static CreateAllDependencyAndEventChainInstances(makespan) {
-        PluginAutoSync.ModelDatabase.createAllEventChainInstances(makespan);
+        PluginAutoSync.ModelSchedule.createAllDependencyAndEventChainInstances(makespan);
     }
     
 
