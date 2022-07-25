@@ -28,7 +28,7 @@ class PluginAutoSyncSchedulerRandom {
     
     static Algorithm(tasks) {
         // Track how far we are into the schedule.
-        let currentTime = null;
+        let currentTime = 0;
         
         // For each task, keep track of the instance we are trying to schedule.
         // A null index means that all instances of a task have been scheduled.

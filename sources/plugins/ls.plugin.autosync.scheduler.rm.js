@@ -28,7 +28,7 @@ class PluginAutoSyncSchedulerRm {
     
     static Algorithm(makespan, tasks) {
         // Track how far we are into the schedule.
-        let currentTime = null;
+        let currentTime = 0;
         
         // For each task, keep track of the instance we are trying to schedule.
         // A null index means that all instances of a task have been scheduled.
@@ -51,33 +51,45 @@ class PluginAutoSyncSchedulerRm {
                     continue;
                 }
                 
-                // Choose the task instance with the minimum LET start time and shortest period (highest priority).
                 const taskInstance = task.value[taskInstanceIndices[taskNumber]];
                 const taskInstancePeriod = taskInstance.periodEndTime - taskInstance.periodStartTime;
-                if (chosenTask.instance == null || taskInstance.letStartTime < chosenTask.instance.letStartTime
-                    || (taskInstance.letStartTime == chosenTask.instance.letStartTime && taskInstancePeriod < chosenTask.period)) {
+                
+                // Update the chosenTask instance with taskInstance if any of the following three conditions are true:
+                // 1. No task instance has been chosen, because we have only just started computing a new scheduling decision.
+                const noChosenTask = (chosenTask.instance == null);
+                // 2. Both the taskInstance and chosenTask are activated after the current time,
+                //    but the taskInstance activates before the chosenTask.
+                const earlierFutureActivation = !noChosenTask && (currentTime < taskInstance.letStartTime && taskInstance.letStartTime < chosenTask.instance.letStartTime);
+                // 3. The priority of taskInstance is equal to or higher than the chosenTask and
+                //    (the taskInstance has already been activated, or the taskInstance is not activated later than the chosenTask).
+                const higherPriority = !noChosenTask && (taskInstancePeriod <= chosenTask.period && (taskInstance.letStartTime <= currentTime || taskInstance.letStartTime <= chosenTask.instance.letStartTime));
+                
+                if (noChosenTask || earlierFutureActivation || higherPriority) {
                     chosenTask.number = taskNumber;
                     chosenTask.instance = taskInstance;
                     chosenTask.period = taskInstancePeriod
                 }
                 
                 // Find the latest time that the next scheduling decision has to be made.
-                // Minimum LET start time of all higher-priority task instances.
+                // Equal to the minimum LET start time of all higher-priority task instances.
                 if (taskInstancePeriod < chosenTask.period) {
                     nextPreemptionTime = Math.min(nextPreemptionTime, taskInstance.letStartTime);
                 }
             }
             
             let lastPreemptedTask = preemptedTasksQueue.pop();
-            if (lastPreemptedTask != null
-                && (chosenTask.number == null || chosenTask.instance == null
-                    || lastPreemptedTask.period <= chosenTask.period
-                    || currentTime < chosenTask.instance.letStartTime)) {
-                // Resume the last preempted task instance if no task instance could be chosen,
-                // or the preempted task instance has the same or a higher priority than the
-                // chosen task instance, or LET start time of the chosen task instance is later
-                // than the current time.
-                if (chosenTask.number != null && chosenTask.instance != null) {
+            const noPreemptedTask = (lastPreemptedTask == null);
+            
+            // Resume the last preempted task instance if any of the following three conditions are true:
+            // 1. No task instance could be chosen, because we have run out of new task instances to schedule.
+            const noChosenTask = !noPreemptedTask && (chosenTask.number == null || chosenTask.instance == null);
+            // 2. The priority of the last preempted task is equal to or higher than the chosenTask.
+            const higherPriority = !noPreemptedTask && (lastPreemptedTask.period <= chosenTask.period);
+            // 3. The chosenTask has not yet been activated for execution.
+            const notActivated = !noPreemptedTask && (currentTime < chosenTask.instance.letStartTime);
+            
+            if (noChosenTask || higherPriority || notActivated) {
+                if (!noChosenTask && notActivated) {
                     nextPreemptionTime = chosenTask.instance.letStartTime;
                 }
                 chosenTask = lastPreemptedTask;
@@ -94,17 +106,16 @@ class PluginAutoSyncSchedulerRm {
                 }
             }
             
-            // Make sure the current time is not earlier than the chosen task instance's LET start time.
+            // Make sure the current time is not earlier than the chosenTask's LET start time.
             currentTime = Math.max(currentTime, chosenTask.instance.letStartTime);
             
             // Schedule as much of the chosen task instance's execution time before the next preeemption time.
             // Create an execution interval for the chosen task instance.
             const executionTimeEnd = currentTime + PluginAutoSyncSchedulerRm.RemainingExecutionTime(chosenTask.instance);
             if (executionTimeEnd > chosenTask.instance.letEndTime) {
-                alert(`Could not schedule enough time for task ${tasks[chosenTask.number].name}, instance ${taskInstanceIndices[chosenTask.number]}!`);
+                alert(`Could not schedule enough time for task ${tasks[chosenTask.number].name}, instance ${chosenTask.instance.instance}!`);
                 return;
             }
-            
             if (executionTimeEnd <= nextPreemptionTime) {
                 const executionInterval = new Utility.Interval(currentTime, executionTimeEnd);
                 chosenTask.instance.executionIntervals.push(executionInterval);
