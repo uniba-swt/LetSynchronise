@@ -1,8 +1,8 @@
 'use strict';
 
-class PluginAutoSyncSchedulerRandom {
+class PluginAutoSyncSchedulerRm {
     // Plug-in Metadata
-    static get Name()     { return 'Randomise Task Scheduling'; }
+    static get Name()     { return 'Rate-Monotonic Task Scheduling'; }
     static get Author()   { return 'Eugene Yip'; }
     static get Category() { return PluginAutoSync.Category.Scheduler; }
 
@@ -35,8 +35,13 @@ class PluginAutoSyncSchedulerRandom {
         let taskInstanceIndices = new Array(tasks.length);
         taskInstanceIndices.fill(0);
         
-        // Schedule all the task instances in chronological order, based on their LET start time.
-        // Task instances with the same LET start time are selected arbitrarily.
+        // Use a LIFO queue to track the task instance being scheduled and those that
+        // have been preempted by a higher-priority task.
+        let schedulingQueue = [];
+        
+        // Schedule all the task instances in chronological (LET start time) and
+        // rate-monotonic (task period) order.
+        // Task instances with the same priority and/or LET start time are selected arbitrarily.
         while (true) {
             let chosenTaskNumber = null;
             let chosenTaskInstance = null;

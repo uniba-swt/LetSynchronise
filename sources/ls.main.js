@@ -116,6 +116,7 @@ PluginAutoSync.ModelSchedule = model.modelSchedule;
 PluginAutoSync.Register(PluginAutoSyncGoalEnd2EndMax);
 PluginAutoSync.Register(PluginAutoSyncGoalRandom);
 PluginAutoSync.Register(PluginAutoSyncSchedulerRandom);
+PluginAutoSync.Register(PluginAutoSyncSchedulerRm);
 view.viewSchedule.updateAutoSyncPluginSelectors();
 
 console.log(PluginAutoSync.ToString());
