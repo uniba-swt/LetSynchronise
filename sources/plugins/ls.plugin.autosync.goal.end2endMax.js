@@ -10,14 +10,22 @@ class PluginAutoSyncGoalEnd2EndMax {
     // Updates the task parameters to maximise end-to-end reponse times.
     static async Result() {
         const taskElementSelected = ['tasks'];
-        const system = await PluginExporter.DatabaseContentsGet(taskElementSelected);
+        const system = await PluginAutoSync.DatabaseContentsGet(taskElementSelected);
         let tasks = system[Model.TaskStoreName];
+        
+        PluginAutoSyncGoalEnd2EndMax.Algorithm(tasks);
+
+        return PluginAutoSync.DatabaseContentsDelete(taskElementSelected)
+            .then(PluginAutoSync.DatabaseContentsSet(system, taskElementSelected));
+    }
+    
+    // Parameter "tasks" is a copy of a reference to an object.
+    static Algorithm(tasks) {
         for (let task of tasks) {
+            // Must update the contents of the referenced object.
             task.activationOffset = 0;
             task.duration = task.period;
         }
-        return PluginAutoSync.DatabaseContentsDelete(taskElementSelected)
-            .then(PluginAutoSync.DatabaseContentsSet(system, taskElementSelected));
     }
     
 }

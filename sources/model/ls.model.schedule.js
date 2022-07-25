@@ -50,8 +50,7 @@ class ModelSchedule {
             'letEndTime'        : timePoint + parameters.activationOffset + parameters.duration,
             'periodEndTime'     : timePoint + parameters.period,
             'executionTime'     : executionTime,
-            'executionIntervals': [ new Utility.Interval(timePoint + parameters.activationOffset, timePoint + parameters.activationOffset + executionTime/2),
-                                    new Utility.Interval(timePoint + parameters.activationOffset + parameters.duration - executionTime/2, timePoint + parameters.activationOffset + parameters.duration) ]
+            'executionIntervals': []
         };
     }
     
@@ -67,6 +66,15 @@ class ModelSchedule {
             'initialOffset': parameters.initialOffset,
             'value': instances
         });
+    }
+    
+    // Create all instances of all tasks within the makespan.
+    createAllTaskInstances(makespan) {
+        const promiseAllTasksInstances = this.modelTask.getAllTasks()
+            .then(tasks => Promise.all(tasks.map(task => this.createTaskInstances(task, makespan))))
+            .then(result => this.database.getAllObjects(Model.TaskInstancesStoreName));
+        
+        return promiseAllTasksInstances;
     }
     
     // Create a single dependency instance.
@@ -169,6 +177,12 @@ class ModelSchedule {
         });
     }
     
+    // Create all instances of all dependencies.
+    createAllDependencyInstances(makespan) {
+        return this.modelDependency.getAllDependencies()
+            .then(dependencies => Promise.all(dependencies.map(dependency => this.createDependencyInstances(dependency, makespan))));
+    }
+    
     // Creates all instances of an event chain from the given dependencyInstances.
     // Each event chain instance is linear with no branching.
     // Event chain instances are found via forward reachability from the event chain's starting dependency.
@@ -264,45 +278,30 @@ class ModelSchedule {
         return promiseAllInferredEventChains;
     }
     
+    // Create all instances of each event chain, and store them in the model database.
+    createAllDependencyAndEventChainInstances(makespan) {
+        // Get all event chain definitions and all dependency instances.
+        const promiseAllEventChains = this.modelEventChain.getAllEventChains();
+        const promiseAllDependenciesInstances = this.createAllDependencyInstances()
+            .then(result => this.database.getAllObjects(Model.DependencyInstancesStoreName));
+        
+        return Promise.all([promiseAllEventChains, promiseAllDependenciesInstances])
+            .then(([allEventChains, allDependencyInstances]) => allEventChains
+                 .forEach(chain => this.createEventChainInstances(allDependencyInstances, chain)));
+    }
     
-    reinstantiateTasks(makespan) {
+    deleteSchedule() {
         // Delete all task, dependency, and event chain instances.
-        this.database.deleteSchedule();
-        
-        // Generate task instances.
-        const promiseAllTasks = this.modelTask.getAllTasks();
-        const promiseAllTasksInstances = promiseAllTasks
-            .then(tasks => Promise.all(tasks.map(task => this.createTaskInstances(task, makespan))))
-            .then(result => this.database.getAllObjects(Model.TaskInstancesStoreName));
-        
-        return promiseAllTasksInstances;
+        return this.database.deleteSchedule();
     }
     
     // Get task schedule for given makespan.
-    getSchedule(makespan) {
-        const promiseAllTasks = this.modelTask.getAllTasks();
-        const promiseAllTasksInstances = this.database.getAllObjects(Model.TaskInstancesStoreName);
-        
-        // Generate dependency instances.
-        const promiseAllDependenciesInstances = this.modelDependency.getAllDependencies()
-            .then(dependencies => Promise.all(dependencies.map(dependency => this.createDependencyInstances(dependency, makespan))))
-            .then(result => this.database.getAllObjects(Model.DependencyInstancesStoreName));
-        
-        // Get all event chains and all dependency instances.
-        // Create all instances of each event chain, and store them in the model database.
-        // Retrieve the event chain instances from the database, and transform them back into ChainInstance objects.
-         const promiseAllEventChains = this.modelEventChain.getAllEventChains();
-         const promiseDeleteChainInstances = this.modelEventChain.deleteAllEventChainsInstances();
-         const promiseAllEventChainInstances = Promise.all([promiseAllEventChains, promiseAllDependenciesInstances, promiseDeleteChainInstances])
-             .then(([allEventChains, allDependencyInstances, _]) => allEventChains
-                 .forEach(chain => this.createEventChainInstances(allDependencyInstances, chain)))
-             .then(result => this.modelEventChain.getAllEventChainsInstances())
-        
+    getSchedule() {
         return {
-            'promiseAllTasks': promiseAllTasks, 
-            'promiseAllTasksInstances': promiseAllTasksInstances,
-            'promiseAllDependenciesInstances': promiseAllDependenciesInstances,
-            'promiseAllEventChainInstances': promiseAllEventChainInstances
+            'promiseAllTasks': this.modelTask.getAllTasks(),
+            'promiseAllTasksInstances': this.database.getAllObjects(Model.TaskInstancesStoreName),
+            'promiseAllDependenciesInstances': this.modelDependency.getAllDependencyInstances(),
+            'promiseAllEventChainInstances': this.modelEventChain.getAllEventChainsInstances()
         };
     }
     

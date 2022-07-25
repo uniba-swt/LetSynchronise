@@ -69,7 +69,6 @@ controller.controllerSchedule.modelEventChain = model.modelEventChain;
 controller.controllerSchedule.modelConstraint = model.modelConstraint;
 
 controller.controllerEventChain.view = view.viewEventChain;
-controller.controllerEventChain.viewSchedule = view.viewSchedule;
 controller.controllerEventChain.model = model.modelEventChain;
 controller.controllerEventChain.modelDependency = model.modelDependency;
 controller.controllerEventChain.modelConstraint = model.modelConstraint;
@@ -113,9 +112,11 @@ console.log(PluginMetric.ToString());
 
 // Register AutoSync plug-ins.
 PluginAutoSync.ModelDatabase = model.modelDatabase;
+PluginAutoSync.ModelSchedule = model.modelSchedule;
 PluginAutoSync.Register(PluginAutoSyncGoalEnd2EndMax);
 PluginAutoSync.Register(PluginAutoSyncGoalRandom);
 PluginAutoSync.Register(PluginAutoSyncSchedulerRandom);
+PluginAutoSync.Register(PluginAutoSyncSchedulerRm);
 view.viewSchedule.updateAutoSyncPluginSelectors();
 
 console.log(PluginAutoSync.ToString());
