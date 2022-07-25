@@ -38,8 +38,7 @@ class PluginAutoSyncSchedulerRandom {
         // Schedule all the task instances in chronological order, based on their LET start time.
         // Task instances with the same LET start time are selected arbitrarily.
         while (true) {
-            let chosenTaskNumber = null;
-            let chosenTaskInstance = null;
+            let chosenTask = { 'number': null, 'instance': null };
             for (const [taskNumber, task] of tasks.entries()) {
                 if (taskInstanceIndices[taskNumber] == null) {
                     continue;
@@ -47,33 +46,33 @@ class PluginAutoSyncSchedulerRandom {
                 
                 // Choose the task instance with the minimum LET start time.
                 const taskInstance = task.value[taskInstanceIndices[taskNumber]];
-                if (chosenTaskInstance == null || taskInstance.letStartTime < chosenTaskInstance.letStartTime) {
-                    chosenTaskNumber = taskNumber;
-                    chosenTaskInstance = taskInstance;
+                if (chosenTask.instance == null || taskInstance.letStartTime < chosenTask.instance.letStartTime) {
+                    chosenTask.number = taskNumber;
+                    chosenTask.instance = taskInstance;
                 }
             }
             
             // Make sure the current time is not earlier than the chosen task instance's LET start time.
-            currentTime = Math.max(currentTime, chosenTaskInstance.letStartTime);
+            currentTime = Math.max(currentTime, chosenTask.instance.letStartTime);
             
             // Make sure the chosen task instance finishes its execution in its LET.
-            const nextTime = currentTime + chosenTaskInstance.executionTime;
-            if (nextTime > chosenTaskInstance.letEndTime) {
-                alert(`Could not schedule enough time for task ${tasks[chosenTaskNumber].name}, instance ${taskInstanceIndices[chosenTaskNumber]}!`);
+            const nextTime = currentTime + chosenTask.instance.executionTime;
+            if (nextTime > chosenTask.instance.letEndTime) {
+                alert(`Could not schedule enough time for task ${tasks[chosenTask.number].name}, instance ${taskInstanceIndices[chosenTask.number]}!`);
                 return;
             }
             
             // Create the execution interval for the chosen task instance.
             const executionInterval = new Utility.Interval(currentTime, nextTime);
-            chosenTaskInstance.executionIntervals.push(executionInterval);
+            chosenTask.instance.executionIntervals.push(executionInterval);
             
             // Advance the current time to the next time.
             currentTime = nextTime;
             
             // Consider the next instance of the chosen task in the next round of scheduling decisions.
-            taskInstanceIndices[chosenTaskNumber]++;
-            if (taskInstanceIndices[chosenTaskNumber] == tasks[chosenTaskNumber].value.length) {
-                taskInstanceIndices[chosenTaskNumber] = null;
+            taskInstanceIndices[chosenTask.number]++;
+            if (taskInstanceIndices[chosenTask.number] == tasks[chosenTask.number].value.length) {
+                taskInstanceIndices[chosenTask.number] = null;
             }
             
             // Terminate when all task instances have been scheduled.

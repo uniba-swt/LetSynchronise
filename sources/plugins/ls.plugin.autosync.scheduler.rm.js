@@ -7,7 +7,7 @@ class PluginAutoSyncSchedulerRm {
     static get Category() { return PluginAutoSync.Category.Scheduler; }
 
     
-    // Randomises the scheduling of task execution.
+    // Uses a rate-monotonic algorithm to schedule task executions.
     static async Result(makespan, reinstantiateTasks) {
         // Create task instances and execution times.
         if (reinstantiateTasks) {
@@ -20,13 +20,13 @@ class PluginAutoSyncSchedulerRm {
         const schedule = await PluginAutoSync.DatabaseContentsGet(scheduleElementSelected);
         const tasks = await schedule[Model.TaskInstancesStoreName];
 
-        PluginAutoSyncSchedulerRandom.Algorithm(tasks);
+        PluginAutoSyncSchedulerRm.Algorithm(makespan, tasks);
         
         return PluginAutoSync.DatabaseContentsDelete(scheduleElementSelected)
             .then(PluginAutoSync.DatabaseContentsSet(schedule, scheduleElementSelected));
     }
     
-    static Algorithm(tasks) {
+    static Algorithm(makespan, tasks) {
         // Track how far we are into the schedule.
         let currentTime = null;
         
@@ -35,57 +35,100 @@ class PluginAutoSyncSchedulerRm {
         let taskInstanceIndices = new Array(tasks.length);
         taskInstanceIndices.fill(0);
         
-        // Use a LIFO queue to track the task instance being scheduled and those that
-        // have been preempted by a higher-priority task.
-        let schedulingQueue = [];
+        // Use a LIFO queue to track the preempted task instances.
+        let preemptedTasksQueue = [];
         
         // Schedule all the task instances in chronological (LET start time) and
         // rate-monotonic (task period) order.
         // Task instances with the same priority and/or LET start time are selected arbitrarily.
         while (true) {
-            let chosenTaskNumber = null;
-            let chosenTaskInstance = null;
+            // Track the earliest time that a task preemption may occur.
+            let nextPreemptionTime = 2 * makespan;
+
+            let chosenTask = { 'number': null, 'instance': null, 'period': null };
             for (const [taskNumber, task] of tasks.entries()) {
                 if (taskInstanceIndices[taskNumber] == null) {
                     continue;
                 }
                 
-                // Choose the task instance with the minimum LET start time.
+                // Choose the task instance with the minimum LET start time and shortest period (highest priority).
                 const taskInstance = task.value[taskInstanceIndices[taskNumber]];
-                if (chosenTaskInstance == null || taskInstance.letStartTime < chosenTaskInstance.letStartTime) {
-                    chosenTaskNumber = taskNumber;
-                    chosenTaskInstance = taskInstance;
+                const taskInstancePeriod = taskInstance.periodEndTime - taskInstance.periodStartTime;
+                if (chosenTask.instance == null || taskInstance.letStartTime < chosenTask.instance.letStartTime
+                    || (taskInstance.letStartTime == chosenTask.instance.letStartTime && taskInstancePeriod < chosenTask.period)) {
+                    chosenTask.number = taskNumber;
+                    chosenTask.instance = taskInstance;
+                    chosenTask.period = taskInstancePeriod
+                }
+                
+                // Find the latest time that the next scheduling decision has to be made.
+                // Minimum LET start time of all higher-priority task instances.
+                if (taskInstancePeriod < chosenTask.period) {
+                    nextPreemptionTime = Math.min(nextPreemptionTime, taskInstance.letStartTime);
+                }
+            }
+            
+            let lastPreemptedTask = preemptedTasksQueue.pop();
+            if (lastPreemptedTask != null
+                && (chosenTask.number == null || chosenTask.instance == null
+                    || lastPreemptedTask.period <= chosenTask.period
+                    || currentTime < chosenTask.instance.letStartTime)) {
+                // Resume the last preempted task instance if no task instance could be chosen,
+                // or the preempted task instance has the same or a higher priority than the
+                // chosen task instance, or LET start time of the chosen task instance is later
+                // than the current time.
+                if (chosenTask.number != null && chosenTask.instance != null) {
+                    nextPreemptionTime = chosenTask.instance.letStartTime;
+                }
+                chosenTask = lastPreemptedTask;
+            } else {
+                if (lastPreemptedTask != null) {
+                    // Push the last preempted task back onto the queue.
+                    preemptedTasksQueue.push(lastPreemptedTask);
+                }
+
+                // Consider the next instance of the chosen task in the next round of scheduling decisions.
+                taskInstanceIndices[chosenTask.number]++;
+                if (taskInstanceIndices[chosenTask.number] == tasks[chosenTask.number].value.length) {
+                    taskInstanceIndices[chosenTask.number] = null;
                 }
             }
             
             // Make sure the current time is not earlier than the chosen task instance's LET start time.
-            currentTime = Math.max(currentTime, chosenTaskInstance.letStartTime);
+            currentTime = Math.max(currentTime, chosenTask.instance.letStartTime);
             
-            // Make sure the chosen task instance finishes its execution in its LET.
-            const nextTime = currentTime + chosenTaskInstance.executionTime;
-            if (nextTime > chosenTaskInstance.letEndTime) {
-                alert(`Could not schedule enough time for task ${tasks[chosenTaskNumber].name}, instance ${taskInstanceIndices[chosenTaskNumber]}!`);
+            // Schedule as much of the chosen task instance's execution time before the next preeemption time.
+            // Create an execution interval for the chosen task instance.
+            const executionTimeEnd = currentTime + PluginAutoSyncSchedulerRm.RemainingExecutionTime(chosenTask.instance);
+            if (executionTimeEnd > chosenTask.instance.letEndTime) {
+                alert(`Could not schedule enough time for task ${tasks[chosenTask.number].name}, instance ${taskInstanceIndices[chosenTask.number]}!`);
                 return;
             }
             
-            // Create the execution interval for the chosen task instance.
-            const executionInterval = new Utility.Interval(currentTime, nextTime);
-            chosenTaskInstance.executionIntervals.push(executionInterval);
-            
-            // Advance the current time to the next time.
-            currentTime = nextTime;
-            
-            // Consider the next instance of the chosen task in the next round of scheduling decisions.
-            taskInstanceIndices[chosenTaskNumber]++;
-            if (taskInstanceIndices[chosenTaskNumber] == tasks[chosenTaskNumber].value.length) {
-                taskInstanceIndices[chosenTaskNumber] = null;
+            if (executionTimeEnd <= nextPreemptionTime) {
+                const executionInterval = new Utility.Interval(currentTime, executionTimeEnd);
+                chosenTask.instance.executionIntervals.push(executionInterval);
+            } else {
+                const executionInterval = new Utility.Interval(currentTime, nextPreemptionTime);
+                chosenTask.instance.executionIntervals.push(executionInterval);
+                preemptedTasksQueue.push(chosenTask);
             }
             
+            // Advance the current time to after the task has finished executing or the next task preemption, whichever occurs earlier.
+            currentTime = Math.min(executionTimeEnd, nextPreemptionTime);
+            
             // Terminate when all task instances have been scheduled.
-            if (!taskInstanceIndices.some(element => element != null)) {
+            if (!taskInstanceIndices.some(element => element != null) && preemptedTasksQueue.length == 0
+                || currentTime == makespan) {
                 break;
             }
         }
+    }
+    
+    static RemainingExecutionTime(taskInstance) {
+        const executionIntervals = taskInstance.executionIntervals.map(json => Utility.Interval.FromJson(json));
+        const executedTime = executionIntervals.reduce((prev, curr) => prev + curr.duration, 0);
+        return taskInstance.executionTime - executedTime;
     }
     
 }
