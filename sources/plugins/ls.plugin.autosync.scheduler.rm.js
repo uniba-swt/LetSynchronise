@@ -26,6 +26,7 @@ class PluginAutoSyncSchedulerRm {
             .then(PluginAutoSync.DatabaseContentsSet(schedule, scheduleElementSelected));
     }
     
+    // Preemptive rate-monotonic.
     static Algorithm(makespan, tasks) {
         // Track how far we are into the schedule.
         let currentTime = 0;
@@ -54,24 +55,37 @@ class PluginAutoSyncSchedulerRm {
                 const taskInstance = task.value[taskInstanceIndices[taskNumber]];
                 const taskInstancePeriod = taskInstance.periodEndTime - taskInstance.periodStartTime;
                 
-                // Update the chosenTask instance with taskInstance if any of the following three conditions are true:
-                // 1. No task instance has been chosen, because we have only just started computing a new scheduling decision.
-                const noChosenTask = (chosenTask.instance == null);
-                // 2. Both the taskInstance and chosenTask are activated after the current time,
-                //    but the taskInstance activates before the chosenTask.
+                // Pre-compute some of the task scheduling conditions:
+                // * No task instance has been chosen, because we have only just started computing a new scheduling decision.
+                const noChosenTask = (chosenTask.number == null || chosenTask.instance == null);
+                // * Only this taskInstance has been activated.
+                const onlyTaskActivated = !noChosenTask && (taskInstance.letStartTime <= currentTime) && (currentTime < chosenTask.instance.letStartTime);
+                // * Both the taskInstance and chosenTask have been activated.
+                const bothTasksActivated = !noChosenTask && (taskInstance.letStartTime <= currentTime && chosenTask.instance.letStartTime <= currentTime);
+                // * Both the taskInstance and chosenTask are activated after the current time,
+                //   but the taskInstance activates before the chosenTask.
                 const earlierFutureActivation = !noChosenTask && (currentTime < taskInstance.letStartTime && taskInstance.letStartTime < chosenTask.instance.letStartTime);
-                // 3. The priority of taskInstance is equal to or higher than the chosenTask and
-                //    (the taskInstance has already been activated, or the taskInstance is not activated later than the chosenTask).
-                const higherPriority = !noChosenTask && (taskInstancePeriod <= chosenTask.period && (taskInstance.letStartTime <= currentTime || taskInstance.letStartTime <= chosenTask.instance.letStartTime));
+                // * The priority of taskInstance is equal to or higher than the chosenTask and both task instances have been activated.
+                const higherPriority = bothTasksActivated && (taskInstancePeriod <= chosenTask.period);
                 
-                if (noChosenTask || earlierFutureActivation || higherPriority) {
+                // Update the chosenTask instance with taskInstance if any of the following 4 conditions are true:
+                // 1. No task instance has been chosen.
+                // 2. Only the taskInstance has been activated.
+                // 3. Both the taskInstance and chosenTask will be activated in the future, but taskInstance activates earlier.
+                // 4. Both the taskInstance and chosenTask have been activated, but taskInstance has the same or higher priority.
+                const previousChosenTask = { ...chosenTask};    // Make a deep copy.
+                if (noChosenTask || onlyTaskActivated || earlierFutureActivation || higherPriority) {
                     chosenTask.number = taskNumber;
                     chosenTask.instance = taskInstance;
-                    chosenTask.period = taskInstancePeriod
+                    chosenTask.period = taskInstancePeriod;
                 }
                 
                 // Find the latest time that the next scheduling decision has to be made.
                 // Equal to the minimum LET start time of all higher-priority task instances.
+                const noPreviousChosenTask = (previousChosenTask.number == null || previousChosenTask.instance == null);
+                if (!noPreviousChosenTask && previousChosenTask.period < chosenTask.period) {
+                    nextPreemptionTime = Math.min(nextPreemptionTime, previousChosenTask.instance.letStartTime);
+                }
                 if (taskInstancePeriod < chosenTask.period) {
                     nextPreemptionTime = Math.min(nextPreemptionTime, taskInstance.letStartTime);
                 }
@@ -80,15 +94,19 @@ class PluginAutoSyncSchedulerRm {
             let lastPreemptedTask = preemptedTasksQueue.pop();
             const noPreemptedTask = (lastPreemptedTask == null);
             
-            // Resume the last preempted task instance if any of the following three conditions are true:
-            // 1. No task instance could be chosen, because we have run out of new task instances to schedule.
-            const noChosenTask = !noPreemptedTask && (chosenTask.number == null || chosenTask.instance == null);
-            // 2. The priority of the last preempted task is equal to or higher than the chosenTask.
-            const higherPriority = !noPreemptedTask && (lastPreemptedTask.period <= chosenTask.period);
-            // 3. The chosenTask has not yet been activated for execution.
-            const notActivated = !noPreemptedTask && (currentTime < chosenTask.instance.letStartTime);
+            // Pre-compute some of the task scheduling conditions:
+            // * No task instance could be chosen, because we have run out of new task instances to schedule.
+            const noChosenTask = (chosenTask.number == null || chosenTask.instance == null);
+            // * The priority of the last preempted task is equal to or higher than the chosenTask.
+            const higherPriority = !noChosenTask && !noPreemptedTask && (lastPreemptedTask.period <= chosenTask.period);
+            // * The chosenTask has not yet been activated for execution.
+            const notActivated = !noChosenTask && !noPreemptedTask && (currentTime < chosenTask.instance.letStartTime);
             
-            if (noChosenTask || higherPriority || notActivated) {
+            // Resume the last preempted task instance if any of the following 3 conditions are true:
+            // 1. No task instance has been chosen, but there is a preempted task instance.
+            // 2. Preempted task instance has the same or higher priority than the chosen task instance.
+            // 3. Chosen task instance has not been acitvated for execution.
+            if (!noPreemptedTask && noChosenTask || higherPriority || notActivated) {
                 if (!noChosenTask && notActivated) {
                     nextPreemptionTime = chosenTask.instance.letStartTime;
                 }
