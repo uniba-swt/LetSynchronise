@@ -34,6 +34,7 @@ class ViewSchedule {
         
         this.instanceField = this.root.querySelector('#instance');
 
+        this.schedulerField = this.root.querySelector('#view-schedule-scheduler');
         this.updateButton = this.root.querySelector('#update');
 
         this.schedule = d3.select('#view-schedule');
@@ -47,7 +48,6 @@ class ViewSchedule {
         
         // AutoSync
         this.goalField = this.root.querySelector('#view-autosync-goal');
-        this.schedulerField = this.root.querySelector('#view-autosync-scheduler');
         this.autoSyncButton = this.root.querySelector('#autosync');
         
         // Listeners
