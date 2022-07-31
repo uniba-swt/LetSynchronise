@@ -83,7 +83,7 @@ class PluginAutoSyncSchedulerEdf {
                 // Find the latest time that the next scheduling decision has to be made.
                 // Equal to the minimum LET start time of all higher-priority task instances.
                 const noPreviousChosenTask = (previousChosenTask.number == null || previousChosenTask.instance == null);
-                if (!noPreviousChosenTask && previousChosenTask.period < chosenTask.period) {
+                if (!noPreviousChosenTask && previousChosenTask.deadline < chosenTask.deadline) {
                     nextPreemptionTime = Math.min(nextPreemptionTime, previousChosenTask.instance.letStartTime);
                 }
                 if (taskInstanceDeadline < chosenTask.deadline) {
