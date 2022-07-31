@@ -26,6 +26,7 @@ class PluginAutoSyncSchedulerRandom {
             .then(PluginAutoSync.DatabaseContentsSet(schedule, scheduleElementSelected));
     }
     
+    // Non-preemptive random.
     static Algorithm(tasks) {
         // Track how far we are into the schedule.
         let currentTime = 0;

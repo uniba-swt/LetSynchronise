@@ -117,6 +117,7 @@ PluginAutoSync.Register(PluginAutoSyncGoalEnd2EndMax);
 PluginAutoSync.Register(PluginAutoSyncGoalRandom);
 PluginAutoSync.Register(PluginAutoSyncSchedulerRandom);
 PluginAutoSync.Register(PluginAutoSyncSchedulerRm);
+PluginAutoSync.Register(PluginAutoSyncSchedulerEdf);
 view.viewSchedule.updateAutoSyncPluginSelectors();
 
 console.log(PluginAutoSync.ToString());
