@@ -76,6 +76,7 @@
     <script src="sources/plugins/ls.plugin.autosync.goal.random.js"></script>
     <script src="sources/plugins/ls.plugin.autosync.scheduler.random.js"></script>
     <script src="sources/plugins/ls.plugin.autosync.scheduler.rm.js"></script>
+    <script src="sources/plugins/ls.plugin.autosync.scheduler.edf.js"></script>
 
     <script defer src="sources/ls.main.js"></script>
 </head>
@@ -402,9 +403,29 @@
             
             <form class="row">
                 <div class="col-auto">
+                    <div class="input-group">
+                        <span class="input-group-text" for="view-schedule-scheduler">Scheduler</span>
+                        <select id="view-schedule-scheduler" class="form-select">
+                            <option disabled selected>Choose ...</option>
+                        </select>
                     <button id="update" type="submit" class="btn btn-primary">Update</button>
+                    </div>
                 </div>
 
+                <div class="col-auto">
+                    <div class="input-group">
+                        <span class="input-group-text" for="view-autosync-goal">Goal</span>
+                        <select id="view-autosync-goal" class="form-select">
+                            <option disabled selected>Choose ...</option>
+                        </select>
+                        <button id="autosync" type="submit" class="btn btn-primary">AutoSync</button>
+                    </div>
+                </div>
+            </form>
+            
+            <div class="m-2"></div>
+            
+            <form class="row">
                 <div class="col-auto">
                     <button id="analyse" type="submit" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#analyse-modal">Analyse</button>
                 </div>
@@ -428,24 +449,6 @@
                         </select>
                         <span for="makespan" class="input-group-text">Instance</span>
                         <input type="range" class="form-control form-range w-25" min="0" max="0" id="instance" value="0"/>
-                    </div>
-                </div>
-            </form>
-
-            <div class="m-2"></div>
-            
-            <form class="row">
-                <div class="col-6">
-                    <div class="input-group">
-                        <span class="input-group-text" for="view-autosync-goal">Goal</span>
-                        <select id="view-autosync-goal" class="form-select">
-                            <option disabled selected>Choose ...</option>
-                        </select>
-                        <span class="input-group-text" for="view-autosync-scheduler">Scheduler</span>
-                        <select id="view-autosync-scheduler" class="form-select">
-                            <option disabled selected>Choose ...</option>
-                        </select>
-                        <button id="autosync" type="submit" class="btn btn-primary">AutoSync</button>
                     </div>
                 </div>
             </form>
