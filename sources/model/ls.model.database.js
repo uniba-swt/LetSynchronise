@@ -125,13 +125,13 @@ class ModelDatabase {
     
     getObjectStoreNames(elements) {
         const elementMap = {
-            "constraints"  : Model.ConstraintStoreName,
-            "dependencies" : Model.DependencyStoreName,
-            "eventChains"  : Model.EventChainStoreName,
-            "inputs"       : Model.SystemInputStoreName,
-            "outputs"      : Model.SystemOutputStoreName,
-            "tasks"        : Model.TaskStoreName,
-            "schedule"     : [
+            'constraints'  : Model.ConstraintStoreName,
+            'dependencies' : Model.DependencyStoreName,
+            'eventChains'  : Model.EventChainStoreName,
+            'inputs'       : Model.SystemInputStoreName,
+            'outputs'      : Model.SystemOutputStoreName,
+            'tasks'        : Model.TaskStoreName,
+            'schedule'     : [
                                 Model.ConstraintInstancesStoreName,
                                 Model.DependencyInstancesStoreName,
                                 Model.EventChainInstanceStoreName,
@@ -185,7 +185,7 @@ class ModelDatabase {
         return Promise.all(importPromises);
     }
     
-    // Schedule export and import.
+    // Schedule delete.
 
     deleteSchedule = function(instancesStoreNames) {
         let deletePromises = [ ];

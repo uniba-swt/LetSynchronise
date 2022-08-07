@@ -15,6 +15,7 @@ class ControllerSchedule {
         
         // Register the handlers when setting the view.
         this._view.registerUpdateHandler(this.handleGetSchedule);
+        this._view.registerAutoSyncHandler(this.handleAutoSync);
     }
 
     get view() {
@@ -26,7 +27,7 @@ class ControllerSchedule {
                 
         // Hack to populate the View with the schedule once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
-            const promise = this._model.getSchedule(this._view.makespan);
+            const promise = this._model.getSchedule(this._view.schedulingParametersClean.makespan);
             this.callbackGetSchedule(promise);
         });
     }
@@ -85,15 +86,47 @@ class ControllerSchedule {
     
     // Handler for updating the task schedule.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
-    handleGetSchedule = (makespan, reinstantiateTasks) => {
-        if (reinstantiateTasks) {
-            this.model.reinstantiateTasks(makespan)
-                .then(result => this.model.getSchedule(makespan))
-                .then(result => this.callbackGetSchedule(result));
-        } else {
-            const promiseSchedule = this.model.getSchedule(makespan);
-            this.callbackGetSchedule(promiseSchedule);
+    handleGetSchedule = (reinstantiateTasks, reschedule) => {
+        // TODO: Determine the parts of the schedule need to be recomputed.
+        // Makespan: Truncate or extend schedule
+        // Dependencies/event-chains: Only update dependency/event-chain instances
+        // Scheduler: Only update task execution intervals
+        // Task execution times: Only update task execution intervals
+            
+        const makespan = this.view.schedulingParametersClean.makespan;
+        
+        let promiseTaskInstances = (reinstantiateTasks)
+                                 ? this.model.deleteSchedule()
+                                       .then(result => this.model.createAllTaskInstances(makespan))
+                                 : new Promise((resolve, reject) => { resolve(true); });
+
+        let promiseAllDependencyAndEventChainInstances = promiseTaskInstances
+            .then(result => this.model.createAllDependencyAndEventChainInstances(makespan));
+
+        let promiseMakeSchedule = promiseAllDependencyAndEventChainInstances;
+        if (reinstantiateTasks || reschedule) {
+            let pluginScheduler = this.view.pluginScheduler;
+            if (pluginScheduler == null) {
+                alert('Execution schedule was not updated because no scheduler was selected!');
+            } else {
+                promiseMakeSchedule = promiseAllDependencyAndEventChainInstances
+                    .then(result => pluginScheduler.Result(makespan));
+            }
         }
+
+        promiseMakeSchedule
+            .then(result => this.model.getSchedule())
+            .then(result => this.callbackGetSchedule(result));
+    }
+    
+    // Handler for optimising the task set and schedule.
+    handleAutoSync = () => {
+        const makespan = this.view.schedulingParametersClean.makespan;
+        this.view.pluginGoal.Result()
+            .then(result => this.view.pluginScheduler.Result(makespan, true))
+            .then(result => this.modelTask.refreshViews())
+            .then(result => this.model.getSchedule(makespan))
+            .then(result => this.callbackGetSchedule(result));
     }
     
     

@@ -19,6 +19,10 @@ class ViewSchedule {
     dependencies = null;
     scheduleTooltip = null;
     dependencyTooltip = null;
+    
+    goalField = null;
+    schedulerField = null;
+    autoSyncButton = null;
 
     constructor() {
         this.root = document.querySelector('#nav-analyse');
@@ -30,6 +34,7 @@ class ViewSchedule {
         
         this.instanceField = this.root.querySelector('#instance');
 
+        this.schedulerField = this.root.querySelector('#view-schedule-scheduler');
         this.updateButton = this.root.querySelector('#update');
 
         this.schedule = d3.select('#view-schedule');
@@ -40,6 +45,10 @@ class ViewSchedule {
 
         // Set the default makespan
         this.makespan = 10;
+        
+        // AutoSync
+        this.goalField = this.root.querySelector('#view-autosync-goal');
+        this.autoSyncButton = this.root.querySelector('#autosync');
         
         // Listeners
         this.setupEventChainListener();
@@ -105,6 +114,44 @@ class ViewSchedule {
             'makespan': parseFloat(this.makespan)
         };
     }
+    
+    get goal() {
+        return this.goalField.value;
+    }
+    
+    set goal(goal) {
+        this.goalField.value = goal;
+    }
+    
+    get pluginGoal() {
+        return PluginAutoSync.GetPlugin(this.goal);
+    }
+    
+    get scheduler() {
+        return this.schedulerField.value;
+    }
+    
+    set scheduler(scheduler) {
+        this.schedulerField.value = scheduler;
+    }
+    
+    get pluginScheduler() {
+        return PluginAutoSync.GetPlugin(this.scheduler);
+    }
+    
+    get autoSyncParametersRaw() {
+        return {
+            'goal': this.goal,
+            'scheduler': this.scheduler
+        };
+    }
+    
+    get autoSyncParametersClean() {
+        return {
+            'goal': this.goal.trim(),
+            'scheduler': this.scheduler.trim()
+        };
+    }
 
 
     // -----------------------------------------------------
@@ -146,13 +193,28 @@ class ViewSchedule {
             // Validate the inputs.
             if (this.validateSchedulingParameters(this.schedulingParametersRaw)) {
                 // Ask the model to give us the current task set via a callback.
-                getScheduleHandler(this.schedulingParametersClean.makespan, true);
+                getScheduleHandler(true, true);
                 
                 this.updateButton.classList.remove('btn-danger');
                 this.updateButton.classList.add('btn-primary');
             }
         });
     }
+    
+    registerAutoSyncHandler(handler) {
+        this.autoSyncButton.addEventListener('click', event => {
+            // Prevent the default behaviour of submitting the form and the reloading of the webpage.
+            event.preventDefault();
+            
+            // Validate the inputs.
+            if (this.validateSchedulingParameters(this.schedulingParametersRaw)
+                && this.validateAutoSyncParameters(this.autoSyncParametersRaw)) {
+                // Call the handler.
+                handler();
+            }
+        });
+    }
+    
     
     validateSchedulingParameters(schedulingParameters) {
         if (schedulingParameters.makespan == null || isNaN(schedulingParameters.makespan)) {
@@ -168,6 +230,20 @@ class ViewSchedule {
         return true;
     }
     
+    validateAutoSyncParameters(autoSyncParameters) {
+        if (autoSyncParameters.goal == 'null ') {
+            alert('Choose an optimisation goal.');
+            return false;
+        }
+        
+        if (autoSyncParameters.scheduler == 'null ') {
+            alert('Choose a task scheduling policy.');
+            return false;
+        }
+        
+        return true;
+    }
+    
     // Callback for task model to notify us of changes to the task set.
     notifyChanges() {
         this.updateButton.classList.remove('btn-primary');
@@ -175,12 +251,13 @@ class ViewSchedule {
     }
     
     
-    async updateSchedule(promise) {
-        const taskParametersSet = await promise['promiseAllTasks'];
-        const tasksInstances = await promise['promiseAllTasksInstances'];
-        const dependenciesSet = await promise['promiseAllDependenciesInstances'];
-        const eventChainInstances = await promise['promiseAllEventChainInstances'];
-        
+    async updateSchedule(promiseSchedule) {
+        const schedule = await promiseSchedule;
+        const taskParametersSet = await schedule['promiseAllTasks'];
+        const tasksInstances = await schedule['promiseAllTasksInstances'];
+        const dependenciesSet = await schedule['promiseAllDependenciesInstances'];
+        const eventChainInstances = await schedule['promiseAllEventChainInstances'];
+                
         if (taskParametersSet.length < 1) {
             this.prologue = 0;
             this.hyperPeriod = 0;
@@ -547,6 +624,32 @@ class ViewSchedule {
                 task.style('fill', 'var(--bs-blue)');
             }
         }
+    }
+    
+    updateAutoSyncPluginSelectors() {
+        const pluginsGoal = Object.keys(PluginAutoSync.OfCategory(PluginAutoSync.Category.Goal));
+        this.updateAutoSyncPluginSelector(d3.select(this.goalField), pluginsGoal);
+        
+        const pluginsScheduler = Object.keys(PluginAutoSync.OfCategory(PluginAutoSync.Category.Scheduler));
+        this.updateAutoSyncPluginSelector(d3.select(this.schedulerField), pluginsScheduler);
+    }
+    
+    updateAutoSyncPluginSelector(parentElement, plugins) {
+        parentElement.selectAll('*').remove();
+        parentElement
+            .append('option')
+                .property('disabled', true)
+                .property('selected', true)
+                .property('hidden', true)
+                .attr('value', 'null ')
+                .text('Choose ...');
+        
+        plugins.forEach(Plugin =>
+            parentElement
+                .append('option')
+                    .attr('value', `${Plugin}`)
+                    .text(Plugin)
+            );
     }
     
     toString() {

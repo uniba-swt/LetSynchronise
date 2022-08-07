@@ -48,10 +48,9 @@ class ModelExportImport {
             .then(this.refreshViews());
     }
 
-    exportSystem(elementsSelected) {
-        this.database.exportSystem(elementsSelected)
-            .then(system => {
-                const json = JSON.stringify(system);
+    exportSystem(elementsSelected, PluginExporter) {
+        PluginExporter.Result(elementsSelected)
+            .then(json => {
                 const link = document.createElement("a");
                 const file = new Blob([json], { type: 'application/json' });
                 link.href = URL.createObjectURL(file);

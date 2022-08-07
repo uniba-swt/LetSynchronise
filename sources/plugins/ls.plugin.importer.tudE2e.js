@@ -28,7 +28,7 @@ class PluginImporterTudE2e {
         '{                                  \
             "TaskStore": [                  \
                 {                           \
-                    "name": "task-a",       \
+                    "name": "task_a",       \
                     "initialOffset": 0,     \
                     "activationOffset": 1,  \
                     "duration": 2,          \
