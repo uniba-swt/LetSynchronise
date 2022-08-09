@@ -73,7 +73,7 @@ class ModelSchedule {
         const promiseAllTasksInstances = this.modelTask.getAllTasks()
             .then(tasks => Promise.all(tasks.map(task => this.createTaskInstances(task, makespan))))
             .then(result => this.database.getAllObjects(Model.TaskInstancesStoreName));
-        
+        console.log("Instantiate");
         return promiseAllTasksInstances;
     }
     
