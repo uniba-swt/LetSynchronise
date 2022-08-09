@@ -36,6 +36,11 @@ class PluginAutoSyncGoalEnd2EndMin {
         let taskInstances = schedule[Model.TaskInstancesStoreName];
         console.log(taskInstances)
         let taskOffsets = {};
+        let totalUtlisation = 0;
+        for (let task of tasks) {
+            totalUtlisation = totalUtlisation + task.wcet/task.period;
+        }
+        console.log("total utlisation: "+ totalUtlisation);
         for (let taskInstance of taskInstances) {
             let task = PluginAutoSyncGoalEnd2EndMin.getTask(taskInstance.name, tasks);
             let letStartOffset = task.period;
@@ -54,17 +59,20 @@ class PluginAutoSyncGoalEnd2EndMin {
                 let periodStart = instance.periodStartTime;
                 let periodEnd = instance.periodEndTime;
                 console.log(exeIntervalStart+' '+exeIntervalEnd+' '+periodStart+' '+periodEnd);
-                if (letStartOffset > exeIntervalStart-periodStart) { //what is the min start offset?
+                if (letStartOffset > exeIntervalStart-periodStart && task.name != "task_c") { //what is the min start offset?
                     letStartOffset = exeIntervalStart-periodStart;
                 }
-                if (exeIntervalEnd-exeIntervalStart >= task.wcet) { //reserve worst case
-                    if (letEndOffset > periodEnd - exeIntervalEnd-letStartOffset) { //what is the min end offset?
-                         letEndOffset = periodEnd - exeIntervalEnd-letStartOffset;
-                    }
-                }else{
-                    exeIntervalEnd = exeIntervalStart+task.wcet*2; //heurstic? reserve 2xwcet as sometimes the scheduler cannot scheudle if 1xwcet
-                    if (letEndOffset > periodEnd - exeIntervalEnd) { //what is the min end offset?
-                        letEndOffset = periodEnd - exeIntervalEnd;
+                if (task.name  != "task_c") {
+                    if (exeIntervalEnd-exeIntervalStart >=  task.wcet) { //reserve worst case task.period * totalUtlisation
+                        if (letEndOffset > periodEnd - exeIntervalEnd-letStartOffset) { //what is the min end offset?
+                            letEndOffset = periodEnd - exeIntervalEnd-letStartOffset;
+                        }
+                    }else{
+                        //exeIntervalEnd = exeIntervalStart+task.wcet*2; //heurstic? reserve 2xwcet as sometimes the scheduler cannot scheudle if 1xwcet
+                        exeIntervalEnd = task.period * totalUtlisation;
+                        if (letEndOffset > periodEnd - exeIntervalEnd) { //what is the min end offset?
+                            letEndOffset = periodEnd - exeIntervalEnd;
+                        }
                     }
                 }
             }
@@ -81,8 +89,12 @@ class PluginAutoSyncGoalEnd2EndMin {
         for (let task of tasks) {
             // Must update the contents of the referenced object.
             console.log(tasks);
-            task.activationOffset = taskOffsets[task.name].letStartOffset;
-            task.duration = task.period - taskOffsets[task.name].letEndOffset;
+            if (taskOffsets[task.name].letStartOffset != 0) {
+                task.activationOffset = taskOffsets[task.name].letStartOffset;
+            }
+            if (taskOffsets[task.name].letEndOffset != 0) {
+                task.duration = task.period - taskOffsets[task.name].letEndOffset;
+            }
             console.log(task.duration);
             //task.duration = task.period;
         }
