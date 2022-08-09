@@ -10,16 +10,20 @@ class PluginAutoSyncGoalEnd2EndMin {
     // Updates the task parameters to miminise end-to-end reponse times.
     static async Result() {
         const taskElementSelected = ['tasks'];
-        const system = await PluginAutoSync.DatabaseContentsGet(taskElementSelected);
-        let tasks = system[Model.TaskStoreName];
+        const taskSystem = await PluginAutoSync.DatabaseContentsGet(taskElementSelected);
+        let tasks = taskSystem[Model.TaskStoreName];
+
+        const eventChainElementSelected = ['eventChains'];
+        const eventChainSystem = await PluginAutoSync.DatabaseContentsGet(eventChainElementSelected);
+        let eventChains = eventChainSystem[Model.EventChainStoreName];
 
         const scheduleElementSelected = ['schedule'];
         const schedule = await PluginAutoSync.DatabaseContentsGet(scheduleElementSelected);
         
-        PluginAutoSyncGoalEnd2EndMin.Algorithm(tasks, schedule);
+        PluginAutoSyncGoalEnd2EndMin.Algorithm(tasks, eventChains, schedule);
 
         return PluginAutoSync.DatabaseContentsDelete(taskElementSelected)
-            .then(PluginAutoSync.DatabaseContentsSet(system, taskElementSelected));
+            .then(PluginAutoSync.DatabaseContentsSet(taskSystem, taskElementSelected));
     }
     
     static getTask(name, tasks) {
@@ -31,7 +35,7 @@ class PluginAutoSyncGoalEnd2EndMin {
     }
 
     // Parameter "tasks" is a copy of a reference to an object.
-    static Algorithm(tasks, schedule) {
+    static Algorithm(tasks, eventChains, schedule) {
         
         let taskInstances = schedule[Model.TaskInstancesStoreName];
         console.log(taskInstances)
