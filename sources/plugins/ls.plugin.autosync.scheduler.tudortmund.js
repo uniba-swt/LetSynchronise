@@ -8,21 +8,24 @@ class PluginAutoSyncSchedulerTuDortmund {
 
     
     // Does nothing 
-    static async Result(makespan, reinstantiateTasks) {
+    static async Result(makespan) {
         // Create task instances and execution times.
-        if (reinstantiateTasks) {
-            await PluginAutoSync.DeleteSchedule();
-            await PluginAutoSync.CreateAllTaskInstances(makespan);
-        }
+        
+        await PluginAutoSync.DeleteSchedule();
+        await PluginAutoSync.CreateAllTaskInstances(makespan);
         await PluginAutoSync.CreateAllDependencyAndEventChainInstances(makespan);
         const systemElementSelected = ['inputs','outputs','tasks','dependencies','eventChains','constraints'];
         const system = await PluginAutoSync.DatabaseContentsGet(systemElementSelected);
 
         const computedSchedule = await this.Algorithm(system);
-
+        if (computedSchedule == null) {
+            alert("Plugin does not support initial offset LET parameters");
+            return
+        }
         const scheduleElementSelected = ['schedule'];
         const schedule = await PluginAutoSync.DatabaseContentsGet(scheduleElementSelected);
         //let tasks = await schedule[Model.TaskInstancesStoreName];
+        
 
         console.log("ss");
         console.log(computedSchedule[Model.TaskInstancesStoreName]);
@@ -34,6 +37,7 @@ class PluginAutoSyncSchedulerTuDortmund {
 
         return PluginAutoSync.DatabaseContentsDelete(scheduleElementSelected)
             .then(PluginAutoSync.DatabaseContentsSet(schedule, scheduleElementSelected));
+        
     }
 
     /*static getTask(taskInstances, name) {
@@ -55,9 +59,11 @@ class PluginAutoSyncSchedulerTuDortmund {
               'Content-Type': 'application/json'
             }
           });
-          
-        const schedule = await response.json(); //extract JSON from the http response
-        console.log(schedule);
+        const status = await response.status;
+        let schedule = null;
+        if (status == 200)
+            schedule = await response.json(); //extract JSON from the http response
+        
         return schedule 
     }
 
