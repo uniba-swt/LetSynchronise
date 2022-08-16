@@ -79,6 +79,18 @@ class ViewSchedule {
         this.makespanField.value = makespan;
     }
     
+    get scheduler() {
+        return this.schedulerField.value;
+    }
+    
+    set scheduler(scheduler) {
+        this.schedulerField.value = scheduler;
+    }
+    
+    get pluginScheduler() {
+        return PluginAutoSync.GetPlugin(this.scheduler);
+    }
+    
     get eventChain() {
         return this.eventChainField.value;
     }
@@ -105,13 +117,15 @@ class ViewSchedule {
     
     get schedulingParametersRaw() {
         return {
-            'makespan': this.makespan
+            'makespan': this.makespan,
+            'scheduler': this.pluginScheduler
         };
     }
     
     get schedulingParametersClean() {
         return {
-            'makespan': parseFloat(this.makespan)
+            'makespan': parseFloat(this.makespan),
+            'scheduler': this.pluginScheduler
         };
     }
     
@@ -127,29 +141,17 @@ class ViewSchedule {
         return PluginAutoSync.GetPlugin(this.goal);
     }
     
-    get scheduler() {
-        return this.schedulerField.value;
-    }
-    
-    set scheduler(scheduler) {
-        this.schedulerField.value = scheduler;
-    }
-    
-    get pluginScheduler() {
-        return PluginAutoSync.GetPlugin(this.scheduler);
-    }
-    
     get autoSyncParametersRaw() {
         return {
-            'goal': this.goal,
-            'scheduler': this.scheduler
+            'goal': this.pluginGoal,
+            'scheduler': this.pluginScheduler
         };
     }
     
     get autoSyncParametersClean() {
         return {
-            'goal': this.goal.trim(),
-            'scheduler': this.scheduler.trim()
+            'goal': this.pluginGoal,
+            'scheduler': this.pluginScheduler
         };
     }
 
@@ -193,7 +195,7 @@ class ViewSchedule {
             // Validate the inputs.
             if (this.validateSchedulingParameters(this.schedulingParametersRaw)) {
                 // Ask the model to give us the current task set via a callback.
-                getScheduleHandler(true, true);
+                getScheduleHandler(true);
                 
                 this.updateButton.classList.remove('btn-danger');
                 this.updateButton.classList.add('btn-primary');
@@ -227,16 +229,21 @@ class ViewSchedule {
             return false;
         }
         
+        if (schedulingParameters.scheduler == null) {
+            alert('Choose a task scheduling policy.');
+            return false;
+        }
+        
         return true;
     }
     
     validateAutoSyncParameters(autoSyncParameters) {
-        if (autoSyncParameters.goal == 'null ') {
+        if (autoSyncParameters.goal == null) {
             alert('Choose an optimisation goal.');
             return false;
         }
         
-        if (autoSyncParameters.scheduler == 'null ') {
+        if (autoSyncParameters.scheduler == null) {
             alert('Choose a task scheduling policy.');
             return false;
         }
