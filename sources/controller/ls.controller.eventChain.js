@@ -107,7 +107,7 @@ class ControllerEventChain {
     callbackUpdateEventChains = (eventChains) => {
         this.view.updateEventChains(eventChains);
         
-        this.controllerSchedule.handleGetSchedule(false, false);
+        this.controllerSchedule.handleGetSchedule(false);
     }
     
     // Callback for updating the displayed event chain selectors.

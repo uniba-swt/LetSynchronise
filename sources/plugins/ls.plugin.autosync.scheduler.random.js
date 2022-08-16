@@ -8,12 +8,10 @@ class PluginAutoSyncSchedulerRandom {
 
     
     // Randomises the scheduling of task execution.
-    static async Result(makespan, reinstantiateTasks) {
-        // Create task instances and execution times.
-        if (reinstantiateTasks) {
-            await PluginAutoSync.DeleteSchedule();
-            await PluginAutoSync.CreateAllTaskInstances(makespan);
-        }
+    static async Result(makespan) {
+        // Create instances of tasks, execution times, data dependencies, and event chains.
+        await PluginAutoSync.DeleteSchedule();
+        await PluginAutoSync.CreateAllTaskInstances(makespan);
         await PluginAutoSync.CreateAllDependencyAndEventChainInstances(makespan);
         
         const scheduleElementSelected = ['schedule'];
@@ -28,6 +26,11 @@ class PluginAutoSyncSchedulerRandom {
     
     // Non-preemptive random.
     static Algorithm(tasks) {
+        // Do nothing if the task set is empty.
+        if (tasks.length == 0) {
+            return;
+        }
+    
         // Track how far we are into the schedule.
         let currentTime = 0;
         
