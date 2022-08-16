@@ -10,12 +10,12 @@ class PluginAutoSyncSchedulerTuDortmund {
     // Does nothing 
     static async Result(makespan, reinstantiateTasks) {
         // Create task instances and execution times.
-        /*if (reinstantiateTasks) {
+        if (reinstantiateTasks) {
             await PluginAutoSync.DeleteSchedule();
             await PluginAutoSync.CreateAllTaskInstances(makespan);
         }
-        await PluginAutoSync.CreateAllDependencyAndEventChainInstances(makespan);*/
-        const systemElementSelected = ['inputs','outputs','tasks','dependencies','eventChains','constraints','schedule'];
+        await PluginAutoSync.CreateAllDependencyAndEventChainInstances(makespan);
+        const systemElementSelected = ['inputs','outputs','tasks','dependencies','eventChains','constraints'];
         const system = await PluginAutoSync.DatabaseContentsGet(systemElementSelected);
 
         const computedSchedule = await this.Algorithm(system);
@@ -57,6 +57,7 @@ class PluginAutoSyncSchedulerTuDortmund {
           });
           
         const schedule = await response.json(); //extract JSON from the http response
+        console.log(schedule);
         return schedule 
     }
 
