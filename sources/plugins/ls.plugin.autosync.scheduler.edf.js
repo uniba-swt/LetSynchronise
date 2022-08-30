@@ -70,14 +70,17 @@ class PluginAutoSyncSchedulerEdf {
                 // * Both the taskInstance and chosenTask are activated after the current time,
                 //   but the taskInstance activates before the chosenTask.
                 const earlierFutureActivation = !noChosenTask && (currentTime < taskInstance.letStartTime && taskInstance.letStartTime < chosenTask.instance.letStartTime);
-                // * The priority of taskInstance is equal to or higher than the chosenTask and both task instances have either been or not been activated.
-                const higherPriority = ((bothTasksActivated || bothTasksNotActivated) && (taskInstanceDeadline <= chosenTask.deadline));
-                
+                // * Both the taskInstance and chosenTask are activated at the same time.
+                const sameActivationTime = !noChosenTask && (taskInstance.letStartTime == chosenTask.instance.letStartTime);
+                // * The priority of taskInstance is equal to or higher than the chosenTask, 
+                //   and both task instances have been activated or both will activate at the same time.
+                const higherPriority = ((bothTasksActivated || bothTasksNotActivated && sameActivationTime) && (taskInstanceDeadline <= chosenTask.deadline));
+                                
                 // Make taskInstance the chosenTask instance if any of the following 4 conditions are true:
                 // 1. No task instance has been chosen.
                 // 2. Only the taskInstance has been activated.
                 // 3. Both the taskInstance and chosenTask will be activated in the future, but taskInstance activates earlier.
-                // 4. Priority of taskInstance is the equal to or higher.
+                // 4. Both the taskInstance and chosenTask have been activated or will be activated together, but taskInstance has the same or higher priority.
                 const previousChosenTask = { ...chosenTask};    // Make a deep copy.
                 if (noChosenTask || onlyTaskActivated || earlierFutureActivation || higherPriority) {
                     chosenTask.number = taskNumber;
