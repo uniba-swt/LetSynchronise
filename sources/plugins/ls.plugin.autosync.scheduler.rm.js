@@ -65,17 +65,22 @@ class PluginAutoSyncSchedulerRm {
                 const onlyTaskActivated = !noChosenTask && (taskInstance.letStartTime <= currentTime) && (currentTime < chosenTask.instance.letStartTime);
                 // * Both the taskInstance and chosenTask have been activated.
                 const bothTasksActivated = !noChosenTask && (taskInstance.letStartTime <= currentTime && chosenTask.instance.letStartTime <= currentTime);
+                // * Both the taskInstance and chosenTask have not been activated.
+                const bothTasksNotActivated = !noChosenTask && (taskInstance.letStartTime > currentTime && chosenTask.instance.letStartTime > currentTime);
                 // * Both the taskInstance and chosenTask are activated after the current time,
                 //   but the taskInstance activates before the chosenTask.
                 const earlierFutureActivation = !noChosenTask && (currentTime < taskInstance.letStartTime && taskInstance.letStartTime < chosenTask.instance.letStartTime);
-                // * The priority of taskInstance is equal to or higher than the chosenTask and both task instances have been activated.
-                const higherPriority = bothTasksActivated && (taskInstancePeriod <= chosenTask.period);
+                // * Both the taskInstance and chosenTask are activated at the same time.
+                const sameActivationTime = !noChosenTask && (taskInstance.letStartTime == chosenTask.instance.letStartTime);
+                // * The priority of taskInstance is equal to or higher than the chosenTask, 
+                //   and both task instances have been activated or both will activate at the same time.
+                const higherPriority = ((bothTasksActivated || bothTasksNotActivated && sameActivationTime) && (taskInstancePeriod <= chosenTask.period));
                 
                 // Update the chosenTask instance with taskInstance if any of the following 4 conditions are true:
                 // 1. No task instance has been chosen.
                 // 2. Only the taskInstance has been activated.
                 // 3. Both the taskInstance and chosenTask will be activated in the future, but taskInstance activates earlier.
-                // 4. Both the taskInstance and chosenTask have been activated, but taskInstance has the same or higher priority.
+                // 4. Both the taskInstance and chosenTask have been activated or will be activated together, but taskInstance has the same or higher priority.
                 const previousChosenTask = { ...chosenTask};    // Make a deep copy.
                 if (noChosenTask || onlyTaskActivated || earlierFutureActivation || higherPriority) {
                     chosenTask.number = taskNumber;
