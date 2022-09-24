@@ -77,8 +77,8 @@ class PluginAutoSync {
         return PluginAutoSync.ModelDatabase.deleteSchedule();
     }
     
-    static CreateAllTaskInstances(makespan) {
-        return PluginAutoSync.ModelSchedule.createAllTaskInstances(makespan);
+    static CreateAllTaskInstances(makespan, executionTiming) {
+        return PluginAutoSync.ModelSchedule.createAllTaskInstances(makespan, executionTiming);
     }
     
     static CreateAllDependencyAndEventChainInstances(makespan) {
