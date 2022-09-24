@@ -7,84 +7,43 @@ class PluginAutoSyncSchedulerTuDortmund {
     static get Category() { return PluginAutoSync.Category.Scheduler; }
 
     
-    // Does nothing 
+    // Uses an external web tool to schedule the task executions
     static async Result(makespan, executionTiming) {
-        // Create task instances and execution times.
-        
+        // Delete existing schedule
         await PluginAutoSync.DeleteSchedule();
-        await PluginAutoSync.CreateAllTaskInstances(makespan, executionTiming);
-        await PluginAutoSync.CreateAllDependencyAndEventChainInstances(makespan);
+        
+        // Retrieve the LET system
         const systemElementSelected = ['inputs','outputs','tasks','dependencies','eventChains','constraints'];
         const system = await PluginAutoSync.DatabaseContentsGet(systemElementSelected);
-
-        const computedSchedule = await this.Algorithm(system);
+        
+        // Schedule the LET system with an external web tool
+        const computedSchedule = await this.Algorithm(system, executionTiming);
         if (computedSchedule == null) {
-            alert("Plugin does not support initial offset LET parameters");
+            alert('Plugin does not support LET tasks with non-zero initial offsets');
             return
         }
+        
+        // Save the externally computed task schedule and compute the dependency and event chain instances
         const scheduleElementSelected = ['schedule'];
-        const schedule = await PluginAutoSync.DatabaseContentsGet(scheduleElementSelected);
-        //let tasks = await schedule[Model.TaskInstancesStoreName];
-        
-
-        console.log("ss");
-        console.log(computedSchedule[Model.TaskInstancesStoreName]);
-        schedule[Model.TaskInstancesStoreName] = computedSchedule[Model.TaskInstancesStoreName];
-        /*for (let task of tasks) {
-            // Must update the contents of the referenced object.
-            task =  this.getTask(system[Model.TaskInstancesStoreName],task.name);
-        }*/
-
         return PluginAutoSync.DatabaseContentsDelete(scheduleElementSelected)
-            .then(PluginAutoSync.DatabaseContentsSet(schedule, scheduleElementSelected));
-        
+            .then(result => PluginAutoSync.DatabaseContentsSet(computedSchedule, scheduleElementSelected))
+            .then(result => PluginAutoSync.CreateAllDependencyAndEventChainInstances(makespan));
     }
 
-    /*static getTask(taskInstances, name) {
-        for (let i = 0; i < taskInstances.length; i++) {
-            // Must update the contents of the referenced object.
-            if (taskInstances[i].name = name) {
-                return task;
-            }
+    // Trigger an external scheduling tool
+    // TODO: Make use of executionTiming when instantiating task execution times
+    static async Algorithm(system, executionTiming) {
+        const response = await fetch('http://localhost:8080/', {
+            method: 'POST',
+            body: JSON.stringify(system),
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const status = await response.status;
+        if (status == 200) {
+            return response.json();
         }
         return null;
-    }*/
-    
-    // Non-preemptive random.
-    static async Algorithm(system) {
-        const response = await fetch('http://127.0.0.1:8080/', {
-            method: 'POST',
-            body: JSON.stringify(system), // string or object
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          });
-        const status = await response.status;
-        let schedule = null;
-        if (status == 200)
-            schedule = await response.json(); //extract JSON from the http response
-        
-        return schedule 
     }
-
-    /*
-    DatabaseContentsGet element map
-        const elementMap = {
-            'constraints'  : Model.ConstraintStoreName,
-            'dependencies' : Model.DependencyStoreName,
-            'eventChains'  : Model.EventChainStoreName,
-            'inputs'       : Model.SystemInputStoreName,
-            'outputs'      : Model.SystemOutputStoreName,
-            'tasks'        : Model.TaskStoreName,
-            'schedule'     : [
-                                Model.ConstraintInstancesStoreName,
-                                Model.DependencyInstancesStoreName,
-                                Model.EventChainInstanceStoreName,
-                                Model.TaskInstancesStoreName
-                             ]
-        };
-        
-
-    */
     
 }
