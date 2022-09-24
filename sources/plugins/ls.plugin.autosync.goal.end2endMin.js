@@ -25,11 +25,17 @@ class PluginAutoSyncGoalEnd2EndMin {
     }
     
     static getTask(name, tasks) {
-        for (let task of tasks) {
+        for (const task of tasks) {
             if (task.name == name) {
                 return task;
             }
         }
+    }
+    
+    static getTaskSetWcet(taskSet, tasks) {
+        return [...taskSet]
+            .filter(taskName => taskName != Model.SystemInterfaceName)
+            .reduce((wcet, taskName) => wcet + this.getTask(taskName, tasks).wcet, 0);
     }
 
     // Each parameter is a copy of a reference to an object.
@@ -67,32 +73,24 @@ class PluginAutoSyncGoalEnd2EndMin {
             eventChainTaskSets.add(taskSet);
         }
 
-        let taskChainWCET = { };
-        let sumWCET = 0;
+        // Get the maximum WCET of the event chain that each task participates in.
+        let taskEventChainWcets = { };
         for (let task of tasks) {
-            let chainWCET = 0;
+            let maxEventChainWcet = 0;
             for (let eventChainTaskSet of eventChainTaskSets) {
                 if (eventChainTaskSet.has(task.name)) {
-                    let WCETSum = 0;
-                    for (let taskInChain of eventChainTaskSet) {
-                        if (taskInChain != Model.SystemInterfaceName) {
-                            WCETSum += this.getTask(taskInChain, tasks).wcet;
-                        }
-                    }
-                    chainWCET = Math.max(chainWCET, WCETSum);
+                    const wcet = this.getTaskSetWcet(eventChainTaskSet, tasks);
+                    maxEventChainWcet = Math.max(maxEventChainWcet, wcet);
                 }
             }
-            sumWCET += task.wcet;
-            taskChainWCET[task.name] = chainWCET;
+            taskEventChainWcets[task.name] = maxEventChainWcet;
         }
-        console.log(taskChainWCET);
+        console.log(taskEventChainWcets);
+        
+        const sumOfAllTaskWcets = [...tasks].reduce((wcet, task) => wcet + task.wcet, 0);
+        const totalUtlisation = [...tasks].reduce((utilisation, task) => utilisation + task.wcet/task.period, 0);
 
-        let taskOffsets = {};
-        let totalUtlisation = 0;
-        for (let task of tasks) {
-            totalUtlisation = totalUtlisation + task.wcet/task.period;
-        }
-        //console.log("total utlisation: "+ totalUtlisation);
+        let taskOffsets = { };
         for (let taskInstance of taskInstances) {
             let task = this.getTask(taskInstance.name, tasks);
             let letStartOffset = task.period;
@@ -101,9 +99,9 @@ class PluginAutoSyncGoalEnd2EndMin {
                 let exeIntervalStart = task.period;
                 let exeIntervalEnd = 0;
 
-                //find the first start execution time and the last finsih execution time within a period
+                // find the first start execution time and the last finsih execution time within a period
                 for (let executionInterval of instance.executionIntervals) {
-                    console.log("start internval: "+executionInterval.startTime+" "+task.name+ " "+instance.periodStartTime + " minus "+(executionInterval.startTime - instance.periodStartTime));
+                    console.log("start interval: "+executionInterval.startTime+" "+task.name+ " "+instance.periodStartTime + " minus "+(executionInterval.startTime - instance.periodStartTime));
                     console.log(instance);
                     if (exeIntervalStart > executionInterval.startTime - instance.periodStartTime) {
                         exeIntervalStart = executionInterval.startTime - instance.periodStartTime; //for all instance start from 0
@@ -115,18 +113,18 @@ class PluginAutoSyncGoalEnd2EndMin {
                 }
                 console.log("start interval " + exeIntervalStart);
 
-                //if the offset is larger than the current offset and it is not a output task then delay LET start time
+                // if the offset is larger than the current offset and it is not a output task then delay LET start time
                 if (letStartOffset > exeIntervalStart && (outputTasks.has(task.name)==false)) { //what is the min start offset?
                     letStartOffset = exeIntervalStart;
                 }
 
-                //the end time must be the start time + some reserve
-                //exeIntervalEnd = sumWCET;//exeIntervalStart + task.wcet; //+ taskChainWCET[task.name];
+                // the end time must be the start time + some reserve
+                //exeIntervalEnd = sumOfAllTaskWcets;//exeIntervalStart + task.wcet; //+ taskEventChainWcets[task.name];
                 if (outputTasks.has(task.name)) {
                     letDuration = task.wcet;//exeIntervalEnd-exeIntervalStart;                 
                 }else{
-                    if (letDuration < sumWCET/*task.period*totalUtlisation*/) { //what is the min end offset?
-                        letDuration = sumWCET/*task.period*totalUtlisation*/;//exeIntervalEnd-exeIntervalStart;
+                    if (letDuration < sumOfAllTaskWcets/*task.period*totalUtlisation*/) { //what is the min end offset?
+                        letDuration = sumOfAllTaskWcets/*task.period*totalUtlisation*/;//exeIntervalEnd-exeIntervalStart;
                     }
                 }
                 console.log(letDuration);
@@ -141,7 +139,7 @@ class PluginAutoSyncGoalEnd2EndMin {
             taskOffsets[taskInstance.name] = {'letStartOffset':letStartOffset, 'letDuration': letDuration};
         }
         //console.log(taskOffsets);
-        //console.log(tasks);
+
         for (let task of tasks) {
             // Must update the contents of the referenced object.
             //console.log(tasks);
@@ -150,9 +148,6 @@ class PluginAutoSyncGoalEnd2EndMin {
             }
             
             task.duration = taskOffsets[task.name].letDuration;
-   
-            //console.log(task.duration);
-            //task.duration = task.period;
         }
     }
     
