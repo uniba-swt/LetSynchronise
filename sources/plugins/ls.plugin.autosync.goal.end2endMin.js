@@ -2,28 +2,26 @@
 
 class PluginAutoSyncGoalEnd2EndMin {
     // Plug-in Metadata
-    static get Name()     { return 'Miminise End-to-End Response Times'; }
+    static get Name()     { return 'Minimise End-to-End Response Times'; }
     static get Author()   { return 'Matthew Kuo'; }
     static get Category() { return PluginAutoSync.Category.Goal; }
 
     
     // Updates the task parameters to miminise end-to-end reponse times.
     static async Result() {
-        const taskElementSelected = ['tasks'];
-        const taskSystem = await PluginAutoSync.DatabaseContentsGet(taskElementSelected);
-        let tasks = taskSystem[Model.TaskStoreName];
 
-        const eventChainElementSelected = ['eventChains'];
-        const eventChainSystem = await PluginAutoSync.DatabaseContentsGet(eventChainElementSelected);
-        let eventChains = eventChainSystem[Model.EventChainStoreName];
-
-        const scheduleElementSelected = ['schedule'];
-        const schedule = await PluginAutoSync.DatabaseContentsGet(scheduleElementSelected);
+        // Retrieve the LET system.
+        const systemElementSelected = ['tasks', 'eventChains', 'schedule'];
+        const system = await PluginAutoSync.DatabaseContentsGet(systemElementSelected);
+        const tasks = await system[Model.TaskStoreName];
+        const eventChains = await system[Model.EventChainStoreName];
+        const taskInstances = await system[Model.TaskInstancesStoreName];
         
-        this.Algorithm(tasks, eventChains, schedule);
+        this.Algorithm(tasks, eventChains, taskInstances);
 
+        const taskElementSelected = ['tasks'];
         return PluginAutoSync.DatabaseContentsDelete(taskElementSelected)
-            .then(PluginAutoSync.DatabaseContentsSet(taskSystem, taskElementSelected));
+            .then(PluginAutoSync.DatabaseContentsSet(system, taskElementSelected));
     }
     
     static getTask(name, tasks) {
@@ -34,38 +32,41 @@ class PluginAutoSyncGoalEnd2EndMin {
         }
     }
 
-    // Parameter "tasks" is a copy of a reference to an object.
-    static Algorithm(tasks, eventChains, schedule) {
+    // Each parameter is a copy of a reference to an object.
+    static Algorithm(tasks, eventChains, taskInstances) {
         let inputTasks = new Set();
         let outputTasks = new Set();
         let eventChainTaskSets = new Set();
-        for (let eventChain of eventChains) {
-            //console.log("----event chain----")
-            //console.log(eventChain)
-            let firstTaskPort = eventChain.segment.source;
-            let successor = eventChain.successor;
-            let lastSuccessor = eventChain; //curently first == last
+        
+        // Get all the tasks involved in each event chain.
+        for (const eventChain of eventChains) {
+            let eventChainSuccessor = eventChain;
+            
+            // Record the task at the start of the chain.
+            if (eventChainSuccessor.segment.source.task == Model.SystemInterfaceName) {
+                inputTasks.add(eventChainSuccessor.segment.destination.task);
+            }
+            
+            // Traverse the segments in the event chain and record the tasks.
             let taskSet = new Set();
-            taskSet.add(eventChain.segment.source.task);
-            taskSet.add(eventChain.segment.destination.task);
-            while(successor != undefined) {
-                lastSuccessor = successor;
-                successor = successor.successor;
-                taskSet.add(lastSuccessor.segment.source.task);
-                taskSet.add(lastSuccessor.segment.destination.task);
+            while (true) {
+                taskSet.add(eventChainSuccessor.segment.source.task);
+                taskSet.add(eventChainSuccessor.segment.destination.task);
+                
+                if (eventChainSuccessor.successor == undefined) {
+                    break;
+                }
+                eventChainSuccessor = eventChainSuccessor.successor;
             }
-            let lastTaskPort = lastSuccessor.segment.destination;
-            if (firstTaskPort.task == "__system") {
-                inputTasks.add(eventChain.segment.destination.task);
+            
+            // Record the task at the end of the chain.
+            if (eventChainSuccessor.segment.destination.task == Model.SystemInterfaceName) {
+                outputTasks.add(eventChainSuccessor.segment.source.task);
             }
-            if (lastTaskPort.task == "__system") {
-                outputTasks.add(lastSuccessor.segment.source.task);
-            }
-            //console.log(firstTaskPort)
-            //console.log(lastTaskPort)
+
             eventChainTaskSets.add(taskSet);
         }
-        //console.log(eventChainTaskSets)
+
         let taskChainWCET = { };
         let sumWCET = 0;
         for (let task of tasks) {
@@ -74,13 +75,11 @@ class PluginAutoSyncGoalEnd2EndMin {
                 if (eventChainTaskSet.has(task.name)) {
                     let WCETSum = 0;
                     for (let taskInChain of eventChainTaskSet) {
-                        if (taskInChain != "__system") {
-                            WCETSum += PluginAutoSyncGoalEnd2EndMin.getTask(taskInChain, tasks).wcet;
+                        if (taskInChain != Model.SystemInterfaceName) {
+                            WCETSum += this.getTask(taskInChain, tasks).wcet;
                         }
                     }
-                    if (WCETSum > chainWCET) {
-                        chainWCET = WCETSum;
-                    }
+                    chainWCET = Math.max(chainWCET, WCETSum);
                 }
             }
             sumWCET += task.wcet;
@@ -88,7 +87,6 @@ class PluginAutoSyncGoalEnd2EndMin {
         }
         console.log(taskChainWCET);
 
-        let taskInstances = schedule[Model.TaskInstancesStoreName];
         let taskOffsets = {};
         let totalUtlisation = 0;
         for (let task of tasks) {
@@ -96,7 +94,7 @@ class PluginAutoSyncGoalEnd2EndMin {
         }
         //console.log("total utlisation: "+ totalUtlisation);
         for (let taskInstance of taskInstances) {
-            let task = PluginAutoSyncGoalEnd2EndMin.getTask(taskInstance.name, tasks);
+            let task = this.getTask(taskInstance.name, tasks);
             let letStartOffset = task.period;
             let letDuration = 0;
             for (let instance of taskInstance.value) {
@@ -115,7 +113,7 @@ class PluginAutoSyncGoalEnd2EndMin {
                         exeIntervalEnd = executionInterval.endTime - instance.periodStartTime; //for all instance start from 0
                     }
                 }
-                console.log("start internval " +exeIntervalStart);
+                console.log("start interval " + exeIntervalStart);
 
                 //if the offset is larger than the current offset and it is not a output task then delay LET start time
                 if (letStartOffset > exeIntervalStart && (outputTasks.has(task.name)==false)) { //what is the min start offset?
