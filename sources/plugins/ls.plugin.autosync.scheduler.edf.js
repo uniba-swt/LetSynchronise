@@ -8,10 +8,10 @@ class PluginAutoSyncSchedulerEdf {
 
     
     // Uses an earliest deadline first algorithm to schedule task executions.
-    static async Result(makespan) {
+    static async Result(makespan, executionTiming) {
         // Create instances of tasks, execution times, data dependencies, and event chains.
         await PluginAutoSync.DeleteSchedule();
-        await PluginAutoSync.CreateAllTaskInstances(makespan);
+        await PluginAutoSync.CreateAllTaskInstances(makespan, executionTiming);
         await PluginAutoSync.CreateAllDependencyAndEventChainInstances(makespan);
         
         const scheduleElementSelected = ['schedule'];

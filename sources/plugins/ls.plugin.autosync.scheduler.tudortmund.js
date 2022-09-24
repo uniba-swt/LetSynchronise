@@ -8,11 +8,11 @@ class PluginAutoSyncSchedulerTuDortmund {
 
     
     // Does nothing 
-    static async Result(makespan) {
+    static async Result(makespan, executionTiming) {
         // Create task instances and execution times.
         
         await PluginAutoSync.DeleteSchedule();
-        await PluginAutoSync.CreateAllTaskInstances(makespan);
+        await PluginAutoSync.CreateAllTaskInstances(makespan, executionTiming);
         await PluginAutoSync.CreateAllDependencyAndEventChainInstances(makespan);
         const systemElementSelected = ['inputs','outputs','tasks','dependencies','eventChains','constraints'];
         const system = await PluginAutoSync.DatabaseContentsGet(systemElementSelected);

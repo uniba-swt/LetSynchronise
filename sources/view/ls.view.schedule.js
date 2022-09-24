@@ -7,48 +7,48 @@ class ViewSchedule {
     hyperPeriodField = null;
     makespanField = null;
     
+    schedulerField = null;
+    executionTimingField = null;
+    updateButton = null;
+    
+    goalField = null;
+    autoSyncButton = null;
+
     eventChainField = null;
     instanceField = null;
-    
-    eventChainInstances = null;
-    currentEventChainInstance = null;
-
-    updateButton = null;
 
     schedule = null;
     dependencies = null;
     scheduleTooltip = null;
     dependencyTooltip = null;
-    
-    goalField = null;
-    schedulerField = null;
-    autoSyncButton = null;
+    eventChainInstances = null;
+    currentEventChainInstance = null;
 
     constructor() {
         this.root = document.querySelector('#nav-analyse');
         
-        // Update the static schedule
+        // Schedule lengths
         this.prologueField = this.root.querySelector('#prologue');
         this.hyperPeriodField = this.root.querySelector('#hyperperiod');
         this.makespanField = this.root.querySelector('#makespan');
-        
-        this.instanceField = this.root.querySelector('#instance');
 
+        // Scheduler
         this.schedulerField = this.root.querySelector('#view-schedule-scheduler');
+        this.executionTimingField = this.root.querySelector('#view-schedule-execution-timing');
         this.updateButton = this.root.querySelector('#update');
 
-        this.schedule = d3.select('#view-schedule');
-        this.dependencies = d3.select('#view-schedule-dependencies-menu');
-        this.eventChainField = this.root.querySelector('#view-schedule-event-chain');
-        this.scheduleTooltip = this.root.querySelector('#view-schedule-task-tooltip');
-        this.dependencyTooltip = this.root.querySelector('#view-schedule-dependency-tooltip');
-
-        // Set the default makespan
-        this.makespan = 10;
-        
         // AutoSync
         this.goalField = this.root.querySelector('#view-autosync-goal');
         this.autoSyncButton = this.root.querySelector('#autosync');
+
+        // Event chains
+        this.eventChainField = this.root.querySelector('#view-schedule-event-chain');
+        this.instanceField = this.root.querySelector('#instance');
+
+        this.schedule = d3.select('#view-schedule');
+        this.dependencies = d3.select('#view-schedule-dependencies-menu');
+        this.scheduleTooltip = this.root.querySelector('#view-schedule-task-tooltip');
+        this.dependencyTooltip = this.root.querySelector('#view-schedule-dependency-tooltip');
         
         // Listeners
         this.setupEventChainListener();
@@ -87,6 +87,14 @@ class ViewSchedule {
         this.schedulerField.value = scheduler;
     }
     
+    get executionTiming() {
+        return this.executionTimingField.value;
+    }
+
+    set executionTiming(executionTiming) {
+        this.executionTimingField.value = executionTiming;
+    }
+
     get pluginScheduler() {
         return PluginAutoSync.GetPlugin(this.scheduler);
     }
@@ -118,14 +126,16 @@ class ViewSchedule {
     get schedulingParametersRaw() {
         return {
             'makespan': this.makespan,
-            'scheduler': this.pluginScheduler
+            'scheduler': this.pluginScheduler,
+            'executionTiming': this.executionTiming
         };
     }
     
     get schedulingParametersClean() {
         return {
             'makespan': parseFloat(this.makespan),
-            'scheduler': this.pluginScheduler
+            'scheduler': this.pluginScheduler,
+            'executionTiming': this.executionTiming
         };
     }
     
