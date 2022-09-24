@@ -18,7 +18,7 @@ class PluginAutoSyncSchedulerRandom {
         const schedule = await PluginAutoSync.DatabaseContentsGet(scheduleElementSelected);
         const tasks = await schedule[Model.TaskInstancesStoreName];
 
-        PluginAutoSyncSchedulerRandom.Algorithm(tasks);
+        this.Algorithm(tasks);
         
         return PluginAutoSync.DatabaseContentsDelete(scheduleElementSelected)
             .then(PluginAutoSync.DatabaseContentsSet(schedule, scheduleElementSelected));

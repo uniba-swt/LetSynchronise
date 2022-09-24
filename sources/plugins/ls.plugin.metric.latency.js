@@ -18,7 +18,7 @@ class PluginMetricLatency {
     // @Input event chain name, array of event chain instances.
     // @Output object with statistical result of metric.
     static Result(chainName, chainInstances) {
-        const rawResults = Object.fromEntries(chainInstances.map(chainInstance => PluginMetricLatency.Compute(chainInstance)));
+        const rawResults = Object.fromEntries(chainInstances.map(chainInstance => this.Compute(chainInstance)));
         const valuesOnly = PluginMetric.ValuesOfObject(rawResults);
         
         return {

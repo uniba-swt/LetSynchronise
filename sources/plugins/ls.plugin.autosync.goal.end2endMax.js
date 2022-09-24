@@ -13,7 +13,7 @@ class PluginAutoSyncGoalEnd2EndMax {
         const system = await PluginAutoSync.DatabaseContentsGet(taskElementSelected);
         let tasks = system[Model.TaskStoreName];
         
-        PluginAutoSyncGoalEnd2EndMax.Algorithm(tasks);
+        this.Algorithm(tasks);
 
         return PluginAutoSync.DatabaseContentsDelete(taskElementSelected)
             .then(PluginAutoSync.DatabaseContentsSet(system, taskElementSelected));

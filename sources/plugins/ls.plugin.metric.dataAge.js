@@ -21,7 +21,7 @@ class PluginMetricDataAge {
         let rawResults = { };
         let statistics = { };
         
-        chainInstances.forEach(chainInstance => PluginMetricDataAge.Compute(chainInstance, rawResults));
+        chainInstances.forEach(chainInstance => this.Compute(chainInstance, rawResults));
         
         for (chainName in rawResults) {
             const valuesOnly = PluginMetric.ValuesOfObject(rawResults[chainName]);

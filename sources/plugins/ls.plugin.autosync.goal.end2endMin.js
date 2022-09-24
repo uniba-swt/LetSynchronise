@@ -20,7 +20,7 @@ class PluginAutoSyncGoalEnd2EndMin {
         const scheduleElementSelected = ['schedule'];
         const schedule = await PluginAutoSync.DatabaseContentsGet(scheduleElementSelected);
         
-        PluginAutoSyncGoalEnd2EndMin.Algorithm(tasks, eventChains, schedule);
+        this.Algorithm(tasks, eventChains, schedule);
 
         return PluginAutoSync.DatabaseContentsDelete(taskElementSelected)
             .then(PluginAutoSync.DatabaseContentsSet(taskSystem, taskElementSelected));

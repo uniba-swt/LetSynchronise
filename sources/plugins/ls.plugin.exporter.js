@@ -15,15 +15,15 @@ class PluginExporter {
     static StoredPlugins = { };
     
     static GetPlugin(name) {
-        return PluginExporter.StoredPlugins[name];
+        return this.StoredPlugins[name];
     }
     
     static get Plugins() {
-        return PluginExporter.StoredPlugins;
+        return this.StoredPlugins;
     }
     
     static OfCategory(category) {
-        return Object.fromEntries(Object.entries(PluginExporter.Plugins).filter(([name, plugin]) => plugin.Category == category));
+        return Object.fromEntries(Object.entries(this.Plugins).filter(([name, plugin]) => plugin.Category == category));
     }
     
     static OfOutput(plugins, output) {
@@ -31,11 +31,11 @@ class PluginExporter {
     }
     
     static Reset() {
-        PluginExporter.StoredPlugins = { };
+        this.StoredPlugins = { };
     }
     
     static Register(Plugin) {
-        PluginExporter.StoredPlugins[Plugin.Name] = Plugin;
+        this.StoredPlugins[Plugin.Name] = Plugin;
     }
     
     
@@ -43,19 +43,19 @@ class PluginExporter {
     static _ModelDatabase = null;
     
     static set ModelDatabase(ModelDatabase) {
-        PluginExporter._ModelDatabase = ModelDatabase;
+        this._ModelDatabase = ModelDatabase;
     }
     
     static get ModelDatabase() {
-        return PluginExporter._ModelDatabase;
+        return this._ModelDatabase;
     }
     
     static get DatabaseContents() {
-        return PluginImporter.ModelDatabase.exportSystem(Model.ShortStoreNames);
+        return this.ModelDatabase.exportSystem(Model.ShortStoreNames);
     }
     
     static DatabaseContentsGet(elementsSelected) {
-        return PluginExporter.ModelDatabase.exportSystem(elementsSelected);
+        return this.ModelDatabase.exportSystem(elementsSelected);
     }
     
     
