@@ -18,7 +18,7 @@ class PluginMetricEnd2End {
     // @Input event chain name, array of event chain instances.
     // @Output object with statistical result of metric.
     static Result(chainName, chainInstances) {
-        let rawResults = Object.fromEntries(chainInstances.map(chainInstance => PluginMetricEnd2End.Compute(chainInstance))
+        let rawResults = Object.fromEntries(chainInstances.map(chainInstance => this.Compute(chainInstance))
                                                           .filter(result => result !== undefined));        
         const valuesOnly = PluginMetric.ValuesOfObject(rawResults);
         

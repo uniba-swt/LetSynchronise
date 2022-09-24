@@ -18,7 +18,7 @@ class PluginAutoSyncSchedulerRm {
         const schedule = await PluginAutoSync.DatabaseContentsGet(scheduleElementSelected);
         const tasks = await schedule[Model.TaskInstancesStoreName];
 
-        PluginAutoSyncSchedulerRm.Algorithm(makespan, tasks);
+        this.Algorithm(makespan, tasks);
         
         return PluginAutoSync.DatabaseContentsDelete(scheduleElementSelected)
             .then(PluginAutoSync.DatabaseContentsSet(schedule, scheduleElementSelected));

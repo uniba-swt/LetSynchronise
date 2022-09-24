@@ -24,15 +24,15 @@ class PluginImporter {
     static StoredPlugins = { };
     
     static GetPlugin(name) {
-        return PluginImporter.StoredPlugins[name];
+        return this.StoredPlugins[name];
     }
     
     static get Plugins() {
-        return PluginImporter.StoredPlugins;
+        return this.StoredPlugins;
     }
     
     static OfCategory(category) {
-        return Object.fromEntries(Object.entries(PluginImporter.Plugins).filter(([name, plugin]) => plugin.Category == category));
+        return Object.fromEntries(Object.entries(this.Plugins).filter(([name, plugin]) => plugin.Category == category));
     }
     
     static OfOutput(plugins, output) {
@@ -40,11 +40,11 @@ class PluginImporter {
     }
     
     static Reset() {
-        PluginImporter.StoredPlugins = { };
+        this.StoredPlugins = { };
     }
     
     static Register(Plugin) {
-        PluginImporter.StoredPlugins[Plugin.Name] = Plugin;
+        this.StoredPlugins[Plugin.Name] = Plugin;
     }
     
     
@@ -52,20 +52,20 @@ class PluginImporter {
     static _ModelDatabase = null;
     
     static set ModelDatabase(ModelDatabase) {
-        PluginImporter._ModelDatabase = ModelDatabase;
+        this._ModelDatabase = ModelDatabase;
     }
     
     static get ModelDatabase() {
-        return PluginImporter._ModelDatabase;
+        return this._ModelDatabase;
     }
     
     static get DatabaseContents() {
-        return PluginImporter.ModelDatabase.exportSystem(Model.ShortStoreNames);
+        return this.ModelDatabase.exportSystem(Model.ShortStoreNames);
     }
     
     
     static ToString() {
-        return 'PluginImporter loaded ...\n  ' + Object.keys(PluginImporter.Plugins).join(',\n  ');
+        return 'PluginImporter loaded ...\n  ' + Object.keys(this.Plugins).join(',\n  ');
     }
 
 }
