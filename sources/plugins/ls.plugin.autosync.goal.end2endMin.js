@@ -15,9 +15,9 @@ class PluginAutoSyncGoalEnd2EndMin {
         const system = await PluginAutoSync.DatabaseContentsGet(systemElementSelected);
         const tasks = await system[Model.TaskStoreName];
         const eventChains = await system[Model.EventChainStoreName];
-        const taskInstances = await system[Model.TaskInstancesStoreName];
+        const tasksInstances = await system[Model.TaskInstancesStoreName];
         
-        this.Algorithm(tasks, eventChains, taskInstances);
+        this.Algorithm(tasks, eventChains, tasksInstances);
 
         const taskElementSelected = ['tasks'];
         return PluginAutoSync.DatabaseContentsDelete(taskElementSelected)
@@ -39,7 +39,7 @@ class PluginAutoSyncGoalEnd2EndMin {
     }
 
     // Each parameter is a copy of a reference to an object.
-    static Algorithm(tasks, eventChains, taskInstances) {
+    static Algorithm(tasks, eventChains, tasksInstances) {
         let inputTasks = new Set();
         let outputTasks = new Set();
         let eventChainTaskSets = new Set();
@@ -90,12 +90,15 @@ class PluginAutoSyncGoalEnd2EndMin {
         const sumOfAllTaskWcets = [...tasks].reduce((wcet, task) => wcet + task.wcet, 0);
         const totalUtlisation = [...tasks].reduce((utilisation, task) => utilisation + task.wcet/task.period, 0);
 
+        // Determine new activation offsets and LET durations for the tasks.
         let newLetParameters = { };
-        for (const taskInstance of taskInstances) {
-            const task = this.getTask(taskInstance.name, tasks);
+        for (const taskInstances of tasksInstances) {
+            const task = this.getTask(taskInstances.name, tasks);
             let activationOffset = task.period;
             let duration = 0;
-            for (const instance of taskInstance.value) {
+            
+            // Determine the task's activation offset and LET duration, based on the execution intervals of all its instances.
+            for (const instance of taskInstances.value) {
                 // Get the min and max bounds of the task instance's execution intervals.
                 let bound = { 'min': task.period, 'max': 0 };
                 for (const executionInterval of instance.executionIntervals) {
@@ -103,7 +106,7 @@ class PluginAutoSyncGoalEnd2EndMin {
                     bound.max = Math.max(bound.max, executionInterval.endTime - instance.periodStartTime);
                 }
 
-                // the end time must be the start time + some reserve
+                // FIXME: end time must be the start time + some reserve
                 //bound.max = sumOfAllTaskWcets;//bound.min + task.wcet; //+ taskEventChainWcets[task.name];
                 
                 // FIXME: Task's activationOffset should not be based on the minimum bound of its execution intervals.
@@ -116,6 +119,9 @@ class PluginAutoSyncGoalEnd2EndMin {
 
                     // The task's duration is equal to the sum of all task WCETs in the system.
                     duration = Math.max(duration, sumOfAllTaskWcets/*task.period*totalUtlisation*/); //what is the min duration?
+                    if (activationOffset + duration > task.period) {
+                        duration = task.period - activationOffset;
+                    }
                 }
 
                 console.log(task.name + " activationOffset: " + activationOffset + " duration: " + duration);
@@ -129,13 +135,12 @@ class PluginAutoSyncGoalEnd2EndMin {
                 duration = task.period;
             }
             
-            newLetParameters[taskInstance.name] = { 'activationOffset': activationOffset, 'duration': duration };
+            newLetParameters[taskInstances.name] = { 'activationOffset': activationOffset, 'duration': duration };
         }
         //console.log(newLetParameters);
 
+        // Update the LET parameters of the tasks.
         for (let task of tasks) {
-            // Must update the contents of the referenced object.
-            
             // FIXME: Why this condition?
             if (newLetParameters[task.name].activationOffset != 0) {
                 task.activationOffset = newLetParameters[task.name].activationOffset;
