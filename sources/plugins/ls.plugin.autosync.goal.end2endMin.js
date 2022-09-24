@@ -90,64 +90,58 @@ class PluginAutoSyncGoalEnd2EndMin {
         const sumOfAllTaskWcets = [...tasks].reduce((wcet, task) => wcet + task.wcet, 0);
         const totalUtlisation = [...tasks].reduce((utilisation, task) => utilisation + task.wcet/task.period, 0);
 
-        let taskOffsets = { };
-        for (let taskInstance of taskInstances) {
-            let task = this.getTask(taskInstance.name, tasks);
-            let letStartOffset = task.period;
-            let letDuration = 0;
-            for (let instance of taskInstance.value) {
-                let exeIntervalStart = task.period;
-                let exeIntervalEnd = 0;
-
-                // find the first start execution time and the last finsih execution time within a period
-                for (let executionInterval of instance.executionIntervals) {
-                    console.log("start interval: "+executionInterval.startTime+" "+task.name+ " "+instance.periodStartTime + " minus "+(executionInterval.startTime - instance.periodStartTime));
-                    console.log(instance);
-                    if (exeIntervalStart > executionInterval.startTime - instance.periodStartTime) {
-                        exeIntervalStart = executionInterval.startTime - instance.periodStartTime; //for all instance start from 0
-                        console.log("minus: "+exeIntervalStart + " - "+(executionInterval.startTime - instance.periodStartTime));
-                    }
-                    if (exeIntervalEnd < executionInterval.endTime - instance.periodStartTime) {
-                        exeIntervalEnd = executionInterval.endTime - instance.periodStartTime; //for all instance start from 0
-                    }
-                }
-                console.log("start interval " + exeIntervalStart);
-
-                // if the offset is larger than the current offset and it is not a output task then delay LET start time
-                if (letStartOffset > exeIntervalStart && (outputTasks.has(task.name)==false)) { //what is the min start offset?
-                    letStartOffset = exeIntervalStart;
+        let newLetParameters = { };
+        for (const taskInstance of taskInstances) {
+            const task = this.getTask(taskInstance.name, tasks);
+            let activationOffset = task.period;
+            let duration = 0;
+            for (const instance of taskInstance.value) {
+                // Get the min and max bounds of the task instance's execution intervals.
+                let bound = { 'min': task.period, 'max': 0 };
+                for (const executionInterval of instance.executionIntervals) {
+                    bound.min = Math.min(bound.min, executionInterval.startTime - instance.periodStartTime);
+                    bound.max = Math.max(bound.max, executionInterval.endTime - instance.periodStartTime);
                 }
 
                 // the end time must be the start time + some reserve
-                //exeIntervalEnd = sumOfAllTaskWcets;//exeIntervalStart + task.wcet; //+ taskEventChainWcets[task.name];
+                //bound.max = sumOfAllTaskWcets;//bound.min + task.wcet; //+ taskEventChainWcets[task.name];
+                
+                // FIXME: Task's activationOffset should not be based on the minimum bound of its execution intervals.
+                //        Should be the max LET end time of its predecessor task.
                 if (outputTasks.has(task.name)) {
-                    letDuration = task.wcet;//exeIntervalEnd-exeIntervalStart;                 
-                }else{
-                    if (letDuration < sumOfAllTaskWcets/*task.period*totalUtlisation*/) { //what is the min end offset?
-                        letDuration = sumOfAllTaskWcets/*task.period*totalUtlisation*/;//exeIntervalEnd-exeIntervalStart;
-                    }
-                }
-                console.log(letDuration);
+                    duration = task.wcet;
+                } else {
+                    // The task's activation offset is the min bound of the execution intervals.
+                    activationOffset = Math.min(activationOffset, bound.min);    //what is the max start offset?
 
+                    // The task's duration is equal to the sum of all task WCETs in the system.
+                    duration = Math.max(duration, sumOfAllTaskWcets/*task.period*totalUtlisation*/); //what is the min duration?
+                }
+
+                console.log(task.name + " activationOffset: " + activationOffset + " duration: " + duration);
             }
-            if (letStartOffset >= task.period) {
-                letStartOffset = 0;
+            
+            // FIXME: How can these conditions be true?
+            if (activationOffset >= task.period) {
+                activationOffset = 0;
             }
-            if (letDuration == 0) {
-                letDuration = task.period;
+            if (duration == 0) {
+                duration = task.period;
             }
-            taskOffsets[taskInstance.name] = {'letStartOffset':letStartOffset, 'letDuration': letDuration};
+            
+            newLetParameters[taskInstance.name] = { 'activationOffset': activationOffset, 'duration': duration };
         }
-        //console.log(taskOffsets);
+        //console.log(newLetParameters);
 
         for (let task of tasks) {
             // Must update the contents of the referenced object.
-            //console.log(tasks);
-            if (taskOffsets[task.name].letStartOffset != 0) {
-                task.activationOffset = taskOffsets[task.name].letStartOffset;
+            
+            // FIXME: Why this condition?
+            if (newLetParameters[task.name].activationOffset != 0) {
+                task.activationOffset = newLetParameters[task.name].activationOffset;
             }
             
-            task.duration = taskOffsets[task.name].letDuration;
+            task.duration = newLetParameters[task.name].duration;
         }
     }
     
