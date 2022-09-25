@@ -7,18 +7,18 @@ class PluginAutoSyncSchedulerRandom {
     static get Category() { return PluginAutoSync.Category.Scheduler; }
 
     
-    // Randomises the scheduling of task execution.
-    static async Result(makespan) {
+    // Random non-preemptive scheduling of task execution.
+    static async Result(makespan, executionTiming) {
         // Create instances of tasks, execution times, data dependencies, and event chains.
         await PluginAutoSync.DeleteSchedule();
-        await PluginAutoSync.CreateAllTaskInstances(makespan);
+        await PluginAutoSync.CreateAllTaskInstances(makespan, executionTiming);
         await PluginAutoSync.CreateAllDependencyAndEventChainInstances(makespan);
         
         const scheduleElementSelected = ['schedule'];
         const schedule = await PluginAutoSync.DatabaseContentsGet(scheduleElementSelected);
         const tasks = await schedule[Model.TaskInstancesStoreName];
 
-        PluginAutoSyncSchedulerRandom.Algorithm(tasks);
+        this.Algorithm(tasks);
         
         return PluginAutoSync.DatabaseContentsDelete(scheduleElementSelected)
             .then(PluginAutoSync.DatabaseContentsSet(schedule, scheduleElementSelected));

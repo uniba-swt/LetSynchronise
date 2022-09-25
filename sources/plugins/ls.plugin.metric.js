@@ -21,15 +21,15 @@ class PluginMetric {
     static StoredPlugins = { };
     
     static GetPlugin(name) {
-        return PluginMetric.StoredPlugins[name];
+        return this.StoredPlugins[name];
     }
     
     static get Plugins() {
-        return PluginMetric.StoredPlugins;
+        return this.StoredPlugins;
     }
     
     static OfCategory(category) {
-        return Object.fromEntries(Object.entries(PluginMetric.Plugins).filter(([name, plugin]) => plugin.Category == category));
+        return Object.fromEntries(Object.entries(this.Plugins).filter(([name, plugin]) => plugin.Category == category));
     }
     
     static OfOutput(plugins, output) {
@@ -37,15 +37,15 @@ class PluginMetric {
     }
     
     static Reset() {
-        PluginMetric.StoredPlugins = { };
+        this.StoredPlugins = { };
     }
     
     static Register(Plugin) {
-        PluginMetric.StoredPlugins[Plugin.Name] = Plugin;
+        this.StoredPlugins[Plugin.Name] = Plugin;
     }
     
     static ToString() {
-        return 'PluginMetric loaded ...\n  ' + Object.keys(PluginMetric.Plugins).join(',\n  ');
+        return 'PluginMetric loaded ...\n  ' + Object.keys(this.Plugins).join(',\n  ');
     }
     
     

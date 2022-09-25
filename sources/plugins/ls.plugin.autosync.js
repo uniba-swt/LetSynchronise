@@ -11,15 +11,15 @@ class PluginAutoSync {
     static StoredPlugins = { };
     
     static GetPlugin(name) {
-        return PluginAutoSync.StoredPlugins[name];
+        return this.StoredPlugins[name];
     }
     
     static get Plugins() {
-        return PluginAutoSync.StoredPlugins;
+        return this.StoredPlugins;
     }
     
     static OfCategory(category) {
-        return Object.fromEntries(Object.entries(PluginAutoSync.Plugins).filter(([name, plugin]) => plugin.Category == category));
+        return Object.fromEntries(Object.entries(this.Plugins).filter(([name, plugin]) => plugin.Category == category));
     }
     
     static OfOutput(plugins, output) {
@@ -27,11 +27,11 @@ class PluginAutoSync {
     }
     
     static Reset() {
-        PluginAutoSync.StoredPlugins = { };
+        this.StoredPlugins = { };
     }
     
     static Register(Plugin) {
-        PluginAutoSync.StoredPlugins[Plugin.Name] = Plugin;
+        this.StoredPlugins[Plugin.Name] = Plugin;
     }
     
     
@@ -40,19 +40,19 @@ class PluginAutoSync {
     static _ModelSchedule = null;
     
     static set ModelDatabase(ModelDatabase) {
-        PluginAutoSync._ModelDatabase = ModelDatabase;
+        this._ModelDatabase = ModelDatabase;
     }
     
     static get ModelSchedule() {
-        return PluginAutoSync._ModelSchedule;
+        return this._ModelSchedule;
     }
     
     static set ModelSchedule(ModelSchedule) {
-        PluginAutoSync._ModelSchedule = ModelSchedule;
+        this._ModelSchedule = ModelSchedule;
     }
     
     static get ModelDatabase() {
-        return PluginAutoSync._ModelDatabase;
+        return this._ModelDatabase;
     }
     
     static get DatabaseContents() {
@@ -60,38 +60,38 @@ class PluginAutoSync {
     }
     
     static DatabaseContentsGet(elementsSelected) {
-        return PluginAutoSync.ModelDatabase.exportSystem(elementsSelected);
+        return this.ModelDatabase.exportSystem(elementsSelected);
     }
     
     static DatabaseContentsSet(system, elementsSelected) {
-        return PluginAutoSync.ModelDatabase.importSystem(system, elementsSelected);
+        return this.ModelDatabase.importSystem(system, elementsSelected);
     }
     
     static DatabaseContentsDelete(elementsSelected) {
-        return PluginAutoSync.ModelDatabase.deleteSystem(elementsSelected);
+        return this.ModelDatabase.deleteSystem(elementsSelected);
     }
     
 
     // Scheduler helper methods.
     static DeleteSchedule() {
-        return PluginAutoSync.ModelDatabase.deleteSchedule();
+        return this.ModelDatabase.deleteSchedule();
     }
     
-    static CreateAllTaskInstances(makespan) {
-        return PluginAutoSync.ModelSchedule.createAllTaskInstances(makespan);
+    static CreateAllTaskInstances(makespan, executionTiming) {
+        return this.ModelSchedule.createAllTaskInstances(makespan, executionTiming);
     }
     
     static CreateAllDependencyAndEventChainInstances(makespan) {
-        return PluginAutoSync.ModelSchedule.createAllDependencyAndEventChainInstances(makespan);
+        return this.ModelSchedule.createAllDependencyAndEventChainInstances(makespan);
     }
     
     static GetSchedule() {
-        return PluginAutoSync.ModelSchedule.getSchedule();
+        return this.ModelSchedule.getSchedule();
     }
     
 
     static ToString() {
-        return 'PluginAutoSync loaded ...\n  ' + Object.keys(PluginAutoSync.Plugins).join(',\n  ');
+        return 'PluginAutoSync loaded ...\n  ' + Object.keys(this.Plugins).join(',\n  ');
     }
 
 }

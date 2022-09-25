@@ -96,7 +96,8 @@ class ControllerSchedule {
         if (reinstantiateTasks) {
             const makespan = this.view.schedulingParametersClean.makespan;
             const scheduler = this.view.schedulingParametersClean.scheduler;
-            scheduler.Result(makespan)
+            const executionTiming = this.view.schedulingParametersClean.executionTiming;
+            scheduler.Result(makespan, executionTiming)
                 .then(result => this.model.getSchedule())
                 .then(result => this.callbackGetSchedule(result));
         } else {
@@ -107,10 +108,11 @@ class ControllerSchedule {
     // Handler for optimising the task set and schedule.
     handleAutoSync = () => {
         const makespan = this.view.schedulingParametersClean.makespan;
-        const goal = this.view.autoSyncParametersClean.goal;
         const scheduler = this.view.autoSyncParametersClean.scheduler;
+        const executionTiming = this.view.schedulingParametersClean.executionTiming;
+        const goal = this.view.autoSyncParametersClean.goal;
         goal.Result()
-            .then(result => scheduler.Result(makespan))
+            .then(result => scheduler.Result(makespan, executionTiming))
             .then(result => this.modelTask.refreshViews())
             .then(result => this.model.getSchedule(makespan))
             .then(result => this.callbackGetSchedule(result));

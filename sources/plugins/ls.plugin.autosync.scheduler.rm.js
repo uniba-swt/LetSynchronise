@@ -8,17 +8,17 @@ class PluginAutoSyncSchedulerRm {
 
     
     // Uses a rate-monotonic algorithm to schedule task executions.
-    static async Result(makespan) {
+    static async Result(makespan, executionTiming) {
         // Create instances of tasks, execution times, data dependencies, and event chains.
         await PluginAutoSync.DeleteSchedule();
-        await PluginAutoSync.CreateAllTaskInstances(makespan);
+        await PluginAutoSync.CreateAllTaskInstances(makespan, executionTiming);
         await PluginAutoSync.CreateAllDependencyAndEventChainInstances(makespan);
         
         const scheduleElementSelected = ['schedule'];
         const schedule = await PluginAutoSync.DatabaseContentsGet(scheduleElementSelected);
         const tasks = await schedule[Model.TaskInstancesStoreName];
 
-        PluginAutoSyncSchedulerRm.Algorithm(makespan, tasks);
+        this.Algorithm(makespan, tasks);
         
         return PluginAutoSync.DatabaseContentsDelete(scheduleElementSelected)
             .then(PluginAutoSync.DatabaseContentsSet(schedule, scheduleElementSelected));

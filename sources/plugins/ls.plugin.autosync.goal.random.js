@@ -12,7 +12,7 @@ class PluginAutoSyncGoalRandom {
         const system = await PluginAutoSync.DatabaseContentsGet(taskElementSelected);
         let tasks = system[Model.TaskStoreName];
         
-        PluginAutoSyncGoalRandom.Algorithm(tasks);
+        this.Algorithm(tasks);
         
         return PluginAutoSync.DatabaseContentsDelete(taskElementSelected)
             .then(PluginAutoSync.DatabaseContentsSet(system, taskElementSelected));

@@ -2,159 +2,150 @@
 
 class PluginAutoSyncGoalEnd2EndMin {
     // Plug-in Metadata
-    static get Name()     { return 'Miminise End-to-End Response Times'; }
+    static get Name()     { return 'Minimise End-to-End Response Times'; }
     static get Author()   { return 'Matthew Kuo'; }
     static get Category() { return PluginAutoSync.Category.Goal; }
 
     
     // Updates the task parameters to miminise end-to-end reponse times.
     static async Result() {
-        const taskElementSelected = ['tasks'];
-        const taskSystem = await PluginAutoSync.DatabaseContentsGet(taskElementSelected);
-        let tasks = taskSystem[Model.TaskStoreName];
-
-        const eventChainElementSelected = ['eventChains'];
-        const eventChainSystem = await PluginAutoSync.DatabaseContentsGet(eventChainElementSelected);
-        let eventChains = eventChainSystem[Model.EventChainStoreName];
-
-        const scheduleElementSelected = ['schedule'];
-        const schedule = await PluginAutoSync.DatabaseContentsGet(scheduleElementSelected);
+        // Retrieve the LET system.
+        const systemElementSelected = ['tasks', 'eventChains', 'schedule'];
+        const system = await PluginAutoSync.DatabaseContentsGet(systemElementSelected);
+        const tasks = await system[Model.TaskStoreName];
+        const eventChains = await system[Model.EventChainStoreName];
+        const tasksInstances = await system[Model.TaskInstancesStoreName];
         
-        PluginAutoSyncGoalEnd2EndMin.Algorithm(tasks, eventChains, schedule);
+        this.Algorithm(tasks, eventChains, tasksInstances);
 
+        const taskElementSelected = ['tasks'];
         return PluginAutoSync.DatabaseContentsDelete(taskElementSelected)
-            .then(PluginAutoSync.DatabaseContentsSet(taskSystem, taskElementSelected));
+            .then(PluginAutoSync.DatabaseContentsSet(system, taskElementSelected));
     }
     
     static getTask(name, tasks) {
-        for (let task of tasks) {
+        for (const task of tasks) {
             if (task.name == name) {
                 return task;
             }
         }
     }
+    
+    static getTaskSetWcet(taskSet, tasks) {
+        return [...taskSet]
+            .filter(taskName => taskName != Model.SystemInterfaceName)
+            .reduce((wcet, taskName) => wcet + this.getTask(taskName, tasks).wcet, 0);
+    }
 
-    // Parameter "tasks" is a copy of a reference to an object.
-    static Algorithm(tasks, eventChains, schedule) {
+    // Each parameter is a copy of a reference to an object.
+    static Algorithm(tasks, eventChains, tasksInstances) {
         let inputTasks = new Set();
         let outputTasks = new Set();
         let eventChainTaskSets = new Set();
-        for (let eventChain of eventChains) {
-            //console.log("----event chain----")
-            //console.log(eventChain)
-            let firstTaskPort = eventChain.segment.source;
-            let successor = eventChain.successor;
-            let lastSuccessor = eventChain; //curently first == last
-            let taskSet = new Set();
-            taskSet.add(eventChain.segment.source.task);
-            taskSet.add(eventChain.segment.destination.task);
-            while(successor != undefined) {
-                lastSuccessor = successor;
-                successor = successor.successor;
-                taskSet.add(lastSuccessor.segment.source.task);
-                taskSet.add(lastSuccessor.segment.destination.task);
-            }
-            let lastTaskPort = lastSuccessor.segment.destination;
-            if (firstTaskPort.task == "__system") {
-                inputTasks.add(eventChain.segment.destination.task);
-            }
-            if (lastTaskPort.task == "__system") {
-                outputTasks.add(lastSuccessor.segment.source.task);
-            }
-            //console.log(firstTaskPort)
-            //console.log(lastTaskPort)
-            eventChainTaskSets.add(taskSet);
-        }
-        //console.log(eventChainTaskSets)
-        let taskChainWCET = { };
-        let sumWCET = 0;
-        for (let task of tasks) {
-            let chainWCET = 0;
-            for (let eventChainTaskSet of eventChainTaskSets) {
-                if (eventChainTaskSet.has(task.name)) {
-                    let WCETSum = 0;
-                    for (let taskInChain of eventChainTaskSet) {
-                        if (taskInChain != "__system") {
-                            WCETSum += PluginAutoSyncGoalEnd2EndMin.getTask(taskInChain, tasks).wcet;
-                        }
-                    }
-                    if (WCETSum > chainWCET) {
-                        chainWCET = WCETSum;
-                    }
-                }
-            }
-            sumWCET += task.wcet;
-            taskChainWCET[task.name] = chainWCET;
-        }
-        console.log(taskChainWCET);
-
-        let taskInstances = schedule[Model.TaskInstancesStoreName];
-        let taskOffsets = {};
-        let totalUtlisation = 0;
-        for (let task of tasks) {
-            totalUtlisation = totalUtlisation + task.wcet/task.period;
-        }
-        //console.log("total utlisation: "+ totalUtlisation);
-        for (let taskInstance of taskInstances) {
-            let task = PluginAutoSyncGoalEnd2EndMin.getTask(taskInstance.name, tasks);
-            let letStartOffset = task.period;
-            let letDuration = 0;
-            for (let instance of taskInstance.value) {
-                let exeIntervalStart = task.period;
-                let exeIntervalEnd = 0;
-
-                //find the first start execution time and the last finsih execution time within a period
-                for (let executionInterval of instance.executionIntervals) {
-                    console.log("start internval: "+executionInterval.startTime+" "+task.name+ " "+instance.periodStartTime + " minus "+(executionInterval.startTime - instance.periodStartTime));
-                    console.log(instance);
-                    if (exeIntervalStart > executionInterval.startTime - instance.periodStartTime) {
-                        exeIntervalStart = executionInterval.startTime - instance.periodStartTime; //for all instance start from 0
-                        console.log("minus: "+exeIntervalStart + " - "+(executionInterval.startTime - instance.periodStartTime));
-                    }
-                    if (exeIntervalEnd < executionInterval.endTime - instance.periodStartTime) {
-                        exeIntervalEnd = executionInterval.endTime - instance.periodStartTime; //for all instance start from 0
-                    }
-                }
-                console.log("start internval " +exeIntervalStart);
-
-                //if the offset is larger than the current offset and it is not a output task then delay LET start time
-                if (letStartOffset > exeIntervalStart && (outputTasks.has(task.name)==false)) { //what is the min start offset?
-                    letStartOffset = exeIntervalStart;
-                }
-
-                //the end time must be the start time + some reserve
-                //exeIntervalEnd = sumWCET;//exeIntervalStart + task.wcet; //+ taskChainWCET[task.name];
-                if (outputTasks.has(task.name)) {
-                    letDuration = task.wcet;//exeIntervalEnd-exeIntervalStart;                 
-                }else{
-                    if (letDuration < sumWCET/*task.period*totalUtlisation*/) { //what is the min end offset?
-                        letDuration = sumWCET/*task.period*totalUtlisation*/;//exeIntervalEnd-exeIntervalStart;
-                    }
-                }
-                console.log(letDuration);
-
-            }
-            if (letStartOffset >= task.period) {
-                letStartOffset = 0;
-            }
-            if (letDuration == 0) {
-                letDuration = task.period;
-            }
-            taskOffsets[taskInstance.name] = {'letStartOffset':letStartOffset, 'letDuration': letDuration};
-        }
-        //console.log(taskOffsets);
-        //console.log(tasks);
-        for (let task of tasks) {
-            // Must update the contents of the referenced object.
-            //console.log(tasks);
-            if (taskOffsets[task.name].letStartOffset != 0) {
-                task.activationOffset = taskOffsets[task.name].letStartOffset;
+        
+        // Get all the tasks involved in each event chain.
+        for (const eventChain of eventChains) {
+            let eventChainSuccessor = eventChain;
+            
+            // Record the task at the start of the chain.
+            if (eventChainSuccessor.segment.source.task == Model.SystemInterfaceName) {
+                inputTasks.add(eventChainSuccessor.segment.destination.task);
             }
             
-            task.duration = taskOffsets[task.name].letDuration;
-   
-            //console.log(task.duration);
-            //task.duration = task.period;
+            // Traverse the segments in the event chain and record the tasks.
+            let taskSet = new Set();
+            while (true) {
+                taskSet.add(eventChainSuccessor.segment.source.task);
+                taskSet.add(eventChainSuccessor.segment.destination.task);
+                
+                if (eventChainSuccessor.successor == undefined) {
+                    break;
+                }
+                eventChainSuccessor = eventChainSuccessor.successor;
+            }
+            
+            // Record the task at the end of the chain.
+            if (eventChainSuccessor.segment.destination.task == Model.SystemInterfaceName) {
+                outputTasks.add(eventChainSuccessor.segment.source.task);
+            }
+
+            eventChainTaskSets.add(taskSet);
+        }
+
+        // Get the maximum WCET of the event chain that each task participates in.
+        let taskEventChainWcets = { };
+        for (let task of tasks) {
+            let maxEventChainWcet = 0;
+            for (let eventChainTaskSet of eventChainTaskSets) {
+                if (eventChainTaskSet.has(task.name)) {
+                    const wcet = this.getTaskSetWcet(eventChainTaskSet, tasks);
+                    maxEventChainWcet = Math.max(maxEventChainWcet, wcet);
+                }
+            }
+            taskEventChainWcets[task.name] = maxEventChainWcet;
+        }
+        console.log(taskEventChainWcets);
+        
+        const sumOfAllTaskWcets = [...tasks].reduce((wcet, task) => wcet + task.wcet, 0);
+        const totalUtlisation = [...tasks].reduce((utilisation, task) => utilisation + task.wcet/task.period, 0);
+
+        // Determine new activation offsets and LET durations for the tasks.
+        let newLetParameters = { };
+        for (const taskInstances of tasksInstances) {
+            const task = this.getTask(taskInstances.name, tasks);
+            let activationOffset = task.period;
+            let duration = 0;
+            
+            // Determine the task's activation offset and LET duration, based on the execution intervals of all its instances.
+            for (const instance of taskInstances.value) {
+                // Get the min and max bounds of the task instance's execution intervals.
+                let bound = { 'min': task.period, 'max': 0 };
+                for (const executionInterval of instance.executionIntervals) {
+                    bound.min = Math.min(bound.min, executionInterval.startTime - instance.periodStartTime);
+                    bound.max = Math.max(bound.max, executionInterval.endTime - instance.periodStartTime);
+                }
+
+                // FIXME: end time must be the start time + some reserve
+                //bound.max = sumOfAllTaskWcets;//bound.min + task.wcet; //+ taskEventChainWcets[task.name];
+                
+                // FIXME: Task's activationOffset should not be based on the minimum bound of its execution intervals.
+                //        Should be the max LET end time of its predecessor task.
+                if (outputTasks.has(task.name)) {
+                    duration = task.wcet;
+                } else {
+                    // The task's activation offset is the min bound of the execution intervals.
+                    activationOffset = Math.min(activationOffset, bound.min);    //what is the max start offset?
+
+                    // The task's duration is equal to the sum of all task WCETs in the system.
+                    duration = Math.max(duration, sumOfAllTaskWcets/*task.period*totalUtlisation*/); //what is the min duration?
+                    if (activationOffset + duration > task.period) {
+                        duration = task.period - activationOffset;
+                    }
+                }
+
+                console.log(task.name + " activationOffset: " + activationOffset + " duration: " + duration);
+            }
+            
+            // FIXME: How can these conditions be true?
+            if (activationOffset >= task.period) {
+                activationOffset = 0;
+            }
+            if (duration == 0) {
+                duration = task.period;
+            }
+            
+            newLetParameters[taskInstances.name] = { 'activationOffset': activationOffset, 'duration': duration };
+        }
+        //console.log(newLetParameters);
+
+        // Update the LET parameters of the tasks.
+        for (let task of tasks) {
+            // FIXME: Why this condition?
+            if (newLetParameters[task.name].activationOffset != 0) {
+                task.activationOffset = newLetParameters[task.name].activationOffset;
+            }
+            
+            task.duration = newLetParameters[task.name].duration;
         }
     }
     

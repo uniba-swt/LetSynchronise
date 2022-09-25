@@ -15,7 +15,7 @@ class ViewEventChain {
     
     deleteHandler = null;
     
-    static get ArrowSeparator() { return '&rarr;' };
+    static get ArrowSeparator() { return '→' };
     
     constructor() {
         this.root = document.querySelector('#nav-analyse');
@@ -108,7 +108,6 @@ class ViewEventChain {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
             event.preventDefault();
             
-            // Validate the dependency.
             this.dependencies = [];
             handler();
         });
