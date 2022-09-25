@@ -9,7 +9,6 @@ class PluginAutoSyncGoalEnd2EndMin {
     
     // Updates the task parameters to miminise end-to-end reponse times.
     static async Result() {
-
         // Retrieve the LET system.
         const systemElementSelected = ['tasks', 'eventChains', 'schedule'];
         const system = await PluginAutoSync.DatabaseContentsGet(systemElementSelected);
