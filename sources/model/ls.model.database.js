@@ -33,7 +33,7 @@ class ModelDatabase {
 
         dbOpenRequest.onerror = function(event) {
             // Do something with request.errorCode!
-            console.error('ModelDatabase error: ' + event.target.errorCode);
+            console.error(`ModelDatabase error: ${event.target.errorCode}`);
         }
 
         dbOpenRequest.onsuccess = (event) => {
@@ -41,7 +41,7 @@ class ModelDatabase {
 
             this.db.onerror = function(event) {
                 // Generic error handler for all errors targeted at this database's requests.
-                console.error('ModelDatabase error: ' + event.target.errorCode);
+                console.error(`ModelDatabase error: ${event.target.errorCode}`);
             };
             
             // Hack to populate the View with tasks once the database is ready
