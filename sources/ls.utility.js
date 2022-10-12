@@ -1,6 +1,9 @@
 'use strict'
 
 class Utility {
+    static get MsToNs() {
+        return 1000000;
+    }
     
     static ValidName(name) {
         return (/^([A-Za-z]|_)([A-Za-z0-9]|_)*$/).test(name);
@@ -52,7 +55,7 @@ class Utility {
     }
     
     
-    // Geenrate samples from a normal distribution.
+    // Generate samples from a normal distribution.
     static NormalSample(samples) {
         let random = 0.0;
         
@@ -77,19 +80,23 @@ class Utility {
         return scale * Math.pow(-Math.log(1 - random), 1 / shape) / upperBound;
     }
     
-    static Random(min, avg, max, distribution) {
+    static RandomInteger(min, avg, max, distribution) {
         const range = max - min;
         
         let delta = 0;
-        if (distribution == 'Normal') {
-            delta = range * Utility.NormalSample(6);
-        } else if (distribution == 'Uniform') {
-            delta = range * Math.random();
-        } else if (distribution == 'Weibull') {
-            delta = range * Utility.WeibullSample(1, 2, 3);
+        switch (distribution) {
+            case 'Normal':
+                delta = range * Utility.NormalSample(6);
+                break;
+            case 'Uniform':
+                delta = range * Math.random();
+                break;
+            case 'Weibull':
+                delta = range * Utility.WeibullSample(1, 2, 3);
+                break;
         }
         
-        return min + delta;
+        return min + Math.trunc(delta);
     }
     
     static FormatTimeString(time, digits) {

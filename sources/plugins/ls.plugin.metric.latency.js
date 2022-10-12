@@ -43,9 +43,10 @@ class PluginMetricLatency {
         if (result == { }) {
             return `<h6>${PluginMetricLatency.Name}: ${result.num} values</h6>`;
         } else {
+            const values = PluginMetric.ValuesOfObject(result.raw).map(value => value / Utility.MsToNs);
             return [
-                `<h6>${PluginMetricLatency.Name}: (min, avg, max) = (${result.min}, ${result.avg}, ${result.max})</h6>`,
-                `<ul><li>${result.num} values: [${PluginMetric.ValuesOfObject(result.raw).join(', ')}]</li></ul>`,
+                `<h6>${PluginMetricLatency.Name}: (min, avg, max) = (${result.min / Utility.MsToNs}, ${result.avg / Utility.MsToNs}, ${result.max / Utility.MsToNs})ms</h6>`,
+                `<ul><li>${result.num} values: [${values.join(', ')}]</li></ul>`,
             ].join('\n');
         }
     }
@@ -54,9 +55,10 @@ class PluginMetricLatency {
         if (result == { }) {
             return `${PluginMetricLatency.Name}: ${result.num} values`;
         } else {
+            const values = PluginMetric.ValuesOfObject(result.raw).map(value => value / Utility.MsToNs);
             return [
-                `${PluginMetricLatency.Name}: (min, avg, max) = (${result.min}, ${result.avg}, ${result.max})`,
-                `  ${result.num} values: [${PluginMetric.ValuesOfObject(result.raw).join(', ')}]`
+                `${PluginMetricLatency.Name}: (min, avg, max) = (${result.min / Utility.MsToNs}, ${result.avg / Utility.MsToNs}, ${result.max / Utility.MsToNs})ms`,
+                `  ${result.num} values: [${values.join(', ')}]`
             ].join('\n');
         }
     }

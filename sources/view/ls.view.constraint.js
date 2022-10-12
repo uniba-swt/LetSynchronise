@@ -76,7 +76,7 @@ class ViewConstraint {
             'name': this.name.trim(),
             'eventChain': this.eventChain.trim(),
             'relation': this.relation.trim(),
-            'time': parseFloat(this.time)
+            'time': parseFloat(this.time) * Utility.MsToNs
         };
     }
     
@@ -155,6 +155,11 @@ class ViewConstraint {
             alert('Time cannot be negative');
             return false;
         }
+        const timeNs = time * Utility.MsToNs;
+        if (!Number.isSafeInteger(timeNs)) {
+            alert('Time is unable to be represented with nanosecond precision.');
+            return false;
+        }
         
         return true;
     }
@@ -196,7 +201,7 @@ class ViewConstraint {
             .data(constraints)
             .enter()
             .append('li')
-                .html(constraint => `<span>${constraint.name}: ${constraint.eventChain} ${constraint.relation} ${constraint.time}</span> ${Utility.AddDeleteButton(constraint.name)}`)
+                .html(constraint => `<span>${constraint.name}: ${constraint.eventChain} ${constraint.relation} ${constraint.time / Utility.MsToNs}ms</span> ${Utility.AddDeleteButton(constraint.name)}`)
             .on('click', function(event, data) {
                 thisRef.constraints.node().querySelectorAll('li')
                     .forEach((constraint) => {
@@ -215,7 +220,7 @@ class ViewConstraint {
         this.name = constraint.name;
         this.eventChain = constraint.eventChain;
         this.relation = constraint.relation;
-        this.time = constraint.time;
+        this.time = constraint.time / Utility.MsToNs;
     }
     
     toString() {

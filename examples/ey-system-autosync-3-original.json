@@ -14,7 +14,7 @@
 			"name": "task_a",
 			"initialOffset": 0,
 			"activationOffset": 0,
-			"duration": 2000000,
+			"duration": 3000000,
 			"period": 3000000,
 			"inputs": [
 				"in"
@@ -23,15 +23,15 @@
 				"out"
 			],
 			"wcet": 500000,
-			"acet": 500000,
-			"bcet": 500000,
+			"acet": 250000,
+			"bcet": 0,
 			"distribution": "Normal"
 		},
 		{
 			"name": "task_b",
 			"initialOffset": 0,
 			"activationOffset": 0,
-			"duration": 1000000,
+			"duration": 2000000,
 			"period": 2000000,
 			"inputs": [
 				"in"
@@ -40,15 +40,15 @@
 				"out"
 			],
 			"wcet": 400000,
-			"acet": 400000,
-			"bcet": 400000,
+			"acet": 200000,
+			"bcet": 0,
 			"distribution": "Uniform"
 		},
 		{
 			"name": "task_c",
 			"initialOffset": 0,
 			"activationOffset": 0,
-			"duration": 1000000,
+			"duration": 2000000,
 			"period": 2000000,
 			"inputs": [
 				"in1",
@@ -120,6 +120,10 @@
 			}
 		}
 	],
+	"ConstraintInstancesStore": [],
+	"DependencyInstancesStore": [],
+	"EventChainInstanceStore": [],
+	"TaskInstancesStore": [],
 	"EventChainStore": [
 		{
 			"segment": {
@@ -200,35 +204,9 @@
 					}
 				}
 			}
-		},
-		{
-			"segment": {
-				"name": "gamma",
-				"source": {
-					"task": "task_b",
-					"port": "out"
-				},
-				"destination": {
-					"task": "task_c",
-					"port": "in2"
-				}
-			},
-			"name": "Test"
 		}
 	],
 	"ConstraintStore": [
-		{
-			"name": "TestConstraint1",
-			"eventChain": "Test",
-			"relation": "<",
-			"time": 3000000
-		},
-		{
-			"name": "TestConstraint2",
-			"eventChain": "Test",
-			"relation": "<",
-			"time": 3000000
-		},
 		{
 			"name": "TimingConstraint1",
 			"eventChain": "EventChain1",
