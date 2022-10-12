@@ -46,7 +46,7 @@ class ModelSchedule {
         } else if (executionTiming === 'WCET') {
             executionTime = parameters.wcet;
         } else {
-            executionTime = Utility.Random(parameters.bcet, parameters.acet, parameters.wcet, parameters.distribution);
+            executionTime = Utility.RandomInteger(parameters.bcet, parameters.acet, parameters.wcet, parameters.distribution);
         }
         
         return {
