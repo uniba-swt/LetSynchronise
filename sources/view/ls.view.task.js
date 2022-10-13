@@ -165,15 +165,15 @@ class ViewTask {
         // Package all the task paramters in their correct types into an object.
         return {
             'name': this.name.trim(),
-            'initialOffset': parseFloat(this.initialOffset) * Utility.MsToNs,
-            'activationOffset': parseFloat(this.activationOffset) * Utility.MsToNs,
-            'duration': parseFloat(this.duration) * Utility.MsToNs,
-            'period': parseFloat(this.period) * Utility.MsToNs,
+            'initialOffset': Math.abs(parseFloat(this.initialOffset)) * Utility.MsToNs,
+            'activationOffset': Math.abs(parseFloat(this.activationOffset)) * Utility.MsToNs,
+            'duration': Math.abs(parseFloat(this.duration)) * Utility.MsToNs,
+            'period': Math.abs(parseFloat(this.period)) * Utility.MsToNs,
             'inputs': this.inputs.split(',').map(item => item.trim()).filter(Boolean),
             'outputs': this.outputs.split(',').map(item => item.trim()).filter(Boolean),
-            'wcet': parseFloat(this.wcet) * Utility.MsToNs,
-            'acet': parseFloat(this.acet) * Utility.MsToNs,
-            'bcet': parseFloat(this.bcet) * Utility.MsToNs,
+            'wcet': Math.abs(parseFloat(this.wcet)) * Utility.MsToNs,
+            'acet': Math.abs(parseFloat(this.acet)) * Utility.MsToNs,
+            'bcet': Math.abs(parseFloat(this.bcet)) * Utility.MsToNs,
             'distribution': this.distribution.trim()
         };
     }
