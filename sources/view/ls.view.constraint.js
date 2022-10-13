@@ -152,7 +152,7 @@ class ViewConstraint {
         }
         const time = parseFloat(constraint.time);
         if (time < 0) {
-            alert('Time cannot be negative');
+            alert('Time cannot be negative.');
             return false;
         }
         const timeNs = time * Utility.MsToNs;
@@ -201,7 +201,7 @@ class ViewConstraint {
             .data(constraints)
             .enter()
             .append('li')
-                .html(constraint => `<span>${constraint.name}: ${constraint.eventChain} ${constraint.relation} ${constraint.time / Utility.MsToNs}ms</span> ${Utility.AddDeleteButton(constraint.name)}`)
+                .html(constraint => `<span>${constraint.name}: ${constraint.eventChain} ${this.toRelationSymbol(constraint.relation)} ${constraint.time / Utility.MsToNs}ms</span> ${Utility.AddDeleteButton(constraint.name)}`)
             .on('click', function(event, data) {
                 thisRef.constraints.node().querySelectorAll('li')
                     .forEach((constraint) => {
@@ -221,6 +221,17 @@ class ViewConstraint {
         this.eventChain = constraint.eventChain;
         this.relation = constraint.relation;
         this.time = constraint.time / Utility.MsToNs;
+    }
+    
+    toRelationSymbol(relation) {
+        switch(relation) {
+            case '<': return '&lt;';
+            case '<=': return '&le;';
+            case '==': return '&equals;&equals;';
+            case '>=': return '&ge;';
+            case '>': return '&gt;';
+            default: return '&quest;';
+        }
     }
     
     toString() {
