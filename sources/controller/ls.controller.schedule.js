@@ -111,7 +111,7 @@ class ControllerSchedule {
         const scheduler = this.view.autoSyncParametersClean.scheduler;
         const executionTiming = this.view.schedulingParametersClean.executionTiming;
         const goal = this.view.autoSyncParametersClean.goal;
-        goal.Result()
+        goal.Result(scheduler)
             .then(result => scheduler.Result(makespan, executionTiming))
             .then(result => this.modelTask.refreshViews())
             .then(result => this.model.getSchedule(makespan))

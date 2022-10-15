@@ -139,7 +139,7 @@ class PluginAutoSyncSchedulerFp {
             
             // Schedule as much of the chosen task instance's execution time before the next preeemption time.
             // Create an execution interval for the chosen task instance.
-            const executionTimeEnd = currentTime + PluginAutoSyncSchedulerFp.RemainingExecutionTime(chosenTask.instance);
+            const executionTimeEnd = currentTime + this.RemainingExecutionTime(chosenTask.instance);
             if (executionTimeEnd > chosenTask.instance.letEndTime) {
                 alert(`Could not schedule enough time for task ${tasksInstances[chosenTask.number].name}, instance ${chosenTask.instance.instance}!`);
                 return;
