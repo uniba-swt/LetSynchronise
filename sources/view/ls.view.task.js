@@ -4,6 +4,7 @@ class ViewTask {
     root = null;
     
     nameField = null;
+    priorityField = null;
     initialOffsetField = null;
     activationOffsetField = null;
     durationField = null;
@@ -31,6 +32,7 @@ class ViewTask {
         
         // Define or edit a task
         this.nameField = this.root.querySelector('#name');
+        this.priorityField = this.root.querySelector('#priority');
         this.initialOffsetField = this.root.querySelector('#initial-offset');
         this.activationOffsetField = this.root.querySelector('#activation-offset');
         this.durationField = this.root.querySelector('#duration');
@@ -62,6 +64,18 @@ class ViewTask {
     
     set name(name) {
         this.nameField.value = name;
+    }
+    
+    get priority() {
+        if (this.priorityField.value == null || this.priorityField.value.trim() == '') {
+            return null;
+        } else {
+            return this.priorityField.value;
+        }
+    }
+
+    set priority(priority) {
+        this.priorityField.value = priority;
     }
     
     get initialOffset() {
@@ -148,6 +162,7 @@ class ViewTask {
         // Package all the task paramters as is into an object.
         return {
             'name': this.name,
+            'priority': this.priority,
             'initialOffset': this.initialOffset,
             'activationOffset': this.activationOffset,
             'duration': this.duration,
@@ -165,6 +180,7 @@ class ViewTask {
         // Package all the task paramters in their correct types into an object.
         return {
             'name': this.name.trim(),
+            'priority': this.priority == null ? null : Math.abs(parseInt(this.priority, 10)),
             'initialOffset': Math.abs(parseFloat(this.initialOffset)) * Utility.MsToNs,
             'activationOffset': Math.abs(parseFloat(this.activationOffset)) * Utility.MsToNs,
             'duration': Math.abs(parseFloat(this.duration)) * Utility.MsToNs,
@@ -202,6 +218,7 @@ class ViewTask {
             
             // Clear all the task parameters in the view.
             this.name = '';
+            this.priority = '';
             this.initialOffset = '';
             this.activationOffset = '';
             this.duration = '';
@@ -262,7 +279,13 @@ class ViewTask {
             alert('Task name can only start with an alphabetical or underscore character, and continue with alphanumerical or underscore characters.');
             return false;
         }
-        
+
+        if (taskParameters.priority != null
+                && (isNaN(taskParameters.priority) || parseInt(taskParameters.priority) < 0 || taskParameters.priority.split(".").length != 1)) {
+            alert('Priority has to be a positive integer. Lowest priority is 0.');
+            return false;
+        }
+
         if (taskParameters.initialOffset == null || taskParameters.initialOffset.trim() == '' || isNaN(taskParameters.initialOffset)) {
             alert('Initial offset has to be a decimal number.');
             return false;
@@ -604,6 +627,7 @@ class ViewTask {
     
     populateParameterForm(taskParameters) {
         this.name = taskParameters.name;
+        this.priority = taskParameters.priority == null ? '' : taskParameters.priority;
         this.initialOffset = taskParameters.initialOffset / Utility.MsToNs;
         this.activationOffset = taskParameters.activationOffset / Utility.MsToNs;
         this.duration = taskParameters.duration / Utility.MsToNs;
@@ -617,7 +641,7 @@ class ViewTask {
     }
         
     formatTaskParametersInfo(taskParameters) {
-        return `${taskParameters.name}: initial offset = ${taskParameters.initialOffset}, activation offset = ${taskParameters.activationOffset}, duration = ${taskParameters.duration}, period = ${taskParameters.period}, inputs = ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.inputs)}, outputs = ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.outputs)}, wcet = ${taskParameters.wcet}, acet = ${taskParameters.acet}, bcet = ${taskParameters.bcet}, distribution = ${taskParameters.distribution}`;
+        return `${taskParameters.name}: priority = ${taskParameters.priority}, initial offset = ${taskParameters.initialOffset}, activation offset = ${taskParameters.activationOffset}, duration = ${taskParameters.duration}, period = ${taskParameters.period}, inputs = ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.inputs)}, outputs = ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.outputs)}, wcet = ${taskParameters.wcet}, acet = ${taskParameters.acet}, bcet = ${taskParameters.bcet}, distribution = ${taskParameters.distribution}`;
     }
     
     toString() {

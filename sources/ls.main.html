@@ -75,9 +75,10 @@
     <script src="sources/plugins/ls.plugin.autosync.goal.end2endMax.js"></script>
     <script src="sources/plugins/ls.plugin.autosync.goal.end2endMin.js"></script>
     <script src="sources/plugins/ls.plugin.autosync.goal.random.js"></script>
+    <script src="sources/plugins/ls.plugin.autosync.scheduler.edf.js"></script>
+    <script src="sources/plugins/ls.plugin.autosync.scheduler.fp.js"></script>
     <script src="sources/plugins/ls.plugin.autosync.scheduler.random.js"></script>
     <script src="sources/plugins/ls.plugin.autosync.scheduler.rm.js"></script>
-    <script src="sources/plugins/ls.plugin.autosync.scheduler.edf.js"></script>
     <script src="sources/plugins/ls.plugin.autosync.scheduler.tudortmund.js"></script>
 
     <script defer src="sources/ls.main.js"></script>
@@ -220,10 +221,17 @@
             <h3>Define or Edit a LET Task</h3>
             
             <form class="row gx-3 gy-2" id="view-task-define">
-                <div class="col-12">
+                <div class="col-6">
                     <div class="input-group">
-                        <span for="name" class="input-group-text col-2">Name</span>
+                        <span for="name" class="input-group-text col-5">Name</span>
                         <input required type="text" class="form-control" id="name" value="t1"/>
+                    </div>
+                </div>
+
+                <div class="col-6">
+                    <div class="input-group">
+                        <span for="priority" class="input-group-text col-5">Priority</span>
+                        <input required type="text" class="form-control" id="priority"  placeholder="0 = lowest" value=""/>
                     </div>
                 </div>
 
@@ -262,14 +270,14 @@
                 <div class="col-6">
                     <div class="input-group">
                         <span for="inputs" class="input-group-text col-5">Inputs</span>
-                        <input required type="text" class="form-control" id="inputs" placeholder="E.g., in1, in2, in3" value="in1,in2,in3"/>
+                        <input required type="text" class="form-control" id="inputs" placeholder="E.g., in1,in2,in3" value="in1,in2,in3"/>
                     </div>
                 </div>
                 
                 <div class="col-6">
                     <div class="input-group">
                         <label for="outputs" class="input-group-text col-5">Outputs</label>
-                        <input required type="text" class="form-control" id="outputs" placeholder="E.g., out1, out2, out3" value="out1,out2,out3"/>
+                        <input required type="text" class="form-control" id="outputs" placeholder="E.g., out1,out2,out3" value="out1,out2,out3"/>
                     </div>
                 </div>
 

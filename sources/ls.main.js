@@ -118,9 +118,10 @@ PluginAutoSync.Register(PluginAutoSyncGoalEnd2EndMin);
 PluginAutoSync.Register(PluginAutoSyncGoalRandom);
 
 
+PluginAutoSync.Register(PluginAutoSyncSchedulerEdf);
+PluginAutoSync.Register(PluginAutoSyncSchedulerFp);
 PluginAutoSync.Register(PluginAutoSyncSchedulerRandom);
 PluginAutoSync.Register(PluginAutoSyncSchedulerRm);
-PluginAutoSync.Register(PluginAutoSyncSchedulerEdf);
 PluginAutoSync.Register(PluginAutoSyncSchedulerTuDortmund);
 view.viewSchedule.updateAutoSyncPluginSelectors();
 
