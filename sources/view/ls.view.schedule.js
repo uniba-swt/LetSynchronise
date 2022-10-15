@@ -133,7 +133,7 @@ class ViewSchedule {
     
     get schedulingParametersClean() {
         return {
-            'makespan': parseFloat(this.makespan) * Utility.MsToNs,
+            'makespan': Math.abs(parseFloat(this.makespan)) * Utility.MsToNs,
             'scheduler': this.pluginScheduler,
             'executionTiming': this.executionTiming
         };
@@ -229,7 +229,7 @@ class ViewSchedule {
     
     
     validateSchedulingParameters(schedulingParameters) {
-        if (schedulingParameters.makespan == null || isNaN(schedulingParameters.makespan)) {
+        if (schedulingParameters.makespan == null || schedulingParameters.makespan.trim() == '' || isNaN(schedulingParameters.makespan)) {
             alert('Makespan has to be a decimal number.');
             return false;
         }

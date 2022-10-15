@@ -214,10 +214,6 @@
 			}
 		}
 	],
-	"ConstraintInstancesStore": [],
-	"DependencyInstancesStore": [],
-	"EventChainInstanceStore": [],
-	"TaskInstancesStore": [],
 	"EventChainStore": [
 		{
 			"segment": {
@@ -231,7 +227,7 @@
 					"port": "in1"
 				}
 			},
-			"name": "Priority1",
+			"name": "EventChain1",
 			"successor": {
 				"segment": {
 					"name": "alpha",
@@ -284,7 +280,7 @@
 					"port": "in1"
 				}
 			},
-			"name": "Priority2",
+			"name": "EventChain2",
 			"successor": {
 				"segment": {
 					"name": "gamma",
@@ -339,5 +335,18 @@
 			}
 		}
 	],
-	"ConstraintStore": []
+	"ConstraintStore": [
+		{
+			"name": "TimingConstraint1",
+			"eventChain": "EventChain1",
+			"relation": "<=",
+			"time": 4000000
+		},
+		{
+			"name": "TimingConstraint2",
+			"eventChain": "EventChain2",
+			"relation": "<=",
+			"time": 3200000
+		}
+	]
 }

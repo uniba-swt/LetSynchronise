@@ -7,6 +7,7 @@ class ViewConstraint {
     eventChainField = null;
     relationField = null;
     timeField = null;
+    priorityField = null;
     
     submitButton = null;
     
@@ -23,6 +24,7 @@ class ViewConstraint {
         this.eventChainField = this.root.querySelector('#view-analyse-constraint-event-chain');
         this.relationField = this.root.querySelector('#view-analyse-constraint-relation');
         this.timeField = this.root.querySelector('#view-analyse-constraint-time');
+        this.priorityField = this.root.querySelector('#view-analyse-constraint-priority');
 
         this.submitButton = this.root.querySelector('#submitConstraint');
         
@@ -62,12 +64,25 @@ class ViewConstraint {
         this.timeField.value = time;
     }
     
+    get priority() {
+        if (this.priorityField.value == null || this.priorityField.value.trim() == '') {
+            return null;
+        } else {
+            return this.priorityField.value;
+        }
+    }
+
+    set priority(priority) {
+        this.priorityField.value = priority;
+    }
+
     get constraintRaw() {
         return {
             'name': this.name,
             'eventChain': this.eventChain,
             'relation': this.relation,
-            'time': this.time
+            'time': this.time,
+            'priority': this.priority
         };
     }
     
@@ -76,7 +91,8 @@ class ViewConstraint {
             'name': this.name.trim(),
             'eventChain': this.eventChain.trim(),
             'relation': this.relation.trim(),
-            'time': parseFloat(this.time) * Utility.MsToNs
+            'time': Math.abs(parseFloat(this.time)) * Utility.MsToNs,
+            'priority': this.priority == null ? null : Math.abs(parseInt(this.priority, 10))
         };
     }
     
@@ -152,7 +168,7 @@ class ViewConstraint {
         }
         const time = parseFloat(constraint.time);
         if (time < 0) {
-            alert('Time cannot be negative');
+            alert('Time cannot be negative.');
             return false;
         }
         const timeNs = time * Utility.MsToNs;
@@ -161,6 +177,12 @@ class ViewConstraint {
             return false;
         }
         
+        if (constraint.priority != null
+                && (isNaN(constraint.priority) || parseInt(constraint.priority) < 0 || constraint.priority.split(".").length != 1)) {
+            alert('Priority has to be a positive integer. Lowest priority is 0.');
+            return false;
+        }
+
         return true;
     }
     
@@ -201,7 +223,7 @@ class ViewConstraint {
             .data(constraints)
             .enter()
             .append('li')
-                .html(constraint => `<span>${constraint.name}: ${constraint.eventChain} ${constraint.relation} ${constraint.time / Utility.MsToNs}ms</span> ${Utility.AddDeleteButton(constraint.name)}`)
+                .html(constraint => `<span>${constraint.name}: ${constraint.eventChain} ${this.toRelationSymbol(constraint.relation)} ${constraint.time / Utility.MsToNs}ms</span> ${Utility.AddDeleteButton(constraint.name)}`)
             .on('click', function(event, data) {
                 thisRef.constraints.node().querySelectorAll('li')
                     .forEach((constraint) => {
@@ -221,6 +243,18 @@ class ViewConstraint {
         this.eventChain = constraint.eventChain;
         this.relation = constraint.relation;
         this.time = constraint.time / Utility.MsToNs;
+        this.priority = constraint.priority == null ? '' : constraint.priority;
+    }
+    
+    toRelationSymbol(relation) {
+        switch(relation) {
+            case '<': return '&lt;';
+            case '<=': return '&le;';
+            case '==': return '&equals;&equals;';
+            case '>=': return '&ge;';
+            case '>': return '&gt;';
+            default: return '&quest;';
+        }
     }
     
     toString() {
