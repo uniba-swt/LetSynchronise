@@ -1,9 +1,9 @@
 'use strict';
 
-class PluginAutoSyncGoalEnd2EndMin {
+class PluginAutoSyncGoalEnd2EndMinEy {
     // Plug-in Metadata
-    static get Name()     { return 'Minimise End-to-End Response Times'; }
-    static get Author()   { return 'Matthew Kuo'; }
+    static get Name()     { return 'Minimise End-to-End Response Times (EY)'; }
+    static get Author()   { return 'Eugene Yip'; }
     static get Category() { return PluginAutoSync.Category.Goal; }
 
     
