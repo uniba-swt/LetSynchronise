@@ -24,7 +24,7 @@ class PluginAutoSyncGoalEnd2EndMinEy {
         }
                 
         // Run iterative optimisation heuristic.
-        this.Algorithm(tasks, eventChains, tasksInstances, graph.priorties);
+        this.Algorithm(tasks, eventChains, tasksInstances, graph.priorities);
 
         const taskElementSelected = ['tasks'];
         return PluginAutoSync.DatabaseContentsDelete(taskElementSelected)
@@ -90,7 +90,7 @@ class PluginAutoSyncGoalEnd2EndMinEy {
     
     static CreateTaskDependencyGraph(eventChains, constraints) {
         // requiredEventChainDetails: event chain priority, task sequence
-        // taskDependencies: source --> target task dependency edges
+        // taskDependencies: task dependency edges
         // tasksRequired: task set
         const [requiredEventChainDetails, taskDependencies, tasksRequired] = this.GetRequiredConstraintDetails(eventChains, constraints);
         
@@ -119,7 +119,6 @@ class PluginAutoSyncGoalEnd2EndMinEy {
         //
         let graph = new PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix(tasksRequired);
         taskDependencies.forEach(dependency => graph.setDirectedEdge(dependency[0], dependency[1]));
-        console.log(graph.toString());
         
         // Check that the task dependency graph is acyclic.
         const graphCycle = graph.cycle;
@@ -136,7 +135,8 @@ class PluginAutoSyncGoalEnd2EndMinEy {
         }
         
         // Assign global task priorities.
-        graph.computeGlobalTaskPriorties();
+        graph.computeGlobalTaskPriorities();
+        console.log(graph.nodesDescendingGlobalPriorities);
         
         return graph;
     }
@@ -165,7 +165,7 @@ PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix = class {
         for (const node of nodes) {
             this.sources.set(node, index);
             this.targets.set(node, index);
-            this.priorities.set(node, new Map([['local', 0], ['global', 0]]));
+            this.priorities.set(node, new Map([['local', 0], ['global', null]]));
             index++;
         }
         
@@ -190,16 +190,8 @@ PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix = class {
         return this.sources.get(node);
     }
     
-    getSourceNode(index) {
-        return this.getNode(this.sources, index);
-    }
-    
     getTargetIndex(node) {
         return this.targets.get(node);
-    }
-    
-    getTargetNode(indexQuery) {
-        return this.getNode(this.targets, index);
     }
     
     setDirectedEdge(source, target) {
@@ -214,10 +206,22 @@ PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix = class {
         this.matrix[row][col] = false;
     }
     
+    get nodesDescendingGlobalPriorities() {
+        return this.sortNodeList([...this.priorities.keys()], this.compareDescendingGlobalPriority);
+    }
+    
     getNodePriority(node, type) {
         return this.priorities.get(node).get(type);
     }
     
+    getNodeLocalPriority(node) {
+        return this.getNodePriority(node, 'local');
+    }
+
+    getNodeGlobalPriority(node) {
+        return this.getNodePriority(node, 'global');
+    }
+
     setNodePriority(node, type, priority) {
         this.priorities.get(node).set(type, priority);
     }
@@ -250,7 +254,6 @@ PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix = class {
     
     getTargetNodes(sourceNode) {
         const col = this.getSourceIndex(sourceNode);
-    
         let targetNodes = [ ];
         for (const [name, row] of this.targets.entries()) {
             if (this.matrix[row][col]) {
@@ -259,6 +262,61 @@ PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix = class {
         }
         
         return targetNodes;
+    }
+    
+    getSourceNodes(targetNode) {
+        const row = this.getTargetIndex(targetNode);
+        let sourceNodes = [ ];
+        for (const [index, isSource] of this.matrix[row].entries()) {
+            if (isSource) {
+                sourceNodes.push(this.getNode(this.sources, index));
+            }
+        }
+        
+        return sourceNodes;
+    }
+    
+    getRootSourceNodes(targetNode) {
+        let rootSourceNodes = new Set();
+
+        const sourceNodes = this.getSourceNodes(targetNode);
+        if (sourceNodes.length == 0) {
+            rootSourceNodes.add(targetNode);
+        } else {
+            for (const sourceNode of sourceNodes) {
+                rootSourceNodes = new Set([...rootSourceNodes, ...this.getRootSourceNodes(sourceNode)]);
+            }
+        }
+        return rootSourceNodes;
+    }
+    
+    compareDescendingLocalPriority(left, right) {
+        if (this.getNodeLocalPriority(left) > this.getNodeLocalPriority(right)) {
+            return -1;
+        }
+        if (this.getNodeLocalPriority(left) < this.getNodeLocalPriority(right)) {
+            return 1;
+        }
+        return 0;
+    }
+    
+    compareDescendingGlobalPriority(left, right) {
+        if (this.getNodeGlobalPriority(left) > this.getNodeGlobalPriority(right)) {
+            return -1;
+        }
+        if (this.getNodeGlobalPriority(left) < this.getNodeGlobalPriority(right)) {
+            return 1;
+        }
+        return 0;
+    }
+    
+    sortNodeList(nodeList, comparator) {
+        return nodeList.sort(comparator.bind(this));
+    }
+    
+    nodeIsShared(node) {
+        const row = this.targets.get(node);
+        return (this.matrix[row].reduce((left, right) => left + right, 0) > 1);
     }
     
     // Depth-first search to find cycles in the graph.
@@ -297,9 +355,33 @@ PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix = class {
     
     // Depth-first traversal with backtracking to assign global priorities to nodes,
     // based on the nodes' local priorities.
-    computeGlobalTaskPriorties() {
-        for (const startNode of this.startNodes) {
-        
+    computeGlobalTaskPriorities() {
+        let currentPriority = { val: this.priorities.size };    // Primitives are passed as values into functions.
+        const startNodesDescendingPriority = this.sortNodeList(this.startNodes, this.compareDescendingLocalPriority);
+        for (const startNode of startNodesDescendingPriority) {
+            this.computeGlobalTaskPrioritiesHelper(startNode, currentPriority);
+        }
+    }
+    
+    // Recursively visit target nodes until the path terminates.
+    computeGlobalTaskPrioritiesHelper(node, currentPriority) {
+        if (this.getNodeGlobalPriority(node) == null) {
+            this.updateNodeGlobalPriorityMax(node, currentPriority.val);
+            currentPriority.val--;
+            
+            const targetNodesDescendingPriority = this.sortNodeList(this.getTargetNodes(node), this.compareDescendingLocalPriority);
+            for (const targetNode of targetNodesDescendingPriority) {
+                if (this.nodeIsShared(targetNode)) {
+                    // Backtrack to all possible start nodes that can reach the targetNode.
+                    const rootSourceNodes = [...this.getRootSourceNodes(targetNode)];
+                    const sourceNodesDescendingPriority = this.sortNodeList(rootSourceNodes, this.compareDescendingLocalPriority);
+                    for (const sourceNode of sourceNodesDescendingPriority) {
+                        this.computeGlobalTaskPrioritiesHelper(sourceNode, currentPriority);
+                    }
+                }
+                
+                this.computeGlobalTaskPrioritiesHelper(targetNode, currentPriority);
+            }
         }
     }
     
