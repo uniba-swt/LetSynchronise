@@ -10,12 +10,11 @@ class PluginAutoSyncGoalEnd2EndMinEy {
     // Updates the task parameters to miminise end-to-end reponse times.
     static async Result(scheduler) {
         // Retrieve the LET system.
-        const systemElementSelected = ['tasks', 'eventChains', 'constraints', 'schedule'];
+        const systemElementSelected = ['tasks', 'eventChains', 'constraints'];
         const system = await PluginAutoSync.DatabaseContentsGet(systemElementSelected);
         const tasks = await system[Model.TaskStoreName];
         const eventChains = await system[Model.EventChainStoreName];
         const constraints = await system[Model.ConstraintStoreName];
-        const tasksInstances = await system[Model.TaskInstancesStoreName];
                 
         // Create task dependency graph and assign task priorities for the heuristic.
         const graph = this.CreateTaskDependencyGraph(eventChains, constraints);
@@ -24,7 +23,7 @@ class PluginAutoSyncGoalEnd2EndMinEy {
         }
                 
         // Run iterative optimisation heuristic.
-        this.Algorithm(tasks, eventChains, tasksInstances, graph.priorities);
+        await this.Algorithm(tasks, graph.nodesDescendingGlobalPriorities, scheduler);
 
         const taskElementSelected = ['tasks'];
         return PluginAutoSync.DatabaseContentsDelete(taskElementSelected)
@@ -135,18 +134,62 @@ class PluginAutoSyncGoalEnd2EndMinEy {
             tasks.forEach(task => graph.updateNodeLocalPriorityMax(task, priority));
         }
         
-        // Assign global task priorities.
+        // Compute the global task priorities.
         graph.computeGlobalTaskPriorities();
-        console.log(graph.nodesDescendingGlobalPriorities);
         
         return graph;
     }
 
     // Each parameter is a copy of a reference to an object.
-    static Algorithm(tasks, eventChains, tasksInstances, taskPriorities) {
+    static async Algorithm(tasks, tasksDescendingPriority, scheduler) {
+        // Scheduling parameters
+        const initialOffsets = tasks.map(taskParameters => taskParameters.initialOffset).flat();
+        const periods = tasks.map(taskParameters => taskParameters.period).flat();
+        const prologue = Utility.MaxOfArray(initialOffsets);
+        const hyperPeriod = Utility.LeastCommonMultipleOfArray(periods);
+        const makespan = prologue + hyperPeriod;
+        const executionTiming = 'WCET';
         
+        let currentTaskSet = new Set();
+        for (const currentTaskName of tasksDescendingPriority) {
+            // Delete the existing task schedule.
+            await PluginAutoSync.DeleteSchedule();
+            
+            // Expand the current task's LET interval to span its entire period.
+            let currentTask = tasks.find(task => (task.name == currentTaskName));
+            currentTask.activationOffset = 0;
+            currentTask.duration = currentTask.period;
+            
+            // Add the currentTask into the current task set to schedule.
+            currentTaskSet.add(currentTask);
+
+            // Schedule the current task set.
+            for (const task of currentTaskSet) {
+                await PluginAutoSync.CreateTaskInstances(task, makespan, executionTiming);
+            }
+            const schedule = await PluginAutoSync.GetSchedule();
+            const allTasksInstances = await schedule['promiseAllTasksInstances'];
+            await scheduler.Algorithm(makespan, allTasksInstances);
+            
+            // Analyse the currentTask parameters.
+            // FIXME: LET min/max bounds are incorrect when the task instance has zero execution time.
+            let letBound = { 'min': currentTask.period, 'max': 0 };
+            const currentTaskInstances = allTasksInstances.find(task => (task.name == currentTaskName));
+            for (const instance of currentTaskInstances.value) {
+                for (const executionInterval of instance.executionIntervals) {
+                    letBound.min = Math.min(letBound.min, executionInterval.startTime - instance.periodStartTime);
+                    letBound.max = Math.max(letBound.max, executionInterval.endTime - instance.periodStartTime);
+                }
+            }
+            
+            if (letBound.min > letBound.max) {
+                console.error(`LET bounds could not be computed for ${currentTaskName}!`);
+            }
+            
+            currentTask.activationOffset = letBound.min;
+            currentTask.duration = letBound.max - letBound.min;
+        }
     }
-    
 }
 
 PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix = class {
@@ -277,6 +320,7 @@ PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix = class {
         return sourceNodes;
     }
     
+    // Returns the earliest predecessor nodes that have not been assigned a global priority.
     getRootSourceNodes(targetNode) {
         let rootSourceNodes = new Set();
         const sourceNodes = this.getSourceNodes(targetNode);
