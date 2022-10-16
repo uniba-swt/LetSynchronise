@@ -264,6 +264,8 @@ class PluginAutoSyncGoalEnd2EndMinEy {
                 currentTask.duration = maxLetEndTime - currentTask.activationOffset;
                 firstTaskInstanceOfInterest[currentTaskName]['letEndTime'] =
                     firstTaskInstanceOfInterest[currentTaskName]['letStartTime'] + currentTask.duration;
+                    
+                // FIXME: Reschedule and trim the slack from the end of the task instances.
             }
             
             predecessorTaskName = currentTaskName;
