@@ -85,7 +85,7 @@ class ModelSchedule {
     // Create a single dependency instance.
     createDependencyInstance(dependency, sourceIndex, sourceInstance, destinationIndex, destinationInstance) {
         return {
-            'instance'    : -1,
+            'instance': -1,
             'receiveEvent': {
                 'task': dependency.destination.task,
                 'port': dependency.destination.port,

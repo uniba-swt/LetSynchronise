@@ -18,14 +18,14 @@ class PluginAutoSyncSchedulerEdf {
         const schedule = await PluginAutoSync.DatabaseContentsGet(scheduleElementSelected);
         const tasks = await schedule[Model.TaskInstancesStoreName];
 
-        this.Algorithm(makespan, tasks);
+        this.Algorithm(tasks, makespan);
         
         return PluginAutoSync.DatabaseContentsDelete(scheduleElementSelected)
             .then(PluginAutoSync.DatabaseContentsSet(schedule, scheduleElementSelected));
     }
     
     // Preemptive earliest deadline first.
-    static Algorithm(makespan, tasks) {
+    static Algorithm(tasks, makespan) {
         // Do nothing if the task set is empty.
         if (tasks.length == 0) {
             return;
@@ -137,7 +137,7 @@ class PluginAutoSyncSchedulerEdf {
             
             // Schedule as much of the chosen task instance's execution time before the next preeemption time.
             // Create an execution interval for the chosen task instance.
-            const executionTimeEnd = currentTime + PluginAutoSyncSchedulerEdf.RemainingExecutionTime(chosenTask.instance);
+            const executionTimeEnd = currentTime + this.RemainingExecutionTime(chosenTask.instance);
             if (executionTimeEnd > chosenTask.instance.letEndTime) {
                 alert(`Could not schedule enough time for task ${tasks[chosenTask.number].name}, instance ${chosenTask.instance.instance}!`);
                 return;

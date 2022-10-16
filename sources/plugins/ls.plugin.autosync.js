@@ -77,6 +77,10 @@ class PluginAutoSync {
         return this.ModelDatabase.deleteSchedule();
     }
     
+    static CreateTaskInstances(taskParameters, makespan, executionTiming) {
+        return this.ModelSchedule.createTaskInstances(taskParameters, makespan, executionTiming)
+    }
+    
     static CreateAllTaskInstances(makespan, executionTiming) {
         return this.ModelSchedule.createAllTaskInstances(makespan, executionTiming);
     }
