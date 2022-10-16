@@ -148,9 +148,8 @@ class PluginAutoSyncGoalEnd2EndMinEy {
     }
 
     // Iteratively schedules each task from highest to lowest priority to determine the
-    // min and max bounds of their LET intervals. The algorithm does not take communication
-    // dependencies into account when determining the LET start times, which would produce
-    // more optimal results.
+    // min and max bounds of their LET intervals.
+    // FIXME: Also need to schedule the tasks not in the dependency graph.
     static async Algorithm(tasks, taskDependencyGraph, scheduler) {
         // Scheduling parameters
         const initialOffsets = tasks.map(taskParameters => taskParameters.initialOffset).flat();
@@ -163,6 +162,7 @@ class PluginAutoSyncGoalEnd2EndMinEy {
         
         let currentTaskSet = new Set();
         let firstTaskInstanceOfInterest = { };
+        let predecessorTaskName = null;
         const tasksDescendingPriority = taskDependencyGraph.nodesDescendingGlobalPriorities;
         for (const currentTaskName of tasksDescendingPriority) {
             // Delete the existing task schedule.
@@ -191,14 +191,12 @@ class PluginAutoSyncGoalEnd2EndMinEy {
             let currentTaskInstances = allTasksInstances.find(task => (task.name == currentTaskName));
             if (currentTaskInstances.value.length == 0) {
                 console.warn(`No task instances available for ${currentTaskName} to compute its LET bounds!`);
+                predecessorTaskName = currentTaskName;
                 continue;
             }
-            
-            // Get the currentTask's precessors.
-            const predecessorTasks = taskDependencyGraph.getSourceNodes(currentTaskName);
 
             // Analyse the currentTask parameters.
-            if (predecessorTasks.length == 0) {
+            if (predecessorTaskName == null) {
                 // No predecessors so just contract the currentTask's LET interval to the execution intervals
                 // of its initial instance.
                 let letBound = { 'min': currentTask.period, 'max': 0 };
@@ -219,7 +217,7 @@ class PluginAutoSyncGoalEnd2EndMinEy {
                 };
             } else {
                 // Get the latest LET end of the predecessors.
-                const maxPredecessorLetEndTime = predecessorTasks.reduce((left, right) => Math.max(left, firstTaskInstanceOfInterest[right].letEndTime), 0);
+                const maxPredecessorLetEndTime = firstTaskInstanceOfInterest[predecessorTaskName].letEndTime;
             
                 // Find the earliest instance of currentTask that can complete its computations after maxPredecessorLetEndTime.
                 // 1. Shift the currentTask's LET activation offset to the earliest possible time.
@@ -242,6 +240,9 @@ class PluginAutoSyncGoalEnd2EndMinEy {
                 }
                 
                 // 2. Reschedule to determine the earliest LET end time.
+                for (const task of currentTaskSet) {
+                    await PluginAutoSync.CreateTaskInstances(task, makespan, executionTiming);
+                }
                 schedule = await PluginAutoSync.GetSchedule();
                 allTasksInstances = await schedule['promiseAllTasksInstances'];
                 await scheduler.Algorithm(allTasksInstances, makespan, tasks);
@@ -263,7 +264,11 @@ class PluginAutoSyncGoalEnd2EndMinEy {
                 currentTask.duration = maxLetEndTime - currentTask.activationOffset;
                 firstTaskInstanceOfInterest[currentTaskName]['letEndTime'] =
                     firstTaskInstanceOfInterest[currentTaskName]['letStartTime'] + currentTask.duration;
+                    
+                // FIXME: Reschedule and trim the slack from the end of the task instances.
             }
+            
+            predecessorTaskName = currentTaskName;
         }
     }
 
