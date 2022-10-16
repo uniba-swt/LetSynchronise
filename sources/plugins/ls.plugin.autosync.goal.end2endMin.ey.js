@@ -25,7 +25,7 @@ class PluginAutoSyncGoalEnd2EndMinEy {
         }
                 
         // Run iterative optimisation heuristic.
-        await this.Algorithm(tasks, graph.nodesDescendingGlobalPriorities, scheduler);
+        await this.Algorithm(tasks, graph, scheduler);
 
         const taskElementSelected = ['tasks'];
         return PluginAutoSync.DatabaseContentsDelete(taskElementSelected)
@@ -146,7 +146,106 @@ class PluginAutoSyncGoalEnd2EndMinEy {
     // min and max bounds of their LET intervals. The algorithm does not take communication
     // dependencies into account when determining the LET start times, which would produce
     // more optimal results.
-    static async Algorithm(tasks, tasksDescendingPriority, scheduler) {
+    static async Algorithm(tasks, taskDependencyGraph, scheduler) {
+        // Scheduling parameters
+        const initialOffsets = tasks.map(taskParameters => taskParameters.initialOffset).flat();
+        const periods = tasks.map(taskParameters => taskParameters.period).flat();
+        const prologue = Utility.MaxOfArray(initialOffsets);
+        const hyperPeriod = Utility.LeastCommonMultipleOfArray(periods);
+        const makespan = prologue + hyperPeriod;
+        const executionTiming = 'WCET';
+        
+        const tasksDescendingPriority = taskDependencyGraph.nodesDescendingGlobalPriorities;
+        
+        let currentTaskSet = new Set();
+        let firstTaskInstanceOfInterest = { };
+        for (const currentTaskName of tasksDescendingPriority) {
+            // Delete the existing task schedule.
+            await PluginAutoSync.DeleteSchedule();
+            
+            // Expand the current task's LET interval to span its entire period,
+            // and remove the initial offset.
+            let currentTask = tasks.find(task => (task.name == currentTaskName));
+            currentTask.initialOffset = 0;
+            currentTask.activationOffset = 0;
+            currentTask.duration = currentTask.period;
+            
+            // Add the currentTask into the task set to schedule.
+            currentTaskSet.add(currentTask);
+
+            // Schedule the current task set.
+            for (const task of currentTaskSet) {
+                await PluginAutoSync.CreateTaskInstances(task, makespan, executionTiming);
+            }
+            let schedule = await PluginAutoSync.GetSchedule();
+            let allTasksInstances = await schedule['promiseAllTasksInstances'];
+            await scheduler.Algorithm(makespan, allTasksInstances);
+            
+            // Get the currentTask's instances.
+            const currentTaskInstances = allTasksInstances.find(task => (task.name == currentTaskName));
+            if (currentTaskInstances.value.length == 0) {
+                console.warn(`No task instances available for ${currentTaskName} to compute its LET bounds!`);
+                continue;
+            }
+            
+            // Get the currentTask's precessors.
+            const predecessorTasks = taskDependencyGraph.getSourceNodes(currentTaskName);
+
+            // Analyse the currentTask parameters.
+            if (predecessorTasks.length == 0) {
+                // No predecessors so just contract the currentTask's LET interval to the execution intervals
+                // of its initial instance.
+                let letBound = { 'min': currentTask.period, 'max': 0 };
+                const firstTaskInstance = currentTaskInstances.value[0];
+                for (const executionInterval of firstTaskInstance.executionIntervals) {
+                    letBound.min = Math.min(letBound.min, executionInterval.startTime - firstTaskInstance.periodStartTime);
+                    letBound.max = Math.max(letBound.max, executionInterval.endTime - firstTaskInstance.periodStartTime);
+                }
+                currentTask.activationOffset = letBound.min;
+                currentTask.duration = letBound.max - letBound.min;
+                
+                // Save the details of the first task instance.
+                const firstPeriodStartTime = firstTaskInstance.periodStartTime;
+                const firstPeriodEndTime = firstTaskInstance.periodEndTime;
+                firstTaskInstanceOfInterest[currentTaskName] = {
+                    'letStartTime': firstPeriodStartTime + currentTask.activationOffset,
+                    'letEndTime': firstPeriodStartTime + currentTask.activationOffset + currentTask.duration
+                };
+            } else {
+                // Get the latest LET end of the predecessors.
+                const maxPredecessorLetEndTime = predecessorTasks.reduce((left, right) => Math.max(left, firstTaskInstanceOfInterest[right].letEndTime), 0);
+            
+                // Find the earliest instance of currentTask that can complete its computations after maxPredecessorLetEndTime.
+                // 1. Shift the currentTask's LET activation offset to the earliest possible time.
+                let letBound = { 'min': currentTask.period, 'max': 0 };
+                for (const instance of currentTaskInstances.value) {
+                    if (instance.periodStartTime <= maxPredecessorLetEndTime && maxPredecessorLetEndTime <= instance.periodEndTime) {
+                        if (maxPredecessorLetEndTime + currentTask.wcet <= instance.periodEndTime) {
+                            currentTask.activationOffset = maxPredecessorLetEndTime - instance.periodStartTime;
+                        } else  {
+                            currentTask.activationOffset = 0;
+                        }
+                        currentTask.duration = currentTask.period - currentTask.activationOffset;
+                        
+                        firstTaskInstanceOfInterest[currentTaskName] = {
+                            'letStartTime': instance.periodStartTime + currentTask.activationOffset,
+                            'letEndTime': instance.periodStartTime + currentTask.duration
+                        };
+                        
+                        break;
+                    }
+                }
+                
+                // 2. Reschedule to determine the earliest LET end time.
+                schedule = await PluginAutoSync.GetSchedule();
+                allTasksInstances = await schedule['promiseAllTasksInstances'];
+                await scheduler.Algorithm(makespan, allTasksInstances);
+            }
+
+        }
+    }
+
+    static async AlgorithmOld(tasks, tasksDescendingPriority, scheduler) {
         // Scheduling parameters
         const initialOffsets = tasks.map(taskParameters => taskParameters.initialOffset).flat();
         const periods = tasks.map(taskParameters => taskParameters.period).flat();
@@ -195,6 +294,7 @@ class PluginAutoSyncGoalEnd2EndMinEy {
             currentTask.duration = letBound.max - letBound.min;
         }
     }
+
 }
 
 PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix = class {
