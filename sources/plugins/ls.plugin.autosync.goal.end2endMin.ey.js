@@ -102,6 +102,7 @@ class PluginAutoSyncGoalEnd2EndMinEy {
         //   t2 --> t3 --> t4 --> t6
         //
         // Adjacency matrix TDG[row][col]:
+        //
         //              Source task (col)
         //            | t1 t2 t3 t4 t5 t6
         //         ---+-------------------
@@ -117,7 +118,7 @@ class PluginAutoSyncGoalEnd2EndMinEy {
         // common task. We can also see that t4 has two
         // outgoing edges (to t5 and t6).
         //
-        let graph = new PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix(tasksRequired);
+        let graph = new this.AdjacencyMatrix(tasksRequired);
         taskDependencies.forEach(dependency => graph.setDirectedEdge(dependency[0], dependency[1]));
         
         // Check that the task dependency graph is acyclic.
@@ -278,12 +279,12 @@ PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix = class {
     
     getRootSourceNodes(targetNode) {
         let rootSourceNodes = new Set();
-
         const sourceNodes = this.getSourceNodes(targetNode);
-        if (sourceNodes.length == 0) {
+        const sourceNodesWithoutGlobalPriority = sourceNodes.filter(node => (this.getNodeGlobalPriority(node) == null));
+        if (sourceNodesWithoutGlobalPriority.length == 0) {
             rootSourceNodes.add(targetNode);
         } else {
-            for (const sourceNode of sourceNodes) {
+            for (const sourceNode of sourceNodesWithoutGlobalPriority) {
                 rootSourceNodes = new Set([...rootSourceNodes, ...this.getRootSourceNodes(sourceNode)]);
             }
         }
@@ -354,7 +355,9 @@ PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix = class {
     }
     
     // Depth-first traversal with backtracking to assign global priorities to nodes,
-    // based on the nodes' local priorities.
+    // based on node local priorities. Priority of a shared node is always lower than
+    // the priorities of its predecessors.
+    // FIXME: However, this approach suffers from the well-known priority inversion problem.
     computeGlobalTaskPriorities() {
         let currentPriority = { val: this.priorities.size };    // Primitives are passed as values into functions.
         const startNodesDescendingPriority = this.sortNodeList(this.startNodes, this.compareDescendingLocalPriority);
@@ -389,5 +392,232 @@ PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix = class {
         const sources = Array.from(this.sources.entries()).map(entry => `${entry[0]}:${entry[1]}`);
         const targets = Array.from(this.targets.entries()).map(entry => `${entry[0]}:${entry[1]}`);
         return [`Sources: ${sources.join(', ')}`, `Targets: ${targets.join(', ')}`, this.matrix.join('\n')].join('\n');
+    }
+}
+
+class PluginAutoSyncGoalEnd2EndMinEyTest {
+    static Run() {
+        this.Test1();
+        this.Test2();
+        this.Test3();
+        this.Test4();
+    }
+
+    // Example event chains:
+    //   Priority 3: t1 ---> t2 ---> t3 --> t4 --> t5 --> t6
+    //   Priority 1: t1 ---> t7 ---> t8 --> t9 --> t5 --> t6
+    //   Priority 2: t10 --> t11 --> t8
+    //
+    // Adjacency matrix TDG[row][col]:
+    //
+    //                 Source task (col)
+    //            | t1 t2 t3 t4 t5 t6 t7 t8 t9 t10 t11
+    //         ---+-----------------------------------
+    // Target  t1 |
+    // task    t2 | X
+    // (row)   t3 |    X
+    //         t4 |       X
+    //         t5 |          X              X
+    //         t6 |             X
+    //         t7 | X
+    //         t8 |                   X            X
+    //         t9 |                      X
+    //        t10 |
+    //        t11 |                            X
+    //
+    //
+    // Global task priority:
+    //   t1 > t2 > t3 > t4 > t10 > t11 > t7 > t8 > t9 > t5 > t6
+    //
+    static Test1() {
+        const tasksRequiredTest = new Set(['t1', 't2', 't3', 't4', 't5', 't6', 't7', 't8', 't9', 't10', 't11']);
+        let graphTest = new PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix(tasksRequiredTest);
+        
+        const taskDependenciesTest = [
+            ['t1', 't2'], ['t2', 't3'], ['t3', 't4'], ['t4', 't5'], ['t5', 't6'],
+            ['t1', 't7'], ['t7', 't8'], ['t8', 't9'], ['t9', 't5'],
+            ['t10', 't11'], ['t11', 't8']
+        ];
+        taskDependenciesTest.forEach(dependency => graphTest.setDirectedEdge(dependency[0], dependency[1]));
+        console.log(graphTest.toString());
+        
+        const graphCycle = graphTest.cycle;
+        if (graphCycle.length > 0) {
+            console.error(`Test1: Aborting because a task dependency cycle was detected! \n\n${graphCycle.join(' → ')}`)
+            return;
+        }
+
+        ['t1', 't2', 't3', 't4', 't5', 't6'].forEach(task => graphTest.updateNodeLocalPriorityMax(task, 3));
+        ['t1', 't7', 't8', 't9', 't5', 't6'].forEach(task => graphTest.updateNodeLocalPriorityMax(task, 1));
+        ['t10', 't11', 't8'].forEach(task => graphTest.updateNodeLocalPriorityMax(task, 2));
+        graphTest.computeGlobalTaskPriorities();
+        console.log(graphTest.nodesDescendingGlobalPriorities);
+
+        const expectedGlobalPriorities = ['t1', 't2', 't3', 't4', 't10', 't11', 't7', 't8', 't9', 't5', 't6'];
+        const isCorrect = graphTest.nodesDescendingGlobalPriorities.length === expectedGlobalPriorities.length
+                          && graphTest.nodesDescendingGlobalPriorities.every((value, index) => value === expectedGlobalPriorities[index]);
+        console.assert(isCorrect, 'Computed global task priorities are incorrect!');
+        
+        return;
+    }
+
+    // Example event chains:
+    //   Priority 1: t1 ---> t2 ---> t3 --> t4 --> t5 --> t6
+    //   Priority 2: t1 ---> t7 ---> t8 --> t9 --> t5 --> t6
+    //   Priority 3: t10 --> t11 --> t8
+    //
+    // Adjacency matrix TDG[row][col]:
+    //
+    //                      Source task (col)
+    //            | t1 t2 t3 t4 t5 t6 t7 t8 t9 t10 t11
+    //         ---+------------------------------------
+    // Target  t1 |
+    // task    t2 | X
+    // (row)   t3 |    X
+    //         t4 |       X
+    //         t5 |          X              X
+    //         t6 |             X
+    //         t7 | X
+    //         t8 |                   X            X
+    //         t9 |                      X
+    //        t10 |
+    //        t11 |                            X
+    //
+    //
+    // Global task priority:
+    //   t1 > t2 > t3 > t4 > t10 > t11 > t7 > t8 > t9 > t5 > t6
+    //
+    static Test2() {
+        const tasksRequiredTest = new Set(['t1', 't2', 't3', 't4', 't5', 't6', 't7', 't8', 't9', 't10', 't11']);
+        let graphTest = new PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix(tasksRequiredTest);
+        
+        const taskDependenciesTest = [
+            ['t1', 't2'], ['t2', 't3'], ['t3', 't4'], ['t4', 't5'], ['t5', 't6'],
+            ['t1', 't7'], ['t7', 't8'], ['t8', 't9'], ['t9', 't5'],
+            ['t10', 't11'], ['t11', 't8']
+        ];
+        taskDependenciesTest.forEach(dependency => graphTest.setDirectedEdge(dependency[0], dependency[1]));
+        console.log(graphTest.toString());
+        
+        const graphCycle = graphTest.cycle;
+        if (graphCycle.length > 0) {
+            console.error(`Test1: Aborting because a task dependency cycle was detected! \n\n${graphCycle.join(' → ')}`)
+            return;
+        }
+
+        ['t1', 't2', 't3', 't4', 't5', 't6'].forEach(task => graphTest.updateNodeLocalPriorityMax(task, 1));
+        ['t1', 't7', 't8', 't9', 't5', 't6'].forEach(task => graphTest.updateNodeLocalPriorityMax(task, 2));
+        ['t10', 't11', 't8'].forEach(task => graphTest.updateNodeLocalPriorityMax(task, 3));
+        graphTest.computeGlobalTaskPriorities();
+        console.log(graphTest.nodesDescendingGlobalPriorities);
+
+        const expectedGlobalPriorities = ['t10', 't11', 't1', 't7', 't8', 't9', 't2', 't3', 't4', 't5', 't6'];
+        const isCorrect = graphTest.nodesDescendingGlobalPriorities.length === expectedGlobalPriorities.length
+                          && graphTest.nodesDescendingGlobalPriorities.every((value, index) => value === expectedGlobalPriorities[index]);
+        console.assert(isCorrect, 'Computed global task priorities are incorrect!');
+        
+        return;
+    }
+
+    // Example event chains:
+    //   Priority 2: t1 --> t2 --> t3 --> t4 --> t5
+    //   Priority 1: t6 --> t2 --> t7 --> t4 --> t8
+    //
+    // Adjacency matrix TDG[row][col]:
+    //
+    //                 Source task (col)
+    //            | t1 t2 t3 t4 t5 t6 t7 t8
+    //         ---+-------------------------
+    // Target  t1 |
+    // task    t2 | X              X
+    // (row)   t3 |    X
+    //         t4 |       X           X
+    //         t5 |          X
+    //         t6 |
+    //         t7 |    X
+    //         t8 |          X
+    //
+    //
+    // Global task priority:
+    //   t1 > t6 > t2 > t3 > t7 > t4 > t5 > t8
+    //
+    static Test3() {
+        const tasksRequiredTest = new Set(['t1', 't2', 't3', 't4', 't5', 't6', 't7', 't8']);
+        let graphTest = new PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix(tasksRequiredTest);
+        
+        const taskDependenciesTest = [
+            ['t1', 't2'], ['t2', 't3'], ['t3', 't4'], ['t4', 't5'],
+            ['t6', 't2'], ['t2', 't7'], ['t7', 't4'], ['t4', 't8']
+        ];
+        taskDependenciesTest.forEach(dependency => graphTest.setDirectedEdge(dependency[0], dependency[1]));
+        console.log(graphTest.toString());
+        
+        const graphCycle = graphTest.cycle;
+        if (graphCycle.length > 0) {
+            console.error(`Test1: Aborting because a task dependency cycle was detected! \n\n${graphCycle.join(' → ')}`)
+            return;
+        }
+
+        ['t1', 't2', 't3', 't4', 't5'].forEach(task => graphTest.updateNodeLocalPriorityMax(task, 2));
+        ['t6', 't2', 't7', 't4', 't8'].forEach(task => graphTest.updateNodeLocalPriorityMax(task, 1));
+        graphTest.computeGlobalTaskPriorities();
+        console.log(graphTest.nodesDescendingGlobalPriorities);
+
+        const expectedGlobalPriorities = ['t1', 't6', 't2', 't3', 't7', 't4', 't5', 't8'];
+        const isCorrect = graphTest.nodesDescendingGlobalPriorities.length === expectedGlobalPriorities.length
+                          && graphTest.nodesDescendingGlobalPriorities.every((value, index) => value === expectedGlobalPriorities[index]);
+        console.assert(isCorrect, 'Computed global task priorities are incorrect!');
+        
+        return;
+    }
+
+    // Example event chains:
+    //   Priority 2: t1 --> t2 --> t3
+    //   Priority 1: t4 --> t5 --> t6
+    //
+    // Adjacency matrix TDG[row][col]:
+    //
+    //              Source task (col)
+    //            | t1 t2 t3 t4 t5 t6
+    //         ---+-------------------
+    // Target  t1 |
+    // task    t2 | X
+    // (row)   t3 |    X
+    //         t4 |
+    //         t5 |          X
+    //         t6 |             X
+    //
+    //
+    // Global task priority:
+    //   t1 > t2 > t3 > t4 > t5 > t6
+    //
+    static Test4() {
+        const tasksRequiredTest = new Set(['t1', 't2', 't3', 't4', 't5', 't6']);
+        let graphTest = new PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix(tasksRequiredTest);
+        
+        const taskDependenciesTest = [
+            ['t1', 't2'], ['t2', 't3'],
+            ['t4', 't5'], ['t5', 't6']
+        ];
+        taskDependenciesTest.forEach(dependency => graphTest.setDirectedEdge(dependency[0], dependency[1]));
+        console.log(graphTest.toString());
+        
+        const graphCycle = graphTest.cycle;
+        if (graphCycle.length > 0) {
+            console.error(`Test1: Aborting because a task dependency cycle was detected! \n\n${graphCycle.join(' → ')}`)
+            return;
+        }
+
+        ['t1', 't2', 't3'].forEach(task => graphTest.updateNodeLocalPriorityMax(task, 2));
+        ['t4', 't5', 't6'].forEach(task => graphTest.updateNodeLocalPriorityMax(task, 1));
+        graphTest.computeGlobalTaskPriorities();
+        console.log(graphTest.nodesDescendingGlobalPriorities);
+
+        const expectedGlobalPriorities = ['t1', 't2', 't3', 't4', 't5', 't6'];
+        const isCorrect = graphTest.nodesDescendingGlobalPriorities.length === expectedGlobalPriorities.length
+                          && graphTest.nodesDescendingGlobalPriorities.every((value, index) => value === expectedGlobalPriorities[index]);
+        console.assert(isCorrect, 'Computed global task priorities are incorrect!');
+        
+        return;
     }
 }
