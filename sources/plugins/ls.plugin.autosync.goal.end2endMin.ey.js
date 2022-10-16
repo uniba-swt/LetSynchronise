@@ -182,7 +182,7 @@ class PluginAutoSyncGoalEnd2EndMinEy {
             await scheduler.Algorithm(makespan, allTasksInstances);
             
             // Get the currentTask's instances.
-            const currentTaskInstances = allTasksInstances.find(task => (task.name == currentTaskName));
+            let currentTaskInstances = allTasksInstances.find(task => (task.name == currentTaskName));
             if (currentTaskInstances.value.length == 0) {
                 console.warn(`No task instances available for ${currentTaskName} to compute its LET bounds!`);
                 continue;
@@ -228,8 +228,7 @@ class PluginAutoSyncGoalEnd2EndMinEy {
                         currentTask.duration = currentTask.period - currentTask.activationOffset;
                         
                         firstTaskInstanceOfInterest[currentTaskName] = {
-                            'letStartTime': instance.periodStartTime + currentTask.activationOffset,
-                            'letEndTime': instance.periodStartTime + currentTask.duration
+                            'letStartTime': instance.periodStartTime + currentTask.activationOffset
                         };
                         
                         break;
@@ -240,8 +239,25 @@ class PluginAutoSyncGoalEnd2EndMinEy {
                 schedule = await PluginAutoSync.GetSchedule();
                 allTasksInstances = await schedule['promiseAllTasksInstances'];
                 await scheduler.Algorithm(makespan, allTasksInstances);
+                
+                // Get the currentTask's instances again.
+                currentTaskInstances = allTasksInstances.find(task => (task.name == currentTaskName));
+                if (currentTaskInstances.value.length == 0) {
+                    console.error(`No task instances available for ${currentTaskName} to compute its LET bounds!`);
+                    return;
+                }
+                
+                let maxLetEndTime = 0;
+                for (const instance of currentTaskInstances.value) {
+                    for (const executionInterval of instance.executionIntervals) {
+                        maxLetEndTime = Math.max(maxLetEndTime, executionInterval.endTime - instance.periodStartTime);
+                    }
+                }
+                
+                currentTask.duration = maxLetEndTime - currentTask.activationOffset;
+                firstTaskInstanceOfInterest[currentTaskName]['letEndTime'] =
+                    firstTaskInstanceOfInterest[currentTaskName]['letStartTime'] + currentTask.duration;
             }
-
         }
     }
 
