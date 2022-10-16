@@ -242,6 +242,9 @@ class PluginAutoSyncGoalEnd2EndMinEy {
                 }
                 
                 // 2. Reschedule to determine the earliest LET end time.
+                for (const task of currentTaskSet) {
+                    await PluginAutoSync.CreateTaskInstances(task, makespan, executionTiming);
+                }
                 schedule = await PluginAutoSync.GetSchedule();
                 allTasksInstances = await schedule['promiseAllTasksInstances'];
                 await scheduler.Algorithm(allTasksInstances, makespan, tasks);
