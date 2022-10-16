@@ -19,14 +19,14 @@ class PluginAutoSyncSchedulerFp {
         const tasksInstances = await system[Model.TaskInstancesStoreName];
         const tasksParameters = await system[Model.TaskStoreName];
 
-        this.Algorithm(makespan, tasksInstances, tasksParameters);
+        this.Algorithm(tasksInstances, makespan, tasksParameters);
         
         return PluginAutoSync.DatabaseContentsDelete(systemElementSelected)
             .then(PluginAutoSync.DatabaseContentsSet(system, systemElementSelected));
     }
     
     // Preemptive fixed-priority.
-    static Algorithm(makespan, tasksInstances, tasksParameters) {
+    static Algorithm(tasksInstances, makespan, tasksParameters) {
         // Do nothing if the task set is empty.
         if (tasksInstances.length == 0) {
             return;

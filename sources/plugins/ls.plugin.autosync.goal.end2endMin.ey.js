@@ -17,6 +17,11 @@ class PluginAutoSyncGoalEnd2EndMinEy {
         const tasks = await system[Model.TaskStoreName];
         const eventChains = await system[Model.EventChainStoreName];
         const constraints = await system[Model.ConstraintStoreName];
+        
+        if (constraints.length == 0) {
+            alert('Aborting because no timing constraints have been defined!');
+            return;
+        }
                 
         // Create task dependency graph and assign task priorities for the heuristic.
         const graph = this.CreateTaskDependencyGraph(eventChains, constraints);
@@ -155,10 +160,10 @@ class PluginAutoSyncGoalEnd2EndMinEy {
         const makespan = prologue + hyperPeriod;
         const executionTiming = 'WCET';
         
-        const tasksDescendingPriority = taskDependencyGraph.nodesDescendingGlobalPriorities;
         
         let currentTaskSet = new Set();
         let firstTaskInstanceOfInterest = { };
+        const tasksDescendingPriority = taskDependencyGraph.nodesDescendingGlobalPriorities;
         for (const currentTaskName of tasksDescendingPriority) {
             // Delete the existing task schedule.
             await PluginAutoSync.DeleteSchedule();
@@ -169,6 +174,7 @@ class PluginAutoSyncGoalEnd2EndMinEy {
             currentTask.initialOffset = 0;
             currentTask.activationOffset = 0;
             currentTask.duration = currentTask.period;
+            currentTask.priority = taskDependencyGraph.getNodeGlobalPriority(currentTaskName);
             
             // Add the currentTask into the task set to schedule.
             currentTaskSet.add(currentTask);
@@ -179,7 +185,7 @@ class PluginAutoSyncGoalEnd2EndMinEy {
             }
             let schedule = await PluginAutoSync.GetSchedule();
             let allTasksInstances = await schedule['promiseAllTasksInstances'];
-            await scheduler.Algorithm(makespan, allTasksInstances);
+            await scheduler.Algorithm(allTasksInstances, makespan, tasks);
             
             // Get the currentTask's instances.
             let currentTaskInstances = allTasksInstances.find(task => (task.name == currentTaskName));
@@ -238,7 +244,7 @@ class PluginAutoSyncGoalEnd2EndMinEy {
                 // 2. Reschedule to determine the earliest LET end time.
                 schedule = await PluginAutoSync.GetSchedule();
                 allTasksInstances = await schedule['promiseAllTasksInstances'];
-                await scheduler.Algorithm(makespan, allTasksInstances);
+                await scheduler.Algorithm(allTasksInstances, makespan, tasks);
                 
                 // Get the currentTask's instances again.
                 currentTaskInstances = allTasksInstances.find(task => (task.name == currentTaskName));
@@ -289,7 +295,7 @@ class PluginAutoSyncGoalEnd2EndMinEy {
             }
             const schedule = await PluginAutoSync.GetSchedule();
             const allTasksInstances = await schedule['promiseAllTasksInstances'];
-            await scheduler.Algorithm(makespan, allTasksInstances);
+            await scheduler.Algorithm(allTasksInstances, makespan, tasks);
             
             // Analyse the currentTask parameters.
             // FIXME: LET min/max bounds are incorrect when the task instance has zero execution time.

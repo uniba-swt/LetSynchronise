@@ -18,14 +18,14 @@ class PluginAutoSyncSchedulerRm {
         const schedule = await PluginAutoSync.DatabaseContentsGet(scheduleElementSelected);
         const tasks = await schedule[Model.TaskInstancesStoreName];
 
-        this.Algorithm(makespan, tasks);
+        this.Algorithm(tasks, makespan);
         
         return PluginAutoSync.DatabaseContentsDelete(scheduleElementSelected)
             .then(PluginAutoSync.DatabaseContentsSet(schedule, scheduleElementSelected));
     }
     
     // Preemptive rate-monotonic.
-    static Algorithm(makespan, tasks) {
+    static Algorithm(tasks, makespan) {
         // Do nothing if the task set is empty.
         if (tasks.length == 0) {
             return;
