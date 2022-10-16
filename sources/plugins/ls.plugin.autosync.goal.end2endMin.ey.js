@@ -8,6 +8,8 @@ class PluginAutoSyncGoalEnd2EndMinEy {
 
     
     // Updates the task parameters to miminise end-to-end reponse times.
+    // Iteratively schedules the tasks based on timing constraint priorities,
+    // and contracts the LET intervals based on min/max execution intervals.
     static async Result(scheduler) {
         // Retrieve the LET system.
         const systemElementSelected = ['tasks', 'eventChains', 'constraints'];
@@ -140,7 +142,10 @@ class PluginAutoSyncGoalEnd2EndMinEy {
         return graph;
     }
 
-    // Each parameter is a copy of a reference to an object.
+    // Iteratively schedules each task from highest to lowest priority to determine the
+    // min and max bounds of their LET intervals. The algorithm does not take communication
+    // dependencies into account when determining the LET start times, which would produce
+    // more optimal results.
     static async Algorithm(tasks, tasksDescendingPriority, scheduler) {
         // Scheduling parameters
         const initialOffsets = tasks.map(taskParameters => taskParameters.initialOffset).flat();
