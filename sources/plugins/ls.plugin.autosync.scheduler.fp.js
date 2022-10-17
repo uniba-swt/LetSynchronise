@@ -33,8 +33,7 @@ class PluginAutoSyncSchedulerFp {
     static Algorithm(tasksInstances, makespan, tasksParameters) {
         // Do nothing if the task set is empty.
         if (tasksInstances.length == 0) {
-            const message = 'No tasks to schedule';
-            return { 'schedulable': true, 'message': message };
+            return { 'schedulable': true, 'message': 'No tasks to schedule' };
         }
 
         // Track how far we are into the schedule.
@@ -167,6 +166,8 @@ class PluginAutoSyncSchedulerFp {
                 break;
             }
         }
+
+        return { 'schedulable': true, 'message': 'Scheduling finished' };
     }
     
     static RemainingExecutionTime(taskInstance) {

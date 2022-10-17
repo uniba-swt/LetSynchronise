@@ -2,7 +2,7 @@
 
 class PluginAutoSyncSchedulerRandom {
     // Plug-in Metadata
-    static get Name()     { return 'Randomise Task Scheduling'; }
+    static get Name()     { return 'Random Task Scheduling'; }
     static get Author()   { return 'Eugene Yip'; }
     static get Category() { return PluginAutoSync.Category.Scheduler; }
 
@@ -32,8 +32,7 @@ class PluginAutoSyncSchedulerRandom {
     static Algorithm(tasks) {
         // Do nothing if the task set is empty.
         if (tasks.length == 0) {
-            const message = 'No tasks to schedule';
-            return { 'schedulable': true, 'message': message };
+            return { 'schedulable': true, 'message': 'No tasks to schedule' };
         }
     
         // Track how far we are into the schedule.
@@ -89,6 +88,8 @@ class PluginAutoSyncSchedulerRandom {
                 break;
             }
         }
+
+        return { 'schedulable': true, 'message': 'Scheduling finished' };
     }
     
 }

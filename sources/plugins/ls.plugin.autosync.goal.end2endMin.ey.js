@@ -184,7 +184,11 @@ class PluginAutoSyncGoalEnd2EndMinEy {
             }
             let schedule = await PluginAutoSync.GetSchedule();
             let allTasksInstances = await schedule['promiseAllTasksInstances'];
-            await scheduler.Algorithm(allTasksInstances, makespan, tasks);
+            let schedulingResult = await scheduler.Algorithm(allTasksInstances, makespan, tasks);
+            if (schedulingResult != null && !schedulingResult.schedulable) {
+                alert('Tasks are unschedulable even when their LET durations span their periods!');
+                return false;
+            }
             
             // Get the currentTask's instances.
             let currentTaskInstances = allTasksInstances.find(task => (task.name == currentTaskName));
@@ -213,6 +217,7 @@ class PluginAutoSyncGoalEnd2EndMinEy {
                 const firstPeriodStartTime = firstTaskInstance.periodStartTime;
                 const firstPeriodEndTime = firstTaskInstance.periodEndTime;
                 firstTaskInstanceOfInterest[currentTaskName] = {
+                    'periodStartTime': firstPeriodStartTime,
                     'letStartTime': firstPeriodStartTime + currentTask.activationOffset,
                     'letEndTime': firstPeriodStartTime + currentTask.activationOffset + currentTask.duration
                 };
@@ -233,6 +238,7 @@ class PluginAutoSyncGoalEnd2EndMinEy {
                         currentTask.duration = currentTask.period - currentTask.activationOffset;
                         
                         firstTaskInstanceOfInterest[currentTaskName] = {
+                            'periodStartTime': instance.periodStartTime,
                             'letStartTime': instance.periodStartTime + currentTask.activationOffset
                         };
                         
@@ -246,7 +252,21 @@ class PluginAutoSyncGoalEnd2EndMinEy {
                 }
                 schedule = await PluginAutoSync.GetSchedule();
                 allTasksInstances = await schedule['promiseAllTasksInstances'];
-                await scheduler.Algorithm(allTasksInstances, makespan, tasks);
+                schedulingResult = await scheduler.Algorithm(allTasksInstances, makespan, tasks);
+                if (schedulingResult != null && !schedulingResult.schedulable) {
+                    // There is not enough time at the end of the currentTask's period to complete its computations.
+                    // Try scheduling task's instance over its next period instead.
+                    currentTask.activationOffset = 0;
+                    currentTask.duration = currentTask.period;
+                    firstTaskInstanceOfInterest[currentTaskName]['letStartTime'] = firstTaskInstanceOfInterest[currentTaskName]['periodStartTime'] + currentTask.period;
+
+                    for (const task of currentTaskSet) {
+                        await PluginAutoSync.CreateTaskInstances(task, makespan, executionTiming);
+                    }
+                    schedule = await PluginAutoSync.GetSchedule();
+                    allTasksInstances = await schedule['promiseAllTasksInstances'];
+                    schedulingResult = await scheduler.Algorithm(allTasksInstances, makespan, tasks);
+                }
                 
                 // Get the currentTask's instances again.
                 currentTaskInstances = allTasksInstances.find(task => (task.name == currentTaskName));
@@ -272,7 +292,11 @@ class PluginAutoSyncGoalEnd2EndMinEy {
                 }
                 schedule = await PluginAutoSync.GetSchedule();
                 allTasksInstances = await schedule['promiseAllTasksInstances'];
-                await scheduler.Algorithm(allTasksInstances, makespan, tasks);
+                schedulingResult = await scheduler.Algorithm(allTasksInstances, makespan, tasks);
+                if (schedulingResult != null && !schedulingResult.schedulable) {
+                    alert(schedulingResult.message);
+                    return false;
+                }
                 
                 // Get the currentTask's instances again.
                 currentTaskInstances = allTasksInstances.find(task => (task.name == currentTaskName));

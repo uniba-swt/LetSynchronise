@@ -32,8 +32,7 @@ class PluginAutoSyncSchedulerRm {
     static Algorithm(tasks, makespan) {
         // Do nothing if the task set is empty.
         if (tasks.length == 0) {
-            const message = 'No tasks to schedule';
-            return { 'schedulable': true, 'message': message };
+            return { 'schedulable': true, 'message': 'No tasks to schedule' };
         }
 
         // Track how far we are into the schedule.
@@ -165,6 +164,8 @@ class PluginAutoSyncSchedulerRm {
                 break;
             }
         }
+
+        return { 'schedulable': true, 'message': 'Scheduling finished' };
     }
     
     static RemainingExecutionTime(taskInstance) {
