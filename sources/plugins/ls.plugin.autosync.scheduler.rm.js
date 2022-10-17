@@ -18,7 +18,11 @@ class PluginAutoSyncSchedulerRm {
         const schedule = await PluginAutoSync.DatabaseContentsGet(scheduleElementSelected);
         const tasks = await schedule[Model.TaskInstancesStoreName];
 
-        this.Algorithm(tasks, makespan);
+        const result = this.Algorithm(tasks, makespan);
+        if (!result.schedulable) {
+            alert(result.message);
+            return;
+        }
         
         return PluginAutoSync.DatabaseContentsDelete(scheduleElementSelected)
             .then(PluginAutoSync.DatabaseContentsSet(schedule, scheduleElementSelected));
@@ -28,7 +32,7 @@ class PluginAutoSyncSchedulerRm {
     static Algorithm(tasks, makespan) {
         // Do nothing if the task set is empty.
         if (tasks.length == 0) {
-            return;
+            return { 'schedulable': true, 'message': 'No tasks to schedule' };
         }
 
         // Track how far we are into the schedule.
@@ -139,8 +143,8 @@ class PluginAutoSyncSchedulerRm {
             // Create an execution interval for the chosen task instance.
             const executionTimeEnd = currentTime + this.RemainingExecutionTime(chosenTask.instance);
             if (executionTimeEnd > chosenTask.instance.letEndTime) {
-                alert(`Could not schedule enough time for task ${tasks[chosenTask.number].name}, instance ${chosenTask.instance.instance}!`);
-                return;
+                const message = `Could not schedule enough time for task ${tasks[chosenTask.number].name}, instance ${chosenTask.instance.instance}!`;
+                return { 'schedulable': false, 'message': message };
             }
             if (executionTimeEnd <= nextPreemptionTime) {
                 const executionInterval = new Utility.Interval(currentTime, executionTimeEnd);
@@ -160,6 +164,8 @@ class PluginAutoSyncSchedulerRm {
                 break;
             }
         }
+
+        return { 'schedulable': true, 'message': 'Scheduling finished' };
     }
     
     static RemainingExecutionTime(taskInstance) {

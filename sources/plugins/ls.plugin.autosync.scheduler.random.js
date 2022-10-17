@@ -2,7 +2,7 @@
 
 class PluginAutoSyncSchedulerRandom {
     // Plug-in Metadata
-    static get Name()     { return 'Randomise Task Scheduling'; }
+    static get Name()     { return 'Random Task Scheduling'; }
     static get Author()   { return 'Eugene Yip'; }
     static get Category() { return PluginAutoSync.Category.Scheduler; }
 
@@ -18,7 +18,11 @@ class PluginAutoSyncSchedulerRandom {
         const schedule = await PluginAutoSync.DatabaseContentsGet(scheduleElementSelected);
         const tasks = await schedule[Model.TaskInstancesStoreName];
 
-        this.Algorithm(tasks);
+        const result = this.Algorithm(tasks);
+        if (!result.schedulable) {
+            alert(result.message);
+            return;
+        }
         
         return PluginAutoSync.DatabaseContentsDelete(scheduleElementSelected)
             .then(PluginAutoSync.DatabaseContentsSet(schedule, scheduleElementSelected));
@@ -28,7 +32,7 @@ class PluginAutoSyncSchedulerRandom {
     static Algorithm(tasks) {
         // Do nothing if the task set is empty.
         if (tasks.length == 0) {
-            return;
+            return { 'schedulable': true, 'message': 'No tasks to schedule' };
         }
     
         // Track how far we are into the schedule.
@@ -62,8 +66,8 @@ class PluginAutoSyncSchedulerRandom {
             // Make sure the chosen task instance finishes its execution in its LET.
             const nextTime = currentTime + chosenTask.instance.executionTime;
             if (nextTime > chosenTask.instance.letEndTime) {
-                alert(`Could not schedule enough time for task ${tasks[chosenTask.number].name}, instance ${taskInstanceIndices[chosenTask.number]}!`);
-                return;
+                const message = `Could not schedule enough time for task ${tasks[chosenTask.number].name}, instance ${chosenTask.instance.instance}!`;
+                return { 'schedulable': false, 'message': message };
             }
             
             // Create the execution interval for the chosen task instance.
@@ -84,6 +88,8 @@ class PluginAutoSyncSchedulerRandom {
                 break;
             }
         }
+
+        return { 'schedulable': true, 'message': 'Scheduling finished' };
     }
     
 }

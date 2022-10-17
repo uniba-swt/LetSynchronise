@@ -19,7 +19,11 @@ class PluginAutoSyncSchedulerFp {
         const tasksInstances = await system[Model.TaskInstancesStoreName];
         const tasksParameters = await system[Model.TaskStoreName];
 
-        this.Algorithm(tasksInstances, makespan, tasksParameters);
+        const result = this.Algorithm(tasksInstances, makespan, tasksParameters);
+        if (!result.schedulable) {
+            alert(result.message);
+            return;
+        }
         
         return PluginAutoSync.DatabaseContentsDelete(systemElementSelected)
             .then(PluginAutoSync.DatabaseContentsSet(system, systemElementSelected));
@@ -29,7 +33,7 @@ class PluginAutoSyncSchedulerFp {
     static Algorithm(tasksInstances, makespan, tasksParameters) {
         // Do nothing if the task set is empty.
         if (tasksInstances.length == 0) {
-            return;
+            return { 'schedulable': true, 'message': 'No tasks to schedule' };
         }
 
         // Track how far we are into the schedule.
@@ -141,8 +145,8 @@ class PluginAutoSyncSchedulerFp {
             // Create an execution interval for the chosen task instance.
             const executionTimeEnd = currentTime + this.RemainingExecutionTime(chosenTask.instance);
             if (executionTimeEnd > chosenTask.instance.letEndTime) {
-                alert(`Could not schedule enough time for task ${tasksInstances[chosenTask.number].name}, instance ${chosenTask.instance.instance}!`);
-                return;
+                const message = `Could not schedule enough time for task ${tasksInstances[chosenTask.number].name}, instance ${chosenTask.instance.instance}!`;
+                return { 'schedulable': false, 'message': message };
             }
             if (executionTimeEnd <= nextPreemptionTime) {
                 const executionInterval = new Utility.Interval(currentTime, executionTimeEnd);
@@ -162,6 +166,8 @@ class PluginAutoSyncSchedulerFp {
                 break;
             }
         }
+
+        return { 'schedulable': true, 'message': 'Scheduling finished' };
     }
     
     static RemainingExecutionTime(taskInstance) {
