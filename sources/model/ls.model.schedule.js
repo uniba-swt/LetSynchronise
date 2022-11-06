@@ -46,7 +46,7 @@ class ModelSchedule {
         } else if (executionTiming === 'WCET') {
             executionTime = parameters.wcet;
         } else {
-            executionTime = Utility.Random(parameters.bcet, parameters.acet, parameters.wcet, parameters.distribution);
+            executionTime = Utility.RandomInteger(parameters.bcet, parameters.acet, parameters.wcet, parameters.distribution);
         }
         
         return {
@@ -85,7 +85,7 @@ class ModelSchedule {
     // Create a single dependency instance.
     createDependencyInstance(dependency, sourceIndex, sourceInstance, destinationIndex, destinationInstance) {
         return {
-            'instance'    : -1,
+            'instance': -1,
             'receiveEvent': {
                 'task': dependency.destination.task,
                 'port': dependency.destination.port,

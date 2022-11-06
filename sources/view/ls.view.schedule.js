@@ -133,7 +133,7 @@ class ViewSchedule {
     
     get schedulingParametersClean() {
         return {
-            'makespan': parseFloat(this.makespan),
+            'makespan': Math.abs(parseFloat(this.makespan)) * Utility.MsToNs,
             'scheduler': this.pluginScheduler,
             'executionTiming': this.executionTiming
         };
@@ -229,13 +229,18 @@ class ViewSchedule {
     
     
     validateSchedulingParameters(schedulingParameters) {
-        if (schedulingParameters.makespan == null || isNaN(schedulingParameters.makespan)) {
+        if (schedulingParameters.makespan == null || schedulingParameters.makespan.trim() == '' || isNaN(schedulingParameters.makespan)) {
             alert('Makespan has to be a decimal number.');
             return false;
         }
         const makespan = parseFloat(schedulingParameters.makespan);
         if (makespan <= 0) {
             alert('Makespan must be greater than zero.');
+            return false;
+        }
+        const makespanNs = makespan * Utility.MsToNs;
+        if (!Number.isSafeInteger(makespanNs)) {
+            alert('Makespan is unable to be represented with nanosecond precision.');
             return false;
         }
         
@@ -295,19 +300,19 @@ class ViewSchedule {
     
     updatePrologue(taskParametersSet) {
         const initialOffsets = taskParametersSet.map(taskParameters => taskParameters.initialOffset).flat();
-        this.prologue = Utility.MaxOfArray(initialOffsets);
+        this.prologue = Utility.MaxOfArray(initialOffsets) / Utility.MsToNs;
     }
     
     updateHyperPeriod(taskParametersSet) {
         const periods = taskParametersSet.map(taskParameters => taskParameters.period).flat();
-        this.hyperPeriod = Utility.LeastCommonMultipleOfArray(periods);
+        this.hyperPeriod = Utility.LeastCommonMultipleOfArray(periods) / Utility.MsToNs;
     }
     
     drawSchedule(tasksInstances) {
         // Create function to scale the data along the x-axis of fixed-length
         const scale =
         d3.scaleLinear()
-          .domain([0, this.makespan])
+          .domain([0, this.makespan * Utility.MsToNs])
           .range([0, View.Width - 2 * View.SvgPadding]);
 
         // Delete the existing task previews, if they exist and set up the canvas.
@@ -357,7 +362,7 @@ class ViewSchedule {
         }
         
         const firstPeriodStartTime = instances[0].periodStartTime;
-        const lastPeriodDuration = instances[instances.length -1].periodEndTime - instances[instances.length -1].periodStartTime;
+        const lastPeriodDuration = instances[instances.length - 1].periodEndTime - instances[instances.length - 1].periodStartTime;
 
         // Add horizontal line for the task's initial offset
         graphInfo.append('line')
@@ -378,7 +383,7 @@ class ViewSchedule {
         // Add horizontal line for the task's periods
         graphInfo.append('line')
                    .attr('x1', scale(firstPeriodStartTime))
-                   .attr('x2', scale(this.makespan + lastPeriodDuration))
+                   .attr('x2', scale(this.makespan * Utility.MsToNs + lastPeriodDuration))
                    .attr('y1', View.BarHeight + View.BarMargin)
                    .attr('y2', View.BarHeight + View.BarMargin)
                    .attr('class', 'period');
@@ -391,7 +396,7 @@ class ViewSchedule {
                        .attr('width', scale(instance.letEndTime - instance.letStartTime))
                        .attr('height', View.BarHeight)
                       .on('mouseover', function() {
-                        tooltip.innerHTML = `${taskInstances.name} instance ${instance.instance} <br/> Execution time: ${Utility.FormatTimeString(instance.executionTime, 2)}`;
+                        tooltip.innerHTML = `${taskInstances.name} instance ${instance.instance} <br/> Execution time: ${Utility.FormatTimeString(instance.executionTime / Utility.MsToNs, 2)}ms`;
                         tooltip.style.visibility = 'visible';
                       })
                       .on('mousemove', (event) => {
@@ -423,7 +428,10 @@ class ViewSchedule {
         }
         
         // Create x-axis with correct scale.
-        const xAxis = d3.axisBottom().scale(scale);
+        const xAxis =
+        d3.axisBottom()
+          .scale(scale)
+          .tickFormat(d => d / Utility.MsToNs);
         
         graphInfo.append('g')
                  .attr('transform', `translate(0, ${View.BarHeight + 2 * View.TickHeight})`)
@@ -546,7 +554,7 @@ class ViewSchedule {
                     .attr('transform', `translate(${View.SvgPadding}, ${View.SvgPadding})`)
                     .attr('class', 'dependency dependencyVisible')
                   .on('mouseover', function() {
-                    tooltip.innerHTML = `${dependencyName} instance ${dependency.instance}:<br/>${sendPortName} &rarr; ${receivePortName}`;
+                    tooltip.innerHTML = `${dependencyName} instance ${dependency.instance}:<br/>${sendPortName} ${View.ArrowSeparator} ${receivePortName}`;
                     tooltip.style.visibility = 'visible';
                   })
                   .on('mousemove', (event) => {

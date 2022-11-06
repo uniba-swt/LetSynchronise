@@ -1,14 +1,14 @@
 'use strict';
 
-class PluginAutoSyncGoalEnd2EndMin {
+class PluginAutoSyncGoalEnd2EndMinMk {
     // Plug-in Metadata
-    static get Name()     { return 'Minimise End-to-End Response Times'; }
+    static get Name()     { return 'Minimise End-to-End Response Times (MK)'; }
     static get Author()   { return 'Matthew Kuo'; }
     static get Category() { return PluginAutoSync.Category.Goal; }
 
     
     // Updates the task parameters to miminise end-to-end reponse times.
-    static async Result() {
+    static async Result(scheduler) {
         // Retrieve the LET system.
         const systemElementSelected = ['tasks', 'eventChains', 'schedule'];
         const system = await PluginAutoSync.DatabaseContentsGet(systemElementSelected);

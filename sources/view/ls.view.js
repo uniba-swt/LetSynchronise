@@ -22,6 +22,7 @@ class View {
     static get BarMargin()        { return 1; }
     static get TickHeight()       { return 6; }
 
+    static get ArrowSeparator()   { return '→' };
     
     // -----------------------------------------------------
     // Normal getters and setters

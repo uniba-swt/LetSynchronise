@@ -14,9 +14,7 @@ class ViewEventChain {
     eventChains = null;
     
     deleteHandler = null;
-    
-    static get ArrowSeparator() { return '→' };
-    
+        
     constructor() {
         this.root = document.querySelector('#nav-analyse');
         
@@ -52,7 +50,7 @@ class ViewEventChain {
     
     get dependencies() {
         if (this.dependenciesField.innerHTML) {
-            return this.dependenciesField.innerHTML.split(ViewEventChain.ArrowSeparator)
+            return this.dependenciesField.innerHTML.split(View.ArrowSeparator)
                 .map(name => name.trim());
         }
         
@@ -60,7 +58,7 @@ class ViewEventChain {
     }
     
     set dependencies(dependencies) {
-        this.dependenciesField.innerHTML = dependencies.join(` ${ViewEventChain.ArrowSeparator} `);
+        this.dependenciesField.innerHTML = dependencies.join(` ${View.ArrowSeparator} `);
     }
     
     get eventChainRaw() {
@@ -202,7 +200,7 @@ class ViewEventChain {
             .enter()
             .append('li')
                 .html(eventChain => {
-                    const dependencies = eventChain.segments.join(` ${ViewEventChain.ArrowSeparator} `);
+                    const dependencies = eventChain.segments.join(` ${View.ArrowSeparator} `);
                     return `<span>${eventChain.name}: ${dependencies}</span> ${Utility.AddDeleteButton(eventChain.name)}`;
                 })
             .on('click', function(event, data) {

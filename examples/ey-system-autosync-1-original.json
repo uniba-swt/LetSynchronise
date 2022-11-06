@@ -1,0 +1,354 @@
+{
+	"SystemInputStore": [
+		{
+			"name": "SystemInput"
+		}
+	],
+	"SystemOutputStore": [
+		{
+			"name": "SystemOutput"
+		}
+	],
+	"TaskStore": [
+		{
+			"name": "t1",
+			"initialOffset": 0,
+			"activationOffset": 0,
+			"duration": 3000000,
+			"period": 3000000,
+			"inputs": [
+				"in1"
+			],
+			"outputs": [
+				"out1"
+			],
+			"wcet": 200000,
+			"acet": 100000,
+			"bcet": 0,
+			"distribution": "Normal"
+		},
+		{
+			"name": "t2",
+			"initialOffset": 0,
+			"activationOffset": 0,
+			"duration": 2000000,
+			"period": 2000000,
+			"inputs": [
+				"in1"
+			],
+			"outputs": [
+				"out1"
+			],
+			"wcet": 200000,
+			"acet": 100000,
+			"bcet": 0,
+			"distribution": "Normal"
+		},
+		{
+			"name": "t3",
+			"initialOffset": 0,
+			"activationOffset": 0,
+			"duration": 4000000,
+			"period": 4000000,
+			"inputs": [
+				"in1"
+			],
+			"outputs": [
+				"out1"
+			],
+			"wcet": 200000,
+			"acet": 100000,
+			"bcet": 0,
+			"distribution": "Normal"
+		},
+		{
+			"name": "t4",
+			"initialOffset": 0,
+			"activationOffset": 0,
+			"duration": 2000000,
+			"period": 2000000,
+			"inputs": [
+				"in1"
+			],
+			"outputs": [
+				"out1"
+			],
+			"wcet": 200000,
+			"acet": 100000,
+			"bcet": 0,
+			"distribution": "Normal"
+		},
+		{
+			"name": "t5",
+			"initialOffset": 0,
+			"activationOffset": 0,
+			"duration": 3000000,
+			"period": 3000000,
+			"inputs": [
+				"in1"
+			],
+			"outputs": [
+				"out1"
+			],
+			"wcet": 200000,
+			"acet": 100000,
+			"bcet": 0,
+			"distribution": "Normal"
+		},
+		{
+			"name": "t6",
+			"initialOffset": 0,
+			"activationOffset": 0,
+			"duration": 2000000,
+			"period": 2000000,
+			"inputs": [
+				"in1"
+			],
+			"outputs": [
+				"out1"
+			],
+			"wcet": 200000,
+			"acet": 100000,
+			"bcet": 0,
+			"distribution": "Normal"
+		}
+	],
+	"DependencyStore": [
+		{
+			"name": "A",
+			"source": {
+				"task": "__system",
+				"port": "SystemInput"
+			},
+			"destination": {
+				"task": "t1",
+				"port": "in1"
+			}
+		},
+		{
+			"name": "B",
+			"source": {
+				"task": "t5",
+				"port": "out1"
+			},
+			"destination": {
+				"task": "__system",
+				"port": "SystemOutput"
+			}
+		},
+		{
+			"name": "C",
+			"source": {
+				"task": "__system",
+				"port": "SystemInput"
+			},
+			"destination": {
+				"task": "t2",
+				"port": "in1"
+			}
+		},
+		{
+			"name": "D",
+			"source": {
+				"task": "t6",
+				"port": "out1"
+			},
+			"destination": {
+				"task": "__system",
+				"port": "SystemOutput"
+			}
+		},
+		{
+			"name": "alpha",
+			"source": {
+				"task": "t1",
+				"port": "out1"
+			},
+			"destination": {
+				"task": "t4",
+				"port": "in1"
+			}
+		},
+		{
+			"name": "beta",
+			"source": {
+				"task": "t4",
+				"port": "out1"
+			},
+			"destination": {
+				"task": "t5",
+				"port": "in1"
+			}
+		},
+		{
+			"name": "delta",
+			"source": {
+				"task": "t3",
+				"port": "out1"
+			},
+			"destination": {
+				"task": "t4",
+				"port": "in1"
+			}
+		},
+		{
+			"name": "epsilon",
+			"source": {
+				"task": "t4",
+				"port": "out1"
+			},
+			"destination": {
+				"task": "t6",
+				"port": "in1"
+			}
+		},
+		{
+			"name": "gamma",
+			"source": {
+				"task": "t2",
+				"port": "out1"
+			},
+			"destination": {
+				"task": "t3",
+				"port": "in1"
+			}
+		}
+	],
+	"EventChainStore": [
+		{
+			"segment": {
+				"name": "A",
+				"source": {
+					"task": "__system",
+					"port": "SystemInput"
+				},
+				"destination": {
+					"task": "t1",
+					"port": "in1"
+				}
+			},
+			"name": "EventChain1",
+			"successor": {
+				"segment": {
+					"name": "alpha",
+					"source": {
+						"task": "t1",
+						"port": "out1"
+					},
+					"destination": {
+						"task": "t4",
+						"port": "in1"
+					}
+				},
+				"successor": {
+					"segment": {
+						"name": "beta",
+						"source": {
+							"task": "t4",
+							"port": "out1"
+						},
+						"destination": {
+							"task": "t5",
+							"port": "in1"
+						}
+					},
+					"successor": {
+						"segment": {
+							"name": "B",
+							"source": {
+								"task": "t5",
+								"port": "out1"
+							},
+							"destination": {
+								"task": "__system",
+								"port": "SystemOutput"
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"segment": {
+				"name": "C",
+				"source": {
+					"task": "__system",
+					"port": "SystemInput"
+				},
+				"destination": {
+					"task": "t2",
+					"port": "in1"
+				}
+			},
+			"name": "EventChain2",
+			"successor": {
+				"segment": {
+					"name": "gamma",
+					"source": {
+						"task": "t2",
+						"port": "out1"
+					},
+					"destination": {
+						"task": "t3",
+						"port": "in1"
+					}
+				},
+				"successor": {
+					"segment": {
+						"name": "delta",
+						"source": {
+							"task": "t3",
+							"port": "out1"
+						},
+						"destination": {
+							"task": "t4",
+							"port": "in1"
+						}
+					},
+					"successor": {
+						"segment": {
+							"name": "epsilon",
+							"source": {
+								"task": "t4",
+								"port": "out1"
+							},
+							"destination": {
+								"task": "t6",
+								"port": "in1"
+							}
+						},
+						"successor": {
+							"segment": {
+								"name": "D",
+								"source": {
+									"task": "t6",
+									"port": "out1"
+								},
+								"destination": {
+									"task": "__system",
+									"port": "SystemOutput"
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	],
+	"ConstraintStore": [
+		{
+			"name": "TimingConstraint1",
+			"eventChain": "EventChain1",
+			"relation": "<=",
+			"time": 4000000,
+			"priority": 2
+		},
+		{
+			"name": "TimingConstraint2",
+			"eventChain": "EventChain2",
+			"relation": "<=",
+			"time": 3200000,
+			"priority": 1
+		}
+	]
+}

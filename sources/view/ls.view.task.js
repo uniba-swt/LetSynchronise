@@ -4,6 +4,7 @@ class ViewTask {
     root = null;
     
     nameField = null;
+    priorityField = null;
     initialOffsetField = null;
     activationOffsetField = null;
     durationField = null;
@@ -31,6 +32,7 @@ class ViewTask {
         
         // Define or edit a task
         this.nameField = this.root.querySelector('#name');
+        this.priorityField = this.root.querySelector('#priority');
         this.initialOffsetField = this.root.querySelector('#initial-offset');
         this.activationOffsetField = this.root.querySelector('#activation-offset');
         this.durationField = this.root.querySelector('#duration');
@@ -62,6 +64,18 @@ class ViewTask {
     
     set name(name) {
         this.nameField.value = name;
+    }
+    
+    get priority() {
+        if (this.priorityField.value == null || this.priorityField.value.trim() == '') {
+            return null;
+        } else {
+            return this.priorityField.value;
+        }
+    }
+
+    set priority(priority) {
+        this.priorityField.value = priority;
     }
     
     get initialOffset() {
@@ -148,6 +162,7 @@ class ViewTask {
         // Package all the task paramters as is into an object.
         return {
             'name': this.name,
+            'priority': this.priority,
             'initialOffset': this.initialOffset,
             'activationOffset': this.activationOffset,
             'duration': this.duration,
@@ -165,15 +180,16 @@ class ViewTask {
         // Package all the task paramters in their correct types into an object.
         return {
             'name': this.name.trim(),
-            'initialOffset': parseFloat(this.initialOffset),
-            'activationOffset': parseFloat(this.activationOffset),
-            'duration': parseFloat(this.duration),
-            'period': parseFloat(this.period),
+            'priority': this.priority == null ? null : Math.abs(parseInt(this.priority, 10)),
+            'initialOffset': Math.abs(parseFloat(this.initialOffset)) * Utility.MsToNs,
+            'activationOffset': Math.abs(parseFloat(this.activationOffset)) * Utility.MsToNs,
+            'duration': Math.abs(parseFloat(this.duration)) * Utility.MsToNs,
+            'period': Math.abs(parseFloat(this.period)) * Utility.MsToNs,
             'inputs': this.inputs.split(',').map(item => item.trim()).filter(Boolean),
             'outputs': this.outputs.split(',').map(item => item.trim()).filter(Boolean),
-            'wcet': parseFloat(this.wcet),
-            'acet': parseFloat(this.acet),
-            'bcet': parseFloat(this.bcet),
+            'wcet': Math.abs(parseFloat(this.wcet)) * Utility.MsToNs,
+            'acet': Math.abs(parseFloat(this.acet)) * Utility.MsToNs,
+            'bcet': Math.abs(parseFloat(this.bcet)) * Utility.MsToNs,
             'distribution': this.distribution.trim()
         };
     }
@@ -202,6 +218,7 @@ class ViewTask {
             
             // Clear all the task parameters in the view.
             this.name = '';
+            this.priority = '';
             this.initialOffset = '';
             this.activationOffset = '';
             this.duration = '';
@@ -211,7 +228,7 @@ class ViewTask {
             this.wcet = '';
             this.acet = '';
             this.bcet = '';
-            this.distribution = 'null ';
+            this.distribution = 'Normal';
             
             // Clear the preview.
             this.clearPreview();
@@ -262,14 +279,25 @@ class ViewTask {
             alert('Task name can only start with an alphabetical or underscore character, and continue with alphanumerical or underscore characters.');
             return false;
         }
-        
+
+        if (taskParameters.priority != null
+                && (isNaN(taskParameters.priority) || parseInt(taskParameters.priority) < 0 || taskParameters.priority.split(".").length != 1)) {
+            alert('Priority has to be a positive integer. Lowest priority is 0.');
+            return false;
+        }
+
         if (taskParameters.initialOffset == null || taskParameters.initialOffset.trim() == '' || isNaN(taskParameters.initialOffset)) {
             alert('Initial offset has to be a decimal number.');
             return false;
         }
         const initialOffset = parseFloat(taskParameters.initialOffset);
         if (initialOffset < 0) {
-            alert('Initial offset cannot be negative');
+            alert('Initial offset cannot be negative.');
+            return false;
+        }
+        const initialOffsetNs = initialOffset * Utility.MsToNs;
+        if (!Number.isSafeInteger(initialOffsetNs)) {
+            alert('Initial offset is unable to be represented with nanosecond precision.');
             return false;
         }
 
@@ -279,10 +307,15 @@ class ViewTask {
         }
         const activationOffset = parseFloat(taskParameters.activationOffset);
         if (activationOffset < 0) {
-            alert('Activation offset cannot be negative');
+            alert('Activation offset cannot be negative.');
             return false;
         }
-
+        const activationOffsetNs = activationOffset * Utility.MsToNs;
+        if (!Number.isSafeInteger(activationOffsetNs)) {
+            alert('Activation offset is unable to be represented with nanosecond precision.');
+            return false;
+        }
+        
         if (taskParameters.duration == null || taskParameters.duration.trim() == '' || isNaN(taskParameters.duration)) {
             alert('Duration offset has to be a decimal number.');
             return false;
@@ -290,6 +323,11 @@ class ViewTask {
         const duration = parseFloat(taskParameters.duration);
         if (duration <= 0) {
             alert('Duration has to be greater than 0.');
+            return false;
+        }
+        const durationNs = duration * Utility.MsToNs;
+        if (!Number.isSafeInteger(durationNs)) {
+            alert('Duration offset is unable to be represented with nanosecond precision.');
             return false;
         }
         
@@ -302,7 +340,12 @@ class ViewTask {
             alert('Period has to be greater than 0.');
             return false;
         }
-        if ((activationOffset + duration) > period) {
+        const periodNs = period * Utility.MsToNs;
+        if (!Number.isSafeInteger(periodNs)) {
+            alert('Period is unable to be represented with nanosecond precision.');
+            return false;
+        }
+        if ((activationOffsetNs + durationNs) > periodNs) {
             alert('Period is shorter than the combined activation offset and LET duration.');
             return false;
         }
@@ -359,6 +402,11 @@ class ViewTask {
             alert('WCET has to be greater than 0.');
             return false;
         }
+        const wcetNs = wcet * Utility.MsToNs;
+        if (!Number.isSafeInteger(wcetNs)) {
+            alert('WCET is unable to be represented with nanosecond precision.');
+            return false;
+        }
         
         if (taskParameters.acet == null || taskParameters.acet.trim() == '' || isNaN(taskParameters.acet)) {
             alert('ACET has to be a decimal number.');
@@ -367,6 +415,11 @@ class ViewTask {
         const acet = parseFloat(taskParameters.acet);
         if (acet <= 0) {
             alert('ACET has to be greater than 0.');
+            return false;
+        }
+        const acetNs = acet * Utility.MsToNs;
+        if (!Number.isSafeInteger(acetNs)) {
+            alert('ACET is unable to be represented with nanosecond precision.');
             return false;
         }
         
@@ -379,21 +432,26 @@ class ViewTask {
             alert('BCET has to be greater than or equal to 0.');
             return false;
         }
+        const bcetNs = bcet * Utility.MsToNs;
+        if (!Number.isSafeInteger(bcetNs)) {
+            alert('BCET is unable to be represented with nanosecond precision.');
+            return false;
+        }
         
-        if (duration < wcet) {
+        if (durationNs < wcetNs) {
             alert('WCET cannot be greater than duration.');
             return false;
         }
-        if (wcet < bcet) {
+        if (wcetNs < bcetNs) {
             alert('WCET cannot be less than BCET.');
             return false;
         }
-        if (wcet < acet || acet < bcet) {
+        if (wcetNs < acetNs || acetNs < bcetNs) {
             alert('ACET cannot be less than BCET or greater than WCET.');
             return false;
         }
         
-        if (taskParameters.distribution == null || taskParameters.distribution.trim() == '' || taskParameters.distribution == 'null ') {
+        if (taskParameters.distribution == null || taskParameters.distribution.trim() == '') {
             alert('Choose type of execution time distribution.');
             return false;
         }
@@ -433,7 +491,8 @@ class ViewTask {
         // Create x-axis with correct scale. Will be added to the chart later
         const x_axis =
         d3.axisBottom()
-          .scale(scale);
+          .scale(scale)
+          .tickFormat(d => d / Utility.MsToNs);
 
         // Set up the canvas
         const anchor =
@@ -467,7 +526,7 @@ class ViewTask {
         textInfo.append('text')
                 .attr('dx', '300px')
                 .attr('dy', '0em')
-                .text(`WCET, ACET, BCET: ${taskParameters.wcet}, ${taskParameters.acet}, ${taskParameters.bcet}`);
+                .text(`WCET, ACET, BCET: ${taskParameters.wcet / Utility.MsToNs}, ${taskParameters.acet / Utility.MsToNs}, ${taskParameters.bcet / Utility.MsToNs}`);
         textInfo.append('text')
                 .attr('dx', '300px')
                 .attr('dy', '1.3em')
@@ -568,20 +627,21 @@ class ViewTask {
     
     populateParameterForm(taskParameters) {
         this.name = taskParameters.name;
-        this.initialOffset = taskParameters.initialOffset;
-        this.activationOffset = taskParameters.activationOffset;
-        this.duration = taskParameters.duration;
-        this.period = taskParameters.period;
+        this.priority = taskParameters.priority == null ? '' : taskParameters.priority;
+        this.initialOffset = taskParameters.initialOffset / Utility.MsToNs;
+        this.activationOffset = taskParameters.activationOffset / Utility.MsToNs;
+        this.duration = taskParameters.duration / Utility.MsToNs;
+        this.period = taskParameters.period / Utility.MsToNs;
         this.inputs = taskParameters.inputs;
         this.outputs = taskParameters.outputs;
-        this.wcet = taskParameters.wcet;
-        this.acet = taskParameters.acet;
-        this.bcet = taskParameters.bcet;
+        this.wcet = taskParameters.wcet / Utility.MsToNs;
+        this.acet = taskParameters.acet / Utility.MsToNs;
+        this.bcet = taskParameters.bcet / Utility.MsToNs;
         this.distribution = taskParameters.distribution;
     }
         
     formatTaskParametersInfo(taskParameters) {
-        return `${taskParameters.name}: initial offset = ${taskParameters.initialOffset}, activation offset = ${taskParameters.activationOffset}, duration = ${taskParameters.duration}, period = ${taskParameters.period}, inputs = ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.inputs)}, outputs = ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.outputs)}, wcet = ${taskParameters.wcet}, acet = ${taskParameters.acet}, bcet = ${taskParameters.bcet}, distribution = ${taskParameters.distribution}`;
+        return `${taskParameters.name}: priority = ${taskParameters.priority}, initial offset = ${taskParameters.initialOffset}, activation offset = ${taskParameters.activationOffset}, duration = ${taskParameters.duration}, period = ${taskParameters.period}, inputs = ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.inputs)}, outputs = ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.outputs)}, wcet = ${taskParameters.wcet}, acet = ${taskParameters.acet}, bcet = ${taskParameters.bcet}, distribution = ${taskParameters.distribution}`;
     }
     
     toString() {

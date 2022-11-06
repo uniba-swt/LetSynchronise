@@ -2,12 +2,12 @@
 
 class PluginAutoSyncGoalRandom {
     // Plug-in Metadata
-    static get Name()     { return 'Randomise Task Parameters'; }
+    static get Name()     { return 'Random Task Parameters'; }
     static get Author()   { return 'Eugene Yip'; }
     static get Category() { return PluginAutoSync.Category.Goal; }
 
     
-    static async Result() {
+    static async Result(scheduler) {
         const taskElementSelected = ['tasks'];
         const system = await PluginAutoSync.DatabaseContentsGet(taskElementSelected);
         let tasks = system[Model.TaskStoreName];

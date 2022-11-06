@@ -59,9 +59,10 @@ class PluginMetricDataAge {
         let output = [`<h6>${PluginMetricDataAge.Name}: ${Object.keys(result).length} dependencies</h6>`];
         
         for (const chainName in result) {
+            const values = PluginMetric.ValuesOfObject(result[chainName].raw).map(value => value / Utility.MsToNs);
             output.push(
-                `${chainName}: (min, avg, max) = (${result[chainName].min}, ${result[chainName].avg}, ${result[chainName].max})`,
-                `<ul><li>${result[chainName].num} values: [${PluginMetric.ValuesOfObject(result[chainName].raw).join(', ')}]</li></ul>`
+                `${chainName}: (min, avg, max) = (${result[chainName].min / Utility.MsToNs}, ${result[chainName].avg / Utility.MsToNs}, ${result[chainName].max / Utility.MsToNs})ms`,
+                `<ul><li>${result[chainName].num} values: [${values.join(', ')}]</li></ul>`
             );
         }
         
@@ -72,9 +73,10 @@ class PluginMetricDataAge {
         let output = [`${PluginMetricDataAge.Name}: ${Object.keys(result).length} dependencies`];
         
         for (const chainName in result) {
+            const values = PluginMetric.ValuesOfObject(result[chainName].raw).map(value => value / Utility.MsToNs);
             output.push(
-                `  ${chainName}: (min, avg, max) = (${result[chainName].min}, ${result[chainName].avg}, ${result[chainName].max})`,
-                `    ${result[chainName].num} values: [${PluginMetric.ValuesOfObject(result[chainName].raw).join(', ')}]`,
+                `  ${chainName}: (min, avg, max) = (${result[chainName].min / Utility.MsToNs}, ${result[chainName].avg / Utility.MsToNs}, ${result[chainName].max / Utility.MsToNs})ms`,
+                `    ${result[chainName].num} values: [${values.join(', ')}]`,
             );
         }
         
