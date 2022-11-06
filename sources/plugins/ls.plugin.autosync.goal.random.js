@@ -2,7 +2,7 @@
 
 class PluginAutoSyncGoalRandom {
     // Plug-in Metadata
-    static get Name()     { return 'Randomise Task Parameters'; }
+    static get Name()     { return 'Random Task Parameters'; }
     static get Author()   { return 'Eugene Yip'; }
     static get Category() { return PluginAutoSync.Category.Goal; }
 

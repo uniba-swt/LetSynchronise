@@ -9,16 +9,16 @@ class PluginAutoSyncSchedulerEdf {
     
     // Uses an earliest deadline first algorithm to schedule task executions.
     static async Result(makespan, executionTiming) {
-        // Create instances of tasks, execution times, data dependencies, and event chains.
+        // Create task instances, execution times, data dependencies, and event chains.
         await PluginAutoSync.DeleteSchedule();
         await PluginAutoSync.CreateAllTaskInstances(makespan, executionTiming);
         await PluginAutoSync.CreateAllDependencyAndEventChainInstances(makespan);
         
         const scheduleElementSelected = ['schedule'];
         const schedule = await PluginAutoSync.DatabaseContentsGet(scheduleElementSelected);
-        const tasks = await schedule[Model.TaskInstancesStoreName];
+        const taskInstances = await schedule[Model.TaskInstancesStoreName];
 
-        const result = this.Algorithm(tasks, makespan);
+        const result = this.Algorithm(taskInstances, makespan);
         if (!result.schedulable) {
             alert(result.message);
             return;
@@ -29,9 +29,9 @@ class PluginAutoSyncSchedulerEdf {
     }
     
     // Preemptive earliest deadline first.
-    static Algorithm(tasks, makespan) {
+    static Algorithm(taskInstances, makespan) {
         // Do nothing if the task set is empty.
-        if (tasks.length == 0) {
+        if (taskInstances.length == 0) {
             return { 'schedulable': true, 'message': 'No tasks to schedule' };
         }
     
@@ -40,7 +40,7 @@ class PluginAutoSyncSchedulerEdf {
         
         // For each task, keep track of the instance we are trying to schedule.
         // A null index means that all instances of a task have been scheduled.
-        let taskInstanceIndices = new Array(tasks.length);
+        let taskInstanceIndices = new Array(taskInstances.length);
         taskInstanceIndices.fill(0);
         
         // Use a deadline-sorted queue to track the preempted task instances.
@@ -54,7 +54,7 @@ class PluginAutoSyncSchedulerEdf {
             let nextPreemptionTime = 2 * makespan;
 
             let chosenTask = { 'number': null, 'instance': null, 'deadline': null };
-            for (const [taskNumber, task] of tasks.entries()) {
+            for (const [taskNumber, task] of taskInstances.entries()) {
                 if (taskInstanceIndices[taskNumber] == null) {
                     continue;
                 }
@@ -131,7 +131,7 @@ class PluginAutoSyncSchedulerEdf {
 
                 // Consider the next instance of the chosen task in the next round of scheduling decisions.
                 taskInstanceIndices[chosenTask.number]++;
-                if (taskInstanceIndices[chosenTask.number] == tasks[chosenTask.number].value.length) {
+                if (taskInstanceIndices[chosenTask.number] == taskInstances[chosenTask.number].value.length) {
                     taskInstanceIndices[chosenTask.number] = null;
                 }
             }
@@ -143,7 +143,7 @@ class PluginAutoSyncSchedulerEdf {
             // Create an execution interval for the chosen task instance.
             const executionTimeEnd = currentTime + this.RemainingExecutionTime(chosenTask.instance);
             if (executionTimeEnd > chosenTask.instance.letEndTime) {
-                const message = `Could not schedule enough time for task ${tasks[chosenTask.number].name}, instance ${chosenTask.instance.instance}!`;
+                const message = `Could not schedule enough time for task ${taskInstances[chosenTask.number].name}, instance ${chosenTask.instance.instance}!`;
                 return { 'schedulable': false, 'message': message };
             }
             if (executionTimeEnd <= nextPreemptionTime) {
