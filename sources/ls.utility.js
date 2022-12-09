@@ -198,7 +198,8 @@ Utility.Interval = class {
     endTime = null;
     
     constructor(startTime, endTime) {
-        if (startTime > endTime) {
+		
+        if (parseInt(startTime) > parseInt(endTime)) {
             throw `Interval start time (${startTime}) is greater than its end time (${endTime})!`;
         }
         this.startTime = startTime;
