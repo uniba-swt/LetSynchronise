@@ -198,12 +198,12 @@ Utility.Interval = class {
     endTime = null;
     
     constructor(startTime, endTime) {
-		
-        if (parseInt(startTime) > parseInt(endTime)) {
-            throw `Interval start time (${startTime}) is greater than its end time (${endTime})!`;
+        this.startTime = parseFloat(startTime);
+        this.endTime = parseFloat(endTime);
+    
+        if (this.startTime > this.endTime) {
+            throw `Interval start time (${this.startTime}) is greater than its end time (${endTime})!`;
         }
-        this.startTime = startTime;
-        this.endTime = endTime;
     }
     
     static FromJson(json) {
@@ -215,7 +215,7 @@ Utility.Interval = class {
     }
     
     set startTime(time) {
-        this.startTime = time;
+        this.startTime = parseFloat(time);
     }
     
     get endTime() {
@@ -223,7 +223,7 @@ Utility.Interval = class {
     }
     
     set endTime(time) {
-        this.endTime = time;
+        this.endTime = parseFloat(time);
     }
     
     get duration() {
@@ -233,6 +233,6 @@ Utility.Interval = class {
     overlaps(other) {
         //                 |<--- this --->|
         // |<--- other --->|              |<--- other --->|
-        return this.startTime < other.endTime && this.endTime > other.startTime;
+        return this.startTime < parseFloat(other.endTime) && this.endTime > parseFloat(other.startTime);
     }
 };
