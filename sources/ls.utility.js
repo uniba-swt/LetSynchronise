@@ -198,8 +198,8 @@ Utility.Interval = class {
     endTime = null;
     
     constructor(startTime, endTime) {
-        this.startTime = parseFloat(startTime);
-        this.endTime = parseFloat(endTime);
+        this.startTime = parseInt(startTime);
+        this.endTime = parseInt(endTime);
     
         if (this.startTime > this.endTime) {
             throw `Interval start time (${this.startTime}) is greater than its end time (${endTime})!`;
@@ -215,7 +215,7 @@ Utility.Interval = class {
     }
     
     set startTime(time) {
-        this.startTime = parseFloat(time);
+        this.startTime = parseInt(time);
     }
     
     get endTime() {
@@ -223,7 +223,7 @@ Utility.Interval = class {
     }
     
     set endTime(time) {
-        this.endTime = parseFloat(time);
+        this.endTime = parseInt(time);
     }
     
     get duration() {
@@ -233,6 +233,6 @@ Utility.Interval = class {
     overlaps(other) {
         //                 |<--- this --->|
         // |<--- other --->|              |<--- other --->|
-        return this.startTime < parseFloat(other.endTime) && this.endTime > parseFloat(other.startTime);
+        return this.startTime < parseInt(other.endTime) && this.endTime > parseInt(other.startTime);
     }
 };
