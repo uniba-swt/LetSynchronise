@@ -125,6 +125,7 @@ PluginAutoSync.Register(PluginAutoSyncGoalEnd2EndMax);
 PluginAutoSync.Register(PluginAutoSyncGoalEnd2EndMinEy);
 PluginAutoSync.Register(PluginAutoSyncGoalEnd2EndMinMk);
 PluginAutoSync.Register(PluginAutoSyncGoalRandom);
+PluginAutoSync.Register(PluginAutoSyncGoalIlp);
 // View
 view.viewSchedule.updateAutoSyncPluginSelectors();
 
