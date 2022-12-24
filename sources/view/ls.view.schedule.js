@@ -396,12 +396,16 @@ class ViewSchedule {
                        .attr('width', scale(instance.letEndTime - instance.letStartTime))
                        .attr('height', View.BarHeight)
                       .on('mouseover', function() {
-                        tooltip.innerHTML = `${taskInstances.name} instance ${instance.instance} <br/> Execution time: ${Utility.FormatTimeString(instance.executionTime / Utility.MsToNs, 2)}ms`;
+                        const title = `<b>${taskInstances.name}</b> instance ${instance.instance}`;
+                        const letInterval = `LET interval: [${Utility.FormatTimeString(instance.letStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.letEndTime / Utility.MsToNs, 2)}]ms`;
+                        const periodInterval = `Period interval: [${Utility.FormatTimeString(instance.periodStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.periodEndTime / Utility.MsToNs, 2)}]ms`;
+                        const executionTime = `Total execution time: ${Utility.FormatTimeString(instance.executionTime / Utility.MsToNs, 2)}ms`;
+                        tooltip.innerHTML = `${title} <br/> ${letInterval} <br/> ${periodInterval} <br/> ${executionTime}`;
                         tooltip.style.visibility = 'visible';
                       })
                       .on('mousemove', (event) => {
                         const [pointerX, pointerY] = d3.pointer(event, window);
-                        tooltip.style.top = `${pointerY - 3 * View.BarHeight}px`;
+                        tooltip.style.top = `${pointerY - 5 * View.BarHeight}px`;
                         tooltip.style.left = `${pointerX}px`;
                       })
                       .on('mouseout', function() {
@@ -415,7 +419,19 @@ class ViewSchedule {
                            .attr('y', View.BarHeight - View.ExecutionHeight)
                            .attr('width', scale(interval.duration))
                            .attr('height', View.ExecutionHeight)
-                           .attr('class', 'time');
+                           .attr('class', 'time')
+                         .on('mouseover', function() {
+                           tooltip.innerHTML = `Execution interval: [${Utility.FormatTimeString(interval.startTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString((interval.startTime + interval.duration) / Utility.MsToNs, 2)}]ms`;
+                           tooltip.style.visibility = 'visible';
+                         })
+                         .on('mousemove', (event) => {
+                           const [pointerX, pointerY] = d3.pointer(event, window);
+                           tooltip.style.top = `${pointerY - 1.5 * View.BarHeight}px`;
+                           tooltip.style.left = `${pointerX}px`;
+                         })
+                         .on('mouseout', function() {
+                           tooltip.style.visibility = 'hidden';
+                         });
             }
             
             // Add vertical line at the start of the period
