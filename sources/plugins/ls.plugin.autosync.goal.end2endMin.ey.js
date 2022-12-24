@@ -17,11 +17,6 @@ class PluginAutoSyncGoalEnd2EndMinEy {
         const tasks = await system[Model.TaskStoreName];
         const eventChains = await system[Model.EventChainStoreName];
         const constraints = await system[Model.ConstraintStoreName];
-        
-        if (constraints.length == 0) {
-            alert('Aborting because no timing constraints have been defined!');
-            return;
-        }
                 
         // Create task dependency graph and assign task priorities for the heuristic.
         const graph = this.CreateTaskDependencyGraph(eventChains, constraints);
@@ -100,6 +95,11 @@ class PluginAutoSyncGoalEnd2EndMinEy {
         // tasksRequired: task set
         const [requiredEventChainDetails, taskDependencies, tasksRequired] = this.GetRequiredConstraintDetails(eventChains, constraints);
         
+        // Return empty graph when it will contain zero tasks.
+        if (tasksRequired.size == 0) {
+            return new this.AdjacencyMatrix([]);
+        }
+        
         // Represent the task dependency graph as an adjacency matrix.
         // Dependency graph is directed so that cycles can be checked.
         //
@@ -149,7 +149,6 @@ class PluginAutoSyncGoalEnd2EndMinEy {
 
     // Iteratively schedules each task from highest to lowest priority to determine the
     // min and max bounds of their LET intervals.
-    // FIXME: Also need to reschedule the tasks not in the dependency graph.
     static async Algorithm(tasks, taskDependencyGraph, scheduler) {
         // Scheduling parameters
         const initialOffsets = tasks.map(taskParameters => taskParameters.initialOffset).flat();
@@ -161,8 +160,20 @@ class PluginAutoSyncGoalEnd2EndMinEy {
         
         let currentTaskSet = new Set();         // Current set of tasks considered for scheduling.
         let firstTaskInstanceOfInterest = { };  // First task instances that communicate directly according to the task dependency graph.
+
         const tasksDescendingPriority = taskDependencyGraph.nodesDescendingGlobalPriorities;
-        for (const currentTaskName of tasksDescendingPriority) {
+        const success = await this.IterativeScheduling(tasks, taskDependencyGraph, scheduler, makespan, executionTiming, currentTaskSet, firstTaskInstanceOfInterest, tasksDescendingPriority);
+        if (!success) {
+            return;
+        }
+        
+        // Schedule the remaining tasks (not part of any timing constraints).
+        const remainingTasks = tasks.map(task => task.name).filter(task => !tasksDescendingPriority.includes(task));
+        await this.IterativeScheduling(tasks, taskDependencyGraph, scheduler, makespan, executionTiming, currentTaskSet, firstTaskInstanceOfInterest, remainingTasks);
+    }
+    
+    static async IterativeScheduling(tasks, taskDependencyGraph, scheduler, makespan, executionTiming, currentTaskSet, firstTaskInstanceOfInterest, tasksToSchedule) {
+        for (const currentTaskName of tasksToSchedule) {
             // Delete the existing task schedule.
             await PluginAutoSync.DeleteSchedule();
             
@@ -172,7 +183,6 @@ class PluginAutoSyncGoalEnd2EndMinEy {
             currentTask.initialOffset = 0;
             currentTask.activationOffset = 0;
             currentTask.duration = currentTask.period;
-            currentTask.priority = taskDependencyGraph.getNodeGlobalPriority(currentTaskName);
             
             // Add the currentTask into the task set to schedule.
             currentTaskSet.add(currentTask);
@@ -181,7 +191,7 @@ class PluginAutoSyncGoalEnd2EndMinEy {
             let [schedulingResult, allTasksInstances] = await this.ScheduleTaskSet(scheduler, currentTaskSet, makespan, executionTiming);
             if (schedulingResult != null && !schedulingResult.schedulable) {
                 alert('Tasks are unschedulable even when their LET durations span their periods!');
-                return;
+                return false;
             }
             
             // Get the currentTask's instances.
@@ -248,7 +258,7 @@ class PluginAutoSyncGoalEnd2EndMinEy {
                     [schedulingResult, allTasksInstances] = await this.ScheduleTaskSet(scheduler, currentTaskSet, makespan, executionTiming);
                     if (schedulingResult != null && !schedulingResult.schedulable) {
                         alert('Tasks are unschedulable even when their LET durations span their periods!');
-                        return;
+                        return false;
                     }
                 }
 
@@ -262,6 +272,8 @@ class PluginAutoSyncGoalEnd2EndMinEy {
                 this.TrimLetDuration(currentTaskInstances.value, currentTask, firstTaskInstanceOfInterest);
             }
         }
+        
+        return true;
     }
     
     static async ScheduleTaskSet(scheduler, taskSet, makespan, executionTiming) {
@@ -415,8 +427,13 @@ PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix = class {
     }
     
     getSourceNodes(targetNode) {
-        const row = this.getTargetIndex(targetNode);
         let sourceNodes = [ ];
+        
+        const row = this.getTargetIndex(targetNode);
+        if (row == undefined) {
+            return sourceNodes;
+        }
+        
         for (const [index, isSource] of this.matrix[row].entries()) {
             if (isSource) {
                 sourceNodes.push(this.getNode(this.sources, index));
@@ -507,7 +524,7 @@ PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix = class {
     // Depth-first traversal with backtracking to assign global priorities to nodes,
     // based on node local priorities. Priority of a shared node is always lower than
     // the priorities of its predecessors.
-    // FIXME: However, this approach suffers from the well-known priority inversion problem.
+    // FIXME: This approach suffers from the well-known priority inversion problem.
     computeGlobalTaskPriorities() {
         let currentPriority = { val: this.priorities.size };    // Primitives are passed as values into functions.
         const startNodesDescendingPriority = this.sortNodeList(this.startNodes, this.compareDescendingLocalPriority);
