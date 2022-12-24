@@ -326,9 +326,12 @@ class ViewSchedule {
             taskIndices[taskInstances.name] = index;
         }
         
+        // Draw the system load.
+        this.drawSystemLoad(tasksInstances, svgElement, scale, tasksInstances.length);
+        
         svgElement
           .attr('width', `${View.Width}px`)
-          .attr('height', `${Object.keys(tasksInstances).length * View.TaskHeight}px`);
+          .attr('height', `${(tasksInstances.length + 1) * View.TaskHeight}px`);
         
         return {svgElement: svgElement, scale: scale, taskIndices: taskIndices};
     }
@@ -411,7 +414,7 @@ class ViewSchedule {
                       .on('mouseout', function() {
                         tooltip.style.visibility = 'hidden';
                       });
-            // Add the task's execution time
+            // Add the task's execution times
             const executionIntervals = instance.executionIntervals.map(interval => Utility.Interval.FromJson(interval));
             for (const interval of executionIntervals) {
                 graphInfo.append('rect')
@@ -443,6 +446,90 @@ class ViewSchedule {
                        .attr('class', 'boundary');
         }
         
+        // Create x-axis with correct scale.
+        const xAxis =
+        d3.axisBottom()
+          .scale(scale)
+          .tickFormat(d => d / Utility.MsToNs);
+        
+        graphInfo.append('g')
+                 .attr('transform', `translate(0, ${View.BarHeight + 2 * View.TickHeight})`)
+                 .call(xAxis)
+                 .call(g => g.select('.domain').remove());
+    }
+    
+    drawSystemLoad(tasksInstances, svgElement, scale, index) {
+        if (index == 0) {
+            return;
+        }
+    
+        const tooltip = this.scheduleTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
+
+        const group =
+        svgElement.append('g')
+                    .attr('transform', `translate(${View.SvgPadding}, ${View.SvgPadding})`);
+        
+        // -----------------------------
+        // Group for textual information
+        const textInfo =
+        group.append('g')
+               .attr('transform', `translate(0, ${index * View.TaskHeight + View.SvgPadding})`);
+
+        // Add the task's name, inputs, and outputs
+        textInfo.append('text')
+                  .text(`System load`);
+
+        // -----------------------------
+        // Group for graphical information
+        const graphInfo =
+        group.append('g')
+               .attr('transform', `translate(0, ${index * View.TaskHeight + 2.5 * View.SvgPadding})`);
+        
+        // Add horizontal line for the makespan
+        graphInfo.append('line')
+                   .attr('x1', 0)
+                   .attr('x2', scale(1.1 * this.makespan * Utility.MsToNs))
+                   .attr('y1', View.BarHeight + View.BarMargin)
+                   .attr('y2', View.BarHeight + View.BarMargin)
+                   .attr('class', 'period');
+
+        // Add vertical line at the start of the makespan
+        graphInfo.append('line')
+                   .attr('x1', 0)
+                   .attr('x2', 0)
+                   .attr('y1', View.BarHeight + View.TickHeight + View.BarMargin)
+                   .attr('y2', `0`)
+                   .attr('class', 'boundary');
+
+        // Add the taskss execution times
+        for (const [index, taskInstances] of tasksInstances.entries()) {
+            for (const instance of taskInstances.value) {
+                const executionIntervals = instance.executionIntervals.map(interval => Utility.Interval.FromJson(interval));
+                for (const interval of executionIntervals) {
+                    graphInfo.append('rect')
+                               .attr('x', scale(interval.startTime))
+                               .attr('y', View.BarHeight - View.ExecutionHeight)
+                               .attr('width', scale(interval.duration))
+                               .attr('height', View.ExecutionHeight)
+                               .attr('class', 'time')
+                             .on('mouseover', function() {
+                               const title = `<b>${taskInstances.name}</b> instance ${instance.instance}`;
+                               const executionInterval = `Execution interval: [${Utility.FormatTimeString(interval.startTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString((interval.startTime + interval.duration) / Utility.MsToNs, 2)}]ms`;
+                               tooltip.innerHTML = `${title} <br/> ${executionInterval}`;
+                               tooltip.style.visibility = 'visible';
+                             })
+                             .on('mousemove', (event) => {
+                               const [pointerX, pointerY] = d3.pointer(event, window);
+                               tooltip.style.top = `${pointerY - 3 * View.BarHeight}px`;
+                               tooltip.style.left = `${pointerX}px`;
+                             })
+                             .on('mouseout', function() {
+                               tooltip.style.visibility = 'hidden';
+                             });
+                }
+            }
+        }
+
         // Create x-axis with correct scale.
         const xAxis =
         d3.axisBottom()
