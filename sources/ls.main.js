@@ -113,17 +113,20 @@ console.log(PluginMetric.ToString());
 // Register AutoSync plug-ins.
 PluginAutoSync.ModelDatabase = model.modelDatabase;
 PluginAutoSync.ModelSchedule = model.modelSchedule;
-PluginAutoSync.Register(PluginAutoSyncGoalEnd2EndMax);
-PluginAutoSync.Register(PluginAutoSyncGoalEnd2EndMinEy);
-PluginAutoSync.Register(PluginAutoSyncGoalEnd2EndMinMk);
-PluginAutoSync.Register(PluginAutoSyncGoalRandom);
-
-
+// Schedulers
+PluginAutoSync.Register(PluginAutoSyncSchedulerIdentity);
 PluginAutoSync.Register(PluginAutoSyncSchedulerEdf);
 PluginAutoSync.Register(PluginAutoSyncSchedulerFp);
 PluginAutoSync.Register(PluginAutoSyncSchedulerRandom);
 PluginAutoSync.Register(PluginAutoSyncSchedulerRm);
 PluginAutoSync.Register(PluginAutoSyncSchedulerTuDortmund);
+// Goals
+PluginAutoSync.Register(PluginAutoSyncGoalEnd2EndMax);
+PluginAutoSync.Register(PluginAutoSyncGoalEnd2EndMinEy);
+PluginAutoSync.Register(PluginAutoSyncGoalEnd2EndMinMk);
+PluginAutoSync.Register(PluginAutoSyncGoalRandom);
+PluginAutoSync.Register(PluginAutoSyncGoalIlp);
+// View
 view.viewSchedule.updateAutoSyncPluginSelectors();
 
 console.log(PluginAutoSync.ToString());

@@ -98,8 +98,7 @@ class ControllerSchedule {
             const scheduler = this.view.schedulingParametersClean.scheduler;
             const executionTiming = this.view.schedulingParametersClean.executionTiming;
             scheduler.Result(makespan, executionTiming)
-                .then(result => this.model.getSchedule())
-                .then(result => this.callbackGetSchedule(result));
+                .then(result => this.callbackGetSchedule(this.model.getSchedule()));
         } else {
             this.callbackGetSchedule(this.model.getSchedule());
         }
@@ -114,8 +113,7 @@ class ControllerSchedule {
         goal.Result(scheduler)
             .then(result => scheduler.Result(makespan, executionTiming))
             .then(result => this.modelTask.refreshViews())
-            .then(result => this.model.getSchedule(makespan))
-            .then(result => this.callbackGetSchedule(result));
+            .then(result => this.callbackGetSchedule(this.model.getSchedule()));
     }
     
     

@@ -517,18 +517,17 @@ class ViewTask {
                 .text(`Task: ${taskParameters.name}`);
         textInfo.append('text')
                 .attr('dy', '1.3em')
-                .text(`Inputs: ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.inputs)}`);
+                .text(`WCET, ACET, BCET: ${taskParameters.wcet / Utility.MsToNs}, ${taskParameters.acet / Utility.MsToNs}, ${taskParameters.bcet / Utility.MsToNs}`);
         textInfo.append('text')
                 .attr('dy', '2.6em')
+                .text(`Inputs: ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.inputs)}`);
+        textInfo.append('text')
+                .attr('dy', '3.9em')
                 .text(`Outputs: ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.outputs)}`);
 
         // Add the task's execution times
         textInfo.append('text')
-                .attr('dx', '300px')
-                .attr('dy', '0em')
-                .text(`WCET, ACET, BCET: ${taskParameters.wcet / Utility.MsToNs}, ${taskParameters.acet / Utility.MsToNs}, ${taskParameters.bcet / Utility.MsToNs}`);
-        textInfo.append('text')
-                .attr('dx', '300px')
+                .attr('dx', '450px')
                 .attr('dy', '1.3em')
                 .text(`Distribution: ${taskParameters.distribution}`);
 
@@ -536,7 +535,7 @@ class ViewTask {
         // Group for graphical information
         const graphInfo =
         group.append('g')
-             .attr('transform', `translate(0, 60)`);
+             .attr('transform', `translate(0, 80)`);
         
         // Add the task's LET duration
         graphInfo.append('rect')
