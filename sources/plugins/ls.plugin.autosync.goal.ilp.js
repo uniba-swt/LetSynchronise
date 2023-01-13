@@ -16,7 +16,7 @@ class PluginAutoSyncGoalIlp {
         const system = await PluginAutoSync.DatabaseContentsGet(systemElementSelected);
         
         // Optimise the LET system with an external web tool.
-        const optimisedSchedule = await this.Algorithm(system);
+        const optimisedSchedule = await this.Algorithm(system, makespan);
         if (optimisedSchedule == null) {
             return
         }
@@ -29,8 +29,9 @@ class PluginAutoSyncGoalIlp {
     }
     
     // Trigger an external optimisation tool.
-    static async Algorithm(system) {
-        const url = 'http://localhost:8181/';
+    static async Algorithm(system, makespan) {
+		system['makespan'] = makespan.value*1000*1000 //send makespan to ILP Solver in ns
+        const url = 'http://localhost:8181/'
         return fetch(url, {
             method: 'POST',
             body: JSON.stringify(system),
