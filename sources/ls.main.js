@@ -122,8 +122,7 @@ PluginAutoSync.Register(PluginAutoSyncSchedulerRm);
 PluginAutoSync.Register(PluginAutoSyncSchedulerTuDortmund);
 // Goals
 PluginAutoSync.Register(PluginAutoSyncGoalEnd2EndMax);
-PluginAutoSync.Register(PluginAutoSyncGoalEnd2EndMinEy);
-PluginAutoSync.Register(PluginAutoSyncGoalEnd2EndMinMk);
+PluginAutoSync.Register(PluginAutoSyncGoalEnd2EndMin);
 PluginAutoSync.Register(PluginAutoSyncGoalRandom);
 PluginAutoSync.Register(PluginAutoSyncGoalIlp);
 // View
