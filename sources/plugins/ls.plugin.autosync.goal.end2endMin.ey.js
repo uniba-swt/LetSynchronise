@@ -235,8 +235,8 @@ class PluginAutoSyncGoalEnd2EndMinEy {
                     // Find the earliest instance of currentTask that can complete its computations after maxPredecessorLetEndTime.
                     if (instance.periodStartTime <= maxPredecessorLetEndTime && maxPredecessorLetEndTime <= instance.periodEndTime) {
                         currentTask.activationOffset = (maxPredecessorLetEndTime + currentTask.wcet <= instance.periodEndTime)
-                                                     ? currentTask.activationOffset = maxPredecessorLetEndTime - instance.periodStartTime
-                                                     : currentTask.activationOffset = 0;
+                                                     ? maxPredecessorLetEndTime - instance.periodStartTime
+                                                     : 0;
                         currentTask.duration = currentTask.period - currentTask.activationOffset;
                         
                         firstTaskInstanceOfInterest[currentTaskName] = {

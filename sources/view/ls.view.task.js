@@ -511,7 +511,7 @@ class ViewTask {
         group.append('g')
              .attr('transform', `translate(0, ${View.SvgPadding})`);
         
-        // Add the task's name, inputs, and outputs
+        // Add the task's name, execution times, inputs, and outputs
         textInfo.append('text')
                 .attr('dy', '0em')
                 .text(`Task: ${taskParameters.name}`);
@@ -525,7 +525,11 @@ class ViewTask {
                 .attr('dy', '3.9em')
                 .text(`Outputs: ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.outputs)}`);
 
-        // Add the task's execution times
+        // Add the task's priority and execution time distribution
+        textInfo.append('text')
+                .attr('dx', '450px')
+                .attr('dy', '0em')
+                .text(`Priority: ${taskParameters.priority == null ? 'None' : taskParameters.priority}`);
         textInfo.append('text')
                 .attr('dx', '450px')
                 .attr('dy', '1.3em')
