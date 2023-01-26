@@ -20,7 +20,7 @@ class PluginAutoSyncGoalIlp {
         const periods = system[Model.TaskStoreName].map(taskParameters => taskParameters.period).flat();
         const prologue = Utility.MaxOfArray(initialOffsets);
         const hyperPeriod = Utility.LeastCommonMultipleOfArray(periods);
-        system['makespan'] = prologue + hyperPeriod; //send makespan to ILP Solver
+        system['makespan'] = prologue + hyperPeriod; // Send makespan to ILP Solver
 
         // Optimise the LET system with an external web tool.
         const optimisedSchedule = await this.Algorithm(system);
@@ -37,7 +37,6 @@ class PluginAutoSyncGoalIlp {
     
     // Trigger an external optimisation tool.
     static async Algorithm(system) {
-		
         const url = 'http://localhost:8181/'
         return fetch(url, {
             method: 'POST',
