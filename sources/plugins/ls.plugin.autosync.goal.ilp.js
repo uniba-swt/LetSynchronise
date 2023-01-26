@@ -14,7 +14,14 @@ class PluginAutoSyncGoalIlp {
         // Retrieve the LET system.
         const systemElementSelected = ['inputs','outputs','tasks','dependencies','eventChains','constraints'];
         const system = await PluginAutoSync.DatabaseContentsGet(systemElementSelected);
-        
+
+        //Compute makespan
+        const initialOffsets = system[Model.TaskStoreName].map(taskParameters => taskParameters.initialOffset).flat();
+        const periods = system[Model.TaskStoreName].map(taskParameters => taskParameters.period).flat();
+        const prologue = Utility.MaxOfArray(initialOffsets);
+        const hyperPeriod = Utility.LeastCommonMultipleOfArray(periods);
+        const makespan = prologue + hyperPeriod;
+
         // Optimise the LET system with an external web tool.
         const optimisedSchedule = await this.Algorithm(system, makespan);
         if (optimisedSchedule == null) {
@@ -30,7 +37,8 @@ class PluginAutoSyncGoalIlp {
     
     // Trigger an external optimisation tool.
     static async Algorithm(system, makespan) {
-		system['makespan'] = makespan.value*1000*1000 //send makespan to ILP Solver in ns
+		system['makespan'] = makespan; //send makespan to ILP Solver in ns
+        console.log(makespan);
         const url = 'http://localhost:8181/'
         return fetch(url, {
             method: 'POST',
