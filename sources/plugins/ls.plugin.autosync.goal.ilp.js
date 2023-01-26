@@ -38,7 +38,6 @@ class PluginAutoSyncGoalIlp {
     // Trigger an external optimisation tool.
     static async Algorithm(system, makespan) {
 		system['makespan'] = makespan; //send makespan to ILP Solver in ns
-        console.log(makespan);
         const url = 'http://localhost:8181/'
         return fetch(url, {
             method: 'POST',
