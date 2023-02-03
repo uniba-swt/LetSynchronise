@@ -31,7 +31,6 @@ class PluginAutoSyncGoalIlp {
     
     // Trigger an external optimisation tool.
     static async Algorithm(system) {
-		
         const url = 'http://localhost:8181/'
         return fetch(url, {
             method: 'POST',

@@ -1,8 +1,8 @@
 'use strict';
 
-class PluginAutoSyncGoalEnd2EndMinEy {
+class PluginAutoSyncGoalEnd2EndMin {
     // Plug-in Metadata
-    static get Name()     { return 'Minimise End-to-End Response Times (EY)'; }
+    static get Name()     { return 'Minimise End-to-End Response Times'; }
     static get Author()   { return 'Eugene Yip'; }
     static get Category() { return PluginAutoSync.Category.Goal; }
 
@@ -235,8 +235,8 @@ class PluginAutoSyncGoalEnd2EndMinEy {
                     // Find the earliest instance of currentTask that can complete its computations after maxPredecessorLetEndTime.
                     if (instance.periodStartTime <= maxPredecessorLetEndTime && maxPredecessorLetEndTime <= instance.periodEndTime) {
                         currentTask.activationOffset = (maxPredecessorLetEndTime + currentTask.wcet <= instance.periodEndTime)
-                                                     ? currentTask.activationOffset = maxPredecessorLetEndTime - instance.periodStartTime
-                                                     : currentTask.activationOffset = 0;
+                                                     ? maxPredecessorLetEndTime - instance.periodStartTime
+                                                     : 0;
                         currentTask.duration = currentTask.period - currentTask.activationOffset;
                         
                         firstTaskInstanceOfInterest[currentTaskName] = {
@@ -310,7 +310,7 @@ class PluginAutoSyncGoalEnd2EndMinEy {
 
 }
 
-PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix = class {
+PluginAutoSyncGoalEnd2EndMin.AdjacencyMatrix = class {
     sources = null;     // Mapping of nodes to indices.
     targets = null;     // Mapping of nodes to indices.
     matrix = null;      // Adjacency matrix as a 2D array.
@@ -562,7 +562,7 @@ PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix = class {
     }
 }
 
-class PluginAutoSyncGoalEnd2EndMinEyTest {
+class PluginAutoSyncGoalEnd2EndMinTest {
     static Run() {
         this.Test1();
         this.Test2();
@@ -598,7 +598,7 @@ class PluginAutoSyncGoalEnd2EndMinEyTest {
     //
     static Test1() {
         const tasksRequiredTest = new Set(['t1', 't2', 't3', 't4', 't5', 't6', 't7', 't8', 't9', 't10', 't11']);
-        let graphTest = new PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix(tasksRequiredTest);
+        let graphTest = new PluginAutoSyncGoalEnd2EndMin.AdjacencyMatrix(tasksRequiredTest);
         
         const taskDependenciesTest = [
             ['t1', 't2'], ['t2', 't3'], ['t3', 't4'], ['t4', 't5'], ['t5', 't6'],
@@ -656,7 +656,7 @@ class PluginAutoSyncGoalEnd2EndMinEyTest {
     //
     static Test2() {
         const tasksRequiredTest = new Set(['t1', 't2', 't3', 't4', 't5', 't6', 't7', 't8', 't9', 't10', 't11']);
-        let graphTest = new PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix(tasksRequiredTest);
+        let graphTest = new PluginAutoSyncGoalEnd2EndMin.AdjacencyMatrix(tasksRequiredTest);
         
         const taskDependenciesTest = [
             ['t1', 't2'], ['t2', 't3'], ['t3', 't4'], ['t4', 't5'], ['t5', 't6'],
@@ -710,7 +710,7 @@ class PluginAutoSyncGoalEnd2EndMinEyTest {
     //
     static Test3() {
         const tasksRequiredTest = new Set(['t1', 't2', 't3', 't4', 't5', 't6', 't7', 't8']);
-        let graphTest = new PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix(tasksRequiredTest);
+        let graphTest = new PluginAutoSyncGoalEnd2EndMin.AdjacencyMatrix(tasksRequiredTest);
         
         const taskDependenciesTest = [
             ['t1', 't2'], ['t2', 't3'], ['t3', 't4'], ['t4', 't5'],
@@ -760,7 +760,7 @@ class PluginAutoSyncGoalEnd2EndMinEyTest {
     //
     static Test4() {
         const tasksRequiredTest = new Set(['t1', 't2', 't3', 't4', 't5', 't6']);
-        let graphTest = new PluginAutoSyncGoalEnd2EndMinEy.AdjacencyMatrix(tasksRequiredTest);
+        let graphTest = new PluginAutoSyncGoalEnd2EndMin.AdjacencyMatrix(tasksRequiredTest);
         
         const taskDependenciesTest = [
             ['t1', 't2'], ['t2', 't3'],
