@@ -15,7 +15,9 @@ class PluginAutoSyncGoalIlp {
         const systemElementSelected = ['inputs','outputs','tasks','dependencies','eventChains','constraints'];
         const system = await PluginAutoSync.DatabaseContentsGet(systemElementSelected);
         
-        system['makespan'] = makespan; //send makespan to ILP Solver
+        // Add the makespan to system so that the ILP Solver can access it.
+        system['makespan'] = makespan;
+        
         // Optimise the LET system with an external web tool.
         const optimisedSchedule = await this.Algorithm(system);
         if (optimisedSchedule == null) {
