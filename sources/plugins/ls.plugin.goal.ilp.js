@@ -1,19 +1,20 @@
 'use strict';
 
-class PluginAutoSyncGoalIlp {
+class PluginGoalIlp {
     // Plug-in Metadata
     static get Name()     { return 'ILP-based Schedule Optimiser'; }
     static get Author()   { return 'Matthew Kuo'; }
-    static get Category() { return PluginAutoSync.Category.Goal; }
+    static get Type()     { return Plugin.Type.Goal; }
+    static get Category() { return Plugin.Category.ResponseTime; }
 
     
     static async Result(scheduler) {
         // Delete existing schedule.
-        await PluginAutoSync.DeleteSchedule();
+        await Plugin.DeleteSchedule();
         
         // Retrieve the LET system.
         const systemElementSelected = ['inputs','outputs','tasks','dependencies','eventChains','constraints'];
-        const system = await PluginAutoSync.DatabaseContentsGet(systemElementSelected);
+        const system = await Plugin.DatabaseContentsGet(systemElementSelected);
 
         //Compute makespan
         const initialOffsets = system[Model.TaskStoreName].map(taskParameters => taskParameters.initialOffset).flat();
@@ -30,9 +31,9 @@ class PluginAutoSyncGoalIlp {
         
         // Save the externally optimised task schedule and compute the dependency and event chain instances.
         const scheduleElementSelected = ['schedule'];
-        return PluginAutoSync.DatabaseContentsDelete(scheduleElementSelected)
-            .then(result => PluginAutoSync.DatabaseContentsSet(optimisedSchedule, scheduleElementSelected))
-            .then(result => PluginAutoSync.CreateAllDependencyAndEventChainInstances(makespan));
+        return Plugin.DatabaseContentsDelete(scheduleElementSelected)
+            .then(result => Plugin.DatabaseContentsSet(optimisedSchedule, scheduleElementSelected))
+            .then(result => Plugin.CreateAllDependencyAndEventChainInstances(makespan));
     }
     
     // Trigger an external optimisation tool.

@@ -1,21 +1,22 @@
 'use strict';
 
-class PluginAutoSyncGoalRandom {
+class PluginGoalRandom {
     // Plug-in Metadata
     static get Name()     { return 'Random Task Parameters'; }
     static get Author()   { return 'Eugene Yip'; }
-    static get Category() { return PluginAutoSync.Category.Goal; }
+    static get Type()     { return Plugin.Type.Goal; }
+    static get Category() { return Plugin.Category.ResponseTime; }
 
     
     static async Result(scheduler) {
         const taskElementSelected = ['tasks'];
-        const system = await PluginAutoSync.DatabaseContentsGet(taskElementSelected);
+        const system = await Plugin.DatabaseContentsGet(taskElementSelected);
         let tasks = system[Model.TaskStoreName];
         
         this.Algorithm(tasks);
         
-        return PluginAutoSync.DatabaseContentsDelete(taskElementSelected)
-            .then(PluginAutoSync.DatabaseContentsSet(system, taskElementSelected));
+        return Plugin.DatabaseContentsDelete(taskElementSelected)
+            .then(Plugin.DatabaseContentsSet(system, taskElementSelected));
     }
     
     // Randomises the task activation offsets and durations.

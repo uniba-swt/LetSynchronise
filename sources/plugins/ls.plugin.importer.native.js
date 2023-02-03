@@ -4,9 +4,10 @@ class PluginImporterNative {
     // Plug-in Metadata
     static get Name()     { return 'LetSynchronise'; }
     static get Author()   { return 'Eugene Yip'; }
-    static get Category() { return PluginImporter.Category.Native; }
-    static get Input()    { return PluginImporter.Input.Json; }
-    static get Output()   { return PluginImporter.Output.Json; }
+    static get Type()     { return Plugin.Type.Importer; }
+    static get Category() { return Plugin.Category.Native; }
+    static get Input()    { return Plugin.Input.Json; }
+    static get Output()   { return Plugin.Output.Json; }
 
     
     // Plug-ins are like utility classes that cannot be instantiated.

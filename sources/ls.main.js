@@ -88,44 +88,38 @@ controller.controllerAnalyse.controllerSchedule = controller.controllerSchedule;
 console.log(controller.toString());
 
 
+// Initialise plug-in repository.
+Plugin.Reset();
+Plugin.ModelDatabase = model.modelDatabase;
+Plugin.ModelSchedule = model.modelSchedule;
+
 // Register importer plug-ins.
-PluginImporter.ModelDatabase = model.modelDatabase;
-PluginImporter.Register(PluginImporterNative);
-PluginImporter.Register(PluginImporterTool1);
-PluginImporter.Register(PluginImporterTudE2e);
+Plugin.Register(PluginImporterNative);
+Plugin.Register(PluginImporterTool1);
+Plugin.Register(PluginImporterTudE2e);
 view.viewExportImport.updateSystemImporters();
 
-console.log(PluginImporter.ToString())
-
 // Register exporter plug-ins.
-PluginExporter.ModelDatabase = model.modelDatabase;
-PluginExporter.Register(PluginExporterNative);
-
-console.log(PluginExporter.ToString())
+Plugin.Register(PluginExporterNative);
 
 // Register metric plug-ins.
-PluginMetric.Register(PluginMetricDataAge);
-PluginMetric.Register(PluginMetricEnd2End);
-PluginMetric.Register(PluginMetricLatency);
+Plugin.Register(PluginMetricDataAge);
+Plugin.Register(PluginMetricEnd2End);
+Plugin.Register(PluginMetricLatency);
 
-console.log(PluginMetric.ToString());
+// Register scheduler plug-ins.
+Plugin.Register(PluginSchedulerIdentity);
+Plugin.Register(PluginSchedulerEdf);
+Plugin.Register(PluginSchedulerFp);
+Plugin.Register(PluginSchedulerRandom);
+Plugin.Register(PluginSchedulerRm);
+Plugin.Register(PluginSchedulerTuDortmund);
 
-// Register AutoSync plug-ins.
-PluginAutoSync.ModelDatabase = model.modelDatabase;
-PluginAutoSync.ModelSchedule = model.modelSchedule;
-// Schedulers
-PluginAutoSync.Register(PluginAutoSyncSchedulerIdentity);
-PluginAutoSync.Register(PluginAutoSyncSchedulerEdf);
-PluginAutoSync.Register(PluginAutoSyncSchedulerFp);
-PluginAutoSync.Register(PluginAutoSyncSchedulerRandom);
-PluginAutoSync.Register(PluginAutoSyncSchedulerRm);
-PluginAutoSync.Register(PluginAutoSyncSchedulerTuDortmund);
-// Goals
-PluginAutoSync.Register(PluginAutoSyncGoalEnd2EndMax);
-PluginAutoSync.Register(PluginAutoSyncGoalEnd2EndMin);
-PluginAutoSync.Register(PluginAutoSyncGoalRandom);
-PluginAutoSync.Register(PluginAutoSyncGoalIlp);
-// View
-view.viewSchedule.updateAutoSyncPluginSelectors();
+// Register optimisation goal plug-ins.
+Plugin.Register(PluginGoalEnd2EndMax);
+Plugin.Register(PluginGoalEnd2EndMin);
+Plugin.Register(PluginGoalRandom);
+Plugin.Register(PluginGoalIlp);
+view.viewSchedule.updateOptimiserPluginSelectors();
 
-console.log(PluginAutoSync.ToString());
+console.log(Plugin.ToString());

@@ -61,7 +61,7 @@ class ModelAnalyse {
                 allChainInstances.forEach(chainInstance => { groupedChainInstances[chainInstance.chainName].push(chainInstance) });
 
                 // Iterate over the available plug-ins and compute metrics for all event chain instances, grouped by event chain name.
-                const timingPlugins = PluginMetric.OfCategory(PluginMetric.Category.Timing);
+                const timingPlugins = Plugin.OfTypeAndCategory(Plugin.Type.Metric, Plugin.Category.Timing);
                 const results = Object.fromEntries(Object.keys(groupedChainInstances).map(chainName => [chainName, { }]));
                 for (const chainName in groupedChainInstances) {
                     for (const pluginName in timingPlugins) {
@@ -70,7 +70,7 @@ class ModelAnalyse {
                 }
 
                 // Evaluate each timing constraint on the latency metrics.
-                const latencyTimingPlugins = PluginMetric.OfOutput(timingPlugins, PluginMetric.Output.Latencies);
+                const latencyTimingPlugins = Plugin.OfOutput(timingPlugins, Plugin.Output.Latencies);
                 for (const chainName in results) {
                     for (const pluginName in latencyTimingPlugins) {
                         results[chainName][pluginName]['constraints'] = { };

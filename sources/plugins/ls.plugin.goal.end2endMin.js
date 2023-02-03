@@ -1,10 +1,11 @@
 'use strict';
 
-class PluginAutoSyncGoalEnd2EndMin {
+class PluginGoalEnd2EndMin {
     // Plug-in Metadata
     static get Name()     { return 'Minimise End-to-End Response Times'; }
     static get Author()   { return 'Eugene Yip'; }
-    static get Category() { return PluginAutoSync.Category.Goal; }
+    static get Type()     { return Plugin.Type.Goal; }
+    static get Category() { return Plugin.Category.ResponseTime; }
 
     
     // Updates the task parameters to miminise end-to-end reponse times.
@@ -13,7 +14,7 @@ class PluginAutoSyncGoalEnd2EndMin {
     static async Result(scheduler) {
         // Retrieve the LET system.
         const systemElementSelected = ['tasks', 'eventChains', 'constraints'];
-        const system = await PluginAutoSync.DatabaseContentsGet(systemElementSelected);
+        const system = await Plugin.DatabaseContentsGet(systemElementSelected);
         const tasks = await system[Model.TaskStoreName];
         const eventChains = await system[Model.EventChainStoreName];
         const constraints = await system[Model.ConstraintStoreName];
@@ -28,8 +29,8 @@ class PluginAutoSyncGoalEnd2EndMin {
         await this.Algorithm(tasks, graph, scheduler);
 
         const taskElementSelected = ['tasks'];
-        return PluginAutoSync.DatabaseContentsDelete(taskElementSelected)
-            .then(PluginAutoSync.DatabaseContentsSet(system, taskElementSelected));
+        return Plugin.DatabaseContentsDelete(taskElementSelected)
+            .then(Plugin.DatabaseContentsSet(system, taskElementSelected));
     }
     
     static getTaskParameters(name, tasks) {
@@ -175,7 +176,7 @@ class PluginAutoSyncGoalEnd2EndMin {
     static async IterativeScheduling(tasks, taskDependencyGraph, scheduler, makespan, executionTiming, currentTaskSet, firstTaskInstanceOfInterest, tasksToSchedule) {
         for (const currentTaskName of tasksToSchedule) {
             // Delete the existing task schedule.
-            await PluginAutoSync.DeleteSchedule();
+            await Plugin.DeleteSchedule();
             
             // Expand the current task's LET interval to span its entire period,
             // and remove the initial offset.
@@ -278,9 +279,9 @@ class PluginAutoSyncGoalEnd2EndMin {
     
     static async ScheduleTaskSet(scheduler, taskSet, makespan, executionTiming) {
         for (const task of taskSet) {
-            await PluginAutoSync.CreateTaskInstances(task, makespan, executionTiming);
+            await Plugin.CreateTaskInstances(task, makespan, executionTiming);
         }
-        const schedule = await PluginAutoSync.GetSchedule();
+        const schedule = await Plugin.GetSchedule();
         const allTasksInstances = await schedule['promiseAllTasksInstances'];
         const schedulingResult = scheduler.Algorithm(allTasksInstances, makespan, [...taskSet]);
         return [schedulingResult, allTasksInstances];
@@ -310,7 +311,7 @@ class PluginAutoSyncGoalEnd2EndMin {
 
 }
 
-PluginAutoSyncGoalEnd2EndMin.AdjacencyMatrix = class {
+PluginGoalEnd2EndMin.AdjacencyMatrix = class {
     sources = null;     // Mapping of nodes to indices.
     targets = null;     // Mapping of nodes to indices.
     matrix = null;      // Adjacency matrix as a 2D array.
@@ -562,7 +563,7 @@ PluginAutoSyncGoalEnd2EndMin.AdjacencyMatrix = class {
     }
 }
 
-class PluginAutoSyncGoalEnd2EndMinTest {
+class PluginGoalEnd2EndMinTest {
     static Run() {
         this.Test1();
         this.Test2();
@@ -598,7 +599,7 @@ class PluginAutoSyncGoalEnd2EndMinTest {
     //
     static Test1() {
         const tasksRequiredTest = new Set(['t1', 't2', 't3', 't4', 't5', 't6', 't7', 't8', 't9', 't10', 't11']);
-        let graphTest = new PluginAutoSyncGoalEnd2EndMin.AdjacencyMatrix(tasksRequiredTest);
+        let graphTest = new PluginGoalEnd2EndMin.AdjacencyMatrix(tasksRequiredTest);
         
         const taskDependenciesTest = [
             ['t1', 't2'], ['t2', 't3'], ['t3', 't4'], ['t4', 't5'], ['t5', 't6'],
@@ -656,7 +657,7 @@ class PluginAutoSyncGoalEnd2EndMinTest {
     //
     static Test2() {
         const tasksRequiredTest = new Set(['t1', 't2', 't3', 't4', 't5', 't6', 't7', 't8', 't9', 't10', 't11']);
-        let graphTest = new PluginAutoSyncGoalEnd2EndMin.AdjacencyMatrix(tasksRequiredTest);
+        let graphTest = new PluginGoalEnd2EndMin.AdjacencyMatrix(tasksRequiredTest);
         
         const taskDependenciesTest = [
             ['t1', 't2'], ['t2', 't3'], ['t3', 't4'], ['t4', 't5'], ['t5', 't6'],
@@ -710,7 +711,7 @@ class PluginAutoSyncGoalEnd2EndMinTest {
     //
     static Test3() {
         const tasksRequiredTest = new Set(['t1', 't2', 't3', 't4', 't5', 't6', 't7', 't8']);
-        let graphTest = new PluginAutoSyncGoalEnd2EndMin.AdjacencyMatrix(tasksRequiredTest);
+        let graphTest = new PluginGoalEnd2EndMin.AdjacencyMatrix(tasksRequiredTest);
         
         const taskDependenciesTest = [
             ['t1', 't2'], ['t2', 't3'], ['t3', 't4'], ['t4', 't5'],
@@ -760,7 +761,7 @@ class PluginAutoSyncGoalEnd2EndMinTest {
     //
     static Test4() {
         const tasksRequiredTest = new Set(['t1', 't2', 't3', 't4', 't5', 't6']);
-        let graphTest = new PluginAutoSyncGoalEnd2EndMin.AdjacencyMatrix(tasksRequiredTest);
+        let graphTest = new PluginGoalEnd2EndMin.AdjacencyMatrix(tasksRequiredTest);
         
         const taskDependenciesTest = [
             ['t1', 't2'], ['t2', 't3'],

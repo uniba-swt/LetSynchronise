@@ -4,9 +4,10 @@ class PluginImporterTudE2e {
     // Plug-in Metadata
     static get Name()     { return 'TU Dortmund End-to-End Analyser'; }
     static get Author()   { return 'Matthew Kuo'; }
-    static get Category() { return PluginImporter.Category.TudE2e; }
-    static get Input()    { return PluginImporter.Input.Txt; }
-    static get Output()   { return PluginImporter.Output.Json; }
+    static get Type()     { return Plugin.Type.Importer; }
+    static get Category() { return Plugin.Category.TudE2e; }
+    static get Input()    { return Plugin.Input.Txt; }
+    static get Output()   { return Plugin.Output.Json; }
 
     
     // Plug-ins are like utility classes that cannot be instantiated.
@@ -17,7 +18,7 @@ class PluginImporterTudE2e {
     // @Input system defined in TXT format.
     // @Output system defined in the native JSON format.
     static async Result(rawSystem) {
-        const databaseContents = await PluginImporter.DatabaseContents;
+        const databaseContents = await Plugin.DatabaseContents;
         console.log(databaseContents);
         
         alert(PluginImporterTudE2e.Name);

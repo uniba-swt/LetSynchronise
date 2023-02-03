@@ -12,7 +12,7 @@ class ViewSchedule {
     updateButton = null;
     
     goalField = null;
-    autoSyncButton = null;
+    optimiseButton = null;
 
     eventChainField = null;
     instanceField = null;
@@ -37,9 +37,9 @@ class ViewSchedule {
         this.executionTimingField = this.root.querySelector('#view-schedule-execution-timing');
         this.updateButton = this.root.querySelector('#update');
 
-        // AutoSync
-        this.goalField = this.root.querySelector('#view-autosync-goal');
-        this.autoSyncButton = this.root.querySelector('#autosync');
+        // Optimiser
+        this.goalField = this.root.querySelector('#view-optimise-goal');
+        this.optimiseButton = this.root.querySelector('#optimise');
 
         // Event chains
         this.eventChainField = this.root.querySelector('#view-schedule-event-chain');
@@ -96,7 +96,7 @@ class ViewSchedule {
     }
 
     get pluginScheduler() {
-        return PluginAutoSync.GetPlugin(this.scheduler);
+        return Plugin.GetPlugin(Plugin.Type.Scheduler, this.scheduler);
     }
     
     get eventChain() {
@@ -127,7 +127,8 @@ class ViewSchedule {
         return {
             'makespan': this.makespan,
             'scheduler': this.pluginScheduler,
-            'executionTiming': this.executionTiming
+            'executionTiming': this.executionTiming,
+            'scheduler': this.pluginScheduler
         };
     }
     
@@ -135,7 +136,8 @@ class ViewSchedule {
         return {
             'makespan': Math.abs(parseFloat(this.makespan)) * Utility.MsToNs,
             'scheduler': this.pluginScheduler,
-            'executionTiming': this.executionTiming
+            'executionTiming': this.executionTiming,
+            'scheduler': this.pluginScheduler
         };
     }
     
@@ -148,20 +150,18 @@ class ViewSchedule {
     }
     
     get pluginGoal() {
-        return PluginAutoSync.GetPlugin(this.goal);
+        return Plugin.GetPlugin(Plugin.Type.Goal, this.goal);
     }
     
-    get autoSyncParametersRaw() {
+    get optimiserParametersRaw() {
         return {
             'goal': this.pluginGoal,
-            'scheduler': this.pluginScheduler
         };
     }
     
-    get autoSyncParametersClean() {
+    get optimiserParametersClean() {
         return {
             'goal': this.pluginGoal,
-            'scheduler': this.pluginScheduler
         };
     }
 
@@ -213,14 +213,14 @@ class ViewSchedule {
         });
     }
     
-    registerAutoSyncHandler(handler) {
-        this.autoSyncButton.addEventListener('click', event => {
+    registerOptimiseHandler(handler) {
+        this.optimiseButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
             event.preventDefault();
             
             // Validate the inputs.
             if (this.validateSchedulingParameters(this.schedulingParametersRaw)
-                && this.validateAutoSyncParameters(this.autoSyncParametersRaw)) {
+                && this.validateOptimiserParameters(this.optimiserParametersRaw)) {
                 // Call the handler.
                 handler();
             }
@@ -249,17 +249,17 @@ class ViewSchedule {
             return false;
         }
         
-        return true;
-    }
-    
-    validateAutoSyncParameters(autoSyncParameters) {
-        if (autoSyncParameters.goal == null) {
-            alert('Choose an optimisation goal.');
+        if (schedulingParameters.scheduler == null) {
+            alert('Choose a task scheduling policy.');
             return false;
         }
         
-        if (autoSyncParameters.scheduler == null) {
-            alert('Choose a task scheduling policy.');
+        return true;
+    }
+    
+    validateOptimiserParameters(optimiserParameters) {
+        if (optimiserParameters.goal == null) {
+            alert('Choose an optimisation goal.');
             return false;
         }
         
@@ -754,15 +754,15 @@ class ViewSchedule {
         }
     }
     
-    updateAutoSyncPluginSelectors() {
-        const pluginsGoal = Object.keys(PluginAutoSync.OfCategory(PluginAutoSync.Category.Goal));
-        this.updateAutoSyncPluginSelector(d3.select(this.goalField), pluginsGoal);
+    updateOptimiserPluginSelectors() {
+        const pluginsGoal = Object.keys(Plugin.OfType(Plugin.Type.Goal));
+        this.updateOptimiserPluginSelector(d3.select(this.goalField), pluginsGoal);
         
-        const pluginsScheduler = Object.keys(PluginAutoSync.OfCategory(PluginAutoSync.Category.Scheduler));
-        this.updateAutoSyncPluginSelector(d3.select(this.schedulerField), pluginsScheduler);
+        const pluginsScheduler = Object.keys(Plugin.OfType(Plugin.Type.Scheduler));
+        this.updateOptimiserPluginSelector(d3.select(this.schedulerField), pluginsScheduler);
     }
     
-    updateAutoSyncPluginSelector(parentElement, plugins) {
+    updateOptimiserPluginSelector(parentElement, plugins) {
         parentElement.selectAll('*').remove();
         parentElement
             .append('option')

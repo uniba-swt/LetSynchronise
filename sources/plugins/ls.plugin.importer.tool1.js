@@ -4,9 +4,10 @@ class PluginImporterTool1 {
     // Plug-in Metadata
     static get Name()     { return 'Tool1'; }
     static get Author()   { return 'Eugene Yip'; }
-    static get Category() { return PluginImporter.Category.Tool1; }
-    static get Input()    { return PluginImporter.Input.Xml1; }
-    static get Output()   { return PluginImporter.Output.Json; }
+    static get Type()     { return Plugin.Type.Importer; }
+    static get Category() { return Plugin.Category.Tool1; }
+    static get Input()    { return Plugin.Input.Xml1; }
+    static get Output()   { return Plugin.Output.Json; }
 
     
     // Plug-ins are like utility classes that cannot be instantiated.
@@ -18,7 +19,7 @@ class PluginImporterTool1 {
     // @Output system defined in the native JSON format.
     static async Result(rawSystem) {
         // Get a copy of the database contents.
-        const databaseContents = await PluginImporter.DatabaseContents;
+        const databaseContents = await Plugin.DatabaseContents;
 
         let json = '';
         

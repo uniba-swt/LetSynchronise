@@ -69,7 +69,7 @@ class ViewAnalyse {
             for (const pluginName in results[chainName]) {
                 const metrics = results[chainName][pluginName]['metrics'];
                 const constraints = results[chainName][pluginName]['constraints'];
-                const plugin = PluginMetric.GetPlugin(pluginName);
+                const plugin = Plugin.GetPlugin(Plugin.Type.Metric, pluginName);
                 
                 accordionBody.push([plugin.ToHtml(metrics) + this.constraintResultsToHtml(constraints)]);
             }

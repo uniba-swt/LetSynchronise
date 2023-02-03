@@ -4,8 +4,9 @@ class PluginExporterNative {
     // Plug-in Metadata
     static get Name()     { return 'LetSynchronise'; }
     static get Author()   { return 'Eugene Yip'; }
-    static get Category() { return PluginExporter.Category.Native; }
-    static get Output()   { return PluginExporter.Output.Json; }
+    static get Type()     { return Plugin.Type.Exporter; }
+    static get Category() { return Plugin.Category.Native; }
+    static get Output()   { return Plugin.Output.Json; }
 
     
     // Plug-ins are like utility classes that cannot be instantiated.
@@ -16,7 +17,7 @@ class PluginExporterNative {
     // @Input system elements selected for export.
     // @Output system defined in the native JSON format.
     static async Result(elementsSelected) {
-        const system = await PluginExporter.DatabaseContentsGet(elementsSelected);
+        const system = await Plugin.DatabaseContentsGet(elementsSelected);
         return JSON.stringify(system);
     }
     

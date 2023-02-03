@@ -4,9 +4,10 @@ class PluginMetricEnd2End {
     // Plug-in Metadata
     static get Name()     { return 'End-to-End Response Time'; }
     static get Author()   { return 'Eugene Yip'; }
-    static get Category() { return PluginMetric.Category.Timing; }
-    static get Input()    { return PluginMetric.Input.ChainInstances; }
-    static get Output()   { return PluginMetric.Output.Latencies; }
+    static get Type()     { return Plugin.Type.Metric; }
+    static get Category() { return Plugin.Category.Timing; }
+    static get Input()    { return Plugin.Input.ChainInstances; }
+    static get Output()   { return Plugin.Output.Latencies; }
     
     
     // Plug-ins are like utility classes that cannot be instantiated.
@@ -20,13 +21,13 @@ class PluginMetricEnd2End {
     static Result(chainName, chainInstances) {
         let rawResults = Object.fromEntries(chainInstances.map(chainInstance => this.Compute(chainInstance))
                                                           .filter(result => result !== undefined));        
-        const valuesOnly = PluginMetric.ValuesOfObject(rawResults);
+        const valuesOnly = Plugin.ValuesOfObject(rawResults);
         
         return {
             'chainName': chainName,
-            'min': PluginMetric.Min(valuesOnly),
-            'avg': PluginMetric.Avg(valuesOnly),
-            'max': PluginMetric.Max(valuesOnly),
+            'min': Plugin.Min(valuesOnly),
+            'avg': Plugin.Avg(valuesOnly),
+            'max': Plugin.Max(valuesOnly),
             'num': valuesOnly.length,
             'raw': rawResults
         }
@@ -49,7 +50,7 @@ class PluginMetricEnd2End {
         if (result.num == 0) {
             return `<h6>${PluginMetricEnd2End.Name}: ${result.num} values</h6>`;
         } else {
-            const values = PluginMetric.ValuesOfObject(result.raw).map(value => value / Utility.MsToNs);
+            const values = Plugin.ValuesOfObject(result.raw).map(value => value / Utility.MsToNs);
             return [
                 `<h6>${PluginMetricEnd2End.Name}: (min, avg, max) = (${result.min / Utility.MsToNs}, ${result.avg / Utility.MsToNs}, ${result.max / Utility.MsToNs})ms</h6>`,
                 `<ul><li>${result.num} values: [${values.join(', ')}]</li></ul>`,
@@ -61,7 +62,7 @@ class PluginMetricEnd2End {
         if (result.num == 0) {
             return `${PluginMetricEnd2End.Name}: ${result.num} values`;
         } else {
-            const values = PluginMetric.ValuesOfObject(result.raw).map(value => value / Utility.MsToNs);
+            const values = Plugin.ValuesOfObject(result.raw).map(value => value / Utility.MsToNs);
             return [
                 `${PluginMetricEnd2End.Name}: (min, avg, max) = (${result.min / Utility.MsToNs}, ${result.avg / Utility.MsToNs}, ${result.max / Utility.MsToNs})ms`,
                 `  ${result.num} values: [${values.join(', ')}]`

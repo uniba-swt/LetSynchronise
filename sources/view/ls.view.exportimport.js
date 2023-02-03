@@ -103,7 +103,7 @@ class ViewExportImport {
     setupImportSystemSelectorListener() {
         this.importSystemSelector.addEventListener('click', event => {
             // Filter the acceptable file types based on the selected plugin.
-            const pluginImporter = PluginImporter.GetPlugin(this.importer);
+            const pluginImporter = Plugin.GetPlugin(Plugin.Type.Importer, this.importer);
             this.importSystemSelector.accept = `.${pluginImporter.Input}`;
         });
     }
@@ -126,7 +126,7 @@ class ViewExportImport {
         this.importSystemButton.addEventListener('click', event => {
             event.preventDefault();
             
-            const pluginImporter = PluginImporter.GetPlugin(this.importer);
+            const pluginImporter = Plugin.GetPlugin(Plugin.Type.Importer, this.importer);
             if (this.importSystemSelector.files.length < 1) {
                 alert(`${pluginImporter.Name} system importer requires a *.${pluginImporter.Input.toLowerCase()} file to be selected!`);
                 return;
@@ -152,9 +152,9 @@ class ViewExportImport {
         const thisRef = this;
         
         // Choose one of the native plugins as the default importer.
-        const nativePlugins = PluginImporter.OfCategory(PluginImporter.Category.Native);
+        const nativePlugins = Plugin.OfTypeAndCategory(Plugin.Type.Importer, Plugin.Category.Native);
         const nativePlugin = Object.keys(nativePlugins).length > 0 ? Object.keys(nativePlugins)[0] : null;
-        const remainingPlugins = Object.keys(PluginImporter.Plugins);
+        const remainingPlugins = Object.keys(Plugin.OfType(Plugin.Type.Importer));
         
         this.importerSystemDropdown.selectAll('*').remove();
         this.importerSystemDropdown

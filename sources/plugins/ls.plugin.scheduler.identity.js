@@ -1,10 +1,11 @@
 'use strict';
 
-class PluginAutoSyncSchedulerIdentity {
+class PluginSchedulerIdentity {
     // Plug-in Metadata
     static get Name()     { return 'No Scheduling (Identity)'; }
     static get Author()   { return 'Eugene Yip'; }
-    static get Category() { return PluginAutoSync.Category.Scheduler; }
+    static get Type()     { return Plugin.Type.Scheduler; }
+    static get Category() { return Plugin.Category.Identity; }
 
     
     // Simply return nothing.

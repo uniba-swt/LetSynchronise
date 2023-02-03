@@ -1,22 +1,23 @@
 'use strict';
 
-class PluginAutoSyncGoalEnd2EndMax {
+class PluginGoalEnd2EndMax {
     // Plug-in Metadata
     static get Name()     { return 'Maximise End-to-End Response Times'; }
     static get Author()   { return 'Eugene Yip'; }
-    static get Category() { return PluginAutoSync.Category.Goal; }
+    static get Type()     { return Plugin.Type.Goal; }
+    static get Category() { return Plugin.Category.ResponseTime; }
 
     
     // Updates the task parameters to maximise end-to-end reponse times.
     static async Result(scheduler) {
         const taskElementSelected = ['tasks'];
-        const system = await PluginAutoSync.DatabaseContentsGet(taskElementSelected);
+        const system = await Plugin.DatabaseContentsGet(taskElementSelected);
         let tasks = system[Model.TaskStoreName];
         
         this.Algorithm(tasks);
 
-        return PluginAutoSync.DatabaseContentsDelete(taskElementSelected)
-            .then(PluginAutoSync.DatabaseContentsSet(system, taskElementSelected));
+        return Plugin.DatabaseContentsDelete(taskElementSelected)
+            .then(Plugin.DatabaseContentsSet(system, taskElementSelected));
     }
     
     // Parameter "tasks" is a copy of a reference to an object.

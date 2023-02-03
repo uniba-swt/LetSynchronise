@@ -15,7 +15,7 @@ class ControllerSchedule {
         
         // Register the handlers when setting the view.
         this._view.registerUpdateHandler(this.handleGetSchedule);
-        this._view.registerAutoSyncHandler(this.handleAutoSync);
+        this._view.registerOptimiseHandler(this.handleOptimise);
     }
 
     get view() {
@@ -105,11 +105,11 @@ class ControllerSchedule {
     }
     
     // Handler for optimising the task set and schedule.
-    handleAutoSync = () => {
+    handleOptimise = () => {
         const makespan = this.view.schedulingParametersClean.makespan;
-        const scheduler = this.view.autoSyncParametersClean.scheduler;
+        const scheduler = this.view.schedulingParametersClean.scheduler;
         const executionTiming = this.view.schedulingParametersClean.executionTiming;
-        const goal = this.view.autoSyncParametersClean.goal;
+        const goal = this.view.optimiserParametersClean.goal;
         goal.Result(scheduler)
             .then(result => scheduler.Result(makespan, executionTiming))
             .then(result => this.modelTask.refreshViews())
