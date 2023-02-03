@@ -11,7 +11,7 @@ class PluginGoalEnd2EndMin {
     // Updates the task parameters to miminise end-to-end reponse times.
     // Iteratively schedules the tasks based on timing constraint priorities,
     // and contracts the LET intervals based on min/max execution intervals.
-    static async Result(scheduler) {
+    static async Result(scheduler, makespan) {
         // Retrieve the LET system.
         const systemElementSelected = ['tasks', 'eventChains', 'constraints'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);

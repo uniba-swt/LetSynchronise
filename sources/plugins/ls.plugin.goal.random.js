@@ -8,7 +8,7 @@ class PluginGoalRandom {
     static get Category() { return Plugin.Category.ResponseTime; }
 
     
-    static async Result(scheduler) {
+    static async Result(scheduler, makespan) {
         const taskElementSelected = ['tasks'];
         const system = await Plugin.DatabaseContentsGet(taskElementSelected);
         let tasks = system[Model.TaskStoreName];
