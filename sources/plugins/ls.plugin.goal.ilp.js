@@ -8,21 +8,17 @@ class PluginGoalIlp {
     static get Category() { return Plugin.Category.ResponseTime; }
 
     
-    static async Result(scheduler) {
+    static async Result(scheduler, makespan) {
         // Delete existing schedule.
         await Plugin.DeleteSchedule();
         
         // Retrieve the LET system.
         const systemElementSelected = ['inputs','outputs','tasks','dependencies','eventChains','constraints'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
-
-        //Compute makespan
-        const initialOffsets = system[Model.TaskStoreName].map(taskParameters => taskParameters.initialOffset).flat();
-        const periods = system[Model.TaskStoreName].map(taskParameters => taskParameters.period).flat();
-        const prologue = Utility.MaxOfArray(initialOffsets);
-        const hyperPeriod = Utility.LeastCommonMultipleOfArray(periods);
-        system['makespan'] = prologue + hyperPeriod; // Send makespan to ILP Solver
-
+        
+        // Add the makespan to system so that the ILP Solver can access it.
+        system['makespan'] = makespan;
+        
         // Optimise the LET system with an external web tool.
         const optimisedSchedule = await this.Algorithm(system);
         if (optimisedSchedule == null) {
