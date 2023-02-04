@@ -36,6 +36,9 @@ Systems can be imported and exported via supported file formats. If only certain
 system elements should be imported or exported, these can be selected beforehand 
 via tick boxes.
 
+> **Note**
+> LetSynchronise uses a time base of nanoseconds to avoid rounding errors.
+
 ### Design Tab
 * Edit the system interface in terms of the environmental inputs and outputs.
 * Edit the system's LET task set, and view each task's parameters diagramatically.
