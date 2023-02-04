@@ -30,7 +30,7 @@ uate the results of existing work.
 ## Usage
 LetSynchronise is designed as a web application that does not require any installation. 
 Just open the `sources/ls.main.html` file in a web browser, e.g., Firefox or Safari.
-There are two tabs for users to `Design` and then to `Analyse` a LET system.
+There are two tabs for users to **Design** and then to **Analyse** a LET system.
 
 Systems can be imported and exported via supported file formats. If only certain
 system elements should be imported or exported, these can be selected beforehand 
