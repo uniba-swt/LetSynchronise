@@ -2,7 +2,7 @@
 
 class PluginGoalIlp {
     // Plug-in Metadata
-    static get Name()     { return 'ILP-based Schedule Optimiser'; }
+    static get Name()     { return 'Minimise End-to-End Response Times (ILP)'; }
     static get Author()   { return 'Matthew Kuo'; }
     static get Type()     { return Plugin.Type.Goal; }
     static get Category() { return Plugin.Category.ResponseTime; }
