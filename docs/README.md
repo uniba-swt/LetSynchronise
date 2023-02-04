@@ -1,68 +1,77 @@
 # LET Task Set
 
 The task set of a LET system is specified by the user.
+Example task sets in JSON format can be found in the `example` folder.
 
-An example task set of a LET system in JSON format can be found at `example/example1-system.json`.
+
+# Task Dependencies
+
+Communication dependencies between tasks are defined from a source (system input or task output)
+to a destination (system output or task input).
 
 
 # LET Task Schedule
 
-The task schedule is recomputed every time the **Update** button is pressed. 
-This means that tasks, dependencies, and event chains are reinstantiated and redrawn. 
-This includes assigning random execution times for each task instance.
+The scheduler that will be used to schedule the executions of overlapping tasks is chosen from a list scheduling policy plugins.
+The execution times to generate for each task instance can be chosen from BCET, ACET, or WCET.
+The task schedule is (re)computed every time the **Update** button is pressed. 
+This means that tasks, dependencies, and event chains are (re)instantiated, (re)scheduled, and (re)drawn as a Gantt chart. 
 
-However, recomputing the entire task schedule is not necessary when task dependencies, event chains, and timing constraints are created, edited, or deleted. 
-They have no impact on the task set. 
-Only when the tasks are created or edited does the task schedule need to be recomputed.
+Recomputing the entire task schedule is not necessary when task dependencies, event chains, and timing constraints are created, edited, or deleted,
+because they have no impact on the task instances. 
+Only when tasks are created or edited does the task schedule need to be recomputed.
 When this is necessary, the **Update** button will turn red and remain red until it has be clicked, triggering a recomputation of the task schedule.
-
-An example schedule in JSON format can be found at `example/example1-schedule.json`.
 
 
 # System Plugins
 
-Plugins are stateless, static classes that provide LetSynchronise with additional functionality.
-Plugins reside in `sources/plugins` and fall into one of the following categories:
-* Exporter: Export the LetSynchronise system to a required file format.
-  Export plugins are registered and managed by `ls.plugin.exporter.js`.
-* Importer: Import systems into LetSynchronise from different file formats.
-  Import plugins are registered and managed by `ls.plugin.importer.js`.
-* Metric: Compute metrics on LetSynchronise systems, e.g., data age, end-to-end response time, communication latency, and schedulability. 
-  Metric plugins are registered and managed by `ls.plugin.metric.js`.
-* External Tool: Invoke an external tool and exchange information with LetSynchronise. 
-  External tool plugins are registered and managed by `ls.plugin.externalTool.js`.
+Plugins are stateless, static classes that extend the capabilities of LetSynchronise.
+Plugins are registered for use by `sources/plugins/ls.plugin.js`, which also provides a convenience API to access and modify the system model.
+Plugins reside in `sources/plugins` and can be one of the following types:
+* Exporter: Exports the current system to a required file format.
+* Importer: Imports a system into LetSynchronise from different file formats.
+* Metric: Computes a metric on the event chains current system, e.g., data age, end-to-end response time, and communication latency. 
+* Scheduler: Schedules the current system according to a scheduling policy, e.g., fixed-priority, rate monotonic, or earliest deadline first.
+* Goal: Optimises the current system according to a goal, e.g., minimise end-to-end response times.
 
-## Defining an Importer Plugin
-Define a new importer plugin in the `plugins` folder, e.g., `ls.plugin.importer.tool1.js` for the importer called **Tool1**.
+## Defining a Plugin
+Define a new plugin in the `plugins` folder, e.g., `ls.plugin.importer.tool1.js` for a system importer called **Tool1**.
 Plugins have meta-data defined as static properties:
-* Name: Descriptive name of the plugin, which will be displayed to the user, e.g., in a menu item.
+* Name: Descriptive name of the plugin, which will be displayed to the user, e.g., in a dropdown item or analysis output.
 * Author: Creator of the plugin.
-* Category: Suitable classification of the plugin, as defined in `PluginImporter.Category` in `ls.plugin.importer.js`.
-* Input: Supported input of the plugin, as defined in `PluginImporter.Input` in `ls.plugin.importer.js`.
-* Output: Supported output of the plugin, as defined in `PluginImporter.Output` in `ls.plugin.importer.js`.
+* Type: Suitable classification of the plugin's capabilities as defined in `Plugin.Type` in `ls.plugin.js`.
+* Category: Suitable classification of the plugin's functionality as defined in `Plugin.Category` in `ls.plugin.js`.
+* Input: Supported input of the plugin as defined in `Plugin.Input` in `ls.plugin.js`.
+* Output: Supported output of the plugin as defined in `Plugin.Output` in `ls.plugin.js`.
 
-Note that the output of all importer plugins shall be `PluginImporter.Output.Json`.
+In addition to the meta-data, a minimal plugin only needs to implement the static method `Result(...)`.
+The parameter of this function depends on the plugin type:
+* Exporter: 
+  * elementsSelected: System elements that the user has selected to export, which can be the system IO, task set, task dependencies, task schedule, event chains, and timing constraints.
+* Importer: 
+  * rawSystem: Raw file contents of a system to convert and import.
+* Metric: 
+  * chainName: Name of the event chain to compute metrics for. 
+  * chainInstances: Instances of the event chain.
+* Scheduler: 
+  * makespan: Length of the schedule to simulate.
+  * executionTiming: Task execution times to generate (BCET, ACET, or WCET).
+* Goal: 
+  * scheduler: Chosen scheduling policy to use.
+  * makespan: Length of the schedule to simulate.
 
-In addition to the meta-data, a minimal importer plugin only needs to define the static method `Result(rawSystem)`
-which returns a JSON object:
+For example, a simple importer plugin would transform the raw system into a JSON object:
 ```javascript
 static async Result(rawSystem) {
-    // Convert rawSystem into a JSON string.
-    const jsonString = ' ... ';
+    // Convert rawSystem into a JSON string that reflects the database structure of LetSynchronise.
+    const jsonString = this.convert(rawSystem);
     
-    // Parse the JSON string into an object.
+    // Parse the JSON string into a JSON object.
     return JSON.parse(jsonString);
 }
 ```
 
-This method shall take the input (`rawSystem`) and transform it into an equivalent JSON string that reflects the database structure of LetSynchronise.
-The JSON string is then converted into a JSON object using the method `JSON.parse()`. 
-LetSynchronise clears its database and stores the JSON object in the database. 
-
-An import plugin may also be used to import LET task schedules, but the plugin shall guarantee that the task, dependency, and event chain instances are consistent with their definitions in the LetSynchronise database (SystemInputStore, SystemOutputStore, TaskStore, DependencyStore, ConstraintStore, EventChainStore).
-Use the static method `DatabaseContents` in `ls.plugin.importer.js` to retrieve a copy of the database contents as an object:
-```javascript
-const databaseContents = await PluginImporter.DatabaseContents;
-```  
-
-Note that portions of a task schedule (e.g., only task instances) can be imported without modifying other scheduling information (e.g., dependencies instances).
+An import plugin may also be used to import LET task schedules, but the plugin shall guarantee 
+that the instances of tasks, dependencies, and event chains are consistent with their definition in 
+the LetSynchronise database (SystemInputStore, SystemOutputStore, TaskStore, DependencyStore, 
+ConstraintStore, EventChainStore).

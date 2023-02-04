@@ -2,7 +2,7 @@
 
 class PluginGoalEnd2EndMin {
     // Plug-in Metadata
-    static get Name()     { return 'Minimise End-to-End Response Times'; }
+    static get Name()     { return 'Minimise End-to-End Response Times (Heuristics)'; }
     static get Author()   { return 'Eugene Yip'; }
     static get Type()     { return Plugin.Type.Goal; }
     static get Category() { return Plugin.Category.ResponseTime; }

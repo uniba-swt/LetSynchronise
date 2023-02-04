@@ -4,12 +4,12 @@ LetSynchronise is an interactive tool for defining a set of LET tasks and analys
 * Define data-dependencies between LET tasks
 * View a static schedule of the LET tasks, including their data-flow
 * Interactively analyse input/output response times 
-* Calculate schedulability and view over-utilisations
 
 
 ## Dependencies
-* [D3 Data-Driven Documents v7.2.0](https://d3js.org): Charting
-* [Bootstrap v5.1.3](https://getbootstrap.com): User interface and layout
+* Web browser that supports [indexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API): System database
+* [D3 Data-Driven Documents](https://d3js.org): Charting
+* [Bootstrap](https://getbootstrap.com): User interface and layout
 
 
 ## Directory Layout

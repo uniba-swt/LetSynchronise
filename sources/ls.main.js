@@ -118,8 +118,8 @@ Plugin.Register(PluginSchedulerTuDortmund);
 // Register optimisation goal plug-ins.
 Plugin.Register(PluginGoalEnd2EndMax);
 Plugin.Register(PluginGoalEnd2EndMin);
-Plugin.Register(PluginGoalRandom);
 Plugin.Register(PluginGoalIlp);
+Plugin.Register(PluginGoalRandom);
 view.viewSchedule.updateOptimiserPluginSelectors();
 
 console.log(Plugin.ToString());
