@@ -31,6 +31,8 @@ uate the results of existing work.
 LetSynchronise is designed as a web application that does not require any installation. 
 Just open the `sources/ls.main.html` file in a web browser, e.g., Firefox or Safari.
 There are two tabs for users to **Design** and then to **Analyse** a LET system.
+See the [docs](docs) folder for information on the types of plugins that are available 
+and can be developed.
 
 Systems can be imported and exported via supported file formats. If only certain
 system elements should be imported or exported, these can be selected beforehand 
@@ -59,6 +61,14 @@ via tick boxes.
 * View analysis results for timing constraints.
 
 
-## Code Style
+## Development
+LetSynchronise is based on the model-view-controller architecure and details
+can be found in the [`docs`](docs) folder. The main logic and plugins are programmed
+in JavaScript. The system model and simulated schedule are stored in 
+[IndexeDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API).
+The user interface is styled with [Bootstrap](https://getbootstrap.com).
+The simulated schedules are plotted with [D3](https://d3js.org).
+
+### Code Style
 * Indentation: 4 spaces
 * Names: camel casing
