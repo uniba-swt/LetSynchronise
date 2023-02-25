@@ -63,7 +63,7 @@ via tick boxes.
 
 ## Development
 LetSynchronise is based on the model-view-controller architecure and details
-can be found in the [docs](docs) folder. The main logic and plugins are programmed
+can be found in the [`docs`](docs) folder. The main logic and plugins are programmed
 in JavaScript. The system model and simulated schedule are stored in 
 [IndexeDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API).
 The user interface is styled with [Bootstrap](https://getbootstrap.com).
