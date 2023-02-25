@@ -12,10 +12,5 @@ class PluginSchedulerIdentity {
     static async Result(makespan, executionTiming) {
         return;
     }
-    
-    // Simply do nothing.
-    static Algorithm(taskInstances, makespan) {
-        return { 'schedulable': true, 'message': 'Scheduling finished' };
-    }
 
 }
