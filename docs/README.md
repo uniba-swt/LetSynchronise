@@ -1,6 +1,6 @@
 # LET Task Set
 The task set of a LET system is specified by the user.
-Example task sets in JSON format can be found in the `example` folder.
+Example task sets in JSON format can be found in the [`examples`](../examples) folder.
 
 
 # Task Dependencies
@@ -22,8 +22,9 @@ When this is necessary, the **Update** button will turn red and remain red until
 
 # System Plugins
 Plugins are stateless, static classes that extend the capabilities of LetSynchronise.
-Plugins are registered for use by `sources/plugins/ls.plugin.js`, which also provides a convenience API to access and modify the system model.
-Plugins reside in `sources/plugins` and can be one of the following types:
+Plugins are registered for use by [`ls.plugin.js`](../sources/plugins/ls.plugin.js), 
+which also provides a convenience API to access and modify the system model.
+Plugins reside in [`sources/plugins`](../sources/plugins) and can be one of the following types:
 * Exporter: Exports the current system to a required file format.
 * Importer: Imports a system into LetSynchronise from different file formats.
 * Metric: Computes a metric on the event chains current system, e.g., data age, end-to-end response time, and communication latency. 
@@ -31,8 +32,9 @@ Plugins reside in `sources/plugins` and can be one of the following types:
 * Goal: Optimises the current system according to a goal, e.g., minimise end-to-end response times.
 
 ## Defining a Plugin
-Define a new plugin in the `plugins` folder, e.g., `ls.plugin.importer.tool1.js` for a system importer called **Tool1**.
-Plugins have meta-data defined as static properties:
+Define a new plugin in the [`plugins`](../sources/plugins) folder, e.g., 
+[`ls.plugin.importer.tool1.js`](../sources/plugins/ls.plugin.importer.tool1.js) 
+for a system importer called **Tool1**. Plugins have meta-data defined as static properties:
 * Name: Descriptive name of the plugin, which will be displayed to the user, e.g., in a dropdown item or analysis output.
 * Author: Creator of the plugin.
 * Type: Suitable classification of the plugin's capabilities as defined in `Plugin.Type` in `ls.plugin.js`.
