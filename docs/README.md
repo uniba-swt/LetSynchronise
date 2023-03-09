@@ -86,8 +86,6 @@ This section describes the plugins that have been implemented so far.
 * `ls.plugin.importer.native.js`: Imports selected elements of a LetSynchronise model file 
   into the IndexedDB.
 * `ls.plugin.importer.tool1.js`: Skeleton that can be used to develop a custom importer.
-* `ls.plugin.importer.tudE2e.js`: Planned to import model files created by the 
-  [TU Dortmund End-to-End Analyser](https://github.com/mkuo005/end-to-end).
 
 ## Metric
 * `ls.plugin.metric.dataAge.js`: For a given event chain, returns the data age of each 
