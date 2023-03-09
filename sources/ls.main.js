@@ -96,7 +96,6 @@ Plugin.ModelSchedule = model.modelSchedule;
 // Register importer plug-ins.
 Plugin.Register(PluginImporterNative);
 Plugin.Register(PluginImporterTool1);
-Plugin.Register(PluginImporterTudE2e);
 view.viewExportImport.updateSystemImporters();
 
 // Register exporter plug-ins.
