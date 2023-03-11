@@ -1,6 +1,5 @@
 'use strict';
 
-
 class Plugin {
     static Type = class {
         static get Importer()  { return 'Importer'; }
