@@ -69,6 +69,8 @@ in JavaScript. The system model and simulated schedule are stored in
 The user interface is styled with [Bootstrap](https://getbootstrap.com).
 The simulated schedules are plotted with [D3](https://d3js.org).
 
+Location of original repository: https://github.com/eyip002/LetSynchronise
+
 ### Code Style
 * Indentation: 4 spaces
 * Names: camel casing
