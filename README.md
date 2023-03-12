@@ -1,13 +1,13 @@
 # LetSynchronise
-LetSynchronise is extensible, web-based, open-source (GPL3) framework for modelling, 
+LetSynchronise is an extensible, web-based, open-source (GPL3) framework for modelling, 
 simulating, analysing, and optimising LET-based systems. It
 currently focuses on timing behaviour and does not support the
 modelling of, e.g., functional behaviour, data values, or memory
 usage. The target audience of LetSynchronise is researchers who
-wish to (1) rapidly prototype and experiment with LET schedul-
-ing policies and optimisations, (2) make solutions and benchmarks
-readily accessible, and (3) fairly and accurately reproduce and eval-
-uate the results of existing work. 
+wish to (1) rapidly prototype and experiment with LET scheduling 
+policies and optimisations, (2) make solutions and benchmarks
+readily accessible, and (3) fairly and accurately reproduce and 
+evaluate the results of existing work. 
 
 
 ## Dependencies
@@ -54,7 +54,7 @@ via tick boxes.
 * Choose an optimisation goal to apply on the system.
 * View the simulated task schedule, including the overall system load.
 * Show or hide each task communication dependency.
-* Interactive tooltips appear the mouse is hovered over each LET interval, execution interval, and task communication dependency.
+* Interactive tooltips appear when the mouse is hovered over each LET interval, execution interval, and task communication dependency.
 * Edit event chains, which represent sequences of task communication dependencies.
 * Highlight each instance of a selected event chain.
 * Define timing constraints on event chains, which will be analysed and used during optimisation.
