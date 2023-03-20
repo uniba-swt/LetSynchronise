@@ -23,6 +23,8 @@ class ViewSchedule {
     dependencyTooltip = null;
     eventChainInstances = null;
     currentEventChainInstance = null;
+    relatedEventChainInstances = null;
+    lastClickedTaskInstance = null;
 
     constructor() {
         this.root = document.querySelector('#nav-analyse');
@@ -179,7 +181,7 @@ class ViewSchedule {
             this.instanceMax = this.eventChainInstances[this.eventChain] - 1;
 
             // Call the handler.
-            this.updateEventChain(this.eventChain, 0);
+            this.updateEventChain(this.eventChain, this.instance);
         });
     }
     
@@ -398,7 +400,7 @@ class ViewSchedule {
                        .attr('x', scale(instance.letStartTime))
                        .attr('width', scale(instance.letEndTime - instance.letStartTime))
                        .attr('height', View.BarHeight)
-                      .on('mouseover', function() {
+                      .on('mouseover', () => {
                         const title = `<b>${taskInstances.name}</b> instance ${instance.instance}`;
                         const letInterval = `LET interval: [${Utility.FormatTimeString(instance.letStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.letEndTime / Utility.MsToNs, 2)}]ms`;
                         const periodInterval = `Period interval: [${Utility.FormatTimeString(instance.periodStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.periodEndTime / Utility.MsToNs, 2)}]ms`;
@@ -411,8 +413,11 @@ class ViewSchedule {
                         tooltip.style.top = `${pointerY - 5 * View.BarHeight}px`;
                         tooltip.style.left = `${pointerX}px`;
                       })
-                      .on('mouseout', function() {
+                      .on('mouseout', () => {
                         tooltip.style.visibility = 'hidden';
+                      })
+                      .on('click', () => {
+                        this.updateRelatedEventChains(taskInstances.name, instance.instance);
                       });
             // Add the task's execution times
             const executionIntervals = instance.executionIntervals.map(interval => Utility.Interval.FromJson(interval));
@@ -423,7 +428,7 @@ class ViewSchedule {
                            .attr('width', scale(interval.duration))
                            .attr('height', View.ExecutionHeight)
                            .attr('class', 'time')
-                         .on('mouseover', function() {
+                         .on('mouseover', () => {
                            tooltip.innerHTML = `Execution interval: [${Utility.FormatTimeString(interval.startTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString((interval.startTime + interval.duration) / Utility.MsToNs, 2)}]ms`;
                            tooltip.style.visibility = 'visible';
                          })
@@ -432,7 +437,7 @@ class ViewSchedule {
                            tooltip.style.top = `${pointerY - 1.5 * View.BarHeight}px`;
                            tooltip.style.left = `${pointerX}px`;
                          })
-                         .on('mouseout', function() {
+                         .on('mouseout', () => {
                            tooltip.style.visibility = 'hidden';
                          });
             }
@@ -512,7 +517,7 @@ class ViewSchedule {
                                .attr('width', scale(interval.duration))
                                .attr('height', View.ExecutionHeight)
                                .attr('class', 'time')
-                             .on('mouseover', function() {
+                             .on('mouseover', () => {
                                const title = `<b>${taskInstances.name}</b> instance ${instance.instance}`;
                                const executionInterval = `Execution interval: [${Utility.FormatTimeString(interval.startTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString((interval.startTime + interval.duration) / Utility.MsToNs, 2)}]ms`;
                                tooltip.innerHTML = `${title} <br/> ${executionInterval}`;
@@ -523,7 +528,7 @@ class ViewSchedule {
                                tooltip.style.top = `${pointerY - 3 * View.BarHeight}px`;
                                tooltip.style.left = `${pointerX}px`;
                              })
-                             .on('mouseout', function() {
+                             .on('mouseout', () => {
                                tooltip.style.visibility = 'hidden';
                              });
                 }
@@ -656,7 +661,7 @@ class ViewSchedule {
                     .attr('d', line(points))
                     .attr('transform', `translate(${View.SvgPadding}, ${View.SvgPadding})`)
                     .attr('class', 'dependency dependencyVisible')
-                  .on('mouseover', function() {
+                  .on('mouseover', () => {
                     tooltip.innerHTML = `${dependencyName} instance ${dependency.instance}:<br/>${sendPortName} ${View.ArrowSeparator} ${receivePortName}`;
                     tooltip.style.visibility = 'visible';
                   })
@@ -665,7 +670,7 @@ class ViewSchedule {
                     tooltip.style.top = `${pointerY - View.SvgPadding}px`;
                     tooltip.style.left = `${pointerX + 2 * View.SvgPadding}px`;
                   })
-                  .on('mouseout', function() {
+                  .on('mouseout', () => {
                     tooltip.style.visibility = 'hidden';
                   });
     }
@@ -681,11 +686,18 @@ class ViewSchedule {
             // Flatten the event chain instance information
             this.eventChainInstances[instanceName] = { };
             this.eventChainInstances[instanceName]['dependencies'] = [ ];
+            this.eventChainInstances[instanceName]['taskNames'] = new Set();
             this.eventChainInstances[instanceName]['tasks'] = new Set();
             for (const dependency of eventChainInstance.generator()) {
                 this.eventChainInstances[instanceName]['dependencies'].push(d3.select(`#${dependency.name}-${dependency.instance}`));
-                this.eventChainInstances[instanceName]['tasks'].add(d3.select(`#${dependency.receiveEvent.task}-${dependency.receiveEvent.taskInstance}`));
-                this.eventChainInstances[instanceName]['tasks'].add(d3.select(`#${dependency.sendEvent.task}-${dependency.sendEvent.taskInstance}`));
+                this.eventChainInstances[instanceName]['taskNames'].add(`#${dependency.receiveEvent.task}-${dependency.receiveEvent.taskInstance}`);
+                this.eventChainInstances[instanceName]['taskNames'].add(`#${dependency.sendEvent.task}-${dependency.sendEvent.taskInstance}`);
+            }
+            for (const taskName of this.eventChainInstances[instanceName]['taskNames']) {
+                const element = d3.select(taskName);
+                if (element.node() != null) {
+                    this.eventChainInstances[instanceName]['tasks'].add(element);
+                }
             }
 
             eventChainNames.add(eventChainInstance.chainName);
@@ -730,8 +742,8 @@ class ViewSchedule {
             }
         
             for (const task of this.currentEventChainInstance.tasks) {
-                task.style('fill', null);
-            }   
+                task.node().classList.remove('eventChainVisible');
+            }
         }
     
         // Highlight the selected event chain instance.
@@ -749,7 +761,56 @@ class ViewSchedule {
             }
         
             for (const task of this.currentEventChainInstance.tasks) {
-                task.style('fill', 'var(--bs-blue)');
+                task.node().classList.add('eventChainVisible');
+            }
+        }
+    }
+    
+    updateRelatedEventChains(taskName, taskInstance) {
+        const taskInstanceName = `#${taskName}-${taskInstance}`;
+    
+        // Clear the SVG style of the current related event chain instances.
+        if (this.relatedEventChainInstances != null) {
+            for (const eventChain of this.relatedEventChainInstances) {
+                for (const dependency of eventChain.dependencies) {
+                    dependency.node().classList.remove('relatedEventChainVisible');
+                }
+            
+                for (const task of eventChain.tasks) {
+                    task.node().classList.remove('relatedEventChainVisible');
+                }
+            }
+        }
+        
+        if (this.lastClickedTaskInstance == taskInstanceName) {
+            this.lastClickedTaskInstance = null;
+            this.relatedEventChainInstances = null;
+            return;
+        }
+        this.lastClickedTaskInstance = taskInstanceName;
+        
+        // Find the event chains that go through the given task instance.
+        this.relatedEventChainInstances = [ ];
+        const eventChains = Object.values(this.eventChainInstances).filter(eventChain => typeof eventChain === 'object');
+        for (const eventChain of eventChains) {
+            if (eventChain.taskNames.has(this.lastClickedTaskInstance)) {
+                this.relatedEventChainInstances.push(eventChain);
+            }
+        }
+        
+        if (this.relatedEventChainInstances.length == 0) {
+            this.relatedEventChainInstances = null;
+            return;
+        }
+        
+        // Highlight the event chain instances.
+        for (const eventChain of this.relatedEventChainInstances) {
+            for (const dependency of eventChain.dependencies) {
+                dependency.node().classList.add('relatedEventChainVisible');
+            }
+        
+            for (const task of eventChain.tasks) {
+                task.node().classList.add('relatedEventChainVisible');
             }
         }
     }
