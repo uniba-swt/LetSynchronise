@@ -26,6 +26,7 @@ class ViewSchedule {
     lastClickedTaskInstance = null;
 
     dependencyAnalysisResults = null;
+    hasDependencyAnalysisResults = false;
 
     scheduleTooltip = null;
     dependencyTooltip = null;
@@ -305,6 +306,7 @@ class ViewSchedule {
         const {svgElement, scale, taskIndices} = this.drawSchedule(tasksInstances);
         
         // Draw communication dependencies.
+        this.hasDependencyAnalysisResults = false;
         this.dependencyAnalysisResults = { };
         this.drawDependencies(svgElement, scale, taskIndices, dependenciesSet);
         
@@ -870,11 +872,15 @@ class ViewSchedule {
     }
     
     // Update the tool tip of each dependency with analysis results.
-    // TODO: Standardise the extraction of analysis results
+    // TODO: Standardise the extraction of analysis results.
     async updateAnalyse(promise) {
+        // Skip if dependency tooltips have already been updated with analysis results.
+        if (this.hasDependencyAnalysisResults) {
+            return;
+        }
+    
+        this.hasDependencyAnalysisResults = true;
         const results = await promise;
-
-        const tooltip = this.dependencyTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
         
         for (const chainName in results) {
             for (const pluginName in results[chainName]) {
