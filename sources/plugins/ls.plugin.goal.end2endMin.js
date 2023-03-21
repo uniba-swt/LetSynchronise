@@ -607,7 +607,7 @@ class PluginGoalEnd2EndMinTest {
             ['t10', 't11'], ['t11', 't8']
         ];
         taskDependenciesTest.forEach(dependency => graphTest.setDirectedEdge(dependency[0], dependency[1]));
-        console.log(graphTest.toString());
+        console.debug(graphTest.toString());
         
         const graphCycle = graphTest.cycle;
         if (graphCycle.length > 0) {
@@ -619,7 +619,7 @@ class PluginGoalEnd2EndMinTest {
         ['t1', 't7', 't8', 't9', 't5', 't6'].forEach(task => graphTest.updateNodeLocalPriorityMax(task, 1));
         ['t10', 't11', 't8'].forEach(task => graphTest.updateNodeLocalPriorityMax(task, 2));
         graphTest.computeGlobalTaskPriorities();
-        console.log(graphTest.nodesDescendingGlobalPriorities);
+        console.debug(graphTest.nodesDescendingGlobalPriorities);
 
         const expectedGlobalPriorities = ['t1', 't2', 't3', 't4', 't10', 't11', 't7', 't8', 't9', 't5', 't6'];
         const isCorrect = graphTest.nodesDescendingGlobalPriorities.length === expectedGlobalPriorities.length
@@ -665,7 +665,7 @@ class PluginGoalEnd2EndMinTest {
             ['t10', 't11'], ['t11', 't8']
         ];
         taskDependenciesTest.forEach(dependency => graphTest.setDirectedEdge(dependency[0], dependency[1]));
-        console.log(graphTest.toString());
+        console.debug(graphTest.toString());
         
         const graphCycle = graphTest.cycle;
         if (graphCycle.length > 0) {
@@ -677,7 +677,7 @@ class PluginGoalEnd2EndMinTest {
         ['t1', 't7', 't8', 't9', 't5', 't6'].forEach(task => graphTest.updateNodeLocalPriorityMax(task, 2));
         ['t10', 't11', 't8'].forEach(task => graphTest.updateNodeLocalPriorityMax(task, 3));
         graphTest.computeGlobalTaskPriorities();
-        console.log(graphTest.nodesDescendingGlobalPriorities);
+        console.debug(graphTest.nodesDescendingGlobalPriorities);
 
         const expectedGlobalPriorities = ['t10', 't11', 't1', 't7', 't8', 't9', 't2', 't3', 't4', 't5', 't6'];
         const isCorrect = graphTest.nodesDescendingGlobalPriorities.length === expectedGlobalPriorities.length
@@ -718,7 +718,7 @@ class PluginGoalEnd2EndMinTest {
             ['t6', 't2'], ['t2', 't7'], ['t7', 't4'], ['t4', 't8']
         ];
         taskDependenciesTest.forEach(dependency => graphTest.setDirectedEdge(dependency[0], dependency[1]));
-        console.log(graphTest.toString());
+        console.debug(graphTest.toString());
         
         const graphCycle = graphTest.cycle;
         if (graphCycle.length > 0) {
@@ -729,7 +729,7 @@ class PluginGoalEnd2EndMinTest {
         ['t1', 't2', 't3', 't4', 't5'].forEach(task => graphTest.updateNodeLocalPriorityMax(task, 2));
         ['t6', 't2', 't7', 't4', 't8'].forEach(task => graphTest.updateNodeLocalPriorityMax(task, 1));
         graphTest.computeGlobalTaskPriorities();
-        console.log(graphTest.nodesDescendingGlobalPriorities);
+        console.debug(graphTest.nodesDescendingGlobalPriorities);
 
         const expectedGlobalPriorities = ['t1', 't6', 't2', 't3', 't7', 't4', 't5', 't8'];
         const isCorrect = graphTest.nodesDescendingGlobalPriorities.length === expectedGlobalPriorities.length
@@ -768,7 +768,7 @@ class PluginGoalEnd2EndMinTest {
             ['t4', 't5'], ['t5', 't6']
         ];
         taskDependenciesTest.forEach(dependency => graphTest.setDirectedEdge(dependency[0], dependency[1]));
-        console.log(graphTest.toString());
+        console.debug(graphTest.toString());
         
         const graphCycle = graphTest.cycle;
         if (graphCycle.length > 0) {
@@ -779,7 +779,7 @@ class PluginGoalEnd2EndMinTest {
         ['t1', 't2', 't3'].forEach(task => graphTest.updateNodeLocalPriorityMax(task, 2));
         ['t4', 't5', 't6'].forEach(task => graphTest.updateNodeLocalPriorityMax(task, 1));
         graphTest.computeGlobalTaskPriorities();
-        console.log(graphTest.nodesDescendingGlobalPriorities);
+        console.debug(graphTest.nodesDescendingGlobalPriorities);
 
         const expectedGlobalPriorities = ['t1', 't2', 't3', 't4', 't5', 't6'];
         const isCorrect = graphTest.nodesDescendingGlobalPriorities.length === expectedGlobalPriorities.length

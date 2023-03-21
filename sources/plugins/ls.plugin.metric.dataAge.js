@@ -24,16 +24,16 @@ class PluginMetricDataAge {
         
         chainInstances.forEach(chainInstance => this.Compute(chainInstance, rawResults));
         
-        for (chainName in rawResults) {
-            const valuesOnly = Plugin.ValuesOfObject(rawResults[chainName]);
+        for (const segmentName in rawResults) {
+            const valuesOnly = Plugin.ValuesOfObject(rawResults[segmentName]);
 
-            statistics[chainName] = {
-                'chainName': chainName,
+            statistics[segmentName] = {
+                'segmentName': segmentName,
                 'min': Plugin.Min(valuesOnly),
                 'avg': Plugin.Avg(valuesOnly),
                 'max': Plugin.Max(valuesOnly),
                 'num': valuesOnly.length,
-                'raw': rawResults[chainName]
+                'raw': rawResults[segmentName]
             };
         }
         
@@ -50,7 +50,7 @@ class PluginMetricDataAge {
             if (!rawResults.hasOwnProperty(segment.name)) {
                 rawResults[segment.name] = { };
             }
-            rawResults[segment.name][chainInstance.name] = endTime - startTime; 
+            rawResults[segment.name][segment.instance] = endTime - startTime; 
         }
         
         return rawResults;
@@ -59,11 +59,11 @@ class PluginMetricDataAge {
     static ToHtml(result) {
         let output = [`<h6>${PluginMetricDataAge.Name}: ${Object.keys(result).length} dependencies</h6>`];
         
-        for (const chainName in result) {
-            const values = Plugin.ValuesOfObject(result[chainName].raw).map(value => value / Utility.MsToNs);
+        for (const segmentName in result) {
+            const values = Plugin.ValuesOfObject(result[segmentName].raw).map(value => value / Utility.MsToNs);
             output.push(
-                `${chainName}: (min, avg, max) = (${result[chainName].min / Utility.MsToNs}, ${result[chainName].avg / Utility.MsToNs}, ${result[chainName].max / Utility.MsToNs})ms`,
-                `<ul><li>${result[chainName].num} values: [${values.join(', ')}]</li></ul>`
+                `${segmentName}: (min, avg, max) = (${result[segmentName].min / Utility.MsToNs}, ${result[segmentName].avg / Utility.MsToNs}, ${result[segmentName].max / Utility.MsToNs})ms`,
+                `<ul><li>${result[segmentName].num} values: [${values.join(', ')}]</li></ul>`
             );
         }
         
@@ -73,11 +73,11 @@ class PluginMetricDataAge {
     static ToString(result) {
         let output = [`${PluginMetricDataAge.Name}: ${Object.keys(result).length} dependencies`];
         
-        for (const chainName in result) {
-            const values = Plugin.ValuesOfObject(result[chainName].raw).map(value => value / Utility.MsToNs);
+        for (const segmentName in result) {
+            const values = Plugin.ValuesOfObject(result[segmentName].raw).map(value => value / Utility.MsToNs);
             output.push(
-                `  ${chainName}: (min, avg, max) = (${result[chainName].min / Utility.MsToNs}, ${result[chainName].avg / Utility.MsToNs}, ${result[chainName].max / Utility.MsToNs})ms`,
-                `    ${result[chainName].num} values: [${values.join(', ')}]`,
+                `  ${segmentName}: (min, avg, max) = (${result[segmentName].min / Utility.MsToNs}, ${result[segmentName].avg / Utility.MsToNs}, ${result[segmentName].max / Utility.MsToNs})ms`,
+                `    ${result[segmentName].num} values: [${values.join(', ')}]`,
             );
         }
         

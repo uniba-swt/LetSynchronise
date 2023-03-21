@@ -25,7 +25,7 @@ class ViewSchedule {
     relatedEventChainInstances = null;
     lastClickedTaskInstance = null;
 
-    analysisResults = null;
+    dependencyAnalysisResults = null;
 
     scheduleTooltip = null;
     dependencyTooltip = null;
@@ -305,13 +305,11 @@ class ViewSchedule {
         const {svgElement, scale, taskIndices} = this.drawSchedule(tasksInstances);
         
         // Draw communication dependencies.
+        this.dependencyAnalysisResults = { };
         this.drawDependencies(svgElement, scale, taskIndices, dependenciesSet);
         
         // Update list of event chains.
         this.updateEventChains(eventChainInstances);
-        
-        // Clear the dependency analysis results.
-        this.analysisResults = null;
     }
     
     // Compute prologue of the schedule and display it.
@@ -639,13 +637,16 @@ class ViewSchedule {
         const xOffset = 20;
         const tooltip = this.dependencyTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
         
-        const dependencyId = `${dependencyName}-${dependency.instance}`;
         const sendEvent = dependency.sendEvent;
         const receiveEvent = dependency.receiveEvent;
         let sendPortName = Utility.TaskPorts(sendEvent.task, [sendEvent.port]);
         let receivePortName = Utility.TaskPorts(receiveEvent.task, [receiveEvent.port]);
         sendEvent.timestamp = scale(sendEvent.timestamp);
         receiveEvent.timestamp = scale(receiveEvent.timestamp);
+        
+        const dependencyId = `${dependencyName}-${dependency.instance}`;
+        this.dependencyAnalysisResults[dependencyId] = `<b>${dependencyName}</b> instance ${dependency.instance}:<br/>${sendPortName} ${View.ArrowSeparator} ${receivePortName}`
+        const analysisResults = this.dependencyAnalysisResults;      // Need to create local reference so that it can be accessed inside the mouse event handlers.
         
         // Create dangling arrows if one of the tasks is Model.SystemInterfaceName
         // Need an additional y-offset
@@ -684,7 +685,7 @@ class ViewSchedule {
                     .attr('transform', `translate(${View.SvgPadding}, ${View.SvgPadding})`)
                     .attr('class', 'dependency dependencyVisible')
                   .on('mouseover', () => {
-                    tooltip.innerHTML = `${dependencyName} instance ${dependency.instance}:<br/>${sendPortName} ${View.ArrowSeparator} ${receivePortName}`;
+                    tooltip.innerHTML = analysisResults[dependencyId];
                     tooltip.style.visibility = 'visible';
                   })
                   .on('mousemove', (event) => {
@@ -869,24 +870,30 @@ class ViewSchedule {
     }
     
     // Update the tool tip of each dependency with analysis results.
+    // TODO: Standardise the extraction of analysis results
     async updateAnalyse(promise) {
         const results = await promise;
+
+        const tooltip = this.dependencyTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
         
-        this.analysisResults = new Set();
         for (const chainName in results) {
             for (const pluginName in results[chainName]) {
                 const plugin = Plugin.GetPlugin(Plugin.Type.Metric, pluginName);
                 if (plugin.Output == Plugin.Output.DataAges) {
                     const metrics = results[chainName][pluginName]['metrics'];
-                    this.analysisResults.add(metrics);
-                    
-                    // TODO: Standardise the extraction of analysis results
-//                    const dependencyNode = this.schedule.select(`#${dependencies.name}-${dependency.instance}`).node();
+                    for (const [dependencyName, dependencyResults] of Object.entries(metrics)) {
+                        const rawResults = dependencyResults['raw'];
+                        for (const [dependencyInstance, value] of Object.entries(rawResults)) {
+                            const dependencyId = `${dependencyName}-${dependencyInstance}`;
+                            const dependencyElement = this.schedule.select(`#${dependencyId}`);
+                            
+                            const analysisResults = `<br/>${pluginName}: ${Utility.FormatTimeString(value / Utility.MsToNs, 2)}ms`;
+                            this.dependencyAnalysisResults[dependencyId] += analysisResults;
+                        }
+                    }
                 }
             }
         }
-
-        console.log(this.analysisResults);
     }
     
     toString() {

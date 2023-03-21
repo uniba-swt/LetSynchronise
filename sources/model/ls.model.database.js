@@ -58,7 +58,7 @@ class ModelDatabase {
 
         // Error handeller
         transaction.onerror = function(event) {
-            promiseReject(console.log('ModelDatabase store error: ' + event.target.errorCode));
+            promiseReject(console.error('ModelDatabase store error: ' + event.target.errorCode));
         }
 
         return transaction.objectStore(storeName);

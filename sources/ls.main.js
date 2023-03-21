@@ -84,7 +84,7 @@ controller.controllerAnalyse.model = model.modelAnalyse;
 controller.controllerAnalyse.modelConstraint = model.modelConstraint;
 controller.controllerAnalyse.modelEventChain = model.modelEventChain;
 
-console.log(controller.toString());
+console.info(controller.toString());
 
 
 // Initialise plug-in repository.
@@ -120,4 +120,4 @@ Plugin.Register(PluginGoalIlp);
 Plugin.Register(PluginGoalRandom);
 view.viewSchedule.updateOptimiserPluginSelectors();
 
-console.log(Plugin.ToString());
+console.info(Plugin.ToString());
