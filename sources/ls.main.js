@@ -83,9 +83,8 @@ controller.controllerAnalyse.viewSchedule = view.viewSchedule;
 controller.controllerAnalyse.model = model.modelAnalyse;
 controller.controllerAnalyse.modelConstraint = model.modelConstraint;
 controller.controllerAnalyse.modelEventChain = model.modelEventChain;
-controller.controllerAnalyse.controllerSchedule = controller.controllerSchedule;
 
-console.log(controller.toString());
+console.info(controller.toString());
 
 
 // Initialise plug-in repository.
@@ -121,4 +120,4 @@ Plugin.Register(PluginGoalIlp);
 Plugin.Register(PluginGoalRandom);
 view.viewSchedule.updateOptimiserPluginSelectors();
 
-console.log(Plugin.ToString());
+console.info(Plugin.ToString());

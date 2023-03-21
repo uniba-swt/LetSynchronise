@@ -6,7 +6,6 @@ class ControllerAnalyse {
     _model = null;
     _modelConstraint = null;
     _modelEventChain = null;
-    _controllerSchedule = null;
     
     constructor() { }
 
@@ -62,15 +61,6 @@ class ControllerAnalyse {
     get modelEventChain() {
         return this._modelEventChain;
     }
-    
-    
-    set controllerSchedule(controllerSchedule) {
-        this._controllerSchedule = controllerSchedule;
-    }
-    
-    get controllerSchedule() {
-        return this._controllerSchedule;
-    }
 
 
     // -----------------------------------------------------
@@ -93,6 +83,7 @@ class ControllerAnalyse {
     // Callback for updating the schedule analysis.
     callbackGetAnalyse = (promise) => {
         this.view.updateAnalyse(promise);
+        this.viewSchedule.updateAnalyse(promise);
     }
     
     callbackCloseAnalyse = () => {

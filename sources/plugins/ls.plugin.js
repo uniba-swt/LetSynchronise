@@ -14,7 +14,6 @@ class Plugin {
         // TODO: Replace Tool1 and Xml1 with actual tools and file types.
         static get Native() { return 'Native'; }   // Import from native LetSynchronise JSON files
         static get Tool1()  { return 'Tool1'; }    // Import from Tool1 generated files
-        static get TudE2e() { return 'TudE2e'; }   // Import from TU Dortmund End-to-End analyser
         
         // Exporter
         static get LetSynchronise()  { return 'LetSynchronise'; }    // Export to a LetSynchronise JSON file

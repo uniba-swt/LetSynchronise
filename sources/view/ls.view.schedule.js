@@ -19,12 +19,17 @@ class ViewSchedule {
 
     schedule = null;
     dependencies = null;
-    scheduleTooltip = null;
-    dependencyTooltip = null;
     eventChainInstances = null;
     currentEventChainInstance = null;
+
     relatedEventChainInstances = null;
     lastClickedTaskInstance = null;
+
+    dependencyAnalysisResults = null;
+    hasDependencyAnalysisResults = false;
+
+    scheduleTooltip = null;
+    dependencyTooltip = null;
 
     constructor() {
         this.root = document.querySelector('#nav-analyse');
@@ -171,6 +176,7 @@ class ViewSchedule {
     // -----------------------------------------------------
     // Setup listeners
     
+    // Event chain has been selected for highlighting.
     setupEventChainListener() {
         this.eventChainField.addEventListener('change', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
@@ -185,6 +191,7 @@ class ViewSchedule {
         });
     }
     
+    // Event chain instance has been selected for highlighting.
     setupInstanceInputListener() {
         this.instanceField.addEventListener('input', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
@@ -199,6 +206,7 @@ class ViewSchedule {
     // -----------------------------------------------------
     // Registration of handlers from the controller
 
+    // Handle the "update" button.
     registerUpdateHandler(getScheduleHandler) {
         this.updateButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
@@ -215,6 +223,7 @@ class ViewSchedule {
         });
     }
     
+    // Handle the "optimise" button.
     registerOptimiseHandler(handler) {
         this.optimiseButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
@@ -230,6 +239,7 @@ class ViewSchedule {
     }
     
     
+    // Validate the scheduler input fields.
     validateSchedulingParameters(schedulingParameters) {
         if (schedulingParameters.makespan == null || schedulingParameters.makespan.trim() == '' || isNaN(schedulingParameters.makespan)) {
             alert('Makespan has to be a decimal number.');
@@ -259,6 +269,7 @@ class ViewSchedule {
         return true;
     }
     
+    // Validate the optimisation input fields.
     validateOptimiserParameters(optimiserParameters) {
         if (optimiserParameters.goal == null) {
             alert('Choose an optimisation goal.');
@@ -268,13 +279,14 @@ class ViewSchedule {
         return true;
     }
     
-    // Callback for task model to notify us of changes to the task set.
+    // Callback for the task model to notify us of changes to the task set.
     notifyChanges() {
         this.updateButton.classList.remove('btn-primary');
         this.updateButton.classList.add('btn-danger');
     }
     
     
+    // Draw the entire schedule.
     async updateSchedule(promiseSchedule) {
         const schedule = await promiseSchedule;
         const taskParametersSet = await schedule['promiseAllTasks'];
@@ -294,22 +306,27 @@ class ViewSchedule {
         const {svgElement, scale, taskIndices} = this.drawSchedule(tasksInstances);
         
         // Draw communication dependencies.
+        this.hasDependencyAnalysisResults = false;
+        this.dependencyAnalysisResults = { };
         this.drawDependencies(svgElement, scale, taskIndices, dependenciesSet);
         
         // Update list of event chains.
         this.updateEventChains(eventChainInstances);
     }
     
+    // Compute prologue of the schedule and display it.
     updatePrologue(taskParametersSet) {
         const initialOffsets = taskParametersSet.map(taskParameters => taskParameters.initialOffset).flat();
         this.prologue = Utility.MaxOfArray(initialOffsets) / Utility.MsToNs;
     }
     
+    // Compute the hyper-period of the schedule and display it.
     updateHyperPeriod(taskParametersSet) {
         const periods = taskParametersSet.map(taskParameters => taskParameters.period).flat();
         this.hyperPeriod = Utility.LeastCommonMultipleOfArray(periods) / Utility.MsToNs;
     }
     
+    // Draw just the tasks and their instances.
     drawSchedule(tasksInstances) {
         // Create function to scale the data along the x-axis of fixed-length
         const scale =
@@ -338,6 +355,7 @@ class ViewSchedule {
         return {svgElement: svgElement, scale: scale, taskIndices: taskIndices};
     }
     
+    // Draw just the instances of a given task.
     drawTaskInstances(taskInstances, svgElement, scale, index) {
         const tooltip = this.scheduleTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
 
@@ -419,6 +437,7 @@ class ViewSchedule {
                       .on('click', () => {
                         this.updateRelatedEventChains(taskInstances.name, instance.instance);
                       });
+            
             // Add the task's execution times
             const executionIntervals = instance.executionIntervals.map(interval => Utility.Interval.FromJson(interval));
             for (const interval of executionIntervals) {
@@ -463,6 +482,7 @@ class ViewSchedule {
                  .call(g => g.select('.domain').remove());
     }
     
+    // Draw the total system load at the bottom of the schedule.
     drawSystemLoad(tasksInstances, svgElement, scale, index) {
         if (index == 0) {
             return;
@@ -547,6 +567,7 @@ class ViewSchedule {
                  .call(g => g.select('.domain').remove());
     }
     
+    // Draw all dependencies between the task instances.
     drawDependencies(svgElement, scale, taskIndices, dependenciesSet) {
         const dependencyNames = dependenciesSet.map(dependencies => dependencies.name);
         this.dependencies.selectAll('*').remove();
@@ -561,7 +582,7 @@ class ViewSchedule {
         for (const dependencies of dependenciesSet) {
             dependencies.value.forEach(dependency => this.drawDependency(svgElement, scale, taskIndices, dependencies.name, dependency));              
 
-            svgGroups.push(...dependencies.value.map(dependency => d3.select(`#${dependencies.name}-${dependency.instance}`)));
+            svgGroups.push(...dependencies.value.map(dependency => svgElement.select(`#${dependencies.name}-${dependency.instance}`)));
                         
             this.dependencies
                 .append('a')
@@ -574,7 +595,7 @@ class ViewSchedule {
                         
                         // Update SVG style of dependencies
                         for (const dependency of dependencies.value) {
-                            const dependencyNode = d3.select(`#${dependencies.name}-${dependency.instance}`).node();
+                            const dependencyNode = svgElement.select(`#${dependencies.name}-${dependency.instance}`).node();
                             if (this.classList.contains('active')) {
                                 dependencyNode.classList.remove('dependencyHidden');
                                 dependencyNode.classList.add('dependencyVisible');
@@ -611,19 +632,23 @@ class ViewSchedule {
                 });
             });
     }
-        
+    
+    // Draw just the given dependency.
     drawDependency(svgElement, scale, taskIndices, dependencyName, dependency) {
         const yOffset = 0.5 * View.BarHeight + 2.5 * View.SvgPadding;
         const xOffset = 20;
         const tooltip = this.dependencyTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
         
-        const dependencyId = `${dependencyName}-${dependency.instance}`;
         const sendEvent = dependency.sendEvent;
         const receiveEvent = dependency.receiveEvent;
         let sendPortName = Utility.TaskPorts(sendEvent.task, [sendEvent.port]);
         let receivePortName = Utility.TaskPorts(receiveEvent.task, [receiveEvent.port]);
         sendEvent.timestamp = scale(sendEvent.timestamp);
         receiveEvent.timestamp = scale(receiveEvent.timestamp);
+        
+        const dependencyId = `${dependencyName}-${dependency.instance}`;
+        this.dependencyAnalysisResults[dependencyId] = `<b>${dependencyName}</b> instance ${dependency.instance}:<br/>${sendPortName} ${View.ArrowSeparator} ${receivePortName}`
+        const analysisResults = this.dependencyAnalysisResults;      // Need to create local reference so that it can be accessed inside the mouse event handlers.
         
         // Create dangling arrows if one of the tasks is Model.SystemInterfaceName
         // Need an additional y-offset
@@ -662,7 +687,7 @@ class ViewSchedule {
                     .attr('transform', `translate(${View.SvgPadding}, ${View.SvgPadding})`)
                     .attr('class', 'dependency dependencyVisible')
                   .on('mouseover', () => {
-                    tooltip.innerHTML = `${dependencyName} instance ${dependency.instance}:<br/>${sendPortName} ${View.ArrowSeparator} ${receivePortName}`;
+                    tooltip.innerHTML = analysisResults[dependencyId];
                     tooltip.style.visibility = 'visible';
                   })
                   .on('mousemove', (event) => {
@@ -675,6 +700,7 @@ class ViewSchedule {
                   });
     }
     
+    // Update the drop-down menu of event chains that can be highlighted.
     updateEventChains(eventChainInstancesJson) {
         this.eventChainInstances = { };
     
@@ -689,12 +715,12 @@ class ViewSchedule {
             this.eventChainInstances[instanceName]['taskNames'] = new Set();
             this.eventChainInstances[instanceName]['tasks'] = new Set();
             for (const dependency of eventChainInstance.generator()) {
-                this.eventChainInstances[instanceName]['dependencies'].push(d3.select(`#${dependency.name}-${dependency.instance}`));
+                this.eventChainInstances[instanceName]['dependencies'].push(this.schedule.select(`#${dependency.name}-${dependency.instance}`));
                 this.eventChainInstances[instanceName]['taskNames'].add(`#${dependency.receiveEvent.task}-${dependency.receiveEvent.taskInstance}`);
                 this.eventChainInstances[instanceName]['taskNames'].add(`#${dependency.sendEvent.task}-${dependency.sendEvent.taskInstance}`);
             }
             for (const taskName of this.eventChainInstances[instanceName]['taskNames']) {
-                const element = d3.select(taskName);
+                const element = this.schedule.select(taskName);
                 if (element.node() != null) {
                     this.eventChainInstances[instanceName]['tasks'].add(element);
                 }
@@ -734,6 +760,7 @@ class ViewSchedule {
         this.instanceMax = 0;
     }
     
+    // Highlight the selected event chain instance in the schedule.
     updateEventChain(eventChainName, instance) {
         // Clear the SVG style of the current event chain instance.
         if (this.currentEventChainInstance != null) {
@@ -766,6 +793,7 @@ class ViewSchedule {
         }
     }
     
+    // Highlight all the event chain instances in the schedule that involve the given task instance.
     updateRelatedEventChains(taskName, taskInstance) {
         const taskInstanceName = `#${taskName}-${taskInstance}`;
     
@@ -815,6 +843,7 @@ class ViewSchedule {
         }
     }
     
+    // Update the drop-down menus of scheduler and optimisation plug-ins.
     updateOptimiserPluginSelectors() {
         const pluginsGoal = Object.keys(Plugin.OfType(Plugin.Type.Goal));
         this.updateOptimiserPluginSelector(d3.select(this.goalField), pluginsGoal);
@@ -823,6 +852,7 @@ class ViewSchedule {
         this.updateOptimiserPluginSelector(d3.select(this.schedulerField), pluginsScheduler);
     }
     
+    // Update the given drop-down menu.
     updateOptimiserPluginSelector(parentElement, plugins) {
         parentElement.selectAll('*').remove();
         parentElement
@@ -839,6 +869,37 @@ class ViewSchedule {
                     .attr('value', `${Plugin}`)
                     .text(Plugin)
             );
+    }
+    
+    // Update the tool tip of each dependency with analysis results.
+    // TODO: Standardise the extraction of analysis results.
+    async updateAnalyse(promise) {
+        // Skip if dependency tooltips have already been updated with analysis results.
+        if (this.hasDependencyAnalysisResults) {
+            return;
+        }
+    
+        this.hasDependencyAnalysisResults = true;
+        const results = await promise;
+        
+        for (const chainName in results) {
+            for (const pluginName in results[chainName]) {
+                const plugin = Plugin.GetPlugin(Plugin.Type.Metric, pluginName);
+                if (plugin.Output == Plugin.Output.DataAges) {
+                    const metrics = results[chainName][pluginName]['metrics'];
+                    for (const [dependencyName, dependencyResults] of Object.entries(metrics)) {
+                        const rawResults = dependencyResults['raw'];
+                        for (const [dependencyInstance, value] of Object.entries(rawResults)) {
+                            const dependencyId = `${dependencyName}-${dependencyInstance}`;
+                            const dependencyElement = this.schedule.select(`#${dependencyId}`);
+                            
+                            const analysisResults = `<br/>${pluginName}: ${Utility.FormatTimeString(value / Utility.MsToNs, 2)}ms`;
+                            this.dependencyAnalysisResults[dependencyId] += analysisResults;
+                        }
+                    }
+                }
+            }
+        }
     }
     
     toString() {
