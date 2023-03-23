@@ -100,8 +100,9 @@ This section describes the plugins that have been implemented so far.
 * `ls.plugin.metric.latency.js`: For a given event chain, regardless of whether it starts 
   from a system input or ends at a system output, returns the latency of each event chain instance
   and their min, avg, and max latencies. The latency of an event chain instance is the 
-  time difference between the end of the first task and the start of the last task, i.e., 
-  time(LET start of the last task) - time(LET end of the first task).
+  time difference between the start time of the event chain's first dependency and the end time of the 
+  event chain's last dependency, i.e., 
+  time(end of the event chain's last dependency) - time(start of the event chain's first dependency).
 
 ## Scheduler
 * `ls.plugin.scheduler.edf.js`: Preemptive, Earliest Deadline First scheduling.
