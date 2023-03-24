@@ -201,7 +201,7 @@ class ViewEventChain {
             .append('li')
                 .html(eventChain => {
                     const dependencies = eventChain.segments.join(` ${View.ArrowSeparator} `);
-                    return `<span>${eventChain.name}: ${dependencies}</span> ${Utility.AddDeleteButton(eventChain.name)}`;
+                    return `<span><b>${eventChain.name}:</b> ${dependencies}</span> ${Utility.AddDeleteButton(eventChain.name)}`;
                 })
             .on('click', function(event, data) {
                 thisRef.eventChains.node().querySelectorAll('li')
