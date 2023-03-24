@@ -223,7 +223,7 @@ class ViewConstraint {
             .data(constraints)
             .enter()
             .append('li')
-                .html(constraint => `<span>${constraint.name}: ${constraint.eventChain} ${this.toRelationSymbol(constraint.relation)} ${constraint.time / Utility.MsToNs}ms</span> ${Utility.AddDeleteButton(constraint.name)}`)
+                .html(constraint => `<span><b>${constraint.name}:</b> ${constraint.eventChain} ${this.toRelationSymbol(constraint.relation)} ${constraint.time / Utility.MsToNs}ms</span> ${Utility.AddDeleteButton(constraint.name)}`)
             .on('click', function(event, data) {
                 thisRef.constraints.node().querySelectorAll('li')
                     .forEach((constraint) => {
