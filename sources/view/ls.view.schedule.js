@@ -582,7 +582,7 @@ class ViewSchedule {
         for (const dependencies of dependenciesSet) {
             dependencies.value.forEach(dependency => this.drawDependency(svgElement, scale, taskIndices, dependencies.name, dependency));              
 
-            svgGroups.push(...dependencies.value.map(dependency => svgElement.select(`#${dependencies.name}-${dependency.instance}`)));
+            svgGroups.push(...dependencies.value.map(dependency => svgElement.select(`path#${dependencies.name}-${dependency.instance}`)));
                         
             this.dependencies
                 .append('a')
@@ -595,7 +595,7 @@ class ViewSchedule {
                         
                         // Update SVG style of dependencies
                         for (const dependency of dependencies.value) {
-                            const dependencyNode = svgElement.select(`#${dependencies.name}-${dependency.instance}`).node();
+                            const dependencyNode = svgElement.select(`path#${dependencies.name}-${dependency.instance}`).node();
                             if (this.classList.contains('active')) {
                                 dependencyNode.classList.remove('dependencyHidden');
                                 dependencyNode.classList.add('dependencyVisible');
@@ -715,12 +715,12 @@ class ViewSchedule {
             this.eventChainInstances[instanceName]['taskNames'] = new Set();
             this.eventChainInstances[instanceName]['tasks'] = new Set();
             for (const dependency of eventChainInstance.generator()) {
-                this.eventChainInstances[instanceName]['dependencies'].push(this.schedule.select(`#${dependency.name}-${dependency.instance}`));
+                this.eventChainInstances[instanceName]['dependencies'].push(this.schedule.select(`path#${dependency.name}-${dependency.instance}`));
                 this.eventChainInstances[instanceName]['taskNames'].add(`#${dependency.receiveEvent.task}-${dependency.receiveEvent.taskInstance}`);
                 this.eventChainInstances[instanceName]['taskNames'].add(`#${dependency.sendEvent.task}-${dependency.sendEvent.taskInstance}`);
             }
             for (const taskName of this.eventChainInstances[instanceName]['taskNames']) {
-                const element = this.schedule.select(taskName);
+                const element = this.schedule.select(`rect${taskName}`);
                 if (element.node() != null) {
                     this.eventChainInstances[instanceName]['tasks'].add(element);
                 }
@@ -890,10 +890,8 @@ class ViewSchedule {
                     for (const [dependencyName, dependencyResults] of Object.entries(metrics)) {
                         const rawResults = dependencyResults['raw'];
                         for (const [dependencyInstance, value] of Object.entries(rawResults)) {
-                            const dependencyId = `${dependencyName}-${dependencyInstance}`;
-                            const dependencyElement = this.schedule.select(`#${dependencyId}`);
-                            
                             const analysisResults = `<br/>${pluginName}: ${Utility.FormatTimeString(value / Utility.MsToNs, 2)}ms`;
+                            const dependencyId = `${dependencyName}-${dependencyInstance}`;
                             this.dependencyAnalysisResults[dependencyId] += analysisResults;
                         }
                     }
