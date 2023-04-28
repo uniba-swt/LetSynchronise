@@ -182,11 +182,13 @@ html {
     stroke-width: 2px;
     marker-end: url(#arrowRed);
     visibility: visible;
+    filter: brightness(0.97);  /* FIXME: Safari 16.4 workaround to trigger the repainting of SVG marker-end */
 }
 
 #view-schedule path.dependencyVisible:hover {
     stroke: var(--bs-orange);
     marker-end: url(#arrowOrange);
+    filter: brightness(0.98);  /* FIXME: Safari 16.4 workaround to trigger the repainting of SVG marker-end */
 }
 
 #view-schedule path.dependencyHidden {
@@ -198,7 +200,7 @@ html {
     stroke-width: 5px;
     marker-end: url(#arrowOrange);
     visibility: visible;
-    filter: brightness(1);  /* FIXME: Safari 16.4 workaround to trigger the repainting of SVG marker-end */
+    filter: brightness(0.99);  /* FIXME: Safari 16.4 workaround to trigger the repainting of SVG marker-end */
 }
 
 #view-schedule path.eventChainVisible {
@@ -206,7 +208,7 @@ html {
     stroke-width: 5px;
     marker-end: url(#arrowBlue);
     visibility: visible;
-    filter: brightness(0.99);  /* FIXME: Safari 16.4 workaround to trigger the repainting of SVG marker-end */
+    filter: brightness(1);  /* FIXME: Safari 16.4 workaround to trigger the repainting of SVG marker-end */
 }
 
 #view-schedule rect.relatedEventChainVisible {
