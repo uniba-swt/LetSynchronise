@@ -9,6 +9,10 @@ policies and optimisations, (2) make solutions and benchmarks
 readily accessible, and (3) fairly and accurately reproduce and 
 evaluate the results of existing work. 
 
+Original authors:
+* [@eyip002](https://github.com/eyip002): [Eugene Yip](https://www.uni-bamberg.de/swt/team/dr-eugene-yip/)
+* [@mkuo005](https://github.com/mkuo005): [Matthew Kuo](http://matthew.kuo.nz)
+
 
 ## Dependencies
 * Web browser that supports [indexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API): System database
@@ -38,7 +42,7 @@ Systems can be imported and exported via supported file formats. If only certain
 system elements should be imported or exported, these can be selected beforehand 
 via tick boxes.
 
-> **Note**
+> **Note**   
 > LetSynchronise uses a time base of nanoseconds to avoid rounding errors.
 
 ### Design Tab
@@ -62,8 +66,10 @@ via tick boxes.
 
 
 ## Development
-> **Note**
+> **Note**   
 > Location of original repository: https://github.com/eyip002/LetSynchronise
+
+**Contributions are always welcome!**
 
 LetSynchronise is based on the model-view-controller architecure and details
 can be found in the [`docs`](docs) folder. The main logic and plugins are programmed
@@ -76,3 +82,4 @@ The simulated schedules are plotted with [D3](https://d3js.org).
 ### Code Style
 * Indentation: 4 spaces
 * Names: camel casing
+
