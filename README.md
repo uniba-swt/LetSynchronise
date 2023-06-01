@@ -9,6 +9,9 @@ policies and optimisations, (2) make solutions and benchmarks
 readily accessible, and (3) fairly and accurately reproduce and 
 evaluate the results of existing work. 
 
+Paper describing LetSynchronise:
+* [E.Yip and M. M. Y. Kuo. _LetSynchronise: An Open-Source Framework for Analysing and Optimising Logical Execution Time Systems_. CPS-IoT Week, 2023](https://dl.acm.org/doi/10.1145/3576914.3587500)
+
 Original authors:
 * [@eyip002](https://github.com/eyip002): [Eugene Yip](https://www.uni-bamberg.de/swt/team/dr-eugene-yip/)
 * [@mkuo005](https://github.com/mkuo005): [Matthew Kuo](http://matthew.kuo.nz)
@@ -43,7 +46,7 @@ system elements should be imported or exported, these can be selected beforehand
 via tick boxes.
 
 > **Note**   
-> LetSynchronise uses a time base of nanoseconds to avoid rounding errors.
+> LetSynchronise uses a time base of nanoseconds to avoid floating-point rounding errors.
 
 ### Design Tab
 * Edit the system interface in terms of the environmental inputs and outputs.
