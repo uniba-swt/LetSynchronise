@@ -272,7 +272,7 @@ class ViewTask {
 
     validateTaskParameters(taskParameters) {
         if (taskParameters.name == null || taskParameters.name.trim() == '') {
-            alert('Name cannot be blank.');
+            alert('Task name cannot be blank.');
             return false;
         }
         if (!Utility.ValidName(taskParameters.name.trim())) {

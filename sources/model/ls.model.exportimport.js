@@ -78,6 +78,8 @@ class ModelExportImport {
     
     refreshViews() {
         return this.modelInterface.refreshViews()
+            .then(this.modelCore.refreshViews())
+            .then(this.modelMemory.refreshViews())
             .then(this.modelTask.refreshViews());
     }
     

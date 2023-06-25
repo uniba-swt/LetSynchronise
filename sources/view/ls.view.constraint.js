@@ -136,7 +136,7 @@ class ViewConstraint {
     
     validateConstraint(constraint) {
         if (constraint.name == null || constraint.name.trim() == '') {
-            alert('Name cannot be blank.');
+            alert('Constraint name cannot be blank.');
             return false;
         }
         if (!Utility.ValidName(constraint.name.trim())) {
