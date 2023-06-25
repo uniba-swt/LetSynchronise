@@ -3,11 +3,13 @@
 class ModelExportImport {
     database = null;
     
+    modelCore = null;
+    modelMemory = null;
+    modelInterface = null;
     modelTask = null;
     modelDependency = null;
-    modelConstraint = null;
-    modelInterface = null;
     modelEventChain = null;
+    modelConstraint = null;
     
     constructor() { }
     
@@ -17,6 +19,14 @@ class ModelExportImport {
     
     registerModelDatabase(database) {
         this.database = database;
+    }
+    
+    registerModelCore(modelCore) {
+        this.modelCore = modelCore;
+    }
+    
+    registerModelMemory(modelMemory) {
+        this.modelMemory = modelMemory;
     }
 
     registerModelInterface(modelInterface) {
@@ -30,16 +40,16 @@ class ModelExportImport {
     registerModelDependency(modelDependency) {
         this.modelDependency = modelDependency;
     }
-    
-     registerModelConstraint(modelConstraint) {
-        this.modelConstraint = modelConstraint;
-    }
-    
+        
     registerModelEventChain(modelEventChain) {
         this.modelEventChain = modelEventChain;
     }
     
-    
+     registerModelConstraint(modelConstraint) {
+        this.modelConstraint = modelConstraint;
+    }
+
+
     // -----------------------------------------------------
     // Class methods
     

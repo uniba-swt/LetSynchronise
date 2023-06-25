@@ -3,6 +3,8 @@
 class ControllerExportImport {
     _view = null;
     _model = null;
+    _modelCore = null;
+    _modelMemory = null;
     _modelInterface = null;
     _modelTask = null;
     _modelDependency = null;
@@ -37,6 +39,28 @@ class ControllerExportImport {
         
         // Register the model interface with the model.
         this._model.registerModelInterface(this._modelInterface);
+    }
+    
+    get modelCore() {
+        return this._modelCore;
+    }
+    
+    set modelCore(modelCore) {
+        this._modelCore = modelCore;
+        
+        // Register the model core with the model.
+        this._model.registerModelCore(this._modelCore);
+    }
+    
+    get modelMemory() {
+        return this._modelMemory;
+    }
+    
+    set modelMemory(modelMemory) {
+        this._modelMemory = modelMemory;
+        
+        // Register the model memory with the model.
+        this._model.registerModelMemory(this._modelMemory);
     }
     
     get modelInterface() {

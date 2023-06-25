@@ -1,8 +1,8 @@
 'use strict';
 
 class ModelDependency {
-    updateDependencies = null;      // Callback to function in ls.view.dependency
-    updateDependencySelectors = null;
+    updateDependencies = null;             // Callback to function in ls.view.dependency
+    updateDependencySelectors = null;      // Callback to function in ls.view.dependency
     
     database = null;
     modelTask = null;

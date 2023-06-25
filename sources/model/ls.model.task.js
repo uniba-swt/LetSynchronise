@@ -5,8 +5,6 @@ class ModelTask {
     notifyChanges = null;               // Callback to function in ls.view.schedule
 
     database = null;
-    storeName = null;
-    
     modelDependency = null;
     modelEventChain = null;
         

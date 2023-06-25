@@ -3,6 +3,8 @@
 // Define the model implementations.
 let model = new Model();
 model.modelExportImport = new ModelExportImport();
+model.modelCore = new ModelCore();
+model.modelMemory = new ModelMemory();
 model.modelInterface = new ModelInterface();
 model.modelTask = new ModelTask();
 model.modelDependency = new ModelDependency();
@@ -37,6 +39,8 @@ controller.controllerAnalyse = new ControllerAnalyse();
 // Link the models and views to their respective controllers.
 controller.controllerExportImport.view = view.viewExportImport;
 controller.controllerExportImport.model = model.modelExportImport;
+controller.controllerExportImport.modelCore = model.modelCore;
+controller.controllerExportImport.modelMemory = model.modelMemory;
 controller.controllerExportImport.modelInterface = model.modelInterface;
 controller.controllerExportImport.modelTask = model.modelTask;
 controller.controllerExportImport.modelDependency = model.modelDependency;

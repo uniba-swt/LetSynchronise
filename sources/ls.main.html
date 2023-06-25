@@ -23,35 +23,37 @@
     <!-- <script type="module"> does not work when executed locally -->
     <script src="sources/model/ls.model.js"></script>
     <script src="sources/model/ls.model.exportImport.js"></script>
+    <script src="sources/model/ls.model.core.js"></script>
+    <script src="sources/model/ls.model.memory.js"></script>
     <script src="sources/model/ls.model.interface.js"></script>
-    <script src="sources/model/ls.model.dependency.js"></script>
-    <script src="sources/model/ls.model.schedule.js"></script>
     <script src="sources/model/ls.model.task.js"></script>
-    <script src="sources/model/ls.model.constraint.js"></script>
-    <script src="sources/model/ls.model.eventChain.js"></script>
+    <script src="sources/model/ls.model.dependency.js"></script>
     <script src="sources/model/ls.model.chain.js"></script>
     <script src="sources/model/ls.model.chainInstance.js"></script>
+    <script src="sources/model/ls.model.eventChain.js"></script>
+    <script src="sources/model/ls.model.constraint.js"></script>
+    <script src="sources/model/ls.model.schedule.js"></script>
     <script src="sources/model/ls.model.analyse.js"></script>
     <script src="sources/model/ls.model.database.js"></script>
 
     <script src="sources/view/ls.view.js"></script>
     <script src="sources/view/ls.view.exportImport.js"></script>
     <script src="sources/view/ls.view.interface.js"></script>
-    <script src="sources/view/ls.view.dependency.js"></script>
-    <script src="sources/view/ls.view.schedule.js"></script>
     <script src="sources/view/ls.view.task.js"></script>
-    <script src="sources/view/ls.view.constraint.js"></script>
+    <script src="sources/view/ls.view.dependency.js"></script>
     <script src="sources/view/ls.view.eventChain.js"></script>
+    <script src="sources/view/ls.view.constraint.js"></script>
+    <script src="sources/view/ls.view.schedule.js"></script>
     <script src="sources/view/ls.view.analyse.js"></script>
 
     <script src="sources/controller/ls.controller.js"></script>
     <script src="sources/controller/ls.controller.exportImport.js"></script>
     <script src="sources/controller/ls.controller.interface.js"></script>
-    <script src="sources/controller/ls.controller.dependency.js"></script>
-    <script src="sources/controller/ls.controller.schedule.js"></script>
     <script src="sources/controller/ls.controller.task.js"></script>
-    <script src="sources/controller/ls.controller.constraint.js"></script>
+    <script src="sources/controller/ls.controller.dependency.js"></script>
     <script src="sources/controller/ls.controller.eventChain.js"></script>
+    <script src="sources/controller/ls.controller.constraint.js"></script>
+    <script src="sources/controller/ls.controller.schedule.js"></script>
     <script src="sources/controller/ls.controller.analyse.js"></script>
 
     <script src="sources/ls.utility.js"></script>
@@ -95,6 +97,12 @@
             <div class="border rounded-3 p-2">
                 <h4>System elements to consider</h4>
         
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" value="" id="exportimport-platform" checked>
+                        <label class="form-check-label" for="exportimport-platform">
+                            Platform
+                        </label>
+                </div>
                 <div class="form-check form-check-inline">
                     <input class="form-check-input" type="checkbox" value="" id="exportimport-inputs-outputs" checked>
                         <label class="form-check-label" for="exportimport-inputs-outputs">
@@ -181,6 +189,7 @@
 
     <!-- Content for the tab views defined below -->
     <div class="tab-content" id="nav-tabContent">
+    
         <div class="tab-pane fade show active" id="nav-platform" role="tabpanel" aria-labelledby="nav-platform-tab">
         
             <h3>Define or Edit a Processor Core</h3>
