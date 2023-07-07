@@ -245,7 +245,7 @@ class ViewTask {
             this.acet = '';
             this.bcet = '';
             this.distribution = 'Normal';
-            this.core = 'Optional';
+            this.core = 'Default';
             
             // Clear the preview.
             this.clearPreview();
@@ -473,6 +473,11 @@ class ViewTask {
             return false;
         }
         
+        if (taskParameters.core == null || taskParameters.core.trim() == '') {
+            alert('Core for execution cannot be blank.');
+            return false;
+        }
+        
         return true;
     }
     
@@ -542,7 +547,7 @@ class ViewTask {
                 .attr('dy', '3.9em')
                 .text(`Outputs: ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.outputs)}`);
 
-        // Add the task's priority and execution time distribution
+        // Add the task's priority, execution time distribution, and core
         textInfo.append('text')
                 .attr('dx', '450px')
                 .attr('dy', '0em')
@@ -551,6 +556,10 @@ class ViewTask {
                 .attr('dx', '450px')
                 .attr('dy', '1.3em')
                 .text(`Distribution: ${taskParameters.distribution}`);
+        textInfo.append('text')
+                .attr('dx', '450px')
+                .attr('dy', '2.6em')
+                .text(`Core: ${taskParameters.core == null ? 'Default' : taskParameters.core}`);
 
         // -----------------------------
         // Group for graphical information
