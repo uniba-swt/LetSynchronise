@@ -100,7 +100,7 @@ class ControllerExportImport {
     // Handler for importing a system
     handleImportSystem = (system, elementsSelected) => {
     	if (system != null) {
-        	this.model.importSystem(system, elementsSelected);
+            this.model.importSystem(system, elementsSelected);
         }
     }
 
