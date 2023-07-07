@@ -99,6 +99,10 @@ class ViewCore {
             alert('Core name cannot be blank.');
             return false;
         }
+        if (core.name.trim().toLowerCase() == 'default') {
+            alert(`Core name cannot be "${core.name.trim()}".`);
+            return false;
+        }
         if (!Utility.ValidName(core.name.trim())) {
             alert('Core name can only start with an alphabetical or underscore character, and continue with alphanumerical or underscore characters.');
             return false;

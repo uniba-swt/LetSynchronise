@@ -1,10 +1,12 @@
 'use strict';
 
 class ModelTask {
+    updateCoreSelector = null;          // Callback to function in ls.view.task
     updateTasks = null;                 // Callback to function in ls.view.task
     notifyChanges = null;               // Callback to function in ls.view.schedule
 
     database = null;
+    modelCore = null;
     modelDependency = null;
     modelEventChain = null;
         
@@ -13,6 +15,10 @@ class ModelTask {
     
     // -----------------------------------------------------
     // Registration of callbacks from the controller
+
+    registerUpdateCoreSelectorCallback(callback) {
+        this.updateCoreSelector = callback;
+    }
 
     registerUpdateTasksCallback(callback) {
         this.updateTasks = callback;
@@ -30,6 +36,10 @@ class ModelTask {
         this.database = database;
     }
     
+    registerModelCore(modelCore) {
+        this.modelCore = modelCore;
+    }
+    
     registerModelDependency(modelDependency) {
         this.modelDependency = modelDependency;
     }
@@ -42,7 +52,7 @@ class ModelTask {
     // -----------------------------------------------------
     // Class methods
 
-   async createTask(parameters) {
+    async createTask(parameters) {
         // Delete dependencies that relied on task ports that are no longer exist.
         let dependenciesToRemove = [];
         let dependencies = await this.modelDependency.getAllDependencies();
@@ -68,7 +78,13 @@ class ModelTask {
         return this.database.putObject(Model.TaskStoreName, parameters)
             .then(this.refreshViews())
             .then(this.notifyChanges());
-   }
+    }
+    
+    // Saves the changes to an existing task, without forcing the view to refresh
+    saveChangedTask(task) {
+        return this.database.putObject(Model.TaskStoreName, task)
+            .then(this.notifyChanges());
+    }
     
     getAllTasks() {
         return this.database.getAllObjects(Model.TaskStoreName);
@@ -84,9 +100,28 @@ class ModelTask {
             .then(result => this.refreshViews());
     }
     
+    // Validate the tasks against the platform
+    async validate() {
+        const allCores = (await this.modelCore.getAllCores()).map(core => core.name);
+        const allTasks = await this.getAllTasks();
+        
+        let changedTasks = [];
+        for (const task of allTasks) {
+            if (task.core != null && !allCores.includes(task.core)) {
+                task.core = null;
+                changedTasks.push(task);
+            }
+        }
+        
+        return Promise.all(changedTasks.map(task => this.saveChangedTask(task)))
+            .then(this.refreshViews());
+    }
+    
     refreshViews() {
         return this.getAllTasks()
             .then(result => this.updateTasks(result))
+            .then(result => this.modelCore.getAllCores())
+            .then(result => this.updateCoreSelector(result))
             .then(result => this.modelDependency.validate());
     }
     

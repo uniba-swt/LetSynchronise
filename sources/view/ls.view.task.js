@@ -485,6 +485,26 @@ class ViewTask {
     // -----------------------------------------------------
     // Class methods
     
+    updateCoreSelector(cores) {
+        let parentElement = d3.select(this.coreField);
+        cores.sort();
+
+        // Create list of available ports
+        parentElement.selectAll('*').remove();
+        parentElement
+            .append('option')
+                .property('selected', true)
+                .attr('value', 'Default')
+                .text('Default');
+
+        cores.forEach(core =>
+            parentElement
+                .append('option')
+                    .attr('value', core.name)
+                    .text(core.name)
+        );
+    }
+    
     clearPreview() {
         // Delete the existing preview, if it exists
         this.taskPreview.selectAll('*').remove();
@@ -667,6 +687,7 @@ class ViewTask {
         this.acet = taskParameters.acet / Utility.MsToNs;
         this.bcet = taskParameters.bcet / Utility.MsToNs;
         this.distribution = taskParameters.distribution;
+        this.core = taskParameters.core == null ? 'Default' : taskParameters.core;
     }
         
     formatTaskParametersInfo(taskParameters) {

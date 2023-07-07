@@ -4,6 +4,7 @@ class ModelCore {
     updateCores = null;                 // Callback to function in ls.view.core
 
     database = null;
+    modeltask = null;
 
     constructor() { }
     
@@ -23,6 +24,9 @@ class ModelCore {
         this.database = database;
     }
 
+    registerModelTask(modelTask) {
+        this.modelTask = modelTask;
+    }
     
     // -----------------------------------------------------
     // Class methods
@@ -44,7 +48,8 @@ class ModelCore {
     
     refreshViews() {
         return this.getAllCores()
-            .then(result => this.updateCores(result));
+            .then(result => this.updateCores(result))
+            .then(result => this.modelTask.validate());
     }
     
     toString() {

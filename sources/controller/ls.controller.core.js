@@ -3,6 +3,7 @@
 class ControllerCore {
     _view = null;
     _model = null;
+    _modelTask = null;
     
     constructor() { }
 
@@ -32,6 +33,17 @@ class ControllerCore {
     
     get model() {
         return this._model;
+    }
+    
+    set modelTask(modelTask) {
+        this._modelTask = modelTask;
+        
+        // Register the model task with the model.
+        this._model.registerModelTask(this._modelTask);
+    }
+    
+    get modelTask() {
+        return this._modelTask;
     }
     
     
