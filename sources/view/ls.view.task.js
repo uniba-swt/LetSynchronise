@@ -15,6 +15,7 @@ class ViewTask {
     acetField = null;
     bcetField = null;
     distributionField = null;
+    coreField = null;
     
     previewButton = null;
     submitButton = null;
@@ -43,6 +44,7 @@ class ViewTask {
         this.acetField = this.root.querySelector('#acet');
         this.bcetField = this.root.querySelector('#bcet');
         this.distributionField = this.root.querySelector('#distribution');
+        this.coreField = this.root.querySelector('#core');
         
         this.previewButton = this.root.querySelector('#previewTask');
         this.submitButton = this.root.querySelector('#submitTask');
@@ -158,6 +160,18 @@ class ViewTask {
         this.distributionField.value = distribution;
     }
     
+    get core() {
+        if (this.coreField.value == null || this.coreField.value.trim() == '') {
+            return null;
+        } else {
+            return this.coreField.value;
+        }
+    }
+    
+    set core(core) {
+        this.coreField.value = core;
+    }
+    
     get taskParametersRaw() {
         // Package all the task paramters as is into an object.
         return {
@@ -172,7 +186,8 @@ class ViewTask {
             'wcet': this.wcet,
             'acet': this.acet,
             'bcet': this.bcet,
-            'distribution': this.distribution
+            'distribution': this.distribution,
+            'core': this.core
         };
     }
     
@@ -190,7 +205,8 @@ class ViewTask {
             'wcet': Math.abs(parseFloat(this.wcet)) * Utility.MsToNs,
             'acet': Math.abs(parseFloat(this.acet)) * Utility.MsToNs,
             'bcet': Math.abs(parseFloat(this.bcet)) * Utility.MsToNs,
-            'distribution': this.distribution.trim()
+            'distribution': this.distribution.trim(),
+            'core':  this.core.trim()
         };
     }
     
@@ -229,6 +245,7 @@ class ViewTask {
             this.acet = '';
             this.bcet = '';
             this.distribution = 'Normal';
+            this.core = 'Optional';
             
             // Clear the preview.
             this.clearPreview();
