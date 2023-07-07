@@ -46,7 +46,7 @@ class PluginMetricEnd2End {
         return undefined;
     }
 
-	static ToHtml(result) {
+    static ToHtml(result) {
         if (result.num == 0) {
             return `<h6>${PluginMetricEnd2End.Name}: ${result.num} values</h6>`;
         } else {
@@ -56,7 +56,7 @@ class PluginMetricEnd2End {
                 `<ul><li>${result.num} values: [${values.join(', ')}]</li></ul>`,
             ].join('\n');
         }
-	}
+    }
 
     static ToString(result) {
         if (result.num == 0) {
