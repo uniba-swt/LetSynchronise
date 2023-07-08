@@ -303,7 +303,7 @@ class ViewSchedule {
         }
         
         // Draw new task schedule.
-        const {svgElement, scale, taskIndices} = this.drawSchedule(tasksInstances);
+        const {svgElement, scale, taskIndices, coreIndices} = this.drawSchedule(tasksInstances);
         
         // Draw communication dependencies.
         this.hasDependencyAnalysisResults = false;
@@ -339,20 +339,27 @@ class ViewSchedule {
         const svgElement = this.schedule.append('svg');
         
         // Draw the task instances.
-        let taskIndices = {};
+        let taskIndices = { };
+        let coreIndices = { };
         for (const [index, taskInstances] of tasksInstances.entries()) {
             this.drawTaskInstances(taskInstances, svgElement, scale, index);
             taskIndices[taskInstances.name] = index;
+            
+            for (const instance of taskInstances.value) {
+                if (coreIndices[instance.core] === undefined) {
+                    coreIndices[instance.core] = Object.keys(coreIndices).length;
+                }
+            }
         }
         
         // Draw the system load.
-        this.drawSystemLoad(tasksInstances, svgElement, scale, tasksInstances.length);
+        this.drawSystemLoad(tasksInstances, svgElement, scale, tasksInstances.length, coreIndices);
         
         svgElement
           .attr('width', `${View.Width}px`)
           .attr('height', `${(tasksInstances.length + 1) * View.TaskHeight}px`);
         
-        return {svgElement: svgElement, scale: scale, taskIndices: taskIndices};
+        return {svgElement: svgElement, scale: scale, taskIndices: taskIndices, coreIndices: coreIndices};
     }
     
     // Draw just the instances of a given task.
@@ -420,15 +427,15 @@ class ViewSchedule {
                        .attr('height', View.BarHeight)
                       .on('mouseover', () => {
                         const title = `<b>${taskInstances.name}</b> instance ${instance.instance}`;
-                        const letInterval = `LET interval: [${Utility.FormatTimeString(instance.letStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.letEndTime / Utility.MsToNs, 2)}]ms`;
                         const periodInterval = `Period interval: [${Utility.FormatTimeString(instance.periodStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.periodEndTime / Utility.MsToNs, 2)}]ms`;
+                        const letInterval = `LET interval: [${Utility.FormatTimeString(instance.letStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.letEndTime / Utility.MsToNs, 2)}]ms`;
                         const executionTime = `Total execution time: ${Utility.FormatTimeString(instance.executionTime / Utility.MsToNs, 2)}ms`;
                         tooltip.innerHTML = `${title} <br/> ${letInterval} <br/> ${periodInterval} <br/> ${executionTime}`;
                         tooltip.style.visibility = 'visible';
                       })
                       .on('mousemove', (event) => {
                         const [pointerX, pointerY] = d3.pointer(event, window);
-                        tooltip.style.top = `${pointerY - 5 * View.BarHeight}px`;
+                        tooltip.style.top = `${pointerY - 5.4 * View.BarHeight}px`;
                         tooltip.style.left = `${pointerX}px`;
                       })
                       .on('mouseout', () => {
@@ -448,12 +455,14 @@ class ViewSchedule {
                            .attr('height', View.ExecutionHeight)
                            .attr('class', 'time')
                          .on('mouseover', () => {
-                           tooltip.innerHTML = `Execution interval: [${Utility.FormatTimeString(interval.startTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString((interval.startTime + interval.duration) / Utility.MsToNs, 2)}]ms`;
+                           const core = `Core ${instance.core}`;
+                           const executionInterval = `Execution interval: [${Utility.FormatTimeString(interval.startTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString((interval.startTime + interval.duration) / Utility.MsToNs, 2)}]ms`;
+                           tooltip.innerHTML = `${core} <br/> ${executionInterval}`;
                            tooltip.style.visibility = 'visible';
                          })
                          .on('mousemove', (event) => {
                            const [pointerX, pointerY] = d3.pointer(event, window);
-                           tooltip.style.top = `${pointerY - 1.5 * View.BarHeight}px`;
+                           tooltip.style.top = `${pointerY - 3 * View.BarHeight}px`;
                            tooltip.style.left = `${pointerX}px`;
                          })
                          .on('mouseout', () => {
@@ -483,7 +492,7 @@ class ViewSchedule {
     }
     
     // Draw the total system load at the bottom of the schedule.
-    drawSystemLoad(tasksInstances, svgElement, scale, index) {
+    drawSystemLoad(tasksInstances, svgElement, scale, index, coreIndices) {
         if (index == 0) {
             return;
         }
@@ -526,26 +535,28 @@ class ViewSchedule {
                    .attr('y2', `0`)
                    .attr('class', 'boundary');
 
-        // Add the taskss execution times
+        // Add the tasks' execution times
         for (const [index, taskInstances] of tasksInstances.entries()) {
             for (const instance of taskInstances.value) {
+                const coreIndex = coreIndices[instance.core];
                 const executionIntervals = instance.executionIntervals.map(interval => Utility.Interval.FromJson(interval));
                 for (const interval of executionIntervals) {
                     graphInfo.append('rect')
                                .attr('x', scale(interval.startTime))
-                               .attr('y', View.BarHeight - View.ExecutionHeight)
+                               .attr('y', View.BarHeight - (coreIndex + 1) * View.ExecutionHeight)
                                .attr('width', scale(interval.duration))
                                .attr('height', View.ExecutionHeight)
                                .attr('class', 'time')
                              .on('mouseover', () => {
                                const title = `<b>${taskInstances.name}</b> instance ${instance.instance}`;
+                               const core = `Core ${instance.core}`;
                                const executionInterval = `Execution interval: [${Utility.FormatTimeString(interval.startTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString((interval.startTime + interval.duration) / Utility.MsToNs, 2)}]ms`;
-                               tooltip.innerHTML = `${title} <br/> ${executionInterval}`;
+                               tooltip.innerHTML = `${title} <br/> ${core} <br/> ${executionInterval}`;
                                tooltip.style.visibility = 'visible';
                              })
                              .on('mousemove', (event) => {
                                const [pointerX, pointerY] = d3.pointer(event, window);
-                               tooltip.style.top = `${pointerY - 3 * View.BarHeight}px`;
+                               tooltip.style.top = `${pointerY - 4.3 * View.BarHeight}px`;
                                tooltip.style.left = `${pointerX}px`;
                              })
                              .on('mouseout', () => {

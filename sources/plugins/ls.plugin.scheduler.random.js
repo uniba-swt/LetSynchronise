@@ -18,8 +18,11 @@ class PluginSchedulerRandom {
         const scheduleElementSelected = ['schedule'];
         const schedule = await Plugin.DatabaseContentsGet(scheduleElementSelected);
         const tasks = await schedule[Model.TaskInstancesStoreName];
+        
+        const coreElementSelected = ['cores'];
+        const cores = (await Plugin.DatabaseContentsGet(coreElementSelected))[Model.CoreStoreName];
 
-        const result = this.Algorithm(tasks);
+        const result = this.Algorithm(tasks, cores);
         if (!result.schedulable) {
             alert(result.message);
             return;
@@ -30,19 +33,29 @@ class PluginSchedulerRandom {
     }
     
     // Non-preemptive random.
-    static Algorithm(tasks) {
+    static Algorithm(tasks, cores) {
         // Do nothing if the task set is empty.
         if (tasks.length == 0) {
             return { 'schedulable': true, 'message': 'No tasks to schedule' };
         }
-    
-        // Track how far we are into the schedule.
-        let currentTime = 0;
+        
+        // Track how far we are into the schedule on each core.
+        // Also select a default core when the system has not defined any cores,
+        // or use the first core as the default core for tasks that have not been allocated to a core.
+        let coreDefault = 'Default';
+        let coreCurrentTime = { };
+        if (cores.length == 0) {
+            coreCurrentTime[coreDefault] = 0;
+        } else {
+            for (const core of cores) {
+                coreCurrentTime[core.name] = 0;
+            }
+            coreDefault = cores[0].name;
+        }
         
         // For each task, keep track of the instance we are trying to schedule.
         // A null index means that all instances of a task have been scheduled.
-        let taskInstanceIndices = new Array(tasks.length);
-        taskInstanceIndices.fill(0);
+        let taskInstanceIndices = new Array(tasks.length).fill(0);
         
         // Schedule all the task instances in chronological order, based on their LET start time.
         // Task instances with the same LET start time are selected arbitrarily.
@@ -61,22 +74,27 @@ class PluginSchedulerRandom {
                 }
             }
             
+            // Determine the allocated core.
+            if (chosenTask.instance.core == null) {
+                chosenTask.instance.core = coreDefault;
+            }
+            
             // Make sure the current time is not earlier than the chosen task instance's LET start time.
-            currentTime = Math.max(currentTime, chosenTask.instance.letStartTime);
+            coreCurrentTime[chosenTask.instance.core] = Math.max(coreCurrentTime[chosenTask.instance.core], chosenTask.instance.letStartTime);
             
             // Make sure the chosen task instance finishes its execution in its LET.
-            const nextTime = currentTime + chosenTask.instance.executionTime;
+            const nextTime = coreCurrentTime[chosenTask.instance.core] + chosenTask.instance.executionTime;
             if (nextTime > chosenTask.instance.letEndTime) {
                 const message = `Could not schedule enough time for task ${tasks[chosenTask.number].name}, instance ${chosenTask.instance.instance}!`;
                 return { 'schedulable': false, 'message': message };
             }
             
             // Create the execution interval for the chosen task instance.
-            const executionInterval = new Utility.Interval(currentTime, nextTime);
+            const executionInterval = new Utility.Interval(coreCurrentTime[chosenTask.instance.core], nextTime);
             chosenTask.instance.executionIntervals.push(executionInterval);
             
             // Advance the current time to the next time.
-            currentTime = nextTime;
+            coreCurrentTime[chosenTask.instance.core] = nextTime;
             
             // Consider the next instance of the chosen task in the next round of scheduling decisions.
             taskInstanceIndices[chosenTask.number]++;

@@ -161,7 +161,7 @@ class ViewTask {
     }
     
     get core() {
-        if (this.coreField.value == null || this.coreField.value.trim() == '') {
+        if (this.coreField.value == null || this.coreField.value.trim() == 'Default') {
             return null;
         } else {
             return this.coreField.value;
@@ -206,7 +206,7 @@ class ViewTask {
             'acet': Math.abs(parseFloat(this.acet)) * Utility.MsToNs,
             'bcet': Math.abs(parseFloat(this.bcet)) * Utility.MsToNs,
             'distribution': this.distribution.trim(),
-            'core':  this.core.trim()
+            'core':  this.core == null ? null : this.core.trim()
         };
     }
     
@@ -473,8 +473,8 @@ class ViewTask {
             return false;
         }
         
-        if (taskParameters.core == null || taskParameters.core.trim() == '') {
-            alert('Core for execution cannot be blank.');
+        if (taskParameters.core != null && taskParameters.core.trim() == '') {
+            alert('Core for execution cannot be an empty string.');
             return false;
         }
         

@@ -56,7 +56,8 @@ class ModelSchedule {
             'letEndTime'        : timePoint + parameters.activationOffset + parameters.duration,
             'periodEndTime'     : timePoint + parameters.period,
             'executionTime'     : executionTime,
-            'executionIntervals': []
+            'executionIntervals': [],
+            'core'              : parameters.core
         };
     }
     
