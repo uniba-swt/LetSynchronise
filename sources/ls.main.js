@@ -52,6 +52,7 @@ controller.controllerExportImport.modelEventChain = model.modelEventChain;
 controller.controllerExportImport.modelConstraint = model.modelConstraint;
 
 controller.controllerCore.view = view.viewCore;
+controller.controllerCore.viewSchedule = view.viewSchedule;
 controller.controllerCore.model = model.modelCore;
 controller.controllerCore.modelTask = model.modelTask;
 

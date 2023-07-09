@@ -2,6 +2,7 @@
 
 class ModelCore {
     updateCores = null;                 // Callback to function in ls.view.core
+    notifyChanges = null;               // Callback to function in ls.view.schedule
 
     database = null;
     modeltask = null;
@@ -15,6 +16,10 @@ class ModelCore {
     
     registerUpdateCoresCallback(callback) {
         this.updateCores = callback;
+    }
+    
+    registerNotifyChangesCallback(callback) {
+        this.notifyChanges = callback;
     }
     
 
@@ -35,7 +40,8 @@ class ModelCore {
     createCore(core) {
         // Store core in Database
         return this.database.putObject(Model.CoreStoreName, core)
-            .then(this.refreshViews());
+            .then(this.refreshViews())
+            .then(this.notifyChanges());
     }
     
     getAllCores() {

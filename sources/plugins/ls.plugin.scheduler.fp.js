@@ -62,10 +62,7 @@ class PluginSchedulerFp {
         tasksInstances.forEach(taskInstances =>
             taskInstances.value.forEach(instance => instance.remainingExecutionTime = instance.executionTime)
         );
-        
-        // Use a LIFO queue to track the preempted task instances.
-//        let preemptedTasksQueue = [ ];
-        
+                
         // Schedule all the task instances in chronological (LET start time) and
         // fixed-priority order.
         // Task instances with the same priority and/or LET start time are selected arbitrarily.
@@ -77,8 +74,6 @@ class PluginSchedulerFp {
                 coreNextPreemptionTime[core.name] = 2 * makespan;
                 coreChosenTask[core.name] = { 'number': null, 'instance': null, 'priority': null };
             }
-//            let nextPreemptionTime = 2 * makespan;
-//            let chosenTask = { 'number': null, 'instance': null, 'priority': null , 'core': null };
 
             for (const [taskNumber, task] of tasksInstances.entries()) {
                 if (taskInstanceIndices[taskNumber] == null) {

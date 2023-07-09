@@ -2,6 +2,7 @@
 
 class ControllerCore {
     _view = null;
+    _viewSchedule = null;
     _model = null;
     _modelTask = null;
     
@@ -19,11 +20,20 @@ class ControllerCore {
         return this._view;
     }
     
+    set viewSchedule(viewSchedule) {
+        this._viewSchedule = viewSchedule;
+    }
+    
+    get viewSchedule() {
+        return this._viewSchedule;
+    }
+    
     set model(model) {
         this._model = model;
         
         // Register the handlers when setting the model.
         this._model.registerUpdateCoresCallback(this.callbackUpdateCores);
+        this._model.registerNotifyChangesCallback(this.callbackNotifyChanges);
 
         // Hack to populate the View with cores once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
@@ -69,6 +79,11 @@ class ControllerCore {
     // Callback for updating the displayed cores.
     callbackUpdateCores = (cores) => {
         this.view.updateCores(cores);
+    }
+    
+    // Callback for notifying the schedule view that cores have changed.
+    callbackNotifyChanges = () => {
+        this.viewSchedule.notifyChanges();
     }
     
     toString() {
