@@ -34,6 +34,7 @@ class PluginSchedulerFp {
     }
     
     // Preemptive fixed-priority, multicore, no task migration.
+    // Preempts the core that will idle the earliest.
     static Algorithm(tasksInstances, makespan, tasksParameters, cores) {
         // Do nothing if the task set is empty.
         if (tasksInstances.length == 0) {
