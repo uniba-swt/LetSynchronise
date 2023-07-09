@@ -48,6 +48,10 @@ via tick boxes.
 > **Note**   
 > LetSynchronise uses a time base of nanoseconds to avoid floating-point rounding errors.
 
+### Platform Tab
+* Edit the cores and their speedups
+* Edit the memories and their sizes and access latencies
+
 ### Design Tab
 * Edit the system interface in terms of the environmental inputs and outputs.
 * Edit the system's LET task set, and view each task's parameters diagramatically.

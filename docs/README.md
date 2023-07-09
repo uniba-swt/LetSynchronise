@@ -1,3 +1,11 @@
+# Platform
+Tasks can be assigned to cores that have been defined in the platform. Task schedulers
+can directly use the core assignments for task execution, or modify the assignments
+dynamically at run-time. If no core has been defined for the platform, a single-core is 
+assumed and created with the name `Default` at a speedup of `1`. When a task instance 
+is being executed on a core, the core is tagged to the execution interval (`instance.currentCore.name`).
+
+
 # LET Task Set
 The task set of a LET system is specified by the user.
 Example task sets in JSON format can be found in the [`examples`](../examples) folder.
