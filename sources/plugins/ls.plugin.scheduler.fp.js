@@ -33,7 +33,7 @@ class PluginSchedulerFp {
             .then(Plugin.DatabaseContentsSet(system, systemElementSelected));
     }
     
-    // Preemptive fixed-priority, multicore, no task migration.
+    // Preemptive, fixed-priority, multicore, no task migration.
     // Preempts the core that will idle the earliest.
     static Algorithm(tasksInstances, makespan, tasksParameters, cores) {
         // Do nothing if the task set is empty.
@@ -124,7 +124,6 @@ class PluginSchedulerFp {
                     coreChosenTask[taskCore.name].number = taskNumber;
                     coreChosenTask[taskCore.name].instance = taskInstance;
                     coreChosenTask[taskCore.name].priority = taskPriority;
-                    coreChosenTask[taskCore.name].core = taskCore;
                 }
                 
                 // Find the latest time that the next scheduling decision has to be made.
