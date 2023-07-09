@@ -15,6 +15,7 @@ class ViewTask {
     acetField = null;
     bcetField = null;
     distributionField = null;
+    coreField = null;
     
     previewButton = null;
     submitButton = null;
@@ -43,6 +44,7 @@ class ViewTask {
         this.acetField = this.root.querySelector('#acet');
         this.bcetField = this.root.querySelector('#bcet');
         this.distributionField = this.root.querySelector('#distribution');
+        this.coreField = this.root.querySelector('#core');
         
         this.previewButton = this.root.querySelector('#previewTask');
         this.submitButton = this.root.querySelector('#submitTask');
@@ -158,6 +160,18 @@ class ViewTask {
         this.distributionField.value = distribution;
     }
     
+    get core() {
+        if (this.coreField.value == null || this.coreField.value.trim() == 'Default') {
+            return null;
+        } else {
+            return this.coreField.value;
+        }
+    }
+    
+    set core(core) {
+        this.coreField.value = core;
+    }
+    
     get taskParametersRaw() {
         // Package all the task paramters as is into an object.
         return {
@@ -172,7 +186,8 @@ class ViewTask {
             'wcet': this.wcet,
             'acet': this.acet,
             'bcet': this.bcet,
-            'distribution': this.distribution
+            'distribution': this.distribution,
+            'core': this.core
         };
     }
     
@@ -190,7 +205,8 @@ class ViewTask {
             'wcet': Math.abs(parseFloat(this.wcet)) * Utility.MsToNs,
             'acet': Math.abs(parseFloat(this.acet)) * Utility.MsToNs,
             'bcet': Math.abs(parseFloat(this.bcet)) * Utility.MsToNs,
-            'distribution': this.distribution.trim()
+            'distribution': this.distribution.trim(),
+            'core':  this.core == null ? null : this.core.trim()
         };
     }
     
@@ -229,6 +245,7 @@ class ViewTask {
             this.acet = '';
             this.bcet = '';
             this.distribution = 'Normal';
+            this.core = 'Default';
             
             // Clear the preview.
             this.clearPreview();
@@ -272,7 +289,7 @@ class ViewTask {
 
     validateTaskParameters(taskParameters) {
         if (taskParameters.name == null || taskParameters.name.trim() == '') {
-            alert('Name cannot be blank.');
+            alert('Task name cannot be blank.');
             return false;
         }
         if (!Utility.ValidName(taskParameters.name.trim())) {
@@ -456,12 +473,37 @@ class ViewTask {
             return false;
         }
         
+        if (taskParameters.core != null && taskParameters.core.trim() == '') {
+            alert('Core for execution cannot be an empty string.');
+            return false;
+        }
+        
         return true;
     }
     
     
     // -----------------------------------------------------
     // Class methods
+    
+    updateCoreSelector(cores) {
+        let parentElement = d3.select(this.coreField);
+        cores.sort();
+
+        // Create list of available ports
+        parentElement.selectAll('*').remove();
+        parentElement
+            .append('option')
+                .property('selected', true)
+                .attr('value', 'Default')
+                .text('Default');
+
+        cores.forEach(core =>
+            parentElement
+                .append('option')
+                    .attr('value', core.name)
+                    .text(core.name)
+        );
+    }
     
     clearPreview() {
         // Delete the existing preview, if it exists
@@ -525,7 +567,7 @@ class ViewTask {
                 .attr('dy', '3.9em')
                 .text(`Outputs: ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.outputs)}`);
 
-        // Add the task's priority and execution time distribution
+        // Add the task's priority, execution time distribution, and core
         textInfo.append('text')
                 .attr('dx', '450px')
                 .attr('dy', '0em')
@@ -534,6 +576,10 @@ class ViewTask {
                 .attr('dx', '450px')
                 .attr('dy', '1.3em')
                 .text(`Distribution: ${taskParameters.distribution}`);
+        textInfo.append('text')
+                .attr('dx', '450px')
+                .attr('dy', '2.6em')
+                .text(`Core: ${taskParameters.core == null ? 'Default' : taskParameters.core}`);
 
         // -----------------------------
         // Group for graphical information
@@ -641,6 +687,7 @@ class ViewTask {
         this.acet = taskParameters.acet / Utility.MsToNs;
         this.bcet = taskParameters.bcet / Utility.MsToNs;
         this.distribution = taskParameters.distribution;
+        this.core = taskParameters.core == null ? 'Default' : taskParameters.core;
     }
         
     formatTaskParametersInfo(taskParameters) {

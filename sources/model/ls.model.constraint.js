@@ -1,8 +1,8 @@
 'use strict';
 
 class ModelConstraint {
-    updateConstraints = null;      // Callback to function in ls.view.constraint
-    updateConstraintSelectors = null;
+    updateConstraints = null;              // Callback to function in ls.view.constraint
+    updateConstraintSelectors = null;      // Callback to function in ls.view.constraint
     
     database = null;
     modelEventChain = null;

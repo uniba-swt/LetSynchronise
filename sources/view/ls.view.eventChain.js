@@ -140,7 +140,7 @@ class ViewEventChain {
     
     validateEventChain(eventChain) {
         if (eventChain.name == null || eventChain.name.trim() == '') {
-            alert('Name cannot be blank.');
+            alert('Event chain name cannot be blank.');
             return false;
         }
         if (!(/^[A-Za-z][A-Za-z0-9]+$/).test(eventChain.name.trim())) {

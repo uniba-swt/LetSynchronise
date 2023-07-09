@@ -2,12 +2,14 @@
 
 class Model {
     _modelExportImport = null;
+    _modelCore = null;
+    _modelMemory = null;
     _modelInterface = null;
     _modelTask = null;
     _modelDependency = null;
     _modelSchedule = null;
-    _modelConstraint = null;
     _modelEventChain = null;
+    _modelConstraint = null;
     _modelAnalyse = null;
     _modelDatabase = null;
     
@@ -16,25 +18,29 @@ class Model {
     // -----------------------------------------------------
     // Static constants.
 
+    static get CoreStoreName()                { return 'CoreStore'; }
+    static get MemoryStoreName()              { return 'MemoryStore'; }
     static get SystemInputStoreName()         { return 'SystemInputStore'; }
-    static get SystemOutputStoreName()        { return 'SystemOutputStore'; }    
+    static get SystemOutputStoreName()        { return 'SystemOutputStore'; }
     static get TaskStoreName()                { return 'TaskStore'; }
     static get TaskInstancesStoreName()       { return 'TaskInstancesStore'; }
     static get DependencyStoreName()          { return 'DependencyStore'; }
     static get DependencyInstancesStoreName() { return 'DependencyInstancesStore'; }
-    static get ConstraintStoreName()          { return 'ConstraintStore'; }
-    static get ConstraintInstancesStoreName() { return 'ConstraintInstancesStore'; }
     static get EventChainStoreName()          { return 'EventChainStore'; }
     static get EventChainInstanceStoreName()  { return 'EventChainInstanceStore'; }
+    static get ConstraintStoreName()          { return 'ConstraintStore'; }
+    static get ConstraintInstancesStoreName() { return 'ConstraintInstancesStore'; }
     
     static get ShortStoreNames() {
         return [
+            'cores',
+            'memories',
             'inputs',
             'outputs',
             'tasks',
             'dependencies',
-            'constraints',
             'eventChains',
+            'constraints',
             'schedule'
         ];
     }
@@ -50,6 +56,22 @@ class Model {
         this._modelExportImport = modelExportImport;
     }
     
+    get modelCore() {
+        return this._modelCore;
+    }
+    
+    set modelCore(modelCore) {
+        this._modelCore = modelCore;
+    }
+
+    get modelMemory() {
+        return this._modelMemory;
+    }
+    
+    set modelMemory(modelMemory) {
+        this._modelMemory = modelMemory;
+    }
+
     get modelInterface() {
         return this._modelInterface;
     }
@@ -113,12 +135,14 @@ class Model {
     set modelDatabase(modelDatabase) {
         this._modelDatabase = modelDatabase;
         this._modelExportImport.registerModelDatabase(this._modelDatabase);
+        this._modelCore.registerModelDatabase(this._modelDatabase);
+        this._modelMemory.registerModelDatabase(this._modelDatabase);
         this._modelInterface.registerModelDatabase(this._modelDatabase);
         this._modelTask.registerModelDatabase(this._modelDatabase);
         this._modelSchedule.registerModelDatabase(this._modelDatabase);
         this._modelDependency.registerModelDatabase(this._modelDatabase);
-        this._modelConstraint.registerModelDatabase(this._modelDatabase);
         this._modelEventChain.registerModelDatabase(this._modelDatabase);
+        this._modelConstraint.registerModelDatabase(this._modelDatabase);
         this._modelAnalyse.registerModelDatabase(this._modelDatabase);
     }
     

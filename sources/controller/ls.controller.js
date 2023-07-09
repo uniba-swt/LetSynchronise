@@ -2,12 +2,14 @@
 
 class Controller {
     controllerExportImport = null;
+    controllerCore = null;
+    controllerMemory = null;
     controllerInterface = null;
     controllerTask = null;
     controllerDependency = null;
-    controllerSchedule = null;
-    controllerConstraint = null;
     controllerEventChain = null;
+    controllerConstraint = null;
+    controllerSchedule = null;
     controllerAnalyse = null;
 
     constructor() { }
@@ -15,12 +17,14 @@ class Controller {
     toString() {
         return ['Controller contains ...',
                 `  ${this.controllerExportImport}, `,
+                `  ${this.controllerCore}, `,
+                `  ${this.controllerMemory}, `,
                 `  ${this.controllerInterface}, `,
                 `  ${this.controllerTask}, `,
                 `  ${this.controllerDependency}, `,
-                `  ${this.controllerSchedule}, `,
-                `  ${this.controllerConstraint},`,
                 `  ${this.controllerEventChain},`,
+                `  ${this.controllerConstraint},`,
+                `  ${this.controllerSchedule}, `,
                 `  ${this.controllerAnalyse}`].join('\n');
     }
     

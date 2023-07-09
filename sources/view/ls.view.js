@@ -2,12 +2,13 @@
 
 class View {
     _viewExportImport = null;
+    _viewCore = null;
     _viewInterface = null;
     _viewTask = null;
     _viewDependency = null;
-    _viewSchedule = null;
-    _viewConstraint = null;
     _viewEventChain = null;
+    _viewConstraint = null;
+    _viewSchedule = null;
     
     constructor() { }
     
@@ -29,6 +30,10 @@ class View {
     
     set viewExportImport(viewExportImport) {
         this._viewExportImport = viewExportImport;
+    }
+    
+    set viewCore(viewCore) {
+        this._viewCore = viewCore;
     }
     
     set viewInterface(viewInterface) {
@@ -57,6 +62,10 @@ class View {
     
     get viewExportImport() {
         return this._viewExportImport;
+    }
+    
+    get viewCore() {
+        return this._viewCore;
     }
     
     get viewInterface() {

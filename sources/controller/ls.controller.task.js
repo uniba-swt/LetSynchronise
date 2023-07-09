@@ -4,6 +4,7 @@ class ControllerTask {
     _view = null;
     _viewSchedule = null;
     _model = null;
+    _modelCore = null;
     _modelDependency = null;
     _modelEventChain = null;
     
@@ -33,18 +34,29 @@ class ControllerTask {
         this._model = model;
         
         // Register the handlers when setting the model.
+        this._model.registerUpdateCoreSelectorCallback(this.callbackUpdateCoreSelector);
         this._model.registerUpdateTasksCallback(this.callbackUpdateTasks);
         this._model.registerNotifyChangesCallback(this.callbackNotifyChanges);
         
         // Hack to populate the View with tasks once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
-            this._model.getAllTasks()
-                .then(result => this.callbackUpdateTasks(result));
+            this._model.refreshViews();
         });
     }
     
     get model() {
         return this._model;
+    }
+    
+    set modelCore(modelCore) {
+        this._modelCore = modelCore;
+        
+        // Register the model core with the model.
+        this._model.registerModelCore(this._modelCore);
+    }
+    
+    get modelCore() {
+        return this._modelCore;
     }
     
     set modelDependency(modelDependency) {
@@ -87,6 +99,11 @@ class ControllerTask {
     
     // -----------------------------------------------------
     // Callbacks for events from the model to the view
+    
+    // Callback for updating the displayed core selector.
+    callbackUpdateCoreSelector = (cores) => {
+        this.view.updateCoreSelector(cores);
+    }
     
     // Callback for updating the displayed tasks.
     callbackUpdateTasks = (tasks) => {

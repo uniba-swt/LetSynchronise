@@ -3,6 +3,7 @@
 class ViewExportImport {
     root = null;
     
+    platformCheckbox = null;
     inputsOutputsCheckbox = null;
     tasksCheckbox = null;
     dependenciesCheckbox = null;
@@ -22,6 +23,7 @@ class ViewExportImport {
         this.root = document.querySelector('#nav-management');
         
         // System elements to consider for export or import.
+        this.platformCheckbox = this.root.querySelector('#exportimport-platform');
         this.inputsOutputsCheckbox = this.root.querySelector('#exportimport-inputs-outputs');
         this.tasksCheckbox = this.root.querySelector('#exportimport-tasks');
         this.dependenciesCheckbox = this.root.querySelector('#exportimport-dependencies');
@@ -39,6 +41,10 @@ class ViewExportImport {
         
         // Listeners
         this.setupImportSystemSelectorListener();
+    }
+    
+    get platformChecked() {
+        return this.platformCheckbox.checked;
     }
     
     get inputsOutputsChecked() {
@@ -68,6 +74,10 @@ class ViewExportImport {
     get elementsSelected() {
         let keys = [];
         
+        if (this.platformChecked) {
+            keys.push('cores');
+            keys.push('memories');
+        }
         if (this.inputsOutputsChecked) {
             keys.push("inputs");
             keys.push("outputs");

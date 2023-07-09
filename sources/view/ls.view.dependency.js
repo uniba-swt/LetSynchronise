@@ -116,7 +116,7 @@ class ViewDependency {
     
     validateTaskDependency(taskDependency) {
         if (taskDependency.name == null || taskDependency.name.trim() == '') {
-            alert('Name cannot be blank.');
+            alert('Task dependency name cannot be blank.');
             return false;
         }
         if (!Utility.ValidName(taskDependency.name.trim())) {

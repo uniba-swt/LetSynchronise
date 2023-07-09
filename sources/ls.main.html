@@ -23,35 +23,41 @@
     <!-- <script type="module"> does not work when executed locally -->
     <script src="sources/model/ls.model.js"></script>
     <script src="sources/model/ls.model.exportImport.js"></script>
+    <script src="sources/model/ls.model.core.js"></script>
+    <script src="sources/model/ls.model.memory.js"></script>
     <script src="sources/model/ls.model.interface.js"></script>
-    <script src="sources/model/ls.model.dependency.js"></script>
-    <script src="sources/model/ls.model.schedule.js"></script>
     <script src="sources/model/ls.model.task.js"></script>
-    <script src="sources/model/ls.model.constraint.js"></script>
-    <script src="sources/model/ls.model.eventChain.js"></script>
+    <script src="sources/model/ls.model.dependency.js"></script>
     <script src="sources/model/ls.model.chain.js"></script>
     <script src="sources/model/ls.model.chainInstance.js"></script>
+    <script src="sources/model/ls.model.eventChain.js"></script>
+    <script src="sources/model/ls.model.constraint.js"></script>
+    <script src="sources/model/ls.model.schedule.js"></script>
     <script src="sources/model/ls.model.analyse.js"></script>
     <script src="sources/model/ls.model.database.js"></script>
 
     <script src="sources/view/ls.view.js"></script>
     <script src="sources/view/ls.view.exportImport.js"></script>
+    <script src="sources/view/ls.view.core.js"></script>
+    <script src="sources/view/ls.view.memory.js"></script>
     <script src="sources/view/ls.view.interface.js"></script>
-    <script src="sources/view/ls.view.dependency.js"></script>
-    <script src="sources/view/ls.view.schedule.js"></script>
     <script src="sources/view/ls.view.task.js"></script>
-    <script src="sources/view/ls.view.constraint.js"></script>
+    <script src="sources/view/ls.view.dependency.js"></script>
     <script src="sources/view/ls.view.eventChain.js"></script>
+    <script src="sources/view/ls.view.constraint.js"></script>
+    <script src="sources/view/ls.view.schedule.js"></script>
     <script src="sources/view/ls.view.analyse.js"></script>
 
     <script src="sources/controller/ls.controller.js"></script>
     <script src="sources/controller/ls.controller.exportImport.js"></script>
+    <script src="sources/controller/ls.controller.core.js"></script>
+    <script src="sources/controller/ls.controller.memory.js"></script>
     <script src="sources/controller/ls.controller.interface.js"></script>
-    <script src="sources/controller/ls.controller.dependency.js"></script>
-    <script src="sources/controller/ls.controller.schedule.js"></script>
     <script src="sources/controller/ls.controller.task.js"></script>
-    <script src="sources/controller/ls.controller.constraint.js"></script>
+    <script src="sources/controller/ls.controller.dependency.js"></script>
     <script src="sources/controller/ls.controller.eventChain.js"></script>
+    <script src="sources/controller/ls.controller.constraint.js"></script>
+    <script src="sources/controller/ls.controller.schedule.js"></script>
     <script src="sources/controller/ls.controller.analyse.js"></script>
 
     <script src="sources/ls.utility.js"></script>
@@ -95,6 +101,12 @@
             <div class="border rounded-3 p-2">
                 <h4>System elements to consider</h4>
         
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" value="" id="exportimport-platform" checked>
+                        <label class="form-check-label" for="exportimport-platform">
+                            Platform
+                        </label>
+                </div>
                 <div class="form-check form-check-inline">
                     <input class="form-check-input" type="checkbox" value="" id="exportimport-inputs-outputs" checked>
                         <label class="form-check-label" for="exportimport-inputs-outputs">
@@ -164,7 +176,7 @@
 
             </div>
         </form>
-    <div>
+    </div>
 
     <div class="m-5"></div>
 
@@ -173,14 +185,87 @@
     <nav>
         <!-- Buttons for the tab views defined below -->
         <div class="nav nav-tabs" id="nav-tab" role="tablist">
-            <button class="nav-link active" id="nav-design-tab" data-bs-toggle="tab" data-bs-target="#nav-design" type="button" role="tab" aria-controls="nav-design" aria-selected="true">Design</button>
+            <button class="nav-link active" id="nav-platform-tab" data-bs-toggle="tab" data-bs-target="#nav-platform" type="button" role="tab" aria-controls="nav-platform" aria-selected="true">Platform</button>
+            <button class="nav-link" id="nav-design-tab" data-bs-toggle="tab" data-bs-target="#nav-design" type="button" role="tab" aria-controls="nav-design" aria-selected="false">Design</button>
             <button class="nav-link" id="nav-analyse-tab" data-bs-toggle="tab" data-bs-target="#nav-analyse" type="button" role="tab" aria-controls="nav-analyse" aria-selected="false">Analyse</button>
         </div>
     </nav>
 
     <!-- Content for the tab views defined below -->
     <div class="tab-content" id="nav-tabContent">
-        <div class="tab-pane fade show active" id="nav-design" role="tabpanel" aria-labelledby="nav-design-tab">
+    
+        <div class="tab-pane fade show active" id="nav-platform" role="tabpanel" aria-labelledby="nav-platform-tab">
+        
+            <h3>Define or Edit a Processor Core</h3>
+        	
+            <form class="row gx-3 gy-2" id="view-core-define">
+                <div class="col-2">
+                    <div class="input-group">
+                        <span for="view-platform-core-name" class="input-group-text">Name</span>
+                        <input required type="text" class="form-control" id="view-platform-core-name" value="c1"/>
+                    </div>
+                </div>
+
+                <div class="col-2">
+                    <div class="input-group">
+                        <span for="view-platform-core-speedup" class="input-group-text">Speedup</span>
+                        <input required type="text" class="form-control" id="view-platform-core-speedup" value="1"/>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <button id="submitCore" type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+
+            <div class="m-3"></div>
+
+            <ul id="view-platform-cores"></ul>
+
+            <div class="m-3"></div>
+
+
+            <h3>Define or Edit a Memory Module</h3>
+        	
+            <form class="row gx-3 gy-2" id="view-memory-define">
+                <div class="col-2">
+                    <div class="input-group">
+                        <span for="view-platform-memory-name" class="input-group-text">Name</span>
+                        <input required type="text" class="form-control" id="view-platform-memory-name" value="m1"/>
+                    </div>
+                </div>
+
+                <div class="col-2">
+                    <div class="input-group">
+                        <span for="view-platform-memory-size" class="input-group-text">Size</span>
+                        <input required type="text" class="form-control" id="view-platform-memory-size" value="100"/>
+                        <span class="input-group-text">bytes</span>
+                    </div>
+                </div>
+
+                <div class="col-2">
+                    <div class="input-group">
+                        <span for="view-platform-memory-latency" class="input-group-text">Latency</span>
+                        <input required type="text" class="form-control" id="view-platform-memory-latency" value="0.00001"/>
+                        <span class="input-group-text">ms</span>
+                    </div>
+                </div>
+                
+                <div class="col">
+                    <button id="submitMemory" type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+
+            <div class="m-3"></div>
+
+            <ul id="view-platform-memories"></ul>
+
+            <div class="m-3"></div>
+
+        </div>
+
+
+        <div class="tab-pane fade" id="nav-design" role="tabpanel" aria-labelledby="nav-design-tab">
 
             <h3>Define System Inputs and Outputs</h3>
             
@@ -311,6 +396,15 @@
                     </div>
                 </div>
 
+                <div class="col-6">
+                    <div class="input-group">
+                        <span class="input-group-text col-5" for="core">Core</span>
+                        <select id="core" class="form-select">
+                            <option value="Default" selected>Default</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div>
                     <button id="previewTask" type="submit" class="btn btn-primary">Preview</button>
                     <button id="submitTask" type="submit" class="btn btn-primary">Save</button>
@@ -375,6 +469,7 @@
         
         
         <div class="tab-pane fade" id="nav-analyse" role="tabpanel" aria-labelledby="nav-analyse-tab">
+        
             <h3>LET Task Schedule</h3>
 
             <form class="row" id="view-schedule-details">
@@ -549,8 +644,6 @@
             </form>
             
             <div class="m-3"></div>
-            
-
             
             <ul id="view-analyse-event-chains"></ul>
             

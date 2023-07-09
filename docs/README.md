@@ -1,3 +1,11 @@
+# Platform
+Tasks can be assigned to cores that have been defined in the platform. Task schedulers
+can directly use the core assignments for task execution, or modify the assignments
+dynamically at run-time. If no core has been defined for the platform, a single-core is 
+assumed and created with the name `Default` at a speedup of `1`. When a task instance 
+is being executed on a core, the core is tagged to the execution interval (`instance.currentCore.name`).
+
+
 # LET Task Set
 The task set of a LET system is specified by the user.
 Example task sets in JSON format can be found in the [`examples`](../examples) folder.
@@ -106,9 +114,9 @@ This section describes the plugins that have been implemented so far.
 
 ## Scheduler
 * `ls.plugin.scheduler.edf.js`: Preemptive, Earliest Deadline First scheduling.
-* `ls.plugin.scheduler.fp.js`: Preemptive, Fixed Priority scheduling.
+* `ls.plugin.scheduler.fp.js`: Multicore, no task migration, preemptive, Fixed Priority scheduling.
 * `ls.plugin.scheduler.identity.js`: Does not do any scheduling and does not modify the schedule.
-* `ls.plugin.scheduler.random.js`: Non-preemptively schedule tasks without any particular preference.
+* `ls.plugin.scheduler.random.js`: Multicore, no task migration, non-preemptive scheduling with no particular task or core preferences.
 * `ls.plugin.scheduler.rm.js`: Preemptive, Rate-Monotonic scheduling
 * `ls.plugin.scheduler.tudortmund.js`: Non-preemptive scheduling by the external tool
   [TU Dortmund End-to-End Analyser](https://github.com/mkuo005/end-to-end).

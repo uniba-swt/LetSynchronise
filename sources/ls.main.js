@@ -3,6 +3,8 @@
 // Define the model implementations.
 let model = new Model();
 model.modelExportImport = new ModelExportImport();
+model.modelCore = new ModelCore();
+model.modelMemory = new ModelMemory();
 model.modelInterface = new ModelInterface();
 model.modelTask = new ModelTask();
 model.modelDependency = new ModelDependency();
@@ -15,33 +17,47 @@ model.modelDatabase = new ModelDatabase();
 // Define the view implementations.
 let view = new View();
 view.viewExportImport = new ViewExportImport();
+view.viewCore = new ViewCore();
+view.viewMemory = new ViewMemory();
 view.viewInterface = new ViewInterface();
 view.viewTask = new ViewTask();
 view.viewDependency = new ViewDependency();
-view.viewSchedule = new ViewSchedule();
-view.viewConstraint = new ViewConstraint();
-view.viewAnalyse = new ViewAnalyse();
 view.viewEventChain = new ViewEventChain();
+view.viewConstraint = new ViewConstraint();
+view.viewSchedule = new ViewSchedule();
+view.viewAnalyse = new ViewAnalyse();
 
 // Define the controller implementations.
 let controller = new Controller();
 controller.controllerExportImport = new ControllerExportImport();
+controller.controllerCore = new ControllerCore();
+controller.controllerMemory = new ControllerMemory();
 controller.controllerInterface = new ControllerInterface();
 controller.controllerTask = new ControllerTask();
 controller.controllerDependency = new ControllerDependency();
-controller.controllerSchedule = new ControllerSchedule();
-controller.controllerConstraint = new ControllerConstraint();
 controller.controllerEventChain = new ControllerEventChain();
+controller.controllerConstraint = new ControllerConstraint();
+controller.controllerSchedule = new ControllerSchedule();
 controller.controllerAnalyse = new ControllerAnalyse();
 
 // Link the models and views to their respective controllers.
 controller.controllerExportImport.view = view.viewExportImport;
 controller.controllerExportImport.model = model.modelExportImport;
+controller.controllerExportImport.modelCore = model.modelCore;
+controller.controllerExportImport.modelMemory = model.modelMemory;
 controller.controllerExportImport.modelInterface = model.modelInterface;
 controller.controllerExportImport.modelTask = model.modelTask;
 controller.controllerExportImport.modelDependency = model.modelDependency;
 controller.controllerExportImport.modelEventChain = model.modelEventChain;
 controller.controllerExportImport.modelConstraint = model.modelConstraint;
+
+controller.controllerCore.view = view.viewCore;
+controller.controllerCore.viewSchedule = view.viewSchedule;
+controller.controllerCore.model = model.modelCore;
+controller.controllerCore.modelTask = model.modelTask;
+
+controller.controllerMemory.view = view.viewMemory;
+controller.controllerMemory.model = model.modelMemory;
 
 controller.controllerInterface.view = view.viewInterface;
 controller.controllerInterface.model = model.modelInterface;
@@ -52,6 +68,7 @@ controller.controllerInterface.modelEventChain = model.modelEventChain;
 controller.controllerTask.view = view.viewTask;
 controller.controllerTask.viewSchedule = view.viewSchedule;
 controller.controllerTask.model = model.modelTask;
+controller.controllerTask.modelCore = model.modelCore;
 controller.controllerTask.modelDependency = model.modelDependency;
 controller.controllerTask.modelEventChain = model.modelEventChain;
 
