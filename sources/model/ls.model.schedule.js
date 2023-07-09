@@ -56,14 +56,14 @@ class ModelSchedule {
             'letEndTime'        : timePoint + parameters.activationOffset + parameters.duration,
             'periodEndTime'     : timePoint + parameters.period,
             'executionTime'     : executionTime,
-            'executionIntervals': [],
-            'core'              : parameters.core
+            'executionIntervals': [ ],
+            'currentCore'       : parameters.core       // Core decided by the designer, which can later be modified by the task scheduler.
         };
     }
     
     // Create all instances of a task within the makespan.
     createTaskInstances(parameters, makespan, executionTiming) {
-        let instances = [];
+        let instances = [ ];
         for (let timePoint = parameters.initialOffset; timePoint < makespan; timePoint += parameters.period) {
             instances.push(this.createTaskInstance(instances.length, parameters, timePoint, executionTiming));
         }

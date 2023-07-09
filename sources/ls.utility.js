@@ -196,10 +196,12 @@ class Utility {
 Utility.Interval = class {
     startTime = null;
     endTime = null;
+    core = null;
     
-    constructor(startTime, endTime) {
+    constructor(startTime, endTime, core) {
         this.startTime = parseInt(startTime);
         this.endTime = parseInt(endTime);
+        this.core = core;
     
         if (this.startTime > this.endTime) {
             throw `Interval start time (${this.startTime}) is greater than its end time (${endTime})!`;
@@ -207,7 +209,7 @@ Utility.Interval = class {
     }
     
     static FromJson(json) {
-        return new Utility.Interval(json.startTime, json.endTime);
+        return new Utility.Interval(json.startTime, json.endTime, json.core);
     }
     
     get startTime() {

@@ -334,7 +334,7 @@ class ViewSchedule {
           .domain([0, this.makespan * Utility.MsToNs])
           .range([0, View.Width - 2 * View.SvgPadding]);
 
-        // Delete the existing task previews, if they exist and set up the canvas.
+        // Delete the existing schedule, if they exist and set up the canvas.
         this.schedule.selectAll('*').remove();
         const svgElement = this.schedule.append('svg');
         
@@ -346,8 +346,10 @@ class ViewSchedule {
             taskIndices[taskInstances.name] = index;
             
             for (const instance of taskInstances.value) {
-                if (coreIndices[instance.core] === undefined) {
-                    coreIndices[instance.core] = Object.keys(coreIndices).length;
+                for (const interval of instance.executionIntervals) {
+                    if (coreIndices[interval.core] === undefined) {
+                        coreIndices[interval.core] = Object.keys(coreIndices).length;
+                    }
                 }
             }
         }
@@ -357,7 +359,7 @@ class ViewSchedule {
         
         svgElement
           .attr('width', `${View.Width}px`)
-          .attr('height', `${(tasksInstances.length + 1) * View.TaskHeight}px`);
+          .attr('height', `${(tasksInstances.length + 1) * View.TaskHeight + (Object.keys(coreIndices).length - 1) * View.ExecutionHeight}px`);
         
         return {svgElement: svgElement, scale: scale, taskIndices: taskIndices, coreIndices: coreIndices};
     }
@@ -455,7 +457,7 @@ class ViewSchedule {
                            .attr('height', View.ExecutionHeight)
                            .attr('class', 'time')
                          .on('mouseover', () => {
-                           const core = `Core ${instance.core}`;
+                           const core = `Core ${interval.core}`;
                            const executionInterval = `Execution interval: [${Utility.FormatTimeString(interval.startTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString((interval.startTime + interval.duration) / Utility.MsToNs, 2)}]ms`;
                            tooltip.innerHTML = `${core} <br/> ${executionInterval}`;
                            tooltip.style.visibility = 'visible';
@@ -509,7 +511,6 @@ class ViewSchedule {
         group.append('g')
                .attr('transform', `translate(0, ${index * View.TaskHeight + View.SvgPadding})`);
 
-        // Add the task's name, inputs, and outputs
         textInfo.append('text')
                   .text(`System load`);
 
@@ -517,7 +518,7 @@ class ViewSchedule {
         // Group for graphical information
         const graphInfo =
         group.append('g')
-               .attr('transform', `translate(0, ${index * View.TaskHeight + 2.5 * View.SvgPadding})`);
+               .attr('transform', `translate(0, ${index * View.TaskHeight + (Object.keys(coreIndices).length - 1) * View.ExecutionHeight + 2.5 * View.SvgPadding})`);
         
         // Add horizontal line for the makespan
         graphInfo.append('line')
@@ -538,9 +539,10 @@ class ViewSchedule {
         // Add the tasks' execution times
         for (const [index, taskInstances] of tasksInstances.entries()) {
             for (const instance of taskInstances.value) {
-                const coreIndex = coreIndices[instance.core];
                 const executionIntervals = instance.executionIntervals.map(interval => Utility.Interval.FromJson(interval));
                 for (const interval of executionIntervals) {
+                    const coreIndex = coreIndices[interval.core];
+                    
                     graphInfo.append('rect')
                                .attr('x', scale(interval.startTime))
                                .attr('y', View.BarHeight - (coreIndex + 1) * View.ExecutionHeight)
@@ -549,7 +551,7 @@ class ViewSchedule {
                                .attr('class', 'time')
                              .on('mouseover', () => {
                                const title = `<b>${taskInstances.name}</b> instance ${instance.instance}`;
-                               const core = `Core ${instance.core}`;
+                               const core = `Core ${interval.core}`;
                                const executionInterval = `Execution interval: [${Utility.FormatTimeString(interval.startTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString((interval.startTime + interval.duration) / Utility.MsToNs, 2)}]ms`;
                                tooltip.innerHTML = `${title} <br/> ${core} <br/> ${executionInterval}`;
                                tooltip.style.visibility = 'visible';

@@ -39,18 +39,15 @@ class PluginSchedulerRandom {
             return { 'schedulable': true, 'message': 'No tasks to schedule' };
         }
         
-        // Track how far we are into the schedule on each core.
-        // Also select a default core when the system has not defined any cores,
-        // or use the first core as the default core for tasks that have not been allocated to a core.
-        let coreDefault = 'Default';
-        let coreCurrentTime = { };
+        // Assume a single core (default) platform when the system has not defined any cores.
         if (cores.length == 0) {
-            coreCurrentTime[coreDefault] = 0;
-        } else {
-            for (const core of cores) {
-                coreCurrentTime[core.name] = 0;
-            }
-            coreDefault = cores[0].name;
+            cores = [{'name': 'Default', 'speedup': 1}];
+        }
+
+        // Track how far we are into the schedule on each core.
+        let coreCurrentTime = { };
+        for (const core of cores) {
+            coreCurrentTime[core.name] = 0;
         }
         
         // For each task, keep track of the instance we are trying to schedule.
@@ -74,27 +71,27 @@ class PluginSchedulerRandom {
                 }
             }
             
-            // Determine the allocated core.
-            if (chosenTask.instance.core == null) {
-                chosenTask.instance.core = coreDefault;
-            }
+            // Select a random core. Before execution, chosenTask.instance.currentCore stores the
+            // core decided by the designer. During execution, chosenTask.instance.currentCore stores the last
+            // core decided by the scheduler, e.g., to support task migration.
+            chosenTask.instance.currentCore = cores[Math.floor(Math.random() * cores.length)].name;
             
             // Make sure the current time is not earlier than the chosen task instance's LET start time.
-            coreCurrentTime[chosenTask.instance.core] = Math.max(coreCurrentTime[chosenTask.instance.core], chosenTask.instance.letStartTime);
+            coreCurrentTime[chosenTask.instance.currentCore] = Math.max(coreCurrentTime[chosenTask.instance.currentCore], chosenTask.instance.letStartTime);
             
             // Make sure the chosen task instance finishes its execution in its LET.
-            const nextTime = coreCurrentTime[chosenTask.instance.core] + chosenTask.instance.executionTime;
+            const nextTime = coreCurrentTime[chosenTask.instance.currentCore] + chosenTask.instance.executionTime;
             if (nextTime > chosenTask.instance.letEndTime) {
-                const message = `Could not schedule enough time for task ${tasks[chosenTask.number].name}, instance ${chosenTask.instance.instance}!`;
+                const message = `Could not schedule enough time for task ${tasks[chosenTask.number].name}, instance ${chosenTask.instance.instance} on core ${chosenTask.instance.currentCore}!`;
                 return { 'schedulable': false, 'message': message };
             }
             
             // Create the execution interval for the chosen task instance.
-            const executionInterval = new Utility.Interval(coreCurrentTime[chosenTask.instance.core], nextTime);
+            const executionInterval = new Utility.Interval(coreCurrentTime[chosenTask.instance.currentCore], nextTime, chosenTask.instance.currentCore);
             chosenTask.instance.executionIntervals.push(executionInterval);
             
             // Advance the current time to the next time.
-            coreCurrentTime[chosenTask.instance.core] = nextTime;
+            coreCurrentTime[chosenTask.instance.currentCore] = nextTime;
             
             // Consider the next instance of the chosen task in the next round of scheduling decisions.
             taskInstanceIndices[chosenTask.number]++;
