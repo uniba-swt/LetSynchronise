@@ -32,7 +32,7 @@ class PluginSchedulerRandom {
             .then(Plugin.DatabaseContentsSet(schedule, scheduleElementSelected));
     }
     
-    // Non-preemptive random.
+    // Non-preemptive random, multicore, no task migration.
     static Algorithm(tasks, cores) {
         // Do nothing if the task set is empty.
         if (tasks.length == 0) {
@@ -111,4 +111,5 @@ class PluginSchedulerRandom {
     static ExecutionTimeOnCore(taskinstance) {
         return taskinstance.executionTime / taskinstance.currentCore.speedup;
     }
+    
 }
