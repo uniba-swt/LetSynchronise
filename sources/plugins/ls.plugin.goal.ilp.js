@@ -7,7 +7,8 @@ class PluginGoalIlp {
     static get Type()     { return Plugin.Type.Goal; }
     static get Category() { return Plugin.Category.ResponseTime; }
 
-    // Solves an ILP formulation of the system to minimise end-to-end response times.
+    // Triggers an external web tool (https://github.com/mkuo005/LET-LP-Scheduler) to create 
+    // and solve an ILP formulation of the system to minimise end-to-end response times.
     // Only supports task sets that have been allocated to the same core.
     static async Result(scheduler, makespan) {
         // Delete existing schedule.
@@ -37,7 +38,7 @@ class PluginGoalIlp {
     static async Algorithm(system) {
         // ILP formulation only supports single core systems.
         if (system[Model.CoreStoreName] != null && Object.keys(system[Model.CoreStoreName]).length > 1) {
-            if (!confirm('Multicore systems cannot be optimised by this plugin! Proceed with the optimisation?')) {
+            if (!confirm('Multicore systems are not supported by this plugin! Proceed with the optimisation?')) {
                 return null;
             }
         }
