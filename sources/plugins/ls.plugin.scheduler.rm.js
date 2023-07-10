@@ -22,7 +22,7 @@ class PluginSchedulerRm {
         const coreElementSelected = ['cores'];
         const cores = (await Plugin.DatabaseContentsGet(coreElementSelected))[Model.CoreStoreName];
 
-        const result = this.Algorithm(tasks, makespan, cores);
+        const result = this.Algorithm(cores, tasks, makespan);
         if (!result.schedulable) {
             alert(result.message);
             return;
@@ -34,7 +34,7 @@ class PluginSchedulerRm {
     
     // Preemptive, rate-monotonic, multicore, no task migration.
     // Preempts the core that will idle the earliest.
-    static Algorithm(tasks, makespan, cores) {
+    static Algorithm(cores, tasks, makespan) {
         // Do nothing if the task set is empty.
         if (tasks.length == 0) {
             return { 'schedulable': true, 'message': 'No tasks to schedule' };
