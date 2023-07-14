@@ -122,14 +122,14 @@ This section describes the plugins that have been implemented so far.
                                        [TU Dortmund End-to-End Analyser](https://github.com/mkuo005/end-to-end).
 
 ## Goal
-* `ls.plugin.goal.end2endMax.js`: Maximises end-to-end response times by changing 
+* `ls.plugin.goal.end2endMax.js`: (Multicore) Maximises end-to-end response times by changing 
   all LET intervals of all tasks to span the entire task period.
-* `ls.plugin.goal.end2endMin.js`: Naive heuristic that iteratively minimises the 
+* `ls.plugin.goal.end2endMin.js`: (Multicore, only EDF and FP) Naive heuristic that iteratively minimises the 
   end-to-end response times of all event chains. Constructs a task dependency task
   and considers tasks based on event chain priority.
-* `ls.plugin.goal.ilp.js`: Simple minimisation of end-to-end response times by 
+* `ls.plugin.goal.ilp.js`: (Single core, custom scheduler) Simple minimisation of end-to-end response times by 
   formulating the the problem as an Integer Linear Program (ILP). The task set is 
   sent to an [external tool](https://github.com/mkuo005/LET-LP-Scheduler), which 
   constructs the ILP and returns the solution as a new LetSynchronise model.
-* `ls.plugin.goal.random.js`: Randomises the parameters of all LET tasks. 
+* `ls.plugin.goal.random.js`: (Multicore) Randomises the parameters of all LET tasks. 
   Only for demonstration purposes.
