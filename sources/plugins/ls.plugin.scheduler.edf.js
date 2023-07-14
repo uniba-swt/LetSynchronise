@@ -22,7 +22,7 @@ class PluginSchedulerEdf {
         const coreElementSelected = ['cores'];
         const cores = (await Plugin.DatabaseContentsGet(coreElementSelected))[Model.CoreStoreName];
 
-        const result = this.Algorithm(tasksInstances, makespan, cores);
+        const result = this.Algorithm(cores, tasksInstances, makespan);
         if (!result.schedulable) {
             alert(result.message);
             return;
@@ -34,7 +34,7 @@ class PluginSchedulerEdf {
     
     // Preemptive, earliest deadline first, multicore, no task migration.
     // Preempts the core that will idle the earliest.
-    static Algorithm(tasksInstances, makespan, cores) {
+    static Algorithm(cores, tasksInstances, makespan) {
         // Do nothing if the task set is empty.
         if (tasksInstances.length == 0) {
             return { 'schedulable': true, 'message': 'No tasks to schedule' };

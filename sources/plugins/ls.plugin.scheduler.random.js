@@ -22,7 +22,7 @@ class PluginSchedulerRandom {
         const coreElementSelected = ['cores'];
         const cores = (await Plugin.DatabaseContentsGet(coreElementSelected))[Model.CoreStoreName];
 
-        const result = this.Algorithm(tasks, cores);
+        const result = this.Algorithm(cores, tasks);
         if (!result.schedulable) {
             alert(result.message);
             return;
@@ -33,7 +33,7 @@ class PluginSchedulerRandom {
     }
     
     // Non-preemptive random, multicore, no task migration.
-    static Algorithm(tasks, cores) {
+    static Algorithm(cores, tasks) {
         // Do nothing if the task set is empty.
         if (tasks.length == 0) {
             return { 'schedulable': true, 'message': 'No tasks to schedule' };

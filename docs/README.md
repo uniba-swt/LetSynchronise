@@ -113,23 +113,23 @@ This section describes the plugins that have been implemented so far.
   time(end of the event chain's last dependency) - time(start of the event chain's first dependency).
 
 ## Scheduler
-* `ls.plugin.scheduler.edf.js`: Preemptive, Earliest Deadline First scheduling.
-* `ls.plugin.scheduler.fp.js`: Multicore, no task migration, preemptive, Fixed Priority scheduling.
+* `ls.plugin.scheduler.edf.js`: Multicore, no task migration, preemptive, Earliest Deadline First (EDF)) scheduling.
+* `ls.plugin.scheduler.fp.js`: Multicore, no task migration, preemptive, Fixed Priority (FP) scheduling.
 * `ls.plugin.scheduler.identity.js`: Does not do any scheduling and does not modify the schedule.
 * `ls.plugin.scheduler.random.js`: Multicore, no task migration, non-preemptive scheduling with no particular task or core preferences.
-* `ls.plugin.scheduler.rm.js`: Preemptive, Rate-Monotonic scheduling
-* `ls.plugin.scheduler.tudortmund.js`: Non-preemptive scheduling by the external tool
-  [TU Dortmund End-to-End Analyser](https://github.com/mkuo005/end-to-end).
+* `ls.plugin.scheduler.rm.js`: Multicore, no task migration, preemptive, Rate-Monotonic (RM) scheduling
+* `ls.plugin.scheduler.tudortmund.js`: Single core, non-preemptive scheduling by the external tool
+                                       [TU Dortmund End-to-End Analyser](https://github.com/mkuo005/end-to-end).
 
 ## Goal
-* `ls.plugin.goal.end2endMax.js`: Maximises end-to-end response times by changing 
+* `ls.plugin.goal.end2endMax.js`: (Multicore) Maximises end-to-end response times by changing 
   all LET intervals of all tasks to span the entire task period.
-* `ls.plugin.goal.end2endMin.js`: Naive heuristic that iteratively minimises the 
+* `ls.plugin.goal.end2endMin.js`: (Multicore, only EDF and FP) Naive heuristic that iteratively minimises the 
   end-to-end response times of all event chains. Constructs a task dependency task
   and considers tasks based on event chain priority.
-* `ls.plugin.goal.ilp.js`: Simple minimisation of end-to-end response times by 
+* `ls.plugin.goal.ilp.js`: (Single core, custom scheduler) Simple minimisation of end-to-end response times by 
   formulating the the problem as an Integer Linear Program (ILP). The task set is 
   sent to an [external tool](https://github.com/mkuo005/LET-LP-Scheduler), which 
   constructs the ILP and returns the solution as a new LetSynchronise model.
-* `ls.plugin.goal.random.js`: Randomises the parameters of all LET tasks. 
+* `ls.plugin.goal.random.js`: (Multicore) Randomises the parameters of all LET tasks. 
   Only for demonstration purposes.

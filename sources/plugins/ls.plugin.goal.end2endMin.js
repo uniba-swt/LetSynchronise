@@ -13,8 +13,9 @@ class PluginGoalEnd2EndMin {
     // and contracts the LET intervals based on min/max execution intervals.
     static async Result(scheduler, makespan) {
         // Retrieve the LET system.
-        const systemElementSelected = ['tasks', 'eventChains', 'constraints'];
+        const systemElementSelected = ['cores', 'tasks', 'eventChains', 'constraints'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
+        const cores = await system[Model.CoreStoreName];
         const tasks = await system[Model.TaskStoreName];
         const eventChains = await system[Model.EventChainStoreName];
         const constraints = await system[Model.ConstraintStoreName];
@@ -26,7 +27,7 @@ class PluginGoalEnd2EndMin {
         }
                 
         // Run iterative optimisation heuristic.
-        await this.Algorithm(tasks, graph, scheduler);
+        await this.Algorithm(cores, tasks, graph, scheduler);
 
         const taskElementSelected = ['tasks'];
         return Plugin.DatabaseContentsDelete(taskElementSelected)
@@ -150,7 +151,7 @@ class PluginGoalEnd2EndMin {
 
     // Iteratively schedules each task from highest to lowest priority to determine the
     // min and max bounds of their LET intervals.
-    static async Algorithm(tasks, taskDependencyGraph, scheduler) {
+    static async Algorithm(cores, tasks, taskDependencyGraph, scheduler) {
         // Scheduling parameters
         const initialOffsets = tasks.map(taskParameters => taskParameters.initialOffset).flat();
         const periods = tasks.map(taskParameters => taskParameters.period).flat();
@@ -163,18 +164,18 @@ class PluginGoalEnd2EndMin {
         let firstTaskInstanceOfInterest = { };  // First task instances that communicate directly according to the task dependency graph.
 
         const tasksDescendingPriority = taskDependencyGraph.nodesDescendingGlobalPriorities;
-        const success = await this.IterativeScheduling(tasks, taskDependencyGraph, scheduler, makespan, executionTiming, currentTaskSet, firstTaskInstanceOfInterest, tasksDescendingPriority);
+        const success = await this.IterativeScheduling(cores, tasks, taskDependencyGraph, scheduler, makespan, executionTiming, currentTaskSet, firstTaskInstanceOfInterest, tasksDescendingPriority);
         if (!success) {
             return;
         }
         
         // Schedule the remaining tasks (not part of any timing constraints).
         const remainingTasks = tasks.map(task => task.name).filter(task => !tasksDescendingPriority.includes(task));
-        await this.IterativeScheduling(tasks, taskDependencyGraph, scheduler, makespan, executionTiming, currentTaskSet, firstTaskInstanceOfInterest, remainingTasks);
+        await this.IterativeScheduling(cores, tasks, taskDependencyGraph, scheduler, makespan, executionTiming, currentTaskSet, firstTaskInstanceOfInterest, remainingTasks);
     }
     
-    static async IterativeScheduling(tasks, taskDependencyGraph, scheduler, makespan, executionTiming, currentTaskSet, firstTaskInstanceOfInterest, tasksToSchedule) {
-        for (const currentTaskName of tasksToSchedule) {
+    static async IterativeScheduling(cores, tasks, taskDependencyGraph, scheduler, makespan, executionTiming, currentTaskSet, firstTaskInstanceOfInterest, tasksToSchedule) {
+        for (const [currentTaskIndex, currentTaskName] of tasksToSchedule.entries()) {
             // Delete the existing task schedule.
             await Plugin.DeleteSchedule();
             
@@ -185,11 +186,14 @@ class PluginGoalEnd2EndMin {
             currentTask.activationOffset = 0;
             currentTask.duration = currentTask.period;
             
+            // Set the task's priority, in case a fixed-priority scheduler is used.
+            currentTask.priority = tasksToSchedule.length - currentTaskIndex;
+                        
             // Add the currentTask into the task set to schedule.
             currentTaskSet.add(currentTask);
 
             // Schedule the current task set.
-            let [schedulingResult, allTasksInstances] = await this.ScheduleTaskSet(scheduler, currentTaskSet, makespan, executionTiming);
+            let [schedulingResult, allTasksInstances] = await this.ScheduleTaskSet(cores, scheduler, currentTaskSet, makespan, executionTiming);
             if (schedulingResult != null && !schedulingResult.schedulable) {
                 alert('Tasks are unschedulable even when their LET durations span their periods!');
                 return false;
@@ -202,7 +206,7 @@ class PluginGoalEnd2EndMin {
                 continue;
             }
             
-            // Get the currentTask's precessors.
+            // Get the currentTask's predecessors.
             const predecessorTasks = taskDependencyGraph.getSourceNodes(currentTaskName);
 
             // Analyse the currentTask parameters.
@@ -250,13 +254,13 @@ class PluginGoalEnd2EndMin {
                 }
                 
                 // 2. Check for schedulability. If unschedulable, reschedule using the currentTask's entire period instead.
-                [schedulingResult, allTasksInstances] = await this.ScheduleTaskSet(scheduler, currentTaskSet, makespan, executionTiming);
+                [schedulingResult, allTasksInstances] = await this.ScheduleTaskSet(cores, scheduler, currentTaskSet, makespan, executionTiming);
                 if (schedulingResult != null && !schedulingResult.schedulable) {
                     currentTask.activationOffset = 0;
                     currentTask.duration = currentTask.period;
                     firstTaskInstanceOfInterest[currentTaskName]['letStartTime'] = firstTaskInstanceOfInterest[currentTaskName]['periodStartTime'] + currentTask.period;
 
-                    [schedulingResult, allTasksInstances] = await this.ScheduleTaskSet(scheduler, currentTaskSet, makespan, executionTiming);
+                    [schedulingResult, allTasksInstances] = await this.ScheduleTaskSet(cores, scheduler, currentTaskSet, makespan, executionTiming);
                     if (schedulingResult != null && !schedulingResult.schedulable) {
                         alert('Tasks are unschedulable even when their LET durations span their periods!');
                         return false;
@@ -268,7 +272,7 @@ class PluginGoalEnd2EndMin {
                 this.TrimLetDuration(currentTaskInstances.value, currentTask, firstTaskInstanceOfInterest);
                     
                 // 4. For deadline-based schedulers, currentTask might now have a higher priority, so retrim its LET duration.
-                [schedulingResult, allTasksInstances] = await this.ScheduleTaskSet(scheduler, currentTaskSet, makespan, executionTiming);
+                [schedulingResult, allTasksInstances] = await this.ScheduleTaskSet(cores, scheduler, currentTaskSet, makespan, executionTiming);
                 currentTaskInstances = this.GetTaskInstances(allTasksInstances, currentTaskName);
                 this.TrimLetDuration(currentTaskInstances.value, currentTask, firstTaskInstanceOfInterest);
             }
@@ -277,13 +281,16 @@ class PluginGoalEnd2EndMin {
         return true;
     }
     
-    static async ScheduleTaskSet(scheduler, taskSet, makespan, executionTiming) {
+    static async ScheduleTaskSet(cores, scheduler, taskSet, makespan, executionTiming) {
         for (const task of taskSet) {
             await Plugin.CreateTaskInstances(task, makespan, executionTiming);
         }
         const schedule = await Plugin.GetSchedule();
         const allTasksInstances = await schedule['promiseAllTasksInstances'];
-        const schedulingResult = scheduler.Algorithm(allTasksInstances, makespan, [...taskSet]);
+        const schedulingResult = scheduler.Algorithm(cores, allTasksInstances, makespan, [...taskSet]);
+        
+        // TODO: Save the core allocation as decided by the scheduler?
+
         return [schedulingResult, allTasksInstances];
     }
     

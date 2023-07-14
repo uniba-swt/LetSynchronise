@@ -2,23 +2,29 @@
 
 class PluginSchedulerTuDortmund {
     // Plug-in Metadata
-    static get Name()     { return 'TU Dortmund'; }
+    static get Name()     { return 'TU Dortmund (Single Core)'; }
     static get Author()   { return 'Matthew Kuo'; }
     static get Type()     { return Plugin.Type.Scheduler; }
     static get Category() { return Plugin.Category.Preemptive; }
 
     
-    // Uses an external web tool to schedule the task executions.
+    // Triggers an external web tool (https://github.com/mkuo005/end-to-end) to schedule  
+    // task executions.
+    // Only supports task sets that have been allocated to the same core.
     static async Result(makespan, executionTiming) {
         // Delete existing schedule.
         await Plugin.DeleteSchedule();
         
         // Retrieve the LET system.
-        const systemElementSelected = ['inputs','outputs','tasks','dependencies','eventChains','constraints'];
+        const systemElementSelected = ['cores', 'inputs','outputs','tasks','dependencies','eventChains','constraints'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
         
+        // Add the executionTiming to system so that the external tool can access it.
+        // TODO: Make use of executionTiming when instantiating task execution times.
+        system['executionTiming'] = executionTiming;
+        
         // Schedule the LET system with an external web tool.
-        const computedSchedule = await this.Algorithm(system, executionTiming);
+        const computedSchedule = await this.Algorithm(system);
         if (computedSchedule == null) {
             return
         }
@@ -31,8 +37,14 @@ class PluginSchedulerTuDortmund {
     }
 
     // Trigger an external scheduling tool.
-    // TODO: Make use of executionTiming when instantiating task execution times.
-    static async Algorithm(system, executionTiming) {
+    static async Algorithm(system) {
+        // External tool only supports single core systems.
+        if (system[Model.CoreStoreName] != null && Object.keys(system[Model.CoreStoreName]).length > 1) {
+            if (!confirm('Multicore systems are not supported by this plugin! Proceed with the scheduling?')) {
+                return null;
+            }
+        }
+        
         const url = 'http://localhost:8080/';
         return fetch(url, {
             method: 'POST',
