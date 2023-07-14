@@ -175,7 +175,7 @@ class PluginGoalEnd2EndMin {
     }
     
     static async IterativeScheduling(cores, tasks, taskDependencyGraph, scheduler, makespan, executionTiming, currentTaskSet, firstTaskInstanceOfInterest, tasksToSchedule) {
-        for (const currentTaskName of tasksToSchedule) {
+        for (const [currentTaskIndex, currentTaskName] of tasksToSchedule.entries()) {
             // Delete the existing task schedule.
             await Plugin.DeleteSchedule();
             
@@ -186,6 +186,9 @@ class PluginGoalEnd2EndMin {
             currentTask.activationOffset = 0;
             currentTask.duration = currentTask.period;
             
+            // Set the task's priority, in case a fixed-priority scheduler is used.
+            currentTask.priority = tasksToSchedule.length - currentTaskIndex;
+                        
             // Add the currentTask into the task set to schedule.
             currentTaskSet.add(currentTask);
 
@@ -203,7 +206,7 @@ class PluginGoalEnd2EndMin {
                 continue;
             }
             
-            // Get the currentTask's precessors.
+            // Get the currentTask's predecessors.
             const predecessorTasks = taskDependencyGraph.getSourceNodes(currentTaskName);
 
             // Analyse the currentTask parameters.
@@ -285,6 +288,9 @@ class PluginGoalEnd2EndMin {
         const schedule = await Plugin.GetSchedule();
         const allTasksInstances = await schedule['promiseAllTasksInstances'];
         const schedulingResult = scheduler.Algorithm(cores, allTasksInstances, makespan, [...taskSet]);
+        
+        // TODO: Save the core allocation as decided by the scheduler?
+
         return [schedulingResult, allTasksInstances];
     }
     
