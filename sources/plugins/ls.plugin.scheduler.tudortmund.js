@@ -21,7 +21,7 @@ class PluginSchedulerTuDortmund {
         
         // Add the executionTiming to system so that the external tool can access it.
         // TODO: Make use of executionTiming when instantiating task execution times.
-        system['executionTiming'] = executionTiming;
+        system['ExecutionTiming'] = executionTiming;
         
         // Schedule the LET system with an external web tool.
         const computedSchedule = await this.Algorithm(system);
