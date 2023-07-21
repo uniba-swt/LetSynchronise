@@ -5,6 +5,7 @@ class PluginGoalRandom {
     static get Name()     { return 'Random Task Parameters'; }
     static get Author()   { return 'Eugene Yip'; }
     static get Type()     { return Plugin.Type.Goal; }
+    static get Platform() { return Plugin.Platform.MultiCore; }
     static get Category() { return Plugin.Category.ResponseTime; }
 
     

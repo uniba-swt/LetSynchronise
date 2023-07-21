@@ -8,6 +8,11 @@ class Plugin {
         static get Scheduler() { return 'Scheduler'; }
         static get Goal()      { return 'Goal'; }
     }
+    
+    static Platform = class {
+        static get SingleCore() { return 'SingleCore'; }
+        static get MultiCore()  { return 'MultiCore'; }
+    }
 
     static Category = class {
         // Importer
