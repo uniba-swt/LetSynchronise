@@ -19,7 +19,7 @@ class PluginGoalIlp {
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
         
         // Add the makespan to system so that the ILP Solver can access it.
-        system['Makespan'] = makespan;
+        system['PluginParameters'] = { 'Makespan' : makespan };
         
         // Optimise the LET system with an external web tool.
         const optimisedSchedule = await this.Algorithm(system);
