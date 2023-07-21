@@ -5,6 +5,7 @@ class PluginSchedulerIdentity {
     static get Name()     { return 'No Scheduling (Identity)'; }
     static get Author()   { return 'Eugene Yip'; }
     static get Type()     { return Plugin.Type.Scheduler; }
+    static get Platform() { return Plugin.Platform.MultiCore; }
     static get Category() { return Plugin.Category.Identity; }
 
     

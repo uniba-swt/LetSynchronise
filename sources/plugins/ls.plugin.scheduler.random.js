@@ -5,6 +5,7 @@ class PluginSchedulerRandom {
     static get Name()     { return 'Random Task Scheduling'; }
     static get Author()   { return 'Eugene Yip'; }
     static get Type()     { return Plugin.Type.Scheduler; }
+    static get Platform() { return Plugin.Platform.MultiCore; }
     static get Category() { return Plugin.Category.NonPreemptive; }
 
     

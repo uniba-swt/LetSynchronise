@@ -5,6 +5,7 @@ class PluginGoalEnd2EndMin {
     static get Name()     { return 'Minimise End-to-End Response Times (Heuristics)'; }
     static get Author()   { return 'Eugene Yip'; }
     static get Type()     { return Plugin.Type.Goal; }
+    static get Platform() { return Plugin.Platform.MultiCore; }
     static get Category() { return Plugin.Category.ResponseTime; }
 
     

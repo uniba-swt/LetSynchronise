@@ -5,6 +5,7 @@ class PluginSchedulerTuDortmund {
     static get Name()     { return 'TU Dortmund (Single Core)'; }
     static get Author()   { return 'Matthew Kuo'; }
     static get Type()     { return Plugin.Type.Scheduler; }
+    static get Platform() { return Plugin.Platform.SingleCore; }
     static get Category() { return Plugin.Category.Preemptive; }
 
     

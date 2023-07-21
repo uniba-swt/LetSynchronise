@@ -5,6 +5,7 @@ class PluginSchedulerRm {
     static get Name()     { return 'Rate-Monotonic Task Scheduling'; }
     static get Author()   { return 'Eugene Yip'; }
     static get Type()     { return Plugin.Type.Scheduler; }
+    static get Platform() { return Plugin.Platform.MultiCore; }
     static get Category() { return Plugin.Category.Preemptive; }
 
     
