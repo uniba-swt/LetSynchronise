@@ -20,8 +20,7 @@ class PluginSchedulerTuDortmund {
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
         
         // Add the executionTiming to system so that the external tool can access it.
-        // TODO: Make use of executionTiming when instantiating task execution times.
-        system['ExecutionTiming'] = executionTiming;
+        system['PluginParameters'] = { 'ExecutionTiming' : executionTiming };
         
         // Schedule the LET system with an external web tool.
         const computedSchedule = await this.Algorithm(system);
@@ -54,7 +53,7 @@ class PluginSchedulerTuDortmund {
             if (response.ok) {
                 return response.json();
             } else {
-                alert('Plugin does not support LET tasks with non-zero activation offsets!');
+                alert(response.statusText);
                 return null;
             }
         }).catch(error => {
