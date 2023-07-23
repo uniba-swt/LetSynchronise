@@ -232,9 +232,23 @@ Utility.Interval = class {
         return this.endTime - this.startTime;
     }
     
-    overlaps(other) {
+    get core() {
+        return this.core;
+    }
+
+    set core(core) {
+        this.core = core
+    }
+
+    overlapsWith(other) {
         //                 |<--- this --->|
         // |<--- other --->|              |<--- other --->|
         return this.startTime < parseInt(other.endTime) && this.endTime > parseInt(other.startTime);
+    }
+    
+    continuousWith(other) {
+        //                 |<--- this --->|
+        // |<--- other --->|              |<--- other --->|
+        return this.startTime == parseInt(other.endTime) || this.endTime == parseInt(other.startTime);
     }
 };

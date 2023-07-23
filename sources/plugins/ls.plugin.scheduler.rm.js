@@ -188,13 +188,12 @@ class PluginSchedulerRm {
                     return { 'schedulable': false, 'message': message };
                 }
                 if (executionTimeEnd <= coreNextPreemptionTime[core.name]) {
-                    const executionInterval = new Utility.Interval(coreCurrentTime[core.name], executionTimeEnd, core.name);
-                    coreChosenTask[core.name].instance.executionIntervals.push(executionInterval);
+                    this.AddExecutionInterval(coreChosenTask[core.name].instance.executionIntervals, coreCurrentTime[core.name], executionTimeEnd, core.name);
                     coreChosenTask[core.name].instance.remainingExecutionTime = 0;
                 } else {
-                    const executionInterval = new Utility.Interval(coreCurrentTime[core.name], coreNextPreemptionTime[core.name], core.name);
-                    coreChosenTask[core.name].instance.executionIntervals.push(executionInterval);
-                    coreChosenTask[core.name].instance.remainingExecutionTime -= executionInterval.duration * core.speedup;
+                    this.AddExecutionInterval(coreChosenTask[core.name].instance.executionIntervals, coreCurrentTime[core.name], coreNextPreemptionTime[core.name], core.name);
+                    const duration = coreNextPreemptionTime[core.name] - coreCurrentTime[core.name];
+                    coreChosenTask[core.name].instance.remainingExecutionTime -= duration * core.speedup;
                     corePreemptedTasksQueue[core.name].push(coreChosenTask[core.name]);
                 }
                 
@@ -218,4 +217,25 @@ class PluginSchedulerRm {
         return taskinstance.remainingExecutionTime / taskinstance.currentCore.speedup;
     }
     
+    static AddExecutionInterval(executionIntervals, startTime, endTime, coreName) {
+        if (executionIntervals.length == 0) {
+            const executionInterval = new Utility.Interval(startTime, endTime, coreName);
+            executionIntervals.push(executionInterval);
+            return;
+        }
+    
+        let lastInterval = executionIntervals.pop();
+        if (lastInterval.core == coreName && lastInterval.endTime == startTime) {
+            // Same core and a coinciding execution boundary
+            lastInterval.endTime = endTime;
+            executionIntervals.push(lastInterval);
+        } else {
+            // Disjoint execution boundaries
+            executionIntervals.push(lastInterval);
+            
+            const executionInterval = new Utility.Interval(startTime, endTime, coreName);
+            executionIntervals.push(executionInterval);
+        }
+    }
+
 }
