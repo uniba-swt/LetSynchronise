@@ -49,6 +49,7 @@ for a system importer called **Tool1**. Plugins have meta-data defined as static
 * Name: Descriptive name of the plugin, which will be displayed to the user, e.g., in a dropdown item or analysis output.
 * Author: Creator of the plugin.
 * Type: Suitable classification of the plugin's capabilities as defined in `Plugin.Type` in `ls.plugin.js`.
+* Platform: Supported execution platform of the plugin as defined in `Plugin.Platform` in `ls.plugin.js`.
 * Category: Suitable classification of the plugin's functionality as defined in `Plugin.Category` in `ls.plugin.js`.
 * Input: Supported input of the plugin as defined in `Plugin.Input` in `ls.plugin.js`.
 * Output: Supported output of the plugin as defined in `Plugin.Output` in `ls.plugin.js`.

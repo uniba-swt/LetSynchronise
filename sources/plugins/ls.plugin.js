@@ -16,25 +16,25 @@ class Plugin {
 
     static Category = class {
         // Importer
-        // TODO: Replace Tool1 and Xml1 with actual tools and file types.
-        static get Native() { return 'Native'; }   // Import from native LetSynchronise JSON files
-        static get Tool1()  { return 'Tool1'; }    // Import from Tool1 generated files
+        // TODO: Replace Tool1 with actual tool and file type.
+        static get Native()          { return 'Native'; }            // Import from native LetSynchronise JSON files
+        static get Tool1()           { return 'Tool1'; }             // Import from Tool1 generated files
         
         // Exporter
         static get LetSynchronise()  { return 'LetSynchronise'; }    // Export to a LetSynchronise JSON file
         static get External()        { return 'External'; }          // Export to an external tool
 
         // Metric
-        static get Timing()  { return 'Timing'; }    // Metric for a timing property
-        static get Utility() { return 'Utility'; }   // Metric for a utility property
+        static get Timing()          { return 'Timing'; }            // Metric for a timing property
+        static get Utility()         { return 'Utility'; }           // Metric for a utility property
         
         // Scheduler
-        static get Preemptive() { return 'Preemptive'; }        // Preemptive scheduling policy
-        static get Preemptive() { return 'Non-Preemptive'; }    // Non-preemptive scheduling policy
-        static get Preemptive() { return 'Identity'; }          // No scheduling policy
+        static get Preemptive()      { return 'Preemptive'; }        // Preemptive scheduling policy
+        static get NonPreemptive()   { return 'Non-Preemptive'; }    // Non-preemptive scheduling policy
+        static get Identity()        { return 'Identity'; }          // No scheduling policy
         
         // Goal
-        static get ResponseTime() { return 'Response Time'; }   // Optimise for response times
+        static get ResponseTime()    { return 'Response Time'; }     // Optimise for response times
     }
 
     static Input = class {
