@@ -36,9 +36,9 @@ Original authors:
 
 ## Usage
 LetSynchronise is designed as a web application that does not require any installation. 
-Just open the `sources/ls.main.html` file in a web browser, e.g., Firefox or Safari.
+Just open the [`sources/ls.main.html`](sources/ls.main.html) file in a web browser, e.g., Firefox or Safari.
 There are two tabs for users to **Design** and then to **Analyse** a LET system.
-See the [docs](docs) folder for information on the types of plugins that are available 
+See the [`docs`](docs) folder for information on the types of plugins that are available 
 and can be developed.
 
 Systems can be imported and exported via supported file formats. If only certain
