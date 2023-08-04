@@ -53,11 +53,11 @@ class PluginGoalIlp {
             if (response.ok) {
                 return response.json();
             } else {
-                alert('FIXME: Plugin encountered an error!');
+                alert(response.statusText);
                 return null;
             }
         }).catch(error => {
-            alert(`${url} could not be reached!`)
+            alert(`${url} could not be reached! \n${error}`)
             return null;
         });
     }
