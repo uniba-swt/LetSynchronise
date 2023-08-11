@@ -206,7 +206,7 @@ class ViewTask {
             'acet': Math.abs(parseFloat(this.acet)) * Utility.MsToNs,
             'bcet': Math.abs(parseFloat(this.bcet)) * Utility.MsToNs,
             'distribution': this.distribution.trim(),
-            'core':  this.core == null ? null : this.core.trim()
+            'core': this.core == null ? null : this.core.trim()
         };
     }
     

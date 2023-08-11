@@ -26,7 +26,6 @@ class PluginSchedulerRandom {
         const result = this.Algorithm(cores, tasks);
         if (!result.schedulable) {
             alert(result.message);
-            return;
         }
         
         return Plugin.DatabaseContentsDelete(scheduleElementSelected)

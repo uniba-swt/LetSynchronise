@@ -26,7 +26,6 @@ class PluginSchedulerEdf {
         const result = this.Algorithm(cores, tasksInstances, makespan);
         if (!result.schedulable) {
             alert(result.message);
-            return;
         }
         
         return Plugin.DatabaseContentsDelete(scheduleElementSelected)

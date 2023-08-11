@@ -27,7 +27,6 @@ class PluginSchedulerFp {
         const result = this.Algorithm(cores, tasksInstances, makespan, tasksParameters);
         if (!result.schedulable) {
             alert(result.message);
-            return;
         }
         
         return Plugin.DatabaseContentsDelete(systemElementSelected)
@@ -67,7 +66,8 @@ class PluginSchedulerFp {
                 
         // Schedule all the task instances in chronological (LET start time) and
         // fixed-priority order.
-        // Task instances with the same priority and/or LET start time are selected arbitrarily.
+        // Task instances with the same priority and/or LET start time are selected based on the
+        // earliest LET end time, otherwise selected arbitrarily.
         while (true) {
             // Track the earliest time that a task preemption may occur on each core.
             let coreNextPreemptionTime = { };
@@ -111,9 +111,11 @@ class PluginSchedulerFp {
                 const earlierFutureActivation = !noChosenTask && (coreCurrentTime[taskCore.name] < taskInstance.letStartTime && taskInstance.letStartTime < coreChosenTask[taskCore.name].instance.letStartTime);
                 // * Both the taskInstance and chosenTask are activated at the same time.
                 const sameActivationTime = !noChosenTask && (taskInstance.letStartTime == coreChosenTask[taskCore.name].instance.letStartTime);
-                // * The priority of taskInstance is equal to or higher than the chosenTask, 
+                // * The priority of taskInstance is either higher than the chosenTask or equal to the chosenTask and ends its LET at or before that of the chosenTask, 
                 //   and both task instances have been activated or both will activate at the same time.
-                const higherPriority = ((bothTasksActivated || bothTasksNotActivated && sameActivationTime) && (taskPriority >= coreChosenTask[taskCore.name].priority));
+                const higherPriority = ((bothTasksActivated || bothTasksNotActivated && sameActivationTime) 
+                                         && (taskPriority > coreChosenTask[taskCore.name].priority
+                                              || (taskPriority == coreChosenTask[taskCore.name].priority && taskInstance.letEndTime <= coreChosenTask[taskCore.name].instance.letEndTime)));
                 
                 // Update the chosenTask instance with taskInstance if any of the following 4 conditions are true:
                 // 1. No task instance has been chosen.
