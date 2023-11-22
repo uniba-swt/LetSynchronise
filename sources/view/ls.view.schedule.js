@@ -30,6 +30,10 @@ class ViewSchedule {
 
     scheduleTooltip = null;
     dependencyTooltip = null;
+    
+    zoomFactor = 1;
+    zoomOutButton = null;
+    zoomInButton = null;
 
     constructor() {
         this.root = document.querySelector('#nav-analyse');
@@ -56,6 +60,10 @@ class ViewSchedule {
         this.dependencies = d3.select('#view-schedule-dependencies-menu');
         this.scheduleTooltip = this.root.querySelector('#view-schedule-task-tooltip');
         this.dependencyTooltip = this.root.querySelector('#view-schedule-dependency-tooltip');
+        
+        // Zoom
+        this.zoomOutButton = this.root.querySelector('#zoom-out');
+        this.zoomInButton = this.root.querySelector('#zoom-in');
         
         // Listeners
         this.setupEventChainListener();
@@ -238,6 +246,21 @@ class ViewSchedule {
         });
     }
     
+    // Handle the zoom "-" and "+" buttons.
+    registerZoomHandler(handler) {
+        this.zoomInButton.addEventListener('click', event => {
+            // Prevent the default behaviour of submitting the form and the reloading of the webpage.
+            event.preventDefault();
+            handler("in");
+        });
+        
+        this.zoomOutButton.addEventListener('click', event => {
+            // Prevent the default behaviour of submitting the form and the reloading of the webpage.
+            event.preventDefault();
+            handler("out");
+        });
+    }
+    
     
     // Validate the scheduler input fields.
     validateSchedulingParameters(schedulingParameters) {
@@ -332,7 +355,7 @@ class ViewSchedule {
         const scale =
         d3.scaleLinear()
           .domain([0, this.makespan * Utility.MsToNs])
-          .range([0, View.Width - 2 * View.SvgPadding]);
+          .range([0, this.zoomFactor * (View.Width - 2 * View.SvgPadding)]);
 
         // Delete the existing schedule, if they exist and set up the canvas.
         this.schedule.selectAll('*').remove();
@@ -910,6 +933,15 @@ class ViewSchedule {
                     }
                 }
             }
+        }
+    }
+    
+    // Update the zoom level.
+    updateZoom(action) {
+        if (action == "out") {
+            this.zoomFactor = Math.max(1, Math.trunc(this.zoomFactor / 2));
+        } else if (action == "in") {
+            this.zoomFactor = this.zoomFactor * 2;
         }
     }
     
