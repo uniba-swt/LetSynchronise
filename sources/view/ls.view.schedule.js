@@ -62,6 +62,7 @@ class ViewSchedule {
         this.dependencyTooltip = this.root.querySelector('#view-schedule-dependency-tooltip');
         
         // Zoom
+        this.zoomField = this.root.querySelector('#zoom');
         this.zoomOutButton = this.root.querySelector('#zoom-out');
         this.zoomInButton = this.root.querySelector('#zoom-in');
         
@@ -102,6 +103,10 @@ class ViewSchedule {
         this.schedulerField.value = scheduler;
     }
     
+    get pluginScheduler() {
+        return Plugin.GetPlugin(Plugin.Type.Scheduler, this.scheduler);
+    }
+    
     get executionTiming() {
         return this.executionTimingField.value;
     }
@@ -110,8 +115,16 @@ class ViewSchedule {
         this.executionTimingField.value = executionTiming;
     }
 
-    get pluginScheduler() {
-        return Plugin.GetPlugin(Plugin.Type.Scheduler, this.scheduler);
+    get goal() {
+        return this.goalField.value;
+    }
+    
+    set goal(goal) {
+        this.goalField.value = goal;
+    }
+    
+    get pluginGoal() {
+        return Plugin.GetPlugin(Plugin.Type.Goal, this.goal);
     }
     
     get eventChain() {
@@ -138,6 +151,16 @@ class ViewSchedule {
         this.instanceField.setAttribute('max', max);
     }
     
+    set zoomAction(action) {
+        if (action == 'out') {
+            this.zoomFactor = Math.max(1, Math.trunc(this.zoomFactor / 2));
+        } else if (action == 'in') {
+            this.zoomFactor = this.zoomFactor * 2;
+        }
+        
+        this.zoomField.value = `${100 * this.zoomFactor}%`;
+    }
+    
     get schedulingParametersRaw() {
         return {
             'makespan': this.makespan,
@@ -154,18 +177,6 @@ class ViewSchedule {
             'executionTiming': this.executionTiming,
             'scheduler': this.pluginScheduler
         };
-    }
-    
-    get goal() {
-        return this.goalField.value;
-    }
-    
-    set goal(goal) {
-        this.goalField.value = goal;
-    }
-    
-    get pluginGoal() {
-        return Plugin.GetPlugin(Plugin.Type.Goal, this.goal);
     }
     
     get optimiserParametersRaw() {
@@ -933,15 +944,6 @@ class ViewSchedule {
                     }
                 }
             }
-        }
-    }
-    
-    // Update the zoom level.
-    updateZoom(action) {
-        if (action == "out") {
-            this.zoomFactor = Math.max(1, Math.trunc(this.zoomFactor / 2));
-        } else if (action == "in") {
-            this.zoomFactor = this.zoomFactor * 2;
         }
     }
     

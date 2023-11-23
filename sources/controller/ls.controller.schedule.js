@@ -29,6 +29,7 @@ class ControllerSchedule {
         // Hack to populate the View with the schedule once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
             const promise = this._model.getSchedule(this._view.schedulingParametersClean.makespan);
+            this.view.zoomAction = 'none';
             this.callbackGetSchedule(promise);
         });
     }
@@ -119,7 +120,7 @@ class ControllerSchedule {
     
     // Handler for zooming in and out of the schedule.
     handleZoom = (action) => {
-        this.view.updateZoom(action);
+        this.view.zoomAction = action;
         this.callbackGetSchedule(this.model.getSchedule());
     }
     
