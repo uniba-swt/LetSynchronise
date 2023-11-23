@@ -119,8 +119,7 @@ class ControllerSchedule {
     }
     
     // Handler for zooming in and out of the schedule.
-    handleZoom = (action) => {
-        this.view.zoomAction = action;
+    handleZoom = () => {
         this.callbackGetSchedule(this.model.getSchedule());
     }
     

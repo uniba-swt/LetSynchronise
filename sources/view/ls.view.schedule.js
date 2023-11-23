@@ -33,8 +33,6 @@ class ViewSchedule {
     
     svgOrigin = 0;
     panOrigin = null;
-    zoomOutButton = null;
-    zoomInButton = null;
 
     constructor() {
         this.root = document.querySelector('#nav-analyse');
@@ -64,8 +62,6 @@ class ViewSchedule {
         
         // Zoom
         this.zoomField = this.root.querySelector('#zoom');
-        this.zoomOutButton = this.root.querySelector('#zoom-out');
-        this.zoomInButton = this.root.querySelector('#zoom-in');
         
         // Listeners
         this.setupEventChainListener();
@@ -153,24 +149,23 @@ class ViewSchedule {
         this.instanceField.setAttribute('max', max);
     }
     
-    get zoomFactor() {
-        return parseInt(this.zoomField.value) / 100;
+    get zoomPercent() {
+        return parseInt(this.zoomField.value);
     }
     
-    set zoomAction(action) {
-        let newZoomFactor = this.zoomFactor;
-        let newSvgOrigin = this.svgOrigin;
-        
-        if (action == 'out') {
-            newZoomFactor = Math.max(1, Math.trunc(newZoomFactor / 2));
-            newSvgOrigin = (newSvgOrigin / 2) - (View.Width / 4);
-        } else if (action == 'in') {
-            newZoomFactor *= 2;
-            newSvgOrigin = (2 * newSvgOrigin) + (View.Width / 2); 
+    get zoomFactor() {
+        return this.zoomPercent / 100;
+    }
+    
+    set zoomAmount(amount) {
+        let newZoomPercent = this.zoomPercent + amount;
+        if (amount < 0) {
+            newZoomPercent = Math.max(100, newZoomPercent);
         }
+        this.zoomField.value = `${newZoomPercent}%`;
         
-        this.zoomField.value = `${100 * newZoomFactor}%`;
-        this.svgOrigin = this.boundSvgOrigin(newSvgOrigin, newZoomFactor);
+        let newSvgOrigin = Math.round((this.svgOrigin * newZoomPercent + View.Width * amount) / this.zoomPercent);
+        this.svgOrigin = this.boundSvgOrigin(newSvgOrigin, this.zoomFactor);
     }
     
     boundSvgOrigin(svgOrigin, zoomFactor) {
@@ -251,16 +246,12 @@ class ViewSchedule {
 
             let svgViewBox = this.schedule.select('svg').node().viewBox.baseVal;
             svgViewBox.x = newX;
-            
-            console.log(svgViewBox.x);
         };
         
         const removeMousemoveHandler = (event) => {
             this.schedule.node().removeEventListener('mousemove', mousemoveHandler);
             let svgViewBox = this.schedule.select('svg').node().viewBox.baseVal;
             this.svgOrigin = svgViewBox.x;
-            
-            console.log(this.svgOrigin);
         };
 
         // Listen for a mouse down event to activate the panning.
@@ -314,18 +305,28 @@ class ViewSchedule {
         });
     }
     
-    // Handle the zoom "-" and "+" buttons.
+    // Handle page scrolling for zooming the schedule.
     registerZoomHandler(handler) {
-        this.zoomInButton.addEventListener('click', event => {
-            // Prevent the default behaviour of submitting the form and the reloading of the webpage.
-            event.preventDefault();
-            handler("in");
-        });
+        const wheelThreshold = 10;
+        let totalDelta = 0;
         
-        this.zoomOutButton.addEventListener('click', event => {
-            // Prevent the default behaviour of submitting the form and the reloading of the webpage.
-            event.preventDefault();
-            handler("out");
+        this.schedule.node().addEventListener('wheel', event => {
+            if (event.shiftKey) {
+                // Prevent the default behaviour of scrolling the webpage.
+                event.preventDefault();
+                
+                const oldZoomPercentage = this.zoomPercent;
+                
+                totalDelta += event.deltaY;
+                if (Math.abs(totalDelta) > wheelThreshold) {
+                    this.zoomAmount = totalDelta;
+                    totalDelta = 0;
+                }
+                
+                if (this.zoomPercent != oldZoomPercentage) {
+                    handler();
+                }
+            }
         });
     }
     
@@ -453,7 +454,6 @@ class ViewSchedule {
         const svgHeight = (tasksInstances.length + 1) * View.TaskHeight + (Object.keys(coreIndices).length - 1) * View.ExecutionHeight;
         svgElement
             .attr('viewBox', [this.svgOrigin, 0, svgWidth, svgHeight]);
-        console.log(this.svgOrigin);
         
         return {svgElement: svgElement, scale: scale, taskIndices: taskIndices, coreIndices: coreIndices};
     }
