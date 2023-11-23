@@ -30,6 +30,9 @@ class ViewSchedule {
 
     scheduleTooltip = null;
     dependencyTooltip = null;
+    
+    svgOrigin = 0;
+    panOrigin = null;
 
     constructor() {
         this.root = document.querySelector('#nav-analyse');
@@ -57,9 +60,13 @@ class ViewSchedule {
         this.scheduleTooltip = this.root.querySelector('#view-schedule-task-tooltip');
         this.dependencyTooltip = this.root.querySelector('#view-schedule-dependency-tooltip');
         
+        // Zoom
+        this.zoomField = this.root.querySelector('#zoom');
+        
         // Listeners
         this.setupEventChainListener();
         this.setupInstanceInputListener();
+        this.setupPanningListener();
     }
     
     get prologue() {
@@ -94,6 +101,10 @@ class ViewSchedule {
         this.schedulerField.value = scheduler;
     }
     
+    get pluginScheduler() {
+        return Plugin.GetPlugin(Plugin.Type.Scheduler, this.scheduler);
+    }
+    
     get executionTiming() {
         return this.executionTimingField.value;
     }
@@ -102,8 +113,16 @@ class ViewSchedule {
         this.executionTimingField.value = executionTiming;
     }
 
-    get pluginScheduler() {
-        return Plugin.GetPlugin(Plugin.Type.Scheduler, this.scheduler);
+    get goal() {
+        return this.goalField.value;
+    }
+    
+    set goal(goal) {
+        this.goalField.value = goal;
+    }
+    
+    get pluginGoal() {
+        return Plugin.GetPlugin(Plugin.Type.Goal, this.goal);
     }
     
     get eventChain() {
@@ -130,6 +149,35 @@ class ViewSchedule {
         this.instanceField.setAttribute('max', max);
     }
     
+    get zoomPercent() {
+        return parseInt(this.zoomField.value);
+    }
+    
+    get zoomFactor() {
+        return this.zoomPercent / 100;
+    }
+    
+    set zoomAmount(amount) {
+        let newZoomPercent = this.zoomPercent + amount;
+        if (amount < 0) {
+            newZoomPercent = Math.max(100, newZoomPercent);
+        }
+        this.zoomField.value = newZoomPercent;
+        
+        let newSvgOrigin = Math.round((this.svgOrigin * newZoomPercent + View.Width * amount) / this.zoomPercent);
+        this.svgOrigin = this.boundSvgOrigin(newSvgOrigin, this.zoomFactor);
+    }
+    
+    boundSvgOrigin(svgOrigin, zoomFactor) {
+        if (0 <= svgOrigin && svgOrigin <= (zoomFactor - 1) * View.Width) {
+            return svgOrigin;
+        } else if (svgOrigin < 0) {
+            return 0;
+        } else {
+            return Math.min((zoomFactor - 1) * View.Width, svgOrigin);
+        }
+    }
+    
     get schedulingParametersRaw() {
         return {
             'makespan': this.makespan,
@@ -146,18 +194,6 @@ class ViewSchedule {
             'executionTiming': this.executionTiming,
             'scheduler': this.pluginScheduler
         };
-    }
-    
-    get goal() {
-        return this.goalField.value;
-    }
-    
-    set goal(goal) {
-        this.goalField.value = goal;
-    }
-    
-    get pluginGoal() {
-        return Plugin.GetPlugin(Plugin.Type.Goal, this.goal);
     }
     
     get optimiserParametersRaw() {
@@ -202,6 +238,37 @@ class ViewSchedule {
         });
     }
     
+    // Handle the panning of the schedule.
+    setupPanningListener() {
+        const mousemoveHandler = (event) => {            
+            // Do not pan beyond the start and end of the schedule.
+            const newX = this.boundSvgOrigin(this.svgOrigin + (this.panOrigin - event.clientX), this.zoomFactor);
+
+            let svgViewBox = this.schedule.select('svg').node().viewBox.baseVal;
+            svgViewBox.x = newX;
+        };
+        
+        const removeMousemoveHandler = (event) => {
+            this.schedule.node().removeEventListener('mousemove', mousemoveHandler);
+            let svgViewBox = this.schedule.select('svg').node().viewBox.baseVal;
+            this.svgOrigin = svgViewBox.x;
+        };
+
+        // Listen for a mouse down event to activate the panning.
+        this.schedule.node().addEventListener('mousedown', event => {
+            this.panOrigin = event.clientX;
+            const svgViewBox = this.schedule.select('svg').node().viewBox.baseVal;
+            this.svgOrigin = svgViewBox.x;
+
+            // Attach a mouse move listener to do the panning. 
+            this.schedule.node().addEventListener('mousemove', mousemoveHandler);
+        });
+
+        // Listen for a mouse up or leave event to deactivate the panning.
+        this.schedule.node().addEventListener('mouseup', removeMousemoveHandler);
+        this.schedule.node().addEventListener('mouseleave', removeMousemoveHandler);
+    }
+    
     
     // -----------------------------------------------------
     // Registration of handlers from the controller
@@ -234,6 +301,31 @@ class ViewSchedule {
                 && this.validateOptimiserParameters(this.optimiserParametersRaw)) {
                 // Call the handler.
                 handler();
+            }
+        });
+    }
+    
+    // Handle page scrolling for zooming the schedule.
+    registerZoomHandler(handler) {
+        const wheelThreshold = 10;
+        let totalDelta = 0;
+        
+        this.schedule.node().addEventListener('wheel', event => {
+            if (event.shiftKey) {
+                // Prevent the default behaviour of scrolling the webpage.
+                event.preventDefault();
+                
+                const oldZoomPercentage = this.zoomPercent;
+                
+                totalDelta += event.deltaY;
+                if (Math.abs(totalDelta) > wheelThreshold) {
+                    this.zoomAmount = totalDelta;
+                    totalDelta = 0;
+                }
+                
+                if (this.zoomPercent != oldZoomPercentage) {
+                    handler();
+                }
             }
         });
     }
@@ -332,7 +424,7 @@ class ViewSchedule {
         const scale =
         d3.scaleLinear()
           .domain([0, this.makespan * Utility.MsToNs])
-          .range([0, View.Width - 2 * View.SvgPadding]);
+          .range([0, (this.zoomFactor * View.Width) - (2 * View.SvgPadding)]);
 
         // Delete the existing schedule, if they exist and set up the canvas.
         this.schedule.selectAll('*').remove();
@@ -357,9 +449,11 @@ class ViewSchedule {
         // Draw the system load.
         this.drawSystemLoad(tasksInstances, svgElement, scale, tasksInstances.length, coreIndices);
         
+        // Set the SVG viewport.
+        const svgWidth = View.Width;
+        const svgHeight = (tasksInstances.length + 1) * View.TaskHeight + (Object.keys(coreIndices).length - 1) * View.ExecutionHeight;
         svgElement
-          .attr('width', `${View.Width}px`)
-          .attr('height', `${(tasksInstances.length + 1) * View.TaskHeight + (Object.keys(coreIndices).length - 1) * View.ExecutionHeight}px`);
+            .attr('viewBox', [this.svgOrigin, 0, svgWidth, svgHeight]);
         
         return {svgElement: svgElement, scale: scale, taskIndices: taskIndices, coreIndices: coreIndices};
     }

@@ -16,6 +16,7 @@ class ControllerSchedule {
         // Register the handlers when setting the view.
         this._view.registerUpdateHandler(this.handleGetSchedule);
         this._view.registerOptimiseHandler(this.handleOptimise);
+        this._view.registerZoomHandler(this.handleZoom);
     }
 
     get view() {
@@ -114,6 +115,11 @@ class ControllerSchedule {
             .then(result => scheduler.Result(makespan, executionTiming))
             .then(result => this.modelTask.refreshViews())
             .then(result => this.callbackGetSchedule(this.model.getSchedule()));
+    }
+    
+    // Handler for zooming in and out of the schedule.
+    handleZoom = () => {
+        this.callbackGetSchedule(this.model.getSchedule());
     }
     
     
