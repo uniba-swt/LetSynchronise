@@ -424,7 +424,7 @@ class ViewSchedule {
         const scale =
         d3.scaleLinear()
           .domain([0, this.makespan * Utility.MsToNs])
-          .range([0, this.zoomFactor * (View.Width - 2 * View.SvgPadding)]);
+          .range([0, (this.zoomFactor * View.Width) - (2 * View.SvgPadding)]);
 
         // Delete the existing schedule, if they exist and set up the canvas.
         this.schedule.selectAll('*').remove();
