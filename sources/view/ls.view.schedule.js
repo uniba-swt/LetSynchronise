@@ -159,18 +159,28 @@ class ViewSchedule {
     
     set zoomAction(action) {
         let newZoomFactor = this.zoomFactor;
+        let newSvgOrigin = this.svgOrigin;
+        
         if (action == 'out') {
             newZoomFactor = Math.max(1, Math.trunc(newZoomFactor / 2));
-            this.svgOrigin = Math.min((newZoomFactor - 1) * View.Width, (this.svgOrigin / 2) - (View.Width / 4));
-            if (this.svgOrigin < 0) {
-                this.svgOrigin = 0;
-            }
+            newSvgOrigin = (newSvgOrigin / 2) - (View.Width / 4);
         } else if (action == 'in') {
             newZoomFactor *= 2;
-            this.svgOrigin = (2 * this.svgOrigin) + (View.Width / 2); 
+            newSvgOrigin = (2 * newSvgOrigin) + (View.Width / 2); 
         }
         
         this.zoomField.value = `${100 * newZoomFactor}%`;
+        this.svgOrigin = this.boundSvgOrigin(newSvgOrigin, newZoomFactor);
+    }
+    
+    boundSvgOrigin(svgOrigin, zoomFactor) {
+        if (0 <= svgOrigin && svgOrigin <= (zoomFactor - 1) * View.Width) {
+            return svgOrigin;
+        } else if (svgOrigin < 0) {
+            return 0;
+        } else {
+            return Math.min((zoomFactor - 1) * View.Width, svgOrigin);
+        }
     }
     
     get schedulingParametersRaw() {
@@ -237,9 +247,7 @@ class ViewSchedule {
     setupPanningListener() {
         const mousemoveHandler = (event) => {            
             // Do not pan beyond the start and end of the schedule.
-            let newX = this.svgOrigin + (this.panOrigin - event.clientX);
-            newX = Math.max(newX, 0);
-            newX = Math.min(newX, (this.zoomFactor - 1) * View.Width); 
+            const newX = this.boundSvgOrigin(this.svgOrigin + (this.panOrigin - event.clientX), this.zoomFactor);
 
             let svgViewBox = this.schedule.select('svg').node().viewBox.baseVal;
             svgViewBox.x = newX;
