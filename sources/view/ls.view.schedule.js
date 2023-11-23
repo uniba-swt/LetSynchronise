@@ -31,7 +31,8 @@ class ViewSchedule {
     scheduleTooltip = null;
     dependencyTooltip = null;
     
-    zoomFactor = 1;
+    svgOrigin = 0;
+    panOrigin = null;
     zoomOutButton = null;
     zoomInButton = null;
 
@@ -69,6 +70,7 @@ class ViewSchedule {
         // Listeners
         this.setupEventChainListener();
         this.setupInstanceInputListener();
+        this.setupPanningListener();
     }
     
     get prologue() {
@@ -151,14 +153,24 @@ class ViewSchedule {
         this.instanceField.setAttribute('max', max);
     }
     
+    get zoomFactor() {
+        return parseInt(this.zoomField.value) / 100;
+    }
+    
     set zoomAction(action) {
+        let newZoomFactor = this.zoomFactor;
         if (action == 'out') {
-            this.zoomFactor = Math.max(1, Math.trunc(this.zoomFactor / 2));
+            newZoomFactor = Math.max(1, Math.trunc(newZoomFactor / 2));
+            this.svgOrigin = Math.min((newZoomFactor - 1) * View.Width, (this.svgOrigin / 2) - (View.Width / 4));
+            if (this.svgOrigin < 0) {
+                this.svgOrigin = 0;
+            }
         } else if (action == 'in') {
-            this.zoomFactor = this.zoomFactor * 2;
+            newZoomFactor *= 2;
+            this.svgOrigin = (2 * this.svgOrigin) + (View.Width / 2); 
         }
         
-        this.zoomField.value = `${100 * this.zoomFactor}%`;
+        this.zoomField.value = `${100 * newZoomFactor}%`;
     }
     
     get schedulingParametersRaw() {
@@ -219,6 +231,43 @@ class ViewSchedule {
             // Call the handler.
             this.updateEventChain(this.eventChain, this.instance);
         });
+    }
+    
+    // Handle the panning of the schedule.
+    setupPanningListener() {
+        const mousemoveHandler = (event) => {            
+            // Do not pan beyond the start and end of the schedule.
+            let newX = this.svgOrigin + (this.panOrigin - event.clientX);
+            newX = Math.max(newX, 0);
+            newX = Math.min(newX, (this.zoomFactor - 1) * View.Width); 
+
+            let svgViewBox = this.schedule.select('svg').node().viewBox.baseVal;
+            svgViewBox.x = newX;
+            
+            console.log(svgViewBox.x);
+        };
+        
+        const removeMousemoveHandler = (event) => {
+            this.schedule.node().removeEventListener('mousemove', mousemoveHandler);
+            let svgViewBox = this.schedule.select('svg').node().viewBox.baseVal;
+            this.svgOrigin = svgViewBox.x;
+            
+            console.log(this.svgOrigin);
+        };
+
+        // Listen for a mouse down event to activate the panning.
+        this.schedule.node().addEventListener('mousedown', event => {
+            this.panOrigin = event.clientX;
+            const svgViewBox = this.schedule.select('svg').node().viewBox.baseVal;
+            this.svgOrigin = svgViewBox.x;
+
+            // Attach a mouse move listener to do the panning. 
+            this.schedule.node().addEventListener('mousemove', mousemoveHandler);
+        });
+
+        // Listen for a mouse up or leave event to deactivate the panning.
+        this.schedule.node().addEventListener('mouseup', removeMousemoveHandler);
+        this.schedule.node().addEventListener('mouseleave', removeMousemoveHandler);
     }
     
     
@@ -391,9 +440,12 @@ class ViewSchedule {
         // Draw the system load.
         this.drawSystemLoad(tasksInstances, svgElement, scale, tasksInstances.length, coreIndices);
         
+        // Set the SVG viewport.
+        const svgWidth = View.Width;
+        const svgHeight = (tasksInstances.length + 1) * View.TaskHeight + (Object.keys(coreIndices).length - 1) * View.ExecutionHeight;
         svgElement
-          .attr('width', `${View.Width}px`)
-          .attr('height', `${(tasksInstances.length + 1) * View.TaskHeight + (Object.keys(coreIndices).length - 1) * View.ExecutionHeight}px`);
+            .attr('viewBox', [this.svgOrigin, 0, svgWidth, svgHeight]);
+        console.log(this.svgOrigin);
         
         return {svgElement: svgElement, scale: scale, taskIndices: taskIndices, coreIndices: coreIndices};
     }
