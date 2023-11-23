@@ -162,7 +162,7 @@ class ViewSchedule {
         if (amount < 0) {
             newZoomPercent = Math.max(100, newZoomPercent);
         }
-        this.zoomField.value = `${newZoomPercent}%`;
+        this.zoomField.value = newZoomPercent;
         
         let newSvgOrigin = Math.round((this.svgOrigin * newZoomPercent + View.Width * amount) / this.zoomPercent);
         this.svgOrigin = this.boundSvgOrigin(newSvgOrigin, this.zoomFactor);
