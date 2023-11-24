@@ -10,7 +10,7 @@ readily accessible, and (3) fairly and accurately reproduce and
 evaluate the results of existing work. 
 
 Paper describing LetSynchronise:
-* [E.Yip and M. M. Y. Kuo. _LetSynchronise: An Open-Source Framework for Analysing and Optimising Logical Execution Time Systems_. CPS-IoT Week, 2023](https://dl.acm.org/doi/10.1145/3576914.3587500)
+* [E. Yip and M. M. Y. Kuo. _LetSynchronise: An Open-Source Framework for Analysing and Optimising Logical Execution Time Systems_. CPS-IoT Week, 2023](https://dl.acm.org/doi/10.1145/3576914.3587500)
 
 Original authors:
 * [@eyip002](https://github.com/eyip002): [Eugene Yip](https://www.uni-bamberg.de/swt/team/dr-eugene-yip/)
@@ -61,14 +61,14 @@ via tick boxes.
 * View the prologue and hyper-period of the task set.
 * Define the makespan of the task schedule to simulate.
 * Choose a task scheduler that implements the desired scheduling policy.
-* Choose the type (BCET, ACET, or WCET) of execution times to simulate for each task instance.
+* Choose the type  of execution times (BCET, ACET, or WCET) to simulate for each task instance.
 * Choose an optimisation goal to apply on the system.
-* View the simulated task schedule, including the overall system load.
+* View, zoom, and pan the simulated task schedule, including the overall system load.
 * Show or hide each task communication dependency.
 * Interactive tooltips appear when the mouse is hovered over each LET interval, execution interval, and task communication dependency.
 * Edit event chains, which represent sequences of task communication dependencies.
 * Highlight each instance of a selected event chain.
-* Define timing constraints on event chains, which will be analysed and used during optimisation.
+* Define timing constraints on event chains, which will also be analysed during optimisation.
 * View analysis results for timing constraints.
 
 
@@ -86,7 +86,7 @@ The user interface is styled with [Bootstrap](https://getbootstrap.com).
 The simulated schedules are plotted with [D3](https://d3js.org).
 
 
-### Code Style
+### Coding Style
 * Indentation: 4 spaces
 * Names: camel casing
 
