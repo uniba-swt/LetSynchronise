@@ -158,13 +158,14 @@ class ViewSchedule {
     }
     
     set zoomAmount(amount) {
-        let newZoomPercent = this.zoomPercent + amount;
+        const oldZoomPercentage = this.zoomPercent;
+        let newZoomPercent = oldZoomPercentage + amount;
         if (amount < 0) {
             newZoomPercent = Math.max(100, newZoomPercent);
         }
         this.zoomField.value = newZoomPercent;
         
-        let newSvgOrigin = Math.round((this.svgOrigin * newZoomPercent + View.Width * amount) / this.zoomPercent);
+        let newSvgOrigin = Math.round((this.svgOrigin * newZoomPercent + View.Width * amount / 2) / oldZoomPercentage);
         this.svgOrigin = this.boundSvgOrigin(newSvgOrigin, this.zoomFactor);
     }
     
@@ -307,7 +308,7 @@ class ViewSchedule {
     
     // Handle page scrolling for zooming the schedule.
     registerZoomHandler(handler) {
-        const wheelThreshold = 10;
+        const wheelThreshold = 9;
         let totalDelta = 0;
         
         this.schedule.node().addEventListener('wheel', event => {
