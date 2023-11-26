@@ -20,6 +20,19 @@ class ControllerExportImport {
         this._view.registerExportSystemButtonHandler(this.handleExportSystem);
         this._view.registerImportSystemButtonHandler(this.handleImportSystem);
         this._view.registerResetSystemButtonHandler(this.handleResetSystem);
+        
+        // Restore settings on page (re)load.
+        window.addEventListener('load', (event) => {
+            const settings = Utility.LocalStorageGetSettings('ExportImport');
+            if (settings != null) {
+                this._view.settings = settings;
+            }
+        });
+        
+        // Save settings on page re/unload.
+        window.addEventListener('unload', (event) => {
+            Utility.LocalStorageSetSettings('ExportImport', this._view.settings);
+        });
     }
     
     get view() {

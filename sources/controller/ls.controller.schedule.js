@@ -17,6 +17,19 @@ class ControllerSchedule {
         this._view.registerUpdateHandler(this.handleGetSchedule);
         this._view.registerOptimiseHandler(this.handleOptimise);
         this._view.registerZoomHandler(this.handleZoom);
+
+        // Restore settings on page (re)load.
+        window.addEventListener('load', (event) => {
+            const settings = Utility.LocalStorageGetSettings('Schedule');
+            if (settings != null) {
+                this._view.settings = settings;
+            }
+        });
+        
+        // Save settings on page re/unload.
+        window.addEventListener('unload', (event) => {
+            Utility.LocalStorageSetSettings('Schedule', this._view.settings);
+        });
     }
 
     get view() {

@@ -43,28 +43,56 @@ class ViewExportImport {
         this.setupImportSystemSelectorListener();
     }
     
+    set platformChecked(isChecked) {
+        this.platformCheckbox.checked = isChecked;
+    }
+    
     get platformChecked() {
         return this.platformCheckbox.checked;
+    }
+    
+    set inputsOutputsChecked(isChecked) {
+        this.inputsOutputsCheckbox.checked = isChecked;
     }
     
     get inputsOutputsChecked() {
         return this.inputsOutputsCheckbox.checked;
     }
     
+    set tasksChecked(isChecked) {
+        this.tasksCheckbox.checked = isChecked;
+    }
+    
     get tasksChecked() {
         return this.tasksCheckbox.checked;
+    }
+    
+    set dependenciesChecked(isChecked) {
+        this.dependenciesCheckbox.checked = isChecked;
     }
     
     get dependenciesChecked() {
         return this.dependenciesCheckbox.checked;
     }
     
+    set scheduleChecked(isChecked) {
+        this.scheduleCheckbox.checked = isChecked;
+    }
+    
     get scheduleChecked() {
         return this.scheduleCheckbox.checked;
     }
     
+    set eventChainsChecked(isChecked) {
+        this.eventChainsCheckbox.checked = isChecked;
+    }
+    
     get eventChainsChecked() {
         return this.eventChainsCheckbox.checked;
+    }
+    
+    set constraintsChecked(isChecked) {
+        this.constraintsCheckbox.checked = isChecked;
     }
     
     get constraintsChecked() {
@@ -104,6 +132,56 @@ class ViewExportImport {
     get importer() {
         const element = this.importerSystemDropdown.select('.active');
         return (element.node() != null) ? element.node().text : null;
+    }
+        
+    set settings(settings) {
+        if (settings.hasOwnProperty('platformChecked')) {
+            this.platformChecked = settings.platformChecked;
+        }
+        
+        if (settings.hasOwnProperty('inputsOutputsChecked')) {
+            this.inputsOutputsChecked = settings.inputsOutputsChecked;
+        }
+
+        if (settings.hasOwnProperty('tasksChecked')) {
+            this.tasksChecked = settings.tasksChecked;
+        }
+
+        if (settings.hasOwnProperty('dependenciesChecked')) {
+            this.dependenciesChecked = settings.dependenciesChecked;
+        }
+
+        if (settings.hasOwnProperty('scheduleChecked')) {
+            this.scheduleChecked = settings.scheduleChecked;
+        }
+        
+        if (settings.hasOwnProperty('eventChainsChecked')) {
+            this.eventChainsChecked = settings.eventChainsChecked;
+        }
+
+        if (settings.hasOwnProperty('constraintsChecked')) {
+            this.constraintsChecked = settings.constraintsChecked;
+        }
+        
+        if (settings.hasOwnProperty('selectedImporter')) {
+            const importer = this.importerSystemDropdown.selectAll('a').filter(element => element == settings.selectedImporter);
+            if (!importer.empty()) {
+                importer.dispatch('click');
+            }
+        }
+    }
+    
+    get settings() {
+        return {
+            'platformChecked'      : this.platformChecked,
+            'inputsOutputsChecked' : this.inputsOutputsChecked,
+            'tasksChecked'         : this.tasksChecked,
+            'dependenciesChecked'  : this.dependenciesChecked,
+            'scheduleChecked'      : this.scheduleChecked,
+            'eventChainsChecked'   : this.eventChainsChecked,
+            'constraintsChecked'   : this.constraintsChecked,
+            'selectedImporter'     : this.importer
+        };
     }
     
     

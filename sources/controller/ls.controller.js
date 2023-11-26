@@ -12,7 +12,27 @@ class Controller {
     controllerSchedule = null;
     controllerAnalyse = null;
 
-    constructor() { }
+    constructor() {
+        // Restore navigation settings on page (re)load.
+        window.addEventListener('load', (event) => {
+            const settings = Utility.LocalStorageGetSettings('NavigationTab');
+            if (settings != null) {
+                const navigationTabs = d3.select('#nav-tab').selectAll('button');
+                const tab = navigationTabs.filter(function (d) { return this.textContent == settings.tab; });
+                if (!tab.empty()) {
+                    tab.dispatch('click');
+                }
+            }
+        });
+
+        // Save navigation settings on page re/unload.
+        window.addEventListener('unload', (event) => {
+            const navigationTabs = d3.select('#nav-tab');
+            const tab = navigationTabs.select('.active');
+            const settings = { 'tab': tab.text() };
+            Utility.LocalStorageSetSettings('NavigationTab', settings);
+        });
+    }
     
     toString() {
         return ['Controller contains ...',
