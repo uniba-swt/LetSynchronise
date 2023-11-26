@@ -23,7 +23,6 @@ class ControllerExportImport {
         
         // Restore settings on page (re)load.
         window.addEventListener('load', (event) => {
-            console.log("onload");
             const settings = Utility.LocalStorageGetSettings('ExportImport');
             if (settings != null) {
                 this._view.settings = settings;
@@ -32,7 +31,6 @@ class ControllerExportImport {
         
         // Save settings on page re/unload.
         window.addEventListener('unload', (event) => {
-            console.log("unload");
             Utility.LocalStorageSetSettings('ExportImport', this._view.settings);
         });
     }
