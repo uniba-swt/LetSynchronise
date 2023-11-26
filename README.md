@@ -18,7 +18,7 @@ Original authors:
 
 
 ## Dependencies
-* Web browser that supports [indexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API): System database
+* Web browser that supports [indexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) (system database) and [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) (UI settings)
 * [D3 Data-Driven Documents](https://d3js.org): Charting
 * [Bootstrap](https://getbootstrap.com): User interface and layout
 
@@ -82,6 +82,7 @@ LetSynchronise is based on the model-view-controller architecure and details
 can be found in the [`docs`](docs) folder. The main logic and plugins are programmed
 in JavaScript. The system model and simulated schedule are stored in 
 [IndexeDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API).
+The user's settings are stored in [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage).
 The user interface is styled with [Bootstrap](https://getbootstrap.com).
 The simulated schedules are plotted with [D3](https://d3js.org).
 
