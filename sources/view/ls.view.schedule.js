@@ -209,6 +209,37 @@ class ViewSchedule {
         };
     }
 
+    set settings(settings) {
+        if (settings.hasOwnProperty('makespan')) {
+            this.makespan = settings.makespan;
+        }
+        
+        // Helper function to select a dropdown item.
+        const validateSetting = function(settings, settingName, selectionField, selectionSetter) {
+            if (settings.hasOwnProperty(settingName)) {
+                const selections = d3.select(selectionField).selectAll('option');
+                const selection = selections.filter(function(d) { return this.value == settings[settingName]; });
+                if (!selection.empty()) {
+                    return settings[settingName];
+                }
+            }
+            return null;
+        };
+        
+        this.scheduler = validateSetting(settings, 'selectedScheduler', this.schedulerField);
+        this.executionTiming = validateSetting(settings, 'selectedTiming', this.executionTimingField);
+        this.goal = validateSetting(settings, 'selectedGoal', this.goalField);
+    }
+    
+    get settings() {
+        return {
+            'makespan'          : this.makespan,
+            'selectedScheduler' : this.scheduler,
+            'selectedTiming'    : this.executionTiming,
+            'selectedGoal'      : this.goal
+        };
+    }
+
 
     // -----------------------------------------------------
     // Setup listeners
