@@ -162,6 +162,13 @@ class ViewExportImport {
         if (settings.hasOwnProperty('constraintsChecked')) {
             this.constraintsChecked = settings.constraintsChecked;
         }
+        
+        if (settings.hasOwnProperty('selectedImporter')) {
+            const importer = this.importerSystemDropdown.selectAll('a').filter(element => element == settings.selectedImporter);
+            if (!importer.empty()) {
+                importer.dispatch('click');
+            }
+        }
     }
     
     get settings() {
@@ -172,7 +179,8 @@ class ViewExportImport {
             'dependenciesChecked'  : this.dependenciesChecked,
             'scheduleChecked'      : this.scheduleChecked,
             'eventChainsChecked'   : this.eventChainsChecked,
-            'constraintsChecked'   : this.constraintsChecked
+            'constraintsChecked'   : this.constraintsChecked,
+            'selectedImporter'     : this.importer
         };
     }
     
