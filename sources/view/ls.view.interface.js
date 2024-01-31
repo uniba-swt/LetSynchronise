@@ -30,6 +30,9 @@ class ViewInterface {
         this.systemOutputs = d3.select('#view-system-outputs');
     }
     
+    get ElementIdPrefix() {
+        return 'interface';
+    }
     
     get input() {
         return this.inputField.value;
@@ -64,7 +67,7 @@ class ViewInterface {
     // Setup listeners
     
     setupDeleteInputButtonListener(elementId) {
-        const deleteInputButton = this.root.querySelector(`[id='${elementId}']`);
+        const deleteInputButton = this.root.querySelector(`#${this.ElementIdPrefix}-${elementId}`);
         
         deleteInputButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
@@ -76,7 +79,7 @@ class ViewInterface {
     }
     
     setupDeleteOutputButtonListener(elementId) {
-        const deleteOutputButton = this.root.querySelector(`[id='${elementId}']`);
+        const deleteOutputButton = this.root.querySelector(`#${this.ElementIdPrefix}-${elementId}`);
         
         deleteOutputButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
@@ -152,7 +155,7 @@ class ViewInterface {
             .data(ports)
             .enter()
             .append('li')
-                .html(port => `<span>${port.name}</span> ${Utility.AddDeleteButton(port.name)}`)
+                .html(port => `<span>${port.name}</span> ${Utility.AddDeleteButton(this.ElementIdPrefix, port.name)}`)
             .on('click', function(event, data) {
                 element.node().querySelectorAll('li')
                     .forEach((port) => {

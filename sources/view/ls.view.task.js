@@ -60,6 +60,11 @@ class ViewTask {
         this.setupClearButtonListener();
     }
     
+    
+    get ElementIdPrefix() {
+        return 'task';
+    }
+    
     get name() {
         return this.nameField.value;
     }
@@ -254,7 +259,7 @@ class ViewTask {
     }
 
     setupDeleteButtonListener(elementId) {
-        const deleteButton = this.root.querySelector(`[id='${elementId}']`);
+        const deleteButton = this.root.querySelector(`#${this.ElementIdPrefix}-${elementId}`);
         
         deleteButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
@@ -660,7 +665,7 @@ class ViewTask {
             const taskListItem = this.taskSet.append('li');
             const anchor = this.draw(taskListItem, taskParameters);
             taskListItem.append('span')
-                        .html(dependency => Utility.AddDeleteButton(taskParameters.name));
+                        .html(dependency => Utility.AddDeleteButton(this.ElementIdPrefix, taskParameters.name));
             this.setupDeleteButtonListener(taskParameters.name);
             
             // Click listener

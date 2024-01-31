@@ -32,6 +32,10 @@ class ViewConstraint {
     }
     
     
+    get ElementIdPrefix() {
+        return 'constraint';
+    }
+    
     get name() {
         return this.nameField.value;
     }
@@ -101,7 +105,7 @@ class ViewConstraint {
     // Setup listeners
     
     setupDeleteButtonListener(elementId) {
-        const deleteButton = this.root.querySelector(`#${elementId}`);
+        const deleteButton = this.root.querySelector(`#${this.ElementIdPrefix}-${elementId}`);
         
         deleteButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
@@ -223,7 +227,7 @@ class ViewConstraint {
             .data(constraints)
             .enter()
             .append('li')
-                .html(constraint => `<span><b>${constraint.name}:</b> ${constraint.eventChain} ${this.toRelationSymbol(constraint.relation)} ${constraint.time / Utility.MsToNs}ms</span> ${Utility.AddDeleteButton(constraint.name)}`)
+                .html(constraint => `<span><b>${constraint.name}:</b> ${constraint.eventChain} ${this.toRelationSymbol(constraint.relation)} ${constraint.time / Utility.MsToNs}ms</span> ${Utility.AddDeleteButton(this. ElementIdPrefix, constraint.name)}`)
             .on('click', function(event, data) {
                 thisRef.constraints.node().querySelectorAll('li')
                     .forEach((constraint) => {

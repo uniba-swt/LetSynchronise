@@ -32,6 +32,10 @@ class ViewEventChain {
     }
     
     
+    get ElementIdPrefix() {
+        return 'eventChain';
+    }
+    
     get name() {
         return this.nameField.value;
     }
@@ -73,7 +77,7 @@ class ViewEventChain {
     // Setup listeners
     
     setupDeleteButtonListener(elementId) {
-        const deleteButton = this.root.querySelector(`#${elementId}`);
+        const deleteButton = this.root.querySelector(`#${this.ElementIdPrefix}-${elementId}`);
         
         deleteButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
@@ -201,7 +205,7 @@ class ViewEventChain {
             .append('li')
                 .html(eventChain => {
                     const dependencies = eventChain.segments.join(` ${View.ArrowSeparator} `);
-                    return `<span><b>${eventChain.name}:</b> ${dependencies}</span> ${Utility.AddDeleteButton(eventChain.name)}`;
+                    return `<span><b>${eventChain.name}:</b> ${dependencies}</span> ${Utility.AddDeleteButton(this.ElementIdPrefix, eventChain.name)}`;
                 })
             .on('click', function(event, data) {
                 thisRef.eventChains.node().querySelectorAll('li')

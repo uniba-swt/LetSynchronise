@@ -26,6 +26,10 @@ class ViewCore {
     }
     
     
+    get ElementIdPrefix() {
+        return 'core';
+    }
+    
     get name() {
         return this.nameField.value;
     }
@@ -61,7 +65,7 @@ class ViewCore {
     // Setup listeners
     
     setupDeleteButtonListener(elementId) {
-        const deleteButton = this.root.querySelector(`[id='${elementId}']`);
+        const deleteButton = this.root.querySelector(`#${this.ElementIdPrefix}-${elementId}`);
         
         deleteButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
@@ -141,7 +145,7 @@ class ViewCore {
             .data(cores)
             .enter()
             .append('li')
-                .html(core => `<span><b>${core.name}:</b> ${core.speedup}&times; speedup</span> ${Utility.AddDeleteButton(core.name)}`)
+                .html(core => `<span><b>${core.name}:</b> ${core.speedup}&times; speedup</span> ${Utility.AddDeleteButton(this.ElementIdPrefix, core.name)}`)
             .on('click', function(event, data) {
                 thisRef.cores.node().querySelectorAll('li')
                     .forEach((core) => {

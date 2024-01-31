@@ -28,6 +28,10 @@ class ViewDependency {
     }
     
     
+    get ElementIdPrefix() {
+        return 'dependency';
+    }
+    
     get name() {
         return this.nameField.value;
     }
@@ -81,7 +85,7 @@ class ViewDependency {
     // Setup listeners
     
     setupDeleteButtonListener(elementId) {
-        const deleteButton = this.root.querySelector(`[id='${elementId}']`);
+        const deleteButton = this.root.querySelector(`#${this.ElementIdPrefix}-${elementId}`);
         
         deleteButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
@@ -96,16 +100,15 @@ class ViewDependency {
     // -----------------------------------------------------
     // Registration of handlers from the controller
 
-    registerSubmitHandler(handlerCreateDependency, handlerGetSystemInterface) {
-        this.submitButton.addEventListener('click', async (event) => {
+    registerSubmitHandler(handler) {
+        this.submitButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
             event.preventDefault();
 
             // Validate the destinations.
-            const [systemInputs, systemOutputs] = await handlerGetSystemInterface();
-            if (this.validateTaskDependency(this.dependencyRaw, systemInputs, systemOutputs)) {
+            if (this.validateTaskDependency(this.dependencyRaw)) {
                 // Call the handler.
-                handlerCreateDependency(this.dependencyClean);
+                handler(this.dependencyClean);
             }
         });
     }
@@ -114,21 +117,13 @@ class ViewDependency {
         this.deleteHandler = handler;
     }
     
-    validateTaskDependency(taskDependency, systemInputs, systemOutputs) {
+    validateTaskDependency(taskDependency) {
         if (taskDependency.name == null || taskDependency.name.trim() == '') {
             alert('Task dependency name cannot be blank.');
             return false;
         }
         if (!Utility.ValidName(taskDependency.name.trim())) {
             alert('Task dependency name can only start with an alphabetical or underscore character, and continue with alphanumerical or underscore characters.');
-            return false;
-        }
-        if (systemInputs.includes(taskDependency.name)) {
-            alert(`Task dependency name cannot be the same as a system input.`);
-            return false;
-        }
-        if (systemOutputs.includes(taskDependency.name)) {
-            alert(`Task dependency name cannot be the same as a system output.`);
             return false;
         }
         
@@ -197,7 +192,7 @@ class ViewDependency {
             .data(dependencies)
             .enter()
             .append('li')
-                .html(dependency => `<span><b>${dependency.name}:</b> ${dependency.source} ${View.ArrowSeparator} ${dependency.destination}</span> ${Utility.AddDeleteButton(dependency.name)}`)
+                .html(dependency => `<span><b>${dependency.name}:</b> ${dependency.source} ${View.ArrowSeparator} ${dependency.destination}</span> ${Utility.AddDeleteButton(this.ElementIdPrefix, dependency.name)}`)
             .on('click', function(event, data) {
                 thisRef.taskDependencies.node().querySelectorAll('li')
                     .forEach((dependency) => {

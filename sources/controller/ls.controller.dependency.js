@@ -12,7 +12,7 @@ class ControllerDependency {
         this._view = view;
         
         // Register the handlers when setting the view.
-        this._view.registerSubmitHandler(this.handleCreateDependency, this.handleGetSystemInterface);
+        this._view.registerSubmitHandler(this.handleCreateDependency);
         this._view.registerDeleteHandler(this.handleDeleteDependency);
     }
 
@@ -84,15 +84,6 @@ class ControllerDependency {
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleDeleteDependency = (name) => {
         this.model.deleteDependency(name);
-    }
-    
-    handleGetSystemInterface = async () => {
-        const inputPorts = await this.modelInterface.getAllInputs();
-        const inputNames = inputPorts.map(port => port.name);
-
-        const outputPorts = await this.modelInterface.getAllOutputs();
-        const outputNames = outputPorts.map(port => port.name);
-        return [inputNames, outputNames];
     }
 
     

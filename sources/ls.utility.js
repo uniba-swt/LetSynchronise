@@ -167,8 +167,8 @@ class Utility {
         });
     }
     
-    static AddDeleteButton(id) {
-        return `<button id="${id}" type="submit" class="btn btn-danger btn-sm delete">Delete</button>`;
+    static AddDeleteButton(prefix, id) {
+        return `<button id="${prefix}-${id}" type="submit" class="btn btn-danger btn-sm delete">Delete</button>`;
     }
     
     static CreateAccordionHeader(data, index) {

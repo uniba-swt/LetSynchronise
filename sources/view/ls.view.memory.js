@@ -28,6 +28,10 @@ class ViewMemory {
     }
     
     
+    get ElementIdPrefix() {
+        return 'memory';
+    }
+    
     get name() {
         return this.nameField.value;
     }
@@ -73,7 +77,7 @@ class ViewMemory {
     // Setup listeners
     
     setupDeleteButtonListener(elementId) {
-        const deleteButton = this.root.querySelector(`[id='${elementId}']`);
+        const deleteButton = this.root.querySelector(`#${this.ElementIdPrefix}-${elementId}`);
         
         deleteButton.addEventListener('click', event => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
@@ -158,7 +162,7 @@ class ViewMemory {
             .data(memories)
             .enter()
             .append('li')
-                .html(memory => `<span><b>${memory.name}:</b> ${memory.size} bytes with ${memory.latency / Utility.MsToNs} ms latency</span> ${Utility.AddDeleteButton(memory.name)}`)
+                .html(memory => `<span><b>${memory.name}:</b> ${memory.size} bytes with ${memory.latency / Utility.MsToNs} ms latency</span> ${Utility.AddDeleteButton(this.ElementIdPrefix, memory.name)}`)
             .on('click', function(event, data) {
                 thisRef.memories.node().querySelectorAll('li')
                     .forEach((memory) => {
