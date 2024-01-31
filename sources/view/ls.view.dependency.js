@@ -96,15 +96,16 @@ class ViewDependency {
     // -----------------------------------------------------
     // Registration of handlers from the controller
 
-    registerSubmitHandler(handler) {
-        this.submitButton.addEventListener('click', event => {
+    registerSubmitHandler(handlerCreateDependency, handlerGetSystemInterface) {
+        this.submitButton.addEventListener('click', async (event) => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
             event.preventDefault();
-            
+
             // Validate the destinations.
-            if (this.validateTaskDependency(this.dependencyRaw)) {
+            const [systemInputs, systemOutputs] = await handlerGetSystemInterface();
+            if (this.validateTaskDependency(this.dependencyRaw, systemInputs, systemOutputs)) {
                 // Call the handler.
-                handler(this.dependencyClean);
+                handlerCreateDependency(this.dependencyClean);
             }
         });
     }
@@ -113,14 +114,21 @@ class ViewDependency {
         this.deleteHandler = handler;
     }
     
-    
-    validateTaskDependency(taskDependency) {
+    validateTaskDependency(taskDependency, systemInputs, systemOutputs) {
         if (taskDependency.name == null || taskDependency.name.trim() == '') {
             alert('Task dependency name cannot be blank.');
             return false;
         }
         if (!Utility.ValidName(taskDependency.name.trim())) {
             alert('Task dependency name can only start with an alphabetical or underscore character, and continue with alphanumerical or underscore characters.');
+            return false;
+        }
+        if (systemInputs.includes(taskDependency.name)) {
+            alert(`Task dependency name cannot be the same as a system input.`);
+            return false;
+        }
+        if (systemOutputs.includes(taskDependency.name)) {
+            alert(`Task dependency name cannot be the same as a system output.`);
             return false;
         }
         
