@@ -493,6 +493,129 @@ class ViewTask {
         return true;
     }
     
+    revalidateTaskParameters(taskParameters, core) {
+        if (taskParameters.name == null) {
+            return false;
+        }
+        if (!Utility.ValidName(taskParameters.name.trim())) {
+            return false;
+        }
+
+        if (taskParameters.priority != null
+                && (isNaN(taskParameters.priority) || parseInt(taskParameters.priority) < 0 || `${taskParameters.priority}`.split(".").length != 1)) {
+            return false;
+        }
+
+        if (taskParameters.initialOffset == null || isNaN(taskParameters.initialOffset)) {
+            return false;
+        }
+        const initialOffset = parseFloat(taskParameters.initialOffset);
+        if (initialOffset < 0) {
+            return false;
+        }
+        const initialOffsetNs = initialOffset * Utility.MsToNs;
+        if (!Number.isSafeInteger(initialOffsetNs)) {
+            return false;
+        }
+
+        if (taskParameters.activationOffset == null || isNaN(taskParameters.activationOffset)) {
+            return false;
+        }
+        const activationOffset = parseFloat(taskParameters.activationOffset);
+        if (activationOffset < 0) {
+            return false;
+        }
+        const activationOffsetNs = activationOffset * Utility.MsToNs;
+        if (!Number.isSafeInteger(activationOffsetNs)) {
+            return false;
+        }
+        
+        if (taskParameters.duration == null || isNaN(taskParameters.duration)) {
+            return false;
+        }
+        const duration = parseFloat(taskParameters.duration);
+        if (duration <= 0) {
+            return false;
+        }
+        const durationNs = duration * Utility.MsToNs;
+        if (!Number.isSafeInteger(durationNs)) {
+            return false;
+        }
+        
+        if (taskParameters.period == null || isNaN(taskParameters.period)) {
+            return false;
+        }
+        const period = parseFloat(taskParameters.period);
+        if (period <= 0) {
+            return false;
+        }
+        const periodNs = period * Utility.MsToNs;
+        if (!Number.isSafeInteger(periodNs)) {
+            return false;
+        }
+        if ((activationOffsetNs + durationNs) > periodNs) {
+            return false;
+        }
+        
+        if (taskParameters.inputs == null) {
+            return false;
+        }        
+        if (taskParameters.outputs == null) {
+            return false;
+        }
+
+        if (taskParameters.wcet == null || isNaN(taskParameters.wcet)) {
+            return false;
+        }
+        const wcet = parseFloat(taskParameters.wcet);
+        if (wcet <= 0) {
+            return false;
+        }
+        const wcetNs = wcet * Utility.MsToNs;
+        if (!Number.isSafeInteger(wcetNs)) {
+            return false;
+        }
+        
+        if (taskParameters.acet == null || isNaN(taskParameters.acet)) {
+            return false;
+        }
+        const acet = parseFloat(taskParameters.acet);
+        if (acet <= 0) {
+            return false;
+        }
+        const acetNs = acet * Utility.MsToNs;
+        if (!Number.isSafeInteger(acetNs)) {
+            return false;
+        }
+        
+        if (taskParameters.bcet == null || isNaN(taskParameters.bcet)) {
+            return false;
+        }
+        const bcet = parseFloat(taskParameters.bcet);
+        if (bcet < 0) {
+            return false;
+        }
+        const bcetNs = bcet * Utility.MsToNs;
+        if (!Number.isSafeInteger(bcetNs)) {
+            return false;
+        }
+        
+        if (durationNs < (wcetNs / core.speedup)) {
+            return false;
+        }
+        if (wcetNs < bcetNs) {
+            return false;
+        }
+        if (wcetNs < acetNs || acetNs < bcetNs) {
+            return false;
+        }
+        
+        if (taskParameters.distribution == null) {
+            return false;
+        }
+        
+        return true;
+    }
     
     // -----------------------------------------------------
     // Class methods

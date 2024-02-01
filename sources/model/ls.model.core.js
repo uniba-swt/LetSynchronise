@@ -46,14 +46,17 @@ class ModelCore {
     
     getCore(name) {
         return this.database.getObject(Model.CoreStoreName, name)
-            .catch(error => this.database.getAllObjects(Model.CoreStoreName))
-            .then(result => {
-                let defaultCore = ModelCore.Default;
-                if (result.length != 0) {
-                    const slowestCore = result.reduce((min, current) => (min.speedup < current.speedup) ? min : current);
-                    defaultCore.speedup = slowestCore.speedup;
-                }
-                return defaultCore;
+            .catch(error => {
+                // Return the default core parameters
+                return this.database.getAllObjects(Model.CoreStoreName)
+                    .then(cores => {
+                        let defaultCore = ModelCore.Default;
+                        if (cores.length != 0) {
+                            const slowestCore = cores.reduce((min, current) => (min.speedup < current.speedup) ? min : current);
+                            defaultCore.speedup = slowestCore.speedup;
+                        }
+                        return defaultCore;
+                    });
             });
     }
 

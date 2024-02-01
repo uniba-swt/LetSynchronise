@@ -3,6 +3,8 @@
 class ModelTask {
     updateCoreSelector = null;          // Callback to function in ls.view.task
     updateTasks = null;                 // Callback to function in ls.view.task
+    revalidateTaskParameters = null;    // Callback to function in ls.view.task
+    clearPreview = null;                // Callback to function in ls.view.task
     notifyChanges = null;               // Callback to function in ls.view.schedule
 
     database = null;
@@ -22,6 +24,14 @@ class ModelTask {
 
     registerUpdateTasksCallback(callback) {
         this.updateTasks = callback;
+    }
+    
+    registerRevalidateTaskParametersCallback(callback) {
+        this.revalidateTaskParameters = callback;
+    }
+    
+    registerClearPreviewCallback(callback) {
+        this.clearPreview = callback;
     }
     
     registerNotifyChangesCallback(callback) {
@@ -106,11 +116,21 @@ class ModelTask {
         const allTasks = await this.getAllTasks();
         
         let changedTasks = [];
+        let invalidTasks = [];
         for (const task of allTasks) {
             if (task.core != null && !allCores.includes(task.core)) {
                 task.core = null;
                 changedTasks.push(task);
             }
+            
+            const core = await this.modelCore.getCore(task.core);
+            if (!this.revalidateTaskParameters(task, core)) {
+                invalidTasks.push(task.name);
+            }
+        }
+        
+        if (invalidTasks.length != 0) {
+            alert(`Tasks ${invalidTasks.join(', ')} are no longer valid.`);
         }
         
         return Promise.all(changedTasks.map(task => this.saveChangedTask(task)))
@@ -120,6 +140,7 @@ class ModelTask {
     refreshViews() {
         return Promise.all([this.getAllTasks(), this.modelCore.getAllCores()])
             .then(([tasks, cores]) => this.updateTasks(tasks, cores))
+            .then(result => this.clearPreview())
             .then(result => this.modelCore.getAllCores())
             .then(result => this.updateCoreSelector(result))
             .then(result => this.modelDependency.validate());

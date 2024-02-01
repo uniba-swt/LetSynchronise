@@ -37,6 +37,8 @@ class ControllerTask {
         // Register the handlers when setting the model.
         this._model.registerUpdateCoreSelectorCallback(this.callbackUpdateCoreSelector);
         this._model.registerUpdateTasksCallback(this.callbackUpdateTasks);
+        this._model.registerRevalidateTaskParametersCallback(this.callbackRevalidateTaskParameters);
+        this._model.registerClearPreviewCallback(this.callbackClearPreview);
         this._model.registerNotifyChangesCallback(this.callbackNotifyChanges);
         
         // Hack to populate the View with tasks once the database is ready
@@ -114,6 +116,16 @@ class ControllerTask {
     // Callback for updating the displayed tasks.
     callbackUpdateTasks = (tasks, cores) => {
         this.view.updateTasks(tasks, cores);
+    }
+
+    // Callback for revalidating a task.
+    callbackRevalidateTaskParameters = (taskParameters, core) => {
+        return this.view.revalidateTaskParameters(taskParameters, core);
+    }
+    
+    // Callback for clearing the task preview.
+    callbackClearPreview = () => {
+        return this.view.clearPreview();
     }
 
     // Callback for notifying the schedule view that tasks have changed.
