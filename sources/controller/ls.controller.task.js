@@ -16,6 +16,7 @@ class ControllerTask {
         // Register the handlers when setting the view.
         this._view.registerSubmitHandler(this.handleCreateTask);
         this._view.registerDeleteHandler(this.handleDeleteTask);
+        this._view.registerGetCoreHandler(this.handleGetCore);
     }
     
     get view() {
@@ -95,6 +96,11 @@ class ControllerTask {
     handleDeleteTask = (name) => {
         this.model.deleteTask(name);
     }
+    
+    // Handler for getting the details of a core.
+    handleGetCore = (name) => {
+        return this.modelCore.getCore(name);
+    }
         
     
     // -----------------------------------------------------
@@ -106,8 +112,8 @@ class ControllerTask {
     }
     
     // Callback for updating the displayed tasks.
-    callbackUpdateTasks = (tasks) => {
-        this.view.updateTasks(tasks);
+    callbackUpdateTasks = (tasks, cores) => {
+        this.view.updateTasks(tasks, cores);
     }
 
     // Callback for notifying the schedule view that tasks have changed.

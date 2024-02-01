@@ -118,8 +118,8 @@ class ModelTask {
     }
     
     refreshViews() {
-        return this.getAllTasks()
-            .then(result => this.updateTasks(result))
+        return Promise.all([this.getAllTasks(), this.modelCore.getAllCores()])
+            .then(([tasks, cores]) => this.updateTasks(tasks, cores))
             .then(result => this.modelCore.getAllCores())
             .then(result => this.updateCoreSelector(result))
             .then(result => this.modelDependency.validate());

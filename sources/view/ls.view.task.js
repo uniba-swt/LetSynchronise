@@ -26,6 +26,7 @@ class ViewTask {
     taskSet = null;
 
     deleteHandler = null;
+    getCoreHandler = null;
     
     
     constructor() {
@@ -220,14 +221,15 @@ class ViewTask {
     // Setup listeners
     
     setupPreviewButtonListener() {
-        this.previewButton.addEventListener('click', event => {
+        this.previewButton.addEventListener('click', async (event) => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
             event.preventDefault();
             
-            // Validate the inputs.            
-            if (this.validateTaskParameters(this.taskParametersRaw)) {
+            // Validate the inputs.
+            const core = await this.getCoreHandler(this.taskParametersRaw.core);
+            if (this.validateTaskParameters(this.taskParametersRaw, core)) {
                 // Call the handler.
-                this.updatePreview(this.taskParametersClean);
+                this.updatePreview(this.taskParametersClean, core.speedup);
             }
         });
     }
@@ -275,12 +277,13 @@ class ViewTask {
     // Registration of handlers from the controller
 
     registerSubmitHandler(handler) {
-        this.submitButton.addEventListener('click', event => {
+        this.submitButton.addEventListener('click', async (event) => {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
             event.preventDefault();
             
-            // Validate the inputs.            
-            if (this.validateTaskParameters(this.taskParametersRaw)) {
+            // Validate the inputs.
+            const core = await this.getCoreHandler(this.taskParametersRaw.core);
+            if (this.validateTaskParameters(this.taskParametersRaw, core)) {
                 // Call the handler.
                 handler(this.taskParametersClean);
             }
@@ -291,8 +294,12 @@ class ViewTask {
         this.deleteHandler = handler;
     }
     
+    registerGetCoreHandler(handler) {
+        this.getCoreHandler = handler;
+    }
+    
 
-    validateTaskParameters(taskParameters) {
+    validateTaskParameters(taskParameters, core) {
         if (taskParameters.name == null || taskParameters.name.trim() == '') {
             alert('Task name cannot be blank.');
             return false;
@@ -459,9 +466,14 @@ class ViewTask {
             alert('BCET is unable to be represented with nanosecond precision.');
             return false;
         }
+
+        if (taskParameters.core != null && taskParameters.core.trim() == '') {
+            alert('Core for execution cannot be an empty string.');
+            return false;
+        }
         
-        if (durationNs < wcetNs) {
-            alert('WCET cannot be greater than duration.');
+        if (durationNs < (wcetNs / core.speedup)) {
+            alert(`WCET cannot be greater than duration. \nWCET is ${(wcetNs / Utility.MsToNs) / core.speedup} ms on core ${core.name} with a speedup of ${core.speedup}.`);
             return false;
         }
         if (wcetNs < bcetNs) {
@@ -475,11 +487,6 @@ class ViewTask {
         
         if (taskParameters.distribution == null || taskParameters.distribution.trim() == '') {
             alert('Choose type of execution time distribution.');
-            return false;
-        }
-        
-        if (taskParameters.core != null && taskParameters.core.trim() == '') {
-            alert('Core for execution cannot be an empty string.');
             return false;
         }
         
@@ -520,15 +527,15 @@ class ViewTask {
             .forEach((item) => { item.classList.remove('taskSelected') });
     }
     
-    updatePreview(taskParameters) {
+    updatePreview(taskParameters, speedup) {
         // Delete the existing task preview, if it exists
         this.clearPreview();
         
         // Draw the task preview
-        this.draw(this.taskPreview, taskParameters);
+        this.draw(this.taskPreview, taskParameters, speedup);
     }
 
-    draw(parentElement, taskParameters) {
+    draw(parentElement, taskParameters, speedup) {
         // Create function to scale the data along the x-axis of fixed-length
         const scale =
         d3.scaleLinear()
@@ -584,7 +591,11 @@ class ViewTask {
         textInfo.append('text')
                 .attr('dx', '450px')
                 .attr('dy', '2.6em')
-                .text(`Core: ${taskParameters.core == null ? 'Default' : taskParameters.core}`);
+                .text(`Core: ${taskParameters.core == null ? ModelCore.Default.name : taskParameters.core}`);
+        textInfo.append('text')
+                .attr('dx', '450px')
+                .attr('dy', '3.9em')
+                .text(`Speedup: ${speedup}`);
 
         // -----------------------------
         // Group for graphical information
@@ -602,13 +613,13 @@ class ViewTask {
         graphInfo.append('rect')
                  .attr('x', scale(taskParameters.initialOffset + taskParameters.activationOffset))
                  .attr('y', View.BarHeight - View.ExecutionHeight)
-                 .attr('width', scale(taskParameters.wcet))
+                 .attr('width', scale(taskParameters.wcet / speedup))
                  .attr('height', View.ExecutionHeight)
                  .attr('class', 'wcet');
         graphInfo.append('rect')
                  .attr('x', scale(taskParameters.initialOffset + taskParameters.activationOffset))
                  .attr('y', View.BarHeight - View.ExecutionHeight)
-                 .attr('width', scale(taskParameters.bcet))
+                 .attr('width', scale(taskParameters.bcet / speedup))
                  .attr('height', View.ExecutionHeight)
                  .attr('class', 'bcet');
 
@@ -657,13 +668,19 @@ class ViewTask {
         return anchor;
     }
     
-    updateTasks(taskParametersSet) {
+    updateTasks(taskParametersSet, cores) {
+        const speedups = cores.map(core => core.speedup);
+        const minSpeedup = (speedups.length == 0) ? ModelCore.Default.speedup : Math.min(...speedups);
+        
         // Delete the existing preview of the task set, if it exists
         this.taskSet.selectAll('*').remove();
         
         for (const taskParameters of taskParametersSet) {
+            const core = cores.find(core => core.name == taskParameters.core);
+            const speedup = (core == null) ? minSpeedup : core.speedup;
+
             const taskListItem = this.taskSet.append('li');
-            const anchor = this.draw(taskListItem, taskParameters);
+            const anchor = this.draw(taskListItem, taskParameters, speedup);
             taskListItem.append('span')
                         .html(dependency => Utility.AddDeleteButton(this.ElementIdPrefix, taskParameters.name));
             this.setupDeleteButtonListener(taskParameters.name);

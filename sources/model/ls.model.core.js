@@ -44,6 +44,11 @@ class ModelCore {
             .then(this.notifyChanges());
     }
     
+    getCore(name) {
+        return this.database.getObject(Model.CoreStoreName, name)
+            .catch(error => ModelCore.Default);
+    }
+
     getAllCores() {
         return this.database.getAllObjects(Model.CoreStoreName);
     }
