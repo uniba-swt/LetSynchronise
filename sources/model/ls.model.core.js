@@ -46,7 +46,15 @@ class ModelCore {
     
     getCore(name) {
         return this.database.getObject(Model.CoreStoreName, name)
-            .catch(error => ModelCore.Default);
+            .catch(error => this.database.getAllObjects(Model.CoreStoreName))
+            .then(result => {
+                let defaultCore = ModelCore.Default;
+                if (result.length != 0) {
+                    const slowestCore = result.reduce((min, current) => (min.speedup < current.speedup) ? min : current);
+                    defaultCore.speedup = slowestCore.speedup;
+                }
+                return defaultCore;
+            });
     }
 
     getAllCores() {
