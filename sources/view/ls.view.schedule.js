@@ -333,6 +333,9 @@ class ViewSchedule {
                 && this.validateOptimiserParameters(this.optimiserParametersRaw)) {
                 // Call the handler.
                 handler();
+
+                this.updateButton.classList.remove('btn-danger');
+                this.updateButton.classList.add('btn-primary');
             }
         });
     }

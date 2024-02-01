@@ -20,6 +20,12 @@ class PluginGoalEnd2EndMin {
         const tasks = await system[Model.TaskStoreName];
         const eventChains = await system[Model.EventChainStoreName];
         const constraints = await system[Model.ConstraintStoreName];
+        
+        // For multicore platforms, ensure that all tasks have been assigned to a core.
+        if (!this.ValidTaskCoreAllocations(cores, tasks)) {
+            alert('For heterogeneous platforms (cores with different speedups), all tasks have to be allocated to a core!');
+            return;
+        }
                 
         // Create task dependency graph and assign task priorities for the heuristic.
         const graph = this.CreateTaskDependencyGraph(eventChains, constraints);
@@ -33,6 +39,24 @@ class PluginGoalEnd2EndMin {
         const taskElementSelected = ['tasks'];
         return Plugin.DatabaseContentsDelete(taskElementSelected)
             .then(Plugin.DatabaseContentsSet(system, taskElementSelected));
+    }
+    
+    static ValidTaskCoreAllocations(cores, tasks) {
+        if (cores.length < 2) {
+            return true;
+        }
+
+    	const hasHomogeneousCores = cores.every(core => core.speedup == cores[0].speedup);
+    	if (hasHomogeneousCores) {
+    	    return true;
+    	}
+
+        for (const task of tasks) {
+            if (!task.hasOwnProperty("core") || task.core == null) {
+                return false;
+            }
+        }
+        return true;
     }
     
     static getTaskParameters(name, tasks) {
@@ -290,8 +314,6 @@ class PluginGoalEnd2EndMin {
         const allTasksInstances = await schedule['promiseAllTasksInstances'];
         const schedulingResult = scheduler.Algorithm(cores, allTasksInstances, makespan, [...taskSet]);
         
-        // TODO: Save the core allocation as decided by the scheduler?
-
         return [schedulingResult, allTasksInstances];
     }
     
