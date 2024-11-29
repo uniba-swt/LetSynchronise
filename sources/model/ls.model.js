@@ -2,6 +2,7 @@
 
 class Model {
     _modelExportImport = null;
+    _modelDevice = null;
     _modelCore = null;
     _modelMemory = null;
     _modelInterface = null;
@@ -18,6 +19,7 @@ class Model {
     // -----------------------------------------------------
     // Static constants.
 
+    static get DeviceStoreName()              { return 'DeviceStore'; }
     static get CoreStoreName()                { return 'CoreStore'; }
     static get MemoryStoreName()              { return 'MemoryStore'; }
     static get SystemInputStoreName()         { return 'SystemInputStore'; }
@@ -33,6 +35,7 @@ class Model {
     
     static get ShortStoreNames() {
         return [
+            'devices',
             'cores',
             'memories',
             'inputs',
@@ -54,6 +57,14 @@ class Model {
     
     set modelExportImport(modelExportImport) {
         this._modelExportImport = modelExportImport;
+    }
+
+    get modelDevice() {
+        return this._modelDevice;
+    }
+
+    set modelDevice(modelDevice) {
+        this._modelDevice = modelDevice;
     }
     
     get modelCore() {
@@ -135,6 +146,7 @@ class Model {
     set modelDatabase(modelDatabase) {
         this._modelDatabase = modelDatabase;
         this._modelExportImport.registerModelDatabase(this._modelDatabase);
+        this._modelDevice.registerModelDatabase(this._modelDatabase);
         this._modelCore.registerModelDatabase(this._modelDatabase);
         this._modelMemory.registerModelDatabase(this._modelDatabase);
         this._modelInterface.registerModelDatabase(this._modelDatabase);

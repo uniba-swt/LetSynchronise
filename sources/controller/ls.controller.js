@@ -2,6 +2,7 @@
 
 class Controller {
     controllerExportImport = null;
+    controllerDevice = null;
     controllerCore = null;
     controllerMemory = null;
     controllerInterface = null;
@@ -37,6 +38,7 @@ class Controller {
     toString() {
         return ['Controller contains ...',
                 `  ${this.controllerExportImport}, `,
+                `  ${this.controllerDevice}, `,
                 `  ${this.controllerCore}, `,
                 `  ${this.controllerMemory}, `,
                 `  ${this.controllerInterface}, `,

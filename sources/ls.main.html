@@ -23,6 +23,7 @@
     <!-- <script type="module"> does not work when executed locally -->
     <script src="sources/model/ls.model.js"></script>
     <script src="sources/model/ls.model.exportImport.js"></script>
+    <script src="sources/model/ls.model.device.js"></script>
     <script src="sources/model/ls.model.core.js"></script>
     <script src="sources/model/ls.model.memory.js"></script>
     <script src="sources/model/ls.model.interface.js"></script>
@@ -38,6 +39,7 @@
 
     <script src="sources/view/ls.view.js"></script>
     <script src="sources/view/ls.view.exportImport.js"></script>
+    <script src="sources/view/ls.view.device.js"></script>
     <script src="sources/view/ls.view.core.js"></script>
     <script src="sources/view/ls.view.memory.js"></script>
     <script src="sources/view/ls.view.interface.js"></script>
@@ -50,6 +52,7 @@
 
     <script src="sources/controller/ls.controller.js"></script>
     <script src="sources/controller/ls.controller.exportImport.js"></script>
+    <script src="sources/controller/ls.controller.device.js"></script>
     <script src="sources/controller/ls.controller.core.js"></script>
     <script src="sources/controller/ls.controller.memory.js"></script>
     <script src="sources/controller/ls.controller.interface.js"></script>
@@ -195,6 +198,34 @@
     <div class="tab-content" id="nav-tabContent">
     
         <div class="tab-pane fade" id="nav-platform" role="tabpanel" aria-labelledby="nav-platform-tab">
+
+            <h3>Define or Edit a Device</h3>
+        	
+            <form class="row gx-3 gy-2" id="view-device-define">
+                <div class="col-2">
+                    <div class="input-group">
+                        <span for="view-platform-device-name" class="input-group-text">Name</span>
+                        <input required type="text" class="form-control" id="view-platform-device-name" value="d1"/>
+                    </div>
+                </div>
+
+                <div class="col-2">
+                    <div class="input-group">
+                        <span for="view-platform-device-speedup" class="input-group-text">Speedup</span>
+                        <input required type="text" class="form-control" id="view-platform-device-speedup" value="1"/>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <button id="submitDevice" type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+
+            <div class="m-3"></div>
+
+            <ul id="view-platform-devices"></ul>
+
+            <div class="m-3"></div>
         
             <h3>Define or Edit a Processor Core</h3>
         	

@@ -2,6 +2,7 @@
 
 class View {
     _viewExportImport = null;
+    _viewDevice = null;
     _viewCore = null;
     _viewInterface = null;
     _viewTask = null;
@@ -30,6 +31,10 @@ class View {
     
     set viewExportImport(viewExportImport) {
         this._viewExportImport = viewExportImport;
+    }
+
+    set viewDevice(viewDevice) {
+        this._viewDevice = viewDevice;
     }
     
     set viewCore(viewCore) {
@@ -62,6 +67,10 @@ class View {
     
     get viewExportImport() {
         return this._viewExportImport;
+    }
+
+    get viewDevice() {
+        return this._viewDevice
     }
     
     get viewCore() {

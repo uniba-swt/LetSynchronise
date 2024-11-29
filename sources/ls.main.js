@@ -3,6 +3,7 @@
 // Define the model implementations.
 let model = new Model();
 model.modelExportImport = new ModelExportImport();
+model.modelDevice = new ModelDevice();
 model.modelCore = new ModelCore();
 model.modelMemory = new ModelMemory();
 model.modelInterface = new ModelInterface();
@@ -17,6 +18,7 @@ model.modelDatabase = new ModelDatabase();
 // Define the view implementations.
 let view = new View();
 view.viewExportImport = new ViewExportImport();
+view.viewDevice = new ViewDevice();
 view.viewCore = new ViewCore();
 view.viewMemory = new ViewMemory();
 view.viewInterface = new ViewInterface();
@@ -30,6 +32,7 @@ view.viewAnalyse = new ViewAnalyse();
 // Define the controller implementations.
 let controller = new Controller();
 controller.controllerExportImport = new ControllerExportImport();
+controller.controllerDevice = new ControllerDevice();
 controller.controllerCore = new ControllerCore();
 controller.controllerMemory = new ControllerMemory();
 controller.controllerInterface = new ControllerInterface();
@@ -50,6 +53,9 @@ controller.controllerExportImport.modelTask = model.modelTask;
 controller.controllerExportImport.modelDependency = model.modelDependency;
 controller.controllerExportImport.modelEventChain = model.modelEventChain;
 controller.controllerExportImport.modelConstraint = model.modelConstraint;
+
+controller.controllerDevice.view = view.viewDevice;
+controller.controllerDevice.model = model.modelDevice;
 
 controller.controllerCore.view = view.viewCore;
 controller.controllerCore.viewSchedule = view.viewSchedule;
