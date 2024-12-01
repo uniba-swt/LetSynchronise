@@ -4,6 +4,7 @@ class Controller {
     controllerExportImport = null;
     controllerDevice = null;
     controllerCore = null;
+    controllerNetworkDelay = null;
     controllerMemory = null;
     controllerInterface = null;
     controllerTask = null;
@@ -40,6 +41,7 @@ class Controller {
                 `  ${this.controllerExportImport}, `,
                 `  ${this.controllerDevice}, `,
                 `  ${this.controllerCore}, `,
+                `  ${this.controllerNetworkDelay}, `,
                 `  ${this.controllerMemory}, `,
                 `  ${this.controllerInterface}, `,
                 `  ${this.controllerTask}, `,

@@ -93,7 +93,7 @@ class ControllerDevice {
     
     // Callback for notifying the schedule view that devices have changed.
     callbackNotifyChanges = () => {
-        this.viewSchedule.notifyChanges();
+        // this.viewSchedule.notifyChanges();
     }
     
     toString() {

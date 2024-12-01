@@ -4,6 +4,7 @@ class View {
     _viewExportImport = null;
     _viewDevice = null;
     _viewCore = null;
+    _viewNetworkDelay = null;
     _viewInterface = null;
     _viewTask = null;
     _viewDependency = null;
@@ -40,6 +41,10 @@ class View {
     set viewCore(viewCore) {
         this._viewCore = viewCore;
     }
+
+    set viewNetworkDelay(viewNetworkDelay) {
+        this._viewNetworkDelay = viewNetworkDelay;
+    }
     
     set viewInterface(viewInterface) {
         this._viewInterface = viewInterface;
@@ -75,6 +80,10 @@ class View {
     
     get viewCore() {
         return this._viewCore;
+    }
+
+    get viewNetworkDelay() {
+        return this._viewNetworkDelay;
     }
     
     get viewInterface() {
