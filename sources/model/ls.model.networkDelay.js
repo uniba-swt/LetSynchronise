@@ -2,8 +2,10 @@
 
 class ModelNetworkDelay {
     updateNetworkDelays = null;
+    updateDeviceSelector = null;
 
     database = null;
+    modelDevice = null;
 
     constructor() { }
     
@@ -21,6 +23,14 @@ class ModelNetworkDelay {
     
     registerModelDatabase(database) {
         this.database = database;
+    }
+
+    registerUpdateDeviceSelectorCallback(callback) {
+        this.updateDeviceSelector = callback;
+    }
+
+    registerModelDevice(modelDevice) {
+        this.modelDevice = modelDevice;
     }
     
     // -----------------------------------------------------
@@ -61,7 +71,9 @@ class ModelNetworkDelay {
     
     refreshViews() {
         return this.getAllNetworkDelays()
-            .then(result => this.updateNetworkDelays(result));
+            .then(result => this.updateNetworkDelays(result))
+            .then(devices => this.modelDevice.getAllDevices())
+            .then(devices => this.updateDeviceSelector(devices));
     }
     
     toString() {

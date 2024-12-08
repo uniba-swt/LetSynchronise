@@ -64,9 +64,11 @@ controller.controllerCore.view = view.viewCore;
 controller.controllerCore.viewSchedule = view.viewSchedule;
 controller.controllerCore.model = model.modelCore;
 controller.controllerCore.modelTask = model.modelTask;
+controller.controllerCore.modelDevice = model.modelDevice;
 
 controller.controllerNetworkDelay.view = view.viewNetworkDelay;
 controller.controllerNetworkDelay.model = model.modelNetworkDelay;
+controller.controllerNetworkDelay.modelDevice = model.modelDevice;
 
 controller.controllerMemory.view = view.viewMemory;
 controller.controllerMemory.model = model.modelMemory;
@@ -93,6 +95,7 @@ controller.controllerDependency.modelEventChain = model.modelEventChain;
 controller.controllerSchedule.view = view.viewSchedule;
 controller.controllerSchedule.model = model.modelSchedule;
 controller.controllerSchedule.modelTask = model.modelTask;
+controller.controllerSchedule.modelDevice = model.modelDevice;
 controller.controllerSchedule.modelDependency = model.modelDependency;
 controller.controllerSchedule.modelEventChain = model.modelEventChain;
 controller.controllerSchedule.modelConstraint = model.modelConstraint;

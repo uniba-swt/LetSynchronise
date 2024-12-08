@@ -8,7 +8,6 @@ class ViewDevice {
 
     delayDeviceField = null;
     protocolNameField = null;
-    protocolDelayField = null;
     bcdtField = null;
     acdtField = null;
     wcdtField = null;
@@ -31,7 +30,6 @@ class ViewDevice {
 
         this.delayDeviceField = this.root.querySelector("#view-platform-delay-device");
         this.protocolNameField = this.root.querySelector("#view-platform-delay-protocol-name");
-        this.protocolDelayField = this.root.querySelector("#view-platform-device-protocol-delay");
         this.bcdtField = this.root.querySelector("#view-platform-device-protocol-bcdt");
         this.acdtField = this.root.querySelector("#view-platform-device-protocol-acdt");
         this.wcdtField = this.root.querySelector("#view-platform-device-protocol-wcdt");
@@ -80,14 +78,6 @@ class ViewDevice {
         this.protocolNameField.value = protocolName;
     }
 
-    get protocolDelay() {
-        return this.protocolDelayField.value;
-    }
-
-    set protocolDelay(protocolDelay) {
-        this.protocolDelayField.value = protocolDelay;
-    }
-
     get bcdt() {
         return this.bcdtField.value;
     }
@@ -130,7 +120,6 @@ class ViewDevice {
         return {
             'name': this.delayDevice,
             'protocol': this.protocolName,
-            'delay': this.protocolDelay,
             'bcdt': this.bcdt,
             'acdt': this.acdt,
             'wcdt': this.wcdt
@@ -141,7 +130,6 @@ class ViewDevice {
         return {
             'name': this.delayDevice.trim(),
             'protocol': this.protocolName.trim(),
-            'delay': Math.abs(parseFloat(this.protocolDelay)),
             'bcdt': Math.abs(parseFloat(this.bcdt)),
             'acdt': Math.abs(parseFloat(this.acdt)),
             'wcdt': Math.abs(parseFloat(this.wcdt))
@@ -287,15 +275,19 @@ class ViewDevice {
             this.setupDeleteButtonListener(`${device.name}`);
         }
 
-        const dropdown = this.delayDeviceField;
-        dropdown.innerHTML = "";
-
-        devices.forEach(device => {
-            const option = document.createElement("option");
-            option.value = device.name;
-            option.textContent = device.name;
-            dropdown.appendChild(option);
-        })
+        const dropdown = d3.select(this.delayDeviceField);
+        dropdown.selectAll('*').remove();
+        dropdown.append('option')
+            .property('disabled', true)
+            .property('selected', true)
+            .property('hidden', true)
+            .attr('value', 'null ')
+            .text('Choose ...');
+        
+        devices.sort();
+        devices.forEach(device => 
+            dropdown.append('option').attr('value', `${device.name}`).text(device.name)
+        )
     }
 
     updateDevicesDelay(devices) {

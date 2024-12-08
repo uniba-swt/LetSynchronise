@@ -4,6 +4,7 @@ class ControllerSchedule {
     _view = null;
     _model = null;
     _modelTask = null;
+    _modelDevice = null;
     _modelDependency = null;
     _modelEventChain = null;
     _modelConstraint = null;
@@ -59,6 +60,17 @@ class ControllerSchedule {
     
     get modelTask() {
         return this._modelTask;
+    }
+
+    set modelDevice(modelDevice) {
+        this._modelDevice = modelDevice;
+        
+        // Register the model task with the model.
+        this._model.registerModelDevice(this._modelDevice);
+    }
+    
+    get modelDevice() {
+        return this._modelDevice;
     }
     
     set modelDependency(modelDependency) {
@@ -133,6 +145,10 @@ class ControllerSchedule {
     // Handler for zooming in and out of the schedule.
     handleZoom = () => {
         this.callbackGetSchedule(this.model.getSchedule());
+    }
+
+    handleGetDelay = (source, dest) => {
+        console.log(this._modelDevice);
     }
     
     

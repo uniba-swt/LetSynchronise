@@ -20,6 +20,7 @@ class View {
     static get Width()            { return window.innerWidth - 40; }
     static get SvgPadding()       { return 10; }
     static get TaskHeight()       { return 110; }
+    static get DelayHeight()      { return 110; }
     static get ExecutionHeight()  { return 10; }
     static get BarHeight()        { return 20; }
     static get BarMargin()        { return 1; }

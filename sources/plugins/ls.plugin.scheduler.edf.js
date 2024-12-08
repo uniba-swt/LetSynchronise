@@ -82,6 +82,8 @@ class PluginSchedulerEdf {
                 
                 const taskInstance = task.value[taskInstanceIndices[taskNumber]];
                 const taskInstanceDeadline = taskInstance.letEndTime;
+
+                // console.log("taskInstance: " + taskInstance + " taskInstanceDeadline: " + taskInstanceDeadline);
                 
                 // Use the core defined by the design, otherwise, select an available core.
                 let availableCore = taskInstance.currentCore;

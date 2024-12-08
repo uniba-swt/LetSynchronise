@@ -428,6 +428,8 @@ class ViewSchedule {
             this.updatePrologue(taskParametersSet);
             this.updateHyperPeriod(taskParametersSet);
         }
+
+        // IDEA: Pass in dependenciesSet to drawSchedule function so that I can determine whether an extra space for delay is needed between two task sets?
         
         // Draw new task schedule.
         const {svgElement, scale, taskIndices, coreIndices} = this.drawSchedule(tasksInstances);
@@ -468,9 +470,16 @@ class ViewSchedule {
         // Draw the task instances.
         let taskIndices = { };
         let coreIndices = { };
+        const lastIndex = tasksInstances.length - 1;
+
         for (const [index, taskInstances] of tasksInstances.entries()) {
-            this.drawTaskInstances(taskInstances, svgElement, scale, index);
+            this.drawTaskInstances(taskInstances, svgElement, scale, index, lastIndex);
             taskIndices[taskInstances.name] = index;
+
+            if (tasksInstances[index + 1] && tasksInstances[index].value[0].currentCore.name != tasksInstances[index + 1].value[0].currentCore.name) {
+                // console.log(tasksInstances[index].value[0].currentCore.device)
+                this.drawNetworkDelay(taskInstances, svgElement, scale, index, coreIndices, lastIndex)
+            }
             
             for (const instance of taskInstances.value) {
                 for (const interval of instance.executionIntervals) {
@@ -486,20 +495,101 @@ class ViewSchedule {
         
         // Set the SVG viewport.
         const svgWidth = View.Width;
-        const svgHeight = (tasksInstances.length + 1) * View.TaskHeight + (Object.keys(coreIndices).length - 1) * View.ExecutionHeight;
+        const svgHeight = 
+            (tasksInstances.length + 1) * View.TaskHeight 
+            + (tasksInstances.length - 2) * View.DelayHeight 
+            + (Object.keys(coreIndices).length - 1) * (View.ExecutionHeight) 
+            + ((tasksInstances.length - 1) * View.DelayHeight);
+
         svgElement
             .attr('viewBox', [this.svgOrigin, 0, svgWidth, svgHeight]);
         
         return {svgElement: svgElement, scale: scale, taskIndices: taskIndices, coreIndices: coreIndices};
     }
+
+    drawNetworkDelay(taskInstances, svgElement, scale, index, coreIndices, lastIndex) {
+        if (index == lastIndex) {
+            return;
+        }
     
-    // Draw just the instances of a given task.
-    drawTaskInstances(taskInstances, svgElement, scale, index) {
         const tooltip = this.scheduleTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
 
         const group =
         svgElement.append('g')
-                    .attr('transform', `translate(${View.SvgPadding}, ${View.SvgPadding})`);
+                    .attr('transform', 
+                        `translate(${View.SvgPadding}, ${View.SvgPadding + ((index + 1) * View.DelayHeight)})`);
+
+        
+        // -----------------------------
+        // Group for textual information
+        const textInfo =
+        group.append('g')
+               .attr('transform', `translate(0, ${index * View.TaskHeight + View.SvgPadding})`);
+
+        textInfo.append('text')
+                  .text(`Network Delay`);
+
+        // -----------------------------
+        // Group for graphical information
+        const graphInfo =
+        group.append('g')
+               .attr('transform', `translate(0, ${index * View.TaskHeight + (Object.keys(coreIndices).length - 1) * View.ExecutionHeight + 2.5 * View.SvgPadding})`);
+        
+        // Add horizontal line for the makespan
+        graphInfo.append('line')
+                   .attr('x1', 0)
+                   .attr('x2', scale(1.1 * this.makespan * Utility.MsToNs))
+                   .attr('y1', View.BarHeight + View.BarMargin)
+                   .attr('y2', View.BarHeight + View.BarMargin)
+                   .attr('class', 'period');
+
+        // Add vertical line at the start of the makespan
+        graphInfo.append('line')
+                   .attr('x1', 0)
+                   .attr('x2', 0)
+                   .attr('y1', View.BarHeight + View.TickHeight + View.BarMargin)
+                   .attr('y2', `0`)
+                   .attr('class', 'boundary');
+
+        const instances = taskInstances.value;
+        if (instances.length == 0) {
+            return;
+        }
+
+        for (const instance of instances) {
+            graphInfo.append('rect')
+                        .attr('x', scale(instance.letEndTime + 200000))
+                        .attr('y', View.BarHeight - View.ExecutionHeight)
+                        .attr('width', scale(200000))
+                        .attr('height', View.ExecutionHeight)
+                        .attr('class', 'time')
+            
+        }
+
+    
+        // Create x-axis with correct scale.
+        const xAxis =
+        d3.axisBottom()
+          .scale(scale)
+          .tickFormat(d => d / Utility.MsToNs);
+        
+        graphInfo.append('g')
+                 .attr('transform', `translate(0, ${View.BarHeight + 2 * View.TickHeight})`)
+                 .call(xAxis)
+                 .call(g => g.select('.domain').remove());
+        
+    }
+    
+    
+    // Draw just the instances of a given task.
+    drawTaskInstances(taskInstances, svgElement, scale, index, lastIndex) {
+        const tooltip = this.scheduleTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers
+
+        const group =
+        svgElement.append('g')
+                    .attr('transform', taskInstances.value[index].currentCore ? 
+                        `translate(${View.SvgPadding}, ${View.SvgPadding + (index * View.DelayHeight)})` 
+                        : `translate(${View.SvgPadding}, ${View.SvgPadding})`); 
         
         // -----------------------------
         // Group for textual information
@@ -549,6 +639,7 @@ class ViewSchedule {
                    .attr('y2', View.BarHeight + View.BarMargin)
                    .attr('class', 'period');
 
+
         for (const instance of instances) {
             // Add the task's LET duration
             graphInfo.append('rect')
@@ -579,6 +670,16 @@ class ViewSchedule {
             // Add the task's execution times
             const executionIntervals = instance.executionIntervals.map(interval => Utility.Interval.FromJson(interval));
             for (const interval of executionIntervals) {
+
+                if (index != 0 && interval.startTime > 0) {
+                        graphInfo.append('rect')
+                        .attr('x', scale(interval.startTime - 200000))
+                        .attr('y', View.BarHeight - View.ExecutionHeight)
+                        .attr('width', scale(200000))
+                        .attr('height', View.ExecutionHeight)
+                        .attr('class', 'receiver')
+                }
+
                 graphInfo.append('rect')
                            .attr('x', scale(interval.startTime))
                            .attr('y', View.BarHeight - View.ExecutionHeight)
@@ -599,6 +700,16 @@ class ViewSchedule {
                          .on('mouseout', () => {
                            tooltip.style.visibility = 'hidden';
                          });
+
+                if (index != lastIndex) {
+                    graphInfo.append('rect')
+                    .attr('x', scale(interval.startTime + interval.duration))
+                    .attr('y', View.BarHeight - View.ExecutionHeight)
+                    .attr('width', scale(200000))
+                    .attr('height', View.ExecutionHeight)
+                    .attr('class', 'sender')
+                }
+                
             }
             
             // Add vertical line at the start of the period
@@ -632,7 +743,7 @@ class ViewSchedule {
 
         const group =
         svgElement.append('g')
-                    .attr('transform', `translate(${View.SvgPadding}, ${View.SvgPadding})`);
+                    .attr('transform', `translate(${View.SvgPadding}, ${View.SvgPadding + View.DelayHeight * (index - 1)})`);
         
         // -----------------------------
         // Group for textual information
@@ -719,10 +830,10 @@ class ViewSchedule {
             .append('a')
                 .attr('class', 'dropdown-item active')
                 .text('All');
-    
+
         let svgGroups = [ ];
         for (const dependencies of dependenciesSet) {
-            dependencies.value.forEach(dependency => this.drawDependency(svgElement, scale, taskIndices, dependencies.name, dependency));              
+            dependencies.value.forEach(dependency => this.drawDependency(svgElement, scale, taskIndices, dependencies.name, dependency));
 
             svgGroups.push(...dependencies.value.map(dependency => svgElement.select(`path#${dependencies.name}-${dependency.instance}`)));
                         
@@ -797,6 +908,9 @@ class ViewSchedule {
         const adjustedSendTaskHeight = (sendEvent.task == Model.SystemInterfaceName) ? -0.4 * View.TaskHeight : 0;
         const adjustedReceiveTaskHeight = (receiveEvent.task == Model.SystemInterfaceName) ? 0.4 * View.TaskHeight : 0 ;
         
+        // IDEA: Use the sendEvent & receiveEvent's tasks values (just think about device's network average network delay & each task's core to determine 
+        // whether they need a delay or not I think?) Maybe call network delay rendering function here?
+
         // Change the name and timestamp of the system event
         if (sendEvent.task == Model.SystemInterfaceName) {
             sendEvent.task = receiveEvent.task;

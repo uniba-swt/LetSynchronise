@@ -3,6 +3,7 @@
 class ControllerNetworkDelay {
     _view = null;
     _model = null;
+    _modelDevice = null;
     
     constructor() { }
 
@@ -32,6 +33,8 @@ class ControllerNetworkDelay {
         // Register the handlers when setting the model.
         this._model.registerUpdateNetworkDelaysCallback(this.callbackUpdateNetworkDelays);
 
+        this._model.registerUpdateDeviceSelectorCallback(this.callbackUpdateDeviceSelector)
+
         // Hack to populate the View with cores once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
             this._model.refreshViews();
@@ -40,6 +43,16 @@ class ControllerNetworkDelay {
     
     get model() {
         return this._model;
+    }
+
+    set modelDevice(modelDevice) {
+        this._modelDevice = modelDevice;
+        
+        this._model.registerModelDevice(this._modelDevice);
+    }
+
+    get modelDevice() {
+        return this._modelDevice;
     }
     
     
@@ -65,6 +78,10 @@ class ControllerNetworkDelay {
     // Callback for updating the displayed cores.
     callbackUpdateNetworkDelays = (networkDelays) => {
         this.view.updateNetworkDelays(networkDelays);
+    }
+
+    callbackUpdateDeviceSelector = (devices) => {
+        this.view.updateDeviceSelector(devices);
     }
     
     toString() {

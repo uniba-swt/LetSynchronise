@@ -5,7 +5,9 @@ class ViewNetworkDelay {
     
     sourceField = null;
     destField = null;
-    delayField = null;
+    bcdtField = null;
+    acdtField = null;
+    wcdtField = null;
 
     networkDelays = null;
     
@@ -20,7 +22,9 @@ class ViewNetworkDelay {
         // Define or edit a core
         this.sourceField = this.root.querySelector('#view-platform-networkDelay-source');
         this.destField = this.root.querySelector('#view-platform-networkDelay-dest');
-        this.delayField = this.root.querySelector('#view-platform-networkDelay-delay');
+        this.bcdtField = this.root.querySelector('#view-platform-networkDelay-bcdt');
+        this.acdtField = this.root.querySelector('#view-platform-networkDelay-bcdt');
+        this.wcdtField = this.root.querySelector('#view-platform-networkDelay-bcdt');
         
         this.submitButton = this.root.querySelector('#submitNetworkDelay');
 
@@ -48,19 +52,37 @@ class ViewNetworkDelay {
         this.destField.value = dest;
     }
 
-    get delay() {
-        return this.delayField.value;
+    get bcdt() {
+        return this.bcdtField.value;
     }
 
-    set delay(delay) {
-        this.delayField.value = delay;
+    set bcdt(bcdt) {
+        this.bcdtField.value = bcdt;
+    }
+
+    get acdt() {
+        return this.acdtField.value;
+    }
+
+    set acdt(acdt) {
+        this.acdtField.value = acdt;
+    }
+
+    get wcdt() {
+        return this.wcdtField.value;
+    }
+
+    set wcdt(wcdt) {
+        this.wcdtField.value = wcdt;
     }
     
     get networkDelayRow() {
         return {
             'source': this.source,
             'dest': this.dest,
-            'delay': this.delay
+            'bcdt': this.bcdt,
+            'acdt': this.acdt,
+            'wcdt': this.wcdt
         };
     }
     
@@ -68,7 +90,9 @@ class ViewNetworkDelay {
         return {
             'source': this.source,
             'dest': this.dest,
-            'delay': Math.abs(parseFloat(this.delay))
+            'bcdt': Math.abs(parseFloat(this.bcdt)),
+            'acdt': Math.abs(parseFloat(this.acdt)),
+            'wcdt': Math.abs(parseFloat(this.wcdt))
         };
     }
     
@@ -120,6 +144,8 @@ class ViewNetworkDelay {
             alert('Network delay has to be a decimal number.');
             return false;
         }
+
+        //TODO: fix
         const speedup = parseFloat(networkDelay.delay);
         if (speedup < 0) {
             alert('Network delay cannot be negative.');
@@ -157,6 +183,31 @@ class ViewNetworkDelay {
         for (const networkDelay of networkDelays) {
             this.setupDeleteButtonListener(`${networkDelay.id}`);
         }
+    }
+
+    updateDeviceSelector(devices) {
+        devices.sort();
+
+        let source = d3.select(this.sourceField);
+        let dest = d3.select(this.destField);
+
+        this.deviceOptions(source, devices);
+        this.deviceOptions(dest, devices);
+    }
+
+    deviceOptions(parentElement, devices) {
+        parentElement.selectAll('*').remove();
+        parentElement.append('option')
+            .property('selected', true)
+            .attr('value', 'Default')
+            .text('');
+        
+        devices.forEach(device => 
+            parentElement
+                .append('option')
+                .attr('value', device.name)
+                .text(device.name)
+        )
     }
     
     toString() {

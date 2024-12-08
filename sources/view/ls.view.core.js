@@ -53,14 +53,14 @@ class ViewCore {
     }
     
     set device(device) {
-        this.deviceField.value ? this.deviceField.value = device : this.deviceField.value = 'n/a';
+        device ? this.deviceField.value = device : this.deviceField.value = 'n/a';
     }
     
     get coreRaw() {
         return {
             'name': this.name,
             'speedup': this.speedup,
-            'device': this.device
+            'device': this.device,
         };
     }
     
@@ -68,8 +68,27 @@ class ViewCore {
         return {
             'name': this.name.trim(),
             'speedup': Math.abs(parseFloat(this.speedup)),
-            'device': this.device.trim()
+            'device': this.device.trim(),
         };
+    }
+
+    updateDeviceSelector(devices) {
+        devices.sort();
+
+        let deviceDropdown = d3.select(this.deviceField);
+
+        deviceDropdown.selectAll('*').remove();
+        deviceDropdown.append('option')
+            .property('selected', true)
+            .attr('value', 'Default')
+            .text('Default');
+        
+        devices.forEach(device => 
+            deviceDropdown
+                .append('option')
+                .attr('value', device.name)
+                .text(device.name)
+        )
     }
     
     
@@ -157,7 +176,9 @@ class ViewCore {
             .data(cores)
             .enter()
             .append('li')
-                .html(core => `<span><b>${core.name}:</b> ${core.speedup}&times; speedup (${core.device})</span> ${Utility.AddDeleteButton(this.ElementIdPrefix, core.name)}`)
+                .html(core => `<span><b>${core.name}:</b> ${core.speedup}&times; speedup 
+                    ${core.device == 'n/a' ? '' : `(${core.device})`}</span> 
+                    ${Utility.AddDeleteButton(this.ElementIdPrefix, core.name)}`)
             .on('click', function(event, data) {
                 thisRef.cores.node().querySelectorAll('li')
                     .forEach((core) => {

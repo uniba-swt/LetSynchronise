@@ -4,6 +4,7 @@ class ModelSchedule {
     database = null;
 
     modelTask = null;
+    modelDevice = null;
     modelDependency = null;
     modelEventChain = null;
     modelConstraint = null;
@@ -20,6 +21,10 @@ class ModelSchedule {
     
     registerModelTask(modelTask) {
         this.modelTask = modelTask;
+    }
+    
+    registerModelDevice(modelDevice) {
+        this.modelDevice = modelDevice;
     }
 
     registerModelDependency(modelDependency) {
@@ -62,11 +67,19 @@ class ModelSchedule {
     }
     
     // Create all instances of a task within the makespan.
-    createTaskInstances(parameters, makespan, executionTiming) {
+    createTaskInstances(parameters, makespan, executionTiming, index, previousTask) {
         let instances = [ ];
         for (let timePoint = parameters.initialOffset; timePoint < makespan; timePoint += parameters.period) {
             instances.push(this.createTaskInstance(instances.length, parameters, timePoint, executionTiming));
         }
+
+        // if (index == 0) {
+        //     for (let timePoint = parameters.initialOffset; timePoint < makespan; timePoint += parameters.period) {
+        //         // instances.push(this.createTaskInstance(instances.length, parameters, timePoint, executionTiming));
+        //     }
+        // } else {
+        //     console.log(modelDevice)
+        // }
 
         return this.database.putObject(Model.TaskInstancesStoreName, {
             'name': parameters.name, 
@@ -78,7 +91,11 @@ class ModelSchedule {
     // Create all instances of all tasks within the makespan.
     createAllTaskInstances(makespan, executionTiming) {
         const promiseAllTasksInstances = this.modelTask.getAllTasks()
-            .then(tasks => Promise.all(tasks.map(task => this.createTaskInstances(task, makespan, executionTiming))))
+            .then(tasks => 
+                Promise.all(tasks.map((task, index) => {
+                    const previousTask = tasks[index - 1]
+                    this.createTaskInstances(task, makespan, executionTiming, index, previousTask)
+                })))
             .then(result => this.database.getAllObjects(Model.TaskInstancesStoreName));
         return promiseAllTasksInstances;
     }
