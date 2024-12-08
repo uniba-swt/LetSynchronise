@@ -6,7 +6,7 @@ class ControllerExportImport {
     _modelCore = null;
     _modelMemory = null;
     _modelInterface = null;
-    _modelTask = null;
+    _modelEntity = null;
     _modelDependency = null;
     _modelEventChain = null;
     _modelConstraint = null;
@@ -80,15 +80,15 @@ class ControllerExportImport {
         return this._modelInterface;
     }
     
-    set modelTask(modelTask) {
-        this._modelTask = modelTask;
+    set modelEntity(modelEntity) {
+        this._modelEntity = modelEntity;
         
         // Register the model task with the model.
-        this._model.registerModelTask(this._modelTask);
+        this._model.registerModelEntity(this._modelEntity);
     }
     
-    get modelTask() {
-        return this._modelTask;
+    get modelEntity() {
+        return this._modelEntity;
     }
     
     set modelDependency(modelDependency) {

@@ -18,7 +18,7 @@ class PluginSchedulerEdf {
         
         const scheduleElementSelected = ['schedule'];
         const schedule = await Plugin.DatabaseContentsGet(scheduleElementSelected);
-        const tasksInstances = await schedule[Model.TaskInstancesStoreName];
+        const tasksInstances = await schedule[Model.EntityInstancesStoreName];
 
         const coreElementSelected = ['cores'];
         const cores = (await Plugin.DatabaseContentsGet(coreElementSelected))[Model.CoreStoreName];

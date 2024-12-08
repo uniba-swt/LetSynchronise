@@ -12,7 +12,7 @@ class PluginGoalRandom {
     static async Result(scheduler, makespan) {
         const taskElementSelected = ['tasks'];
         const system = await Plugin.DatabaseContentsGet(taskElementSelected);
-        let tasks = system[Model.TaskStoreName];
+        let tasks = system[Model.EntityStoreName];
         
         this.Algorithm(tasks);
         

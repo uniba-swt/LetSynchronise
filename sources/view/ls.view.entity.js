@@ -1,6 +1,6 @@
 'use strict';
 
-class ViewTask {
+class ViewEntity {
     root = null;
     
     nameField = null;
@@ -63,7 +63,7 @@ class ViewTask {
     
     
     get ElementIdPrefix() {
-        return 'task';
+        return 'entity';
     }
     
     get name() {
@@ -840,6 +840,6 @@ class ViewTask {
     }
     
     toString() {
-        return "ViewTask";
+        return "ViewEntity";
     }
 }

@@ -5,7 +5,7 @@ class Model {
     _modelCore = null;
     _modelMemory = null;
     _modelInterface = null;
-    _modelTask = null;
+    _modelEntity = null;
     _modelDependency = null;
     _modelSchedule = null;
     _modelEventChain = null;
@@ -22,8 +22,8 @@ class Model {
     static get MemoryStoreName()              { return 'MemoryStore'; }
     static get SystemInputStoreName()         { return 'SystemInputStore'; }
     static get SystemOutputStoreName()        { return 'SystemOutputStore'; }
-    static get TaskStoreName()                { return 'TaskStore'; }
-    static get TaskInstancesStoreName()       { return 'TaskInstancesStore'; }
+    static get EntityStoreName()                { return 'EntityStore'; }
+    static get EntityInstancesStoreName()       { return 'EntityInstancesStore'; }
     static get DependencyStoreName()          { return 'DependencyStore'; }
     static get DependencyInstancesStoreName() { return 'DependencyInstancesStore'; }
     static get EventChainStoreName()          { return 'EventChainStore'; }
@@ -80,12 +80,12 @@ class Model {
         this._modelInterface = modelInterface;
     }
     
-    get modelTask() {
-        return this._modelTask;
+    get modelEntity() {
+        return this._modelEntity;
     }
     
-    set modelTask(modelTask) {
-        this._modelTask = modelTask;
+    set modelEntity(modelEntity) {
+        this._modelEntity = modelEntity;
     }
     
     get modelDependency() {
@@ -138,7 +138,7 @@ class Model {
         this._modelCore.registerModelDatabase(this._modelDatabase);
         this._modelMemory.registerModelDatabase(this._modelDatabase);
         this._modelInterface.registerModelDatabase(this._modelDatabase);
-        this._modelTask.registerModelDatabase(this._modelDatabase);
+        this._modelEntity.registerModelDatabase(this._modelDatabase);
         this._modelSchedule.registerModelDatabase(this._modelDatabase);
         this._modelDependency.registerModelDatabase(this._modelDatabase);
         this._modelEventChain.registerModelDatabase(this._modelDatabase);

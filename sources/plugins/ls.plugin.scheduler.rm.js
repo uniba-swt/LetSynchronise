@@ -18,7 +18,7 @@ class PluginSchedulerRm {
         
         const scheduleElementSelected = ['schedule'];
         const schedule = await Plugin.DatabaseContentsGet(scheduleElementSelected);
-        const tasks = await schedule[Model.TaskInstancesStoreName];
+        const tasks = await schedule[Model.EntityInstancesStoreName];
 
         const coreElementSelected = ['cores'];
         const cores = (await Plugin.DatabaseContentsGet(coreElementSelected))[Model.CoreStoreName];

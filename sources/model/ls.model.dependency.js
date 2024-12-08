@@ -5,7 +5,7 @@ class ModelDependency {
     updateDependencySelectors = null;      // Callback to function in ls.view.dependency
     
     database = null;
-    modelTask = null;
+    modelEntity = null;
     modelInterface = null;
     modelEventChain = null;
 
@@ -31,8 +31,8 @@ class ModelDependency {
         this.database = database;
     }
     
-    registerModelTask(modelTask) {
-        this.modelTask = modelTask;
+    registerModelEntity(modelEntity) {
+        this.modelEntity = modelEntity;
     }
     
     registerModelInterface(modelInterface) {
@@ -94,7 +94,7 @@ class ModelDependency {
         // Get all the available inputs and outputs.
         let allSources = { };
         let allDestinations = { };
-        (await this.modelTask.getAllTasks()).map(task => {
+        (await this.modelEntity.getAllTasks()).map(task => {
             allSources[task.name] = task.outputs;
             allDestinations[task.name] = task.inputs;
         });
@@ -122,7 +122,7 @@ class ModelDependency {
     refreshViews() {
         return this.getAllDependencies()
             .then(result => this.updateDependencies(result))
-            .then(result => Promise.all([this.modelTask.getAllTasks(), this.modelInterface.getAllInputs(), this.modelInterface.getAllOutputs()]))
+            .then(result => Promise.all([this.modelEntity.getAllTasks(), this.modelInterface.getAllInputs(), this.modelInterface.getAllOutputs()]))
             .then(([tasks, systemInputs, systemOutputs]) => this.updateDependencySelectors(tasks, systemInputs, systemOutputs))
             .then(result => this.modelEventChain.validate());
     }

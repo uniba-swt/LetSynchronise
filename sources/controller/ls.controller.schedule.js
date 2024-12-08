@@ -3,7 +3,7 @@
 class ControllerSchedule {
     _view = null;
     _model = null;
-    _modelTask = null;
+    _modelEntity = null;
     _modelDependency = null;
     _modelEventChain = null;
     _modelConstraint = null;
@@ -50,15 +50,15 @@ class ControllerSchedule {
         return this._model;
     }
     
-    set modelTask(modelTask) {
-        this._modelTask = modelTask;
+    set modelEntity(modelEntity) {
+        this._modelEntity = modelEntity;
         
         // Register the model task with the model.
-        this._model.registerModelTask(this._modelTask);
+        this._model.registerModelEntity(this._modelEntity);
     }
     
-    get modelTask() {
-        return this._modelTask;
+    get modelEntity() {
+        return this._modelEntity;
     }
     
     set modelDependency(modelDependency) {
@@ -126,7 +126,7 @@ class ControllerSchedule {
         const goal = this.view.optimiserParametersClean.goal;
         goal.Result(scheduler, makespan)
             .then(result => scheduler.Result(makespan, executionTiming))
-            .then(result => this.modelTask.refreshViews())
+            .then(result => this.modelEntity.refreshViews())
             .then(result => this.callbackGetSchedule(this.model.getSchedule()));
     }
     

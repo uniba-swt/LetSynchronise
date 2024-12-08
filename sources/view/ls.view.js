@@ -4,7 +4,7 @@ class View {
     _viewExportImport = null;
     _viewCore = null;
     _viewInterface = null;
-    _viewTask = null;
+    _viewEntity = null;
     _viewDependency = null;
     _viewEventChain = null;
     _viewConstraint = null;
@@ -17,7 +17,7 @@ class View {
     
     static get Width()            { return window.innerWidth - 40; }
     static get SvgPadding()       { return 10; }
-    static get TaskHeight()       { return 110; }
+    static get EntityHeight()       { return 110; }
     static get ExecutionHeight()  { return 10; }
     static get BarHeight()        { return 20; }
     static get BarMargin()        { return 1; }
@@ -40,8 +40,8 @@ class View {
         this._viewInterface = viewInterface;
     }
 
-    set viewTask(viewTask) {
-        this._viewTask = viewTask;
+    set viewEntity(viewEntity) {
+        this._viewEntity = viewEntity;
     }
 
     set viewDependency(viewDependency) {
@@ -72,8 +72,8 @@ class View {
         return this._viewInterface;
     }
     
-    get viewTask() {
-        return this._viewTask;
+    get viewEntity() {
+        return this._viewEntity;
     }
     
     get viewDependency() {

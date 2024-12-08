@@ -3,7 +3,7 @@
 class ModelSchedule {    
     database = null;
 
-    modelTask = null;
+    modelEntity = null;
     modelDependency = null;
     modelEventChain = null;
     modelConstraint = null;
@@ -18,8 +18,8 @@ class ModelSchedule {
         this.database = database;
     }
     
-    registerModelTask(modelTask) {
-        this.modelTask = modelTask;
+    registerModelEntity(modelEntity) {
+        this.modelEntity = modelEntity;
     }
 
     registerModelDependency(modelDependency) {
@@ -68,7 +68,7 @@ class ModelSchedule {
             instances.push(this.createTaskInstance(instances.length, parameters, timePoint, executionTiming));
         }
 
-        return this.database.putObject(Model.TaskInstancesStoreName, {
+        return this.database.putObject(Model.EntityInstancesStoreName, {
             'name': parameters.name, 
             'initialOffset': parameters.initialOffset,
             'value': instances
@@ -77,9 +77,9 @@ class ModelSchedule {
     
     // Create all instances of all tasks within the makespan.
     createAllTaskInstances(makespan, executionTiming) {
-        const promiseAllTasksInstances = this.modelTask.getAllTasks()
+        const promiseAllTasksInstances = this.modelEntity.getAllTasks()
             .then(tasks => Promise.all(tasks.map(task => this.createTaskInstances(task, makespan, executionTiming))))
-            .then(result => this.database.getAllObjects(Model.TaskInstancesStoreName));
+            .then(result => this.database.getAllObjects(Model.EntityInstancesStoreName));
         return promiseAllTasksInstances;
     }
     
@@ -127,8 +127,8 @@ class ModelSchedule {
         // Get all instances of the source and destination tasks
         // If one of the tasks is Model.SystemInterfaceName, we duplicate the other task
         return Promise.all([
-            this.database.getObject(Model.TaskInstancesStoreName, dependency.source.task), 
-            this.database.getObject(Model.TaskInstancesStoreName, dependency.destination.task)
+            this.database.getObject(Model.EntityInstancesStoreName, dependency.source.task), 
+            this.database.getObject(Model.EntityInstancesStoreName, dependency.destination.task)
         ]).then(([sourceTaskInstances, destinationTaskInstances]) => {            
             let instances = [];
             if (dependency.source.task == Model.SystemInterfaceName) {
@@ -304,8 +304,8 @@ class ModelSchedule {
     // Get task schedule for given makespan.
     getSchedule() {
         return {
-            'promiseAllTasks': this.modelTask.getAllTasks(),
-            'promiseAllTasksInstances': this.database.getAllObjects(Model.TaskInstancesStoreName),
+            'promiseAllTasks': this.modelEntity.getAllTasks(),
+            'promiseAllTasksInstances': this.database.getAllObjects(Model.EntityInstancesStoreName),
             'promiseAllDependenciesInstances': this.modelDependency.getAllDependencyInstances(),
             'promiseAllEventChainInstances': this.modelEventChain.getAllEventChainsInstances()
         };

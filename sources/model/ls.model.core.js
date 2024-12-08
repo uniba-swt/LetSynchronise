@@ -5,7 +5,7 @@ class ModelCore {
     notifyChanges = null;               // Callback to function in ls.view.schedule
 
     database = null;
-    modeltask = null;
+    modelEntity = null;
 
     constructor() { }
     
@@ -30,8 +30,8 @@ class ModelCore {
         this.database = database;
     }
 
-    registerModelTask(modelTask) {
-        this.modelTask = modelTask;
+    registerModelEntity(modelEntity) {
+        this.modelEntity = modelEntity;
     }
     
     // -----------------------------------------------------
@@ -72,7 +72,7 @@ class ModelCore {
     refreshViews() {
         return this.getAllCores()
             .then(result => this.updateCores(result))
-            .then(result => this.modelTask.validate());
+            .then(result => this.modelEntity.validate());
     }
     
     toString() {

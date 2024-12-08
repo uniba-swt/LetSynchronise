@@ -1,6 +1,6 @@
 'use strict';
 
-class ControllerTask {
+class ControllerEntity {
     _view = null;
     _viewSchedule = null;
     _model = null;
@@ -135,6 +135,6 @@ class ControllerTask {
     
     
     toString() {
-        return `ControllerTask with ${this.view} and ${this.model}`;
+        return `ControllerEntity with ${this.view} and ${this.model}`;
     }
 }

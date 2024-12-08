@@ -17,7 +17,7 @@ class PluginGoalEnd2EndMin {
         const systemElementSelected = ['cores', 'tasks', 'eventChains', 'constraints'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
         const cores = await system[Model.CoreStoreName];
-        const tasks = await system[Model.TaskStoreName];
+        const tasks = await system[Model.EntityStoreName];
         const eventChains = await system[Model.EventChainStoreName];
         const constraints = await system[Model.ConstraintStoreName];
         

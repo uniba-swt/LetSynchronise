@@ -5,7 +5,7 @@ class Controller {
     controllerCore = null;
     controllerMemory = null;
     controllerInterface = null;
-    controllerTask = null;
+    controllerEntity = null;
     controllerDependency = null;
     controllerEventChain = null;
     controllerConstraint = null;
@@ -40,7 +40,7 @@ class Controller {
                 `  ${this.controllerCore}, `,
                 `  ${this.controllerMemory}, `,
                 `  ${this.controllerInterface}, `,
-                `  ${this.controllerTask}, `,
+                `  ${this.controllerEntity}, `,
                 `  ${this.controllerDependency}, `,
                 `  ${this.controllerEventChain},`,
                 `  ${this.controllerConstraint},`,

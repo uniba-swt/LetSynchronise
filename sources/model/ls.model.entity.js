@@ -1,6 +1,6 @@
 'use strict';
 
-class ModelTask {
+class ModelEntity {
     updateCoreSelector = null;          // Callback to function in ls.view.task
     updateTasks = null;                 // Callback to function in ls.view.task
     revalidateTaskParameters = null;    // Callback to function in ls.view.task
@@ -85,28 +85,28 @@ class ModelTask {
         }        
 
         // Store task parameters into Database
-        return this.database.putObject(Model.TaskStoreName, parameters)
+        return this.database.putObject(Model.EntityStoreName, parameters)
             .then(this.refreshViews())
             .then(this.notifyChanges());
     }
     
     // Saves the changes to an existing task, without forcing the view to refresh
     saveChangedTask(task) {
-        return this.database.putObject(Model.TaskStoreName, task)
+        return this.database.putObject(Model.EntityStoreName, task)
             .then(this.notifyChanges());
     }
     
     getAllTasks() {
-        return this.database.getAllObjects(Model.TaskStoreName);
+        return this.database.getAllObjects(Model.EntityStoreName);
     }
     
     getAllTaskInstances() {
-        return this.database.getAllObjects(Model.TaskInstancesStoreName);
+        return this.database.getAllObjects(Model.EntityInstancesStoreName);
     }
 
     deleteTask(name) {
-        return this.database.deleteObject(Model.TaskStoreName, name)
-            .then(this.database.deleteObject(Model.TaskInstancesStoreName, name))
+        return this.database.deleteObject(Model.EntityStoreName, name)
+            .then(this.database.deleteObject(Model.EntityInstancesStoreName, name))
             .then(result => this.refreshViews());
     }
     
@@ -147,7 +147,7 @@ class ModelTask {
     }
     
     toString() {
-        return "ModelTask";
+        return "ModelEntity";
     }
     
 }

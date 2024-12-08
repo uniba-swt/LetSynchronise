@@ -486,7 +486,7 @@ class ViewSchedule {
         
         // Set the SVG viewport.
         const svgWidth = View.Width;
-        const svgHeight = (tasksInstances.length + 1) * View.TaskHeight + (Object.keys(coreIndices).length - 1) * View.ExecutionHeight;
+        const svgHeight = (tasksInstances.length + 1) * View.EntityHeight + (Object.keys(coreIndices).length - 1) * View.ExecutionHeight;
         svgElement
             .attr('viewBox', [this.svgOrigin, 0, svgWidth, svgHeight]);
         
@@ -505,7 +505,7 @@ class ViewSchedule {
         // Group for textual information
         const textInfo =
         group.append('g')
-               .attr('transform', `translate(0, ${index * View.TaskHeight + View.SvgPadding})`);
+               .attr('transform', `translate(0, ${index * View.EntityHeight + View.SvgPadding})`);
 
         // Add the task's name, inputs, and outputs
         textInfo.append('text')
@@ -515,7 +515,7 @@ class ViewSchedule {
         // Group for graphical information
         const graphInfo =
         group.append('g')
-               .attr('transform', `translate(0, ${index * View.TaskHeight + 2.5 * View.SvgPadding})`);
+               .attr('transform', `translate(0, ${index * View.EntityHeight + 2.5 * View.SvgPadding})`);
         
         const instances = taskInstances.value;
         if (instances.length == 0) {
@@ -638,7 +638,7 @@ class ViewSchedule {
         // Group for textual information
         const textInfo =
         group.append('g')
-               .attr('transform', `translate(0, ${index * View.TaskHeight + View.SvgPadding})`);
+               .attr('transform', `translate(0, ${index * View.EntityHeight + View.SvgPadding})`);
 
         textInfo.append('text')
                   .text(`System load`);
@@ -647,7 +647,7 @@ class ViewSchedule {
         // Group for graphical information
         const graphInfo =
         group.append('g')
-               .attr('transform', `translate(0, ${index * View.TaskHeight + (Object.keys(coreIndices).length - 1) * View.ExecutionHeight + 2.5 * View.SvgPadding})`);
+               .attr('transform', `translate(0, ${index * View.EntityHeight + (Object.keys(coreIndices).length - 1) * View.ExecutionHeight + 2.5 * View.SvgPadding})`);
         
         // Add horizontal line for the makespan
         graphInfo.append('line')
@@ -794,8 +794,8 @@ class ViewSchedule {
         
         // Create dangling arrows if one of the tasks is Model.SystemInterfaceName
         // Need an additional y-offset
-        const adjustedSendTaskHeight = (sendEvent.task == Model.SystemInterfaceName) ? -0.4 * View.TaskHeight : 0;
-        const adjustedReceiveTaskHeight = (receiveEvent.task == Model.SystemInterfaceName) ? 0.4 * View.TaskHeight : 0 ;
+        const adjustedSendEntityHeight = (sendEvent.task == Model.SystemInterfaceName) ? -0.4 * View.EntityHeight : 0;
+        const adjustedReceiveEntityHeight = (receiveEvent.task == Model.SystemInterfaceName) ? 0.4 * View.EntityHeight : 0 ;
         
         // Change the name and timestamp of the system event
         if (sendEvent.task == Model.SystemInterfaceName) {
@@ -812,10 +812,10 @@ class ViewSchedule {
         
         // Create the arrow
         const points = [
-            { x: sendEvent.timestamp,                y: yOffset + taskIndices[sendEvent.task] * View.TaskHeight + adjustedSendTaskHeight },
-            { x: sendEvent.timestamp + xOffset,      y: yOffset + taskIndices[sendEvent.task] * View.TaskHeight + adjustedSendTaskHeight },
-            { x: receiveEvent.timestamp - xOffset,   y: yOffset + taskIndices[receiveEvent.task] * View.TaskHeight + adjustedReceiveTaskHeight },
-            { x: receiveEvent.timestamp,             y: yOffset + taskIndices[receiveEvent.task] * View.TaskHeight + adjustedReceiveTaskHeight }
+            { x: sendEvent.timestamp,                y: yOffset + taskIndices[sendEvent.task] * View.EntityHeight + adjustedSendEntityHeight },
+            { x: sendEvent.timestamp + xOffset,      y: yOffset + taskIndices[sendEvent.task] * View.EntityHeight + adjustedSendEntityHeight },
+            { x: receiveEvent.timestamp - xOffset,   y: yOffset + taskIndices[receiveEvent.task] * View.EntityHeight + adjustedReceiveEntityHeight },
+            { x: receiveEvent.timestamp,             y: yOffset + taskIndices[receiveEvent.task] * View.EntityHeight + adjustedReceiveEntityHeight }
         ]
 
         let line = d3.line()
