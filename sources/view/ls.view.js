@@ -2,7 +2,9 @@
 
 class View {
     _viewExportImport = null;
+    _viewDevice = null;
     _viewCore = null;
+    _viewNetworkDelay = null;
     _viewInterface = null;
     _viewEntity = null;
     _viewDependency = null;
@@ -18,6 +20,7 @@ class View {
     static get Width()            { return window.innerWidth - 40; }
     static get SvgPadding()       { return 10; }
     static get EntityHeight()       { return 110; }
+    static get DelayHeight()      { return 110; }
     static get ExecutionHeight()  { return 10; }
     static get BarHeight()        { return 20; }
     static get BarMargin()        { return 1; }
@@ -31,9 +34,17 @@ class View {
     set viewExportImport(viewExportImport) {
         this._viewExportImport = viewExportImport;
     }
+
+    set viewDevice(viewDevice) {
+        this._viewDevice = viewDevice;
+    }
     
     set viewCore(viewCore) {
         this._viewCore = viewCore;
+    }
+
+    set viewNetworkDelay(viewNetworkDelay) {
+        this._viewNetworkDelay = viewNetworkDelay;
     }
     
     set viewInterface(viewInterface) {
@@ -63,9 +74,17 @@ class View {
     get viewExportImport() {
         return this._viewExportImport;
     }
+
+    get viewDevice() {
+        return this._viewDevice
+    }
     
     get viewCore() {
         return this._viewCore;
+    }
+
+    get viewNetworkDelay() {
+        return this._viewNetworkDelay;
     }
     
     get viewInterface() {

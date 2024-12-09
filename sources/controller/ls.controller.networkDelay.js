@@ -1,10 +1,8 @@
 'use strict';
 
-class ControllerCore {
+class ControllerNetworkDelay {
     _view = null;
-    _viewSchedule = null;
     _model = null;
-    _modelEntity = null;
     _modelDevice = null;
     
     constructor() { }
@@ -13,8 +11,8 @@ class ControllerCore {
         this._view = view;
         
         // Register the handlers when setting the view.
-        this._view.registerSubmitHandler(this.handleCreateCore);
-        this._view.registerDeleteHandler(this.handleDeleteCore);
+        this._view.registerSubmitHandler(this.handleCreateNetworkDelay);
+        this._view.registerDeleteHandler(this.handleDeleteNetworkDelay);
     }
 
     get view() {
@@ -33,9 +31,9 @@ class ControllerCore {
         this._model = model;
         
         // Register the handlers when setting the model.
-        this._model.registerUpdateCoresCallback(this.callbackUpdateCores);
+        this._model.registerUpdateNetworkDelaysCallback(this.callbackUpdateNetworkDelays);
+
         this._model.registerUpdateDeviceSelectorCallback(this.callbackUpdateDeviceSelector)
-        this._model.registerNotifyChangesCallback(this.callbackNotifyChanges);
 
         // Hack to populate the View with cores once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
@@ -45,17 +43,6 @@ class ControllerCore {
     
     get model() {
         return this._model;
-    }
-    
-    set modelEntity(modelEntity) {
-        this._modelEntity = modelEntity;
-        
-        // Register the model task with the model.
-        this._model.registerModelEntity(this._modelEntity);
-    }
-    
-    get modelEntity() {
-        return this._modelEntity;
     }
 
     set modelDevice(modelDevice) {
@@ -74,14 +61,14 @@ class ControllerCore {
     
     // Handler for creating a core.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
-    handleCreateCore = (core) => {
-        this.model.createCore(core);
+    handleCreateNetworkDelay = (networkDelay) => {
+        this.model.createNetworkDelay(networkDelay);
     }
     
     // Handler for deleting a core.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
-    handleDeleteCore = (name) => {
-        this.model.deleteCore(name);
+    handleDeleteNetworkDelay = (networkDelay) => {
+        this.model.deleteNetworkDelay(networkDelay);
     }
     
     
@@ -89,17 +76,12 @@ class ControllerCore {
     // Callbacks for events from the model to the view
     
     // Callback for updating the displayed cores.
-    callbackUpdateCores = (cores) => {
-        this.view.updateCores(cores);
+    callbackUpdateNetworkDelays = (networkDelays) => {
+        this.view.updateNetworkDelays(networkDelays);
     }
 
     callbackUpdateDeviceSelector = (devices) => {
         this.view.updateDeviceSelector(devices);
-    }
-    
-    // Callback for notifying the schedule view that cores have changed.
-    callbackNotifyChanges = () => {
-        this.viewSchedule.notifyChanges();
     }
     
     toString() {

@@ -5,6 +5,7 @@ class ViewCore {
     
     nameField = null;
     speedupField = null;
+    deviceField = null;
     
     cores = null;
     
@@ -19,6 +20,7 @@ class ViewCore {
         // Define or edit a core
         this.nameField = this.root.querySelector('#view-platform-core-name');
         this.speedupField = this.root.querySelector('#view-platform-core-speedup');
+        this.deviceField = this.root.querySelector('#view-platform-core-device');
         
         this.submitButton = this.root.querySelector('#submitCore');
         
@@ -45,19 +47,48 @@ class ViewCore {
     set speedup(speedup) {
         this.speedupField.value = speedup;
     }
+
+    get device() {
+        return this.deviceField.value ? this.deviceField.value : 'n/a';
+    }
+    
+    set device(device) {
+        device ? this.deviceField.value = device : this.deviceField.value = 'n/a';
+    }
     
     get coreRaw() {
         return {
             'name': this.name,
-            'speedup': this.speedup
+            'speedup': this.speedup,
+            'device': this.device,
         };
     }
     
     get coreClean() {
         return {
             'name': this.name.trim(),
-            'speedup': Math.abs(parseFloat(this.speedup))
+            'speedup': Math.abs(parseFloat(this.speedup)),
+            'device': this.device.trim(),
         };
+    }
+
+    updateDeviceSelector(devices) {
+        devices.sort();
+
+        let deviceDropdown = d3.select(this.deviceField);
+
+        deviceDropdown.selectAll('*').remove();
+        deviceDropdown.append('option')
+            .property('selected', true)
+            .attr('value', 'Default')
+            .text('Default');
+        
+        devices.forEach(device => 
+            deviceDropdown
+                .append('option')
+                .attr('value', device.name)
+                .text(device.name)
+        )
     }
     
     
@@ -145,7 +176,9 @@ class ViewCore {
             .data(cores)
             .enter()
             .append('li')
-                .html(core => `<span><b>${core.name}:</b> ${core.speedup}&times; speedup</span> ${Utility.AddDeleteButton(this.ElementIdPrefix, core.name)}`)
+                .html(core => `<span><b>${core.name}:</b> ${core.speedup}&times; speedup 
+                    ${core.device == 'n/a' ? '' : `(${core.device})`}</span> 
+                    ${Utility.AddDeleteButton(this.ElementIdPrefix, core.name)}`)
             .on('click', function(event, data) {
                 thisRef.cores.node().querySelectorAll('li')
                     .forEach((core) => {

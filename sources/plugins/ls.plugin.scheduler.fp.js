@@ -36,6 +36,8 @@ class PluginSchedulerFp {
     // Preemptive, fixed-priority, multicore, no task migration.
     // Preempts the core that will idle the earliest.
     static Algorithm(cores, tasksInstances, makespan, tasksParameters) {
+        // Input params would also need to include comm instances & netowrk instances. Update all occurrence of task instances to include them. Comm instances would be on the same as the taks(assumtions)
+        // Netowkr execution won't be restricted by the core ytet.
         // Do nothing if the task set is empty.
         if (tasksInstances.length == 0) {
             return { 'schedulable': true, 'message': 'No tasks to schedule' };
@@ -116,6 +118,8 @@ class PluginSchedulerFp {
                 const higherPriority = ((bothTasksActivated || bothTasksNotActivated && sameActivationTime) 
                                          && (taskPriority > coreChosenTask[taskCore.name].priority
                                               || (taskPriority == coreChosenTask[taskCore.name].priority && taskInstance.letEndTime <= coreChosenTask[taskCore.name].instance.letEndTime)));
+                                                // Add so it includes delays. HEre and the lines below
+
                 
                 // Update the chosenTask instance with taskInstance if any of the following 4 conditions are true:
                 // 1. No task instance has been chosen.

@@ -12,11 +12,15 @@ html {
 }
 
 /* Platform tab */
+#view-platform-networkDelays,
+#view-platform-devices,
 #view-platform-cores,
 #view-platform-memories {
     display: inline-block;
 }
 
+#view-platform-networkDelays li,
+#view-platform-devices li,
 #view-platform-cores li,
 #view-platform-memories li {
     float: left;
@@ -24,6 +28,8 @@ html {
     cursor: pointer;
 }
 
+#view-platform-networkDelays li span,
+#view-platform-devices li span,
 #view-platform-cores li span,
 #view-platform-memories li span {
     display: inline-block;
@@ -31,11 +37,17 @@ html {
     border-radius: 10px;
 }
 
+#view-platform-networkDelays li span:hover,
+#view-platform-devices li span:hover,
 #view-platform-cores li span:hover,
 #view-platform-memories li span:hover {
     background-color: whitesmoke;
 }
 
+#view-platform-networkDelays li.networkDelaySelected span,
+#view-platform-networkDelays li.networkDelaySelected span:hover,
+#view-platform-devices li.deviceSelected span,
+#view-platform-devices li.deviceSelected span:hover,
 #view-platform-cores li.coreSelected span,
 #view-platform-cores li.coreSelected span:hover,
 #view-platform-memories li.memorySelected span,
@@ -43,11 +55,15 @@ html {
     background-color: lightgrey;
 }
 
+#view-platform-networkDelays li .delete,
+#view-platform-devices li .delete,
 #view-platform-cores li .delete,
 #view-platform-memories li .delete {
     visibility: hidden;
 }
 
+#view-platform-networkDelays li:hover .delete,
+#view-platform-devices li:hover .delete,
 #view-platform-cores li:hover .delete,
 #view-platform-memories li:hover .delete {
     visibility: visible;
@@ -219,6 +235,14 @@ html {
 
 #view-schedule .time:hover {
     fill: var(--bs-orange);
+}
+
+#view-schedule .sender {
+    fill: green;
+}
+
+#view-schedule .receiver {
+    fill: red;
 }
 
 #view-schedule .dependency {

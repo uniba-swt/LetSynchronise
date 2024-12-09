@@ -2,10 +2,12 @@
 
 class ModelCore {
     updateCores = null;                 // Callback to function in ls.view.core
+    updateDeviceSelector = null;
     notifyChanges = null;               // Callback to function in ls.view.schedule
 
     database = null;
     modelEntity = null;
+    modelDevice = null;
 
     constructor() { }
     
@@ -16,6 +18,10 @@ class ModelCore {
     
     registerUpdateCoresCallback(callback) {
         this.updateCores = callback;
+    }
+
+    registerUpdateDeviceSelectorCallback(callback) {
+        this.updateDeviceSelector = callback;
     }
     
     registerNotifyChangesCallback(callback) {
@@ -32,6 +38,14 @@ class ModelCore {
 
     registerModelEntity(modelEntity) {
         this.modelEntity = modelEntity;
+    }
+
+    registerModelDevice(modelDevice) {
+        this.modelDevice = modelDevice;
+    }
+
+    registerModelDevice(modelDevice) {
+        this.modelDevice = modelDevice;
     }
     
     // -----------------------------------------------------
@@ -71,7 +85,9 @@ class ModelCore {
     
     refreshViews() {
         return this.getAllCores()
-            .then(result => this.updateCores(result))
+            .then(cores => this.updateCores(cores))
+            .then(devices => this.modelDevice.getAllDevices())
+            .then(devices => this.updateDeviceSelector(devices))
             .then(result => this.modelEntity.validate());
     }
     

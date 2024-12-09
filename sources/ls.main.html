@@ -23,7 +23,9 @@
     <!-- <script type="module"> does not work when executed locally -->
     <script src="sources/model/ls.model.js"></script>
     <script src="sources/model/ls.model.exportImport.js"></script>
+    <script src="sources/model/ls.model.device.js"></script>
     <script src="sources/model/ls.model.core.js"></script>
+    <script src="sources/model/ls.model.networkDelay.js"></script>
     <script src="sources/model/ls.model.memory.js"></script>
     <script src="sources/model/ls.model.interface.js"></script>
     <script src="sources/model/ls.model.entity.js"></script>
@@ -38,7 +40,9 @@
 
     <script src="sources/view/ls.view.js"></script>
     <script src="sources/view/ls.view.exportImport.js"></script>
+    <script src="sources/view/ls.view.device.js"></script>
     <script src="sources/view/ls.view.core.js"></script>
+    <script src="sources/view/ls.view.networkDelay.js"></script>
     <script src="sources/view/ls.view.memory.js"></script>
     <script src="sources/view/ls.view.interface.js"></script>
     <script src="sources/view/ls.view.entity.js"></script>
@@ -50,7 +54,9 @@
 
     <script src="sources/controller/ls.controller.js"></script>
     <script src="sources/controller/ls.controller.exportImport.js"></script>
+    <script src="sources/controller/ls.controller.device.js"></script>
     <script src="sources/controller/ls.controller.core.js"></script>
+    <script src="sources/controller/ls.controller.networkDelay.js"></script>
     <script src="sources/controller/ls.controller.memory.js"></script>
     <script src="sources/controller/ls.controller.interface.js"></script>
     <script src="sources/controller/ls.controller.entity.js"></script>
@@ -195,6 +201,89 @@
     <div class="tab-content" id="nav-tabContent">
     
         <div class="tab-pane fade" id="nav-platform" role="tabpanel" aria-labelledby="nav-platform-tab">
+
+            <h3>Define or Edit a Device</h3>
+        	
+            <form class="row gx-3 gy-2" id="view-device-define">
+                <div class="col-2">
+                    <div class="input-group">
+                        <span for="view-platform-device-name" class="input-group-text">Name</span>
+                        <input required type="text" class="form-control" id="view-platform-device-name" value="d1"/>
+                    </div>
+                </div>
+
+                <div class="col-2">
+                    <div class="input-group">
+                        <span for="view-platform-device-speedup" class="input-group-text">Speedup</span>
+                        <input required type="text" class="form-control" id="view-platform-device-speedup" value="1"/>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <button id="submitDevice" type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+
+            <div class="m-3"></div>
+
+            <ul id="view-platform-devices"></ul>
+
+            <div class="m-3"></div>
+
+            <h3>Define or Edit a Protocol Delay</h3>
+
+            <form class="row gx-3 gy-2 mb-5" id="view-device-delay-define">
+                
+                <div class="col-3">
+                    <div class="input-group">
+                        <span class="input-group-text" for="view-platform-delay-device">Device</span>
+                        <select id="view-platform-delay-device" class="form-select">
+                            <option disabled selected>Choose ...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-2">
+                    <div class="input-group">
+                        <span for="view-platform-delay-protocol-name" class="input-group-text">Protocol name</span>
+                        <input required type="text" class="form-control" id="view-platform-delay-protocol-name" value="tcp"/>
+                    </div>
+                </div>
+
+                <div class="col-3">
+                    <div class="input-group">
+                        <span for="view-platform-device-protocol-bcdt" class="input-group-text">Protocol bcdt</span>
+                        <input required type="text" class="form-control" id="view-platform-device-protocol-bcdt" value="1"/>
+                        <span class="input-group-text">ms</span>
+                    </div>
+                </div>
+
+                <div class="col-3">
+                    <div class="input-group">
+                        <span for="view-platform-device-protocol-acdt" class="input-group-text">Protocol acdt</span>
+                        <input required type="text" class="form-control" id="view-platform-device-protocol-acdt" value="1"/>
+                        <span class="input-group-text">ms</span>
+                    </div>
+                </div>
+
+                <div class="col-3">
+                    <div class="input-group">
+                        <span for="view-platform-device-protocol-wcdt" class="input-group-text">Protocol wcdt</span>
+                        <input required type="text" class="form-control" id="view-platform-device-protocol-wcdt" value="1"/>
+                        <span class="input-group-text">ms</span>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <button id="submitDeviceProtocolDelay" type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+
+            <div class="m-3"></div>
+
+            <div id="view-platform-device-delays"></div>
+
+            <div class="m-3"></div>
         
             <h3>Define or Edit a Processor Core</h3>
         	
@@ -210,6 +299,15 @@
                     <div class="input-group">
                         <span for="view-platform-core-speedup" class="input-group-text">Speedup</span>
                         <input required type="text" class="form-control" id="view-platform-core-speedup" value="1"/>
+                    </div>
+                </div>
+
+                <div class="col-3">
+                    <div class="input-group">
+                        <span class="input-group-text" for="view-platform-core-device">Device</span>
+                        <select id="view-platform-core-device" class="form-select">
+                            <option disabled selected>Choose ...</option>
+                        </select>
                     </div>
                 </div>
 
@@ -262,6 +360,71 @@
 
             <div class="m-3"></div>
 
+            <h3>Define or Edit a Network Delay</h3>
+
+            <form class="row gx-3 gy-2" id="view-networkDelay-define">
+
+                <div class="col-3">
+                    <div class="input-group">
+                        <span class="input-group-text" for="view-platform-networkDelay-source">Device</span>
+                        <select id="view-platform-networkDelay-source" class="form-select">
+                            <option disabled selected>Choose ...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-3">
+                    <div class="input-group">
+                        <span class="input-group-text" for="view-platform-networkDelay-dest">Device</span>
+                        <select id="view-platform-networkDelay-dest" class="form-select">
+                            <option disabled selected>Choose ...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-3">
+                    <div class="input-group">
+                        <span for="view-platform-networkDelay-delay" class="input-group-text">Network delay</span>
+                        <input required type="text" class="form-control" id="view-platform-networkDelay-delay" value="1"/>
+                        <span class="input-group-text">ms</span>
+                    </div>
+                </div>
+
+                <div class="col-3">
+                    <div class="input-group">
+                        <span for="view-platform-networkDelay-bcdt" class="input-group-text">Network bcdt</span>
+                        <input required type="text" class="form-control" id="view-platform-networkDelay-bcdt" value="1"/>
+                        <span class="input-group-text">ms</span>
+                    </div>
+                </div>
+
+                <div class="col-3">
+                    <div class="input-group">
+                        <span for="view-platform-networkDelay-acdt" class="input-group-text">Network acdt</span>
+                        <input required type="text" class="form-control" id="view-platform-networkDelay-acdt" value="1"/>
+                        <span class="input-group-text">ms</span>
+                    </div>
+                </div>
+
+                <div class="col-3">
+                    <div class="input-group">
+                        <span for="view-platform-networkDelay-wcdt" class="input-group-text">Network wcdt</span>
+                        <input required type="text" class="form-control" id="view-platform-networkDelay-wcdt" value="1"/>
+                        <span class="input-group-text">ms</span>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <button id="submitNetworkDelay" type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+
+            <div class="m-3"></div>
+
+            <ul id="view-platform-networkDelays"></ul>
+
+            <div class="m-3"></div>
+
         </div>
 
 
@@ -304,7 +467,7 @@
                 <div class="col-6">
                     <div class="input-group">
                         <span for="name" class="input-group-text col-5">Name</span>
-                        <input required type="text" class="form-control" id="name" value="t1"/>
+                        <input required type="text" class="form-control" id="name" value="t3"/>
                     </div>
                 </div>
 

@@ -3,7 +3,9 @@
 // Define the model implementations.
 let model = new Model();
 model.modelExportImport = new ModelExportImport();
+model.modelDevice = new ModelDevice();
 model.modelCore = new ModelCore();
+model.modelNetworkDelay = new ModelNetworkDelay();
 model.modelMemory = new ModelMemory();
 model.modelInterface = new ModelInterface();
 model.modelEntity = new ModelEntity();
@@ -17,7 +19,9 @@ model.modelDatabase = new ModelDatabase();
 // Define the view implementations.
 let view = new View();
 view.viewExportImport = new ViewExportImport();
+view.viewDevice = new ViewDevice();
 view.viewCore = new ViewCore();
+view.viewNetworkDelay = new ViewNetworkDelay();
 view.viewMemory = new ViewMemory();
 view.viewInterface = new ViewInterface();
 view.viewEntity = new ViewEntity();
@@ -30,7 +34,9 @@ view.viewAnalyse = new ViewAnalyse();
 // Define the controller implementations.
 let controller = new Controller();
 controller.controllerExportImport = new ControllerExportImport();
+controller.controllerDevice = new ControllerDevice();
 controller.controllerCore = new ControllerCore();
+controller.controllerNetworkDelay = new ControllerNetworkDelay();
 controller.controllerMemory = new ControllerMemory();
 controller.controllerInterface = new ControllerInterface();
 controller.controllerEntity = new ControllerEntity();
@@ -51,10 +57,18 @@ controller.controllerExportImport.modelDependency = model.modelDependency;
 controller.controllerExportImport.modelEventChain = model.modelEventChain;
 controller.controllerExportImport.modelConstraint = model.modelConstraint;
 
+controller.controllerDevice.view = view.viewDevice;
+controller.controllerDevice.model = model.modelDevice;
+
 controller.controllerCore.view = view.viewCore;
 controller.controllerCore.viewSchedule = view.viewSchedule;
 controller.controllerCore.model = model.modelCore;
 controller.controllerCore.modelEntity = model.modelEntity;
+controller.controllerCore.modelDevice = model.modelDevice;
+
+controller.controllerNetworkDelay.view = view.viewNetworkDelay;
+controller.controllerNetworkDelay.model = model.modelNetworkDelay;
+controller.controllerNetworkDelay.modelDevice = model.modelDevice;
 
 controller.controllerMemory.view = view.viewMemory;
 controller.controllerMemory.model = model.modelMemory;
@@ -81,6 +95,7 @@ controller.controllerDependency.modelEventChain = model.modelEventChain;
 controller.controllerSchedule.view = view.viewSchedule;
 controller.controllerSchedule.model = model.modelSchedule;
 controller.controllerSchedule.modelEntity = model.modelEntity;
+controller.controllerSchedule.modelDevice = model.modelDevice;
 controller.controllerSchedule.modelDependency = model.modelDependency;
 controller.controllerSchedule.modelEventChain = model.modelEventChain;
 controller.controllerSchedule.modelConstraint = model.modelConstraint;

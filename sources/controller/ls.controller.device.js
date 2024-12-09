@@ -1,11 +1,10 @@
 'use strict';
 
-class ControllerCore {
+class ControllerDevice {
     _view = null;
     _viewSchedule = null;
     _model = null;
     _modelEntity = null;
-    _modelDevice = null;
     
     constructor() { }
 
@@ -13,8 +12,9 @@ class ControllerCore {
         this._view = view;
         
         // Register the handlers when setting the view.
-        this._view.registerSubmitHandler(this.handleCreateCore);
-        this._view.registerDeleteHandler(this.handleDeleteCore);
+        this._view.registerSubmitHandler(this.handleCreateDevice);
+        this._view.registerDelaySubmitHandler(this.handleDeviceDelay);
+        this._view.registerDeleteHandler(this.handleDeleteDevice);
     }
 
     get view() {
@@ -33,11 +33,11 @@ class ControllerCore {
         this._model = model;
         
         // Register the handlers when setting the model.
-        this._model.registerUpdateCoresCallback(this.callbackUpdateCores);
-        this._model.registerUpdateDeviceSelectorCallback(this.callbackUpdateDeviceSelector)
+        this._model.registerUpdateDevicesCallback(this.callbackUpdateDevices);
+        this._model.registerUpdateDevicesDelayCallback(this.callbackUpdateDevicesDelay);
         this._model.registerNotifyChangesCallback(this.callbackNotifyChanges);
 
-        // Hack to populate the View with cores once the database is ready
+        // Hack to populate the View with devices once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
             this._model.refreshViews();
         });
@@ -57,52 +57,46 @@ class ControllerCore {
     get modelEntity() {
         return this._modelEntity;
     }
-
-    set modelDevice(modelDevice) {
-        this._modelDevice = modelDevice;
-        
-        this._model.registerModelDevice(this._modelDevice);
-    }
-
-    get modelDevice() {
-        return this._modelDevice;
-    }
     
     
     // -----------------------------------------------------
     // Handlers for events from the view to the model
     
-    // Handler for creating a core.
+    // Handler for creating a device.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
-    handleCreateCore = (core) => {
-        this.model.createCore(core);
+    handleCreateDevice = (device) => {
+        this.model.createDevice(device);
+    }
+
+    handleDeviceDelay = (device) => {
+        this.model.addDelay(device);
     }
     
-    // Handler for deleting a core.
+    // Handler for deleting a device.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
-    handleDeleteCore = (name) => {
-        this.model.deleteCore(name);
+    handleDeleteDevice = (name) => {
+        this.model.deleteDevice(name);
     }
     
     
     // -----------------------------------------------------
     // Callbacks for events from the model to the view
     
-    // Callback for updating the displayed cores.
-    callbackUpdateCores = (cores) => {
-        this.view.updateCores(cores);
+    // Callback for updating the displayed devices.
+    callbackUpdateDevices = (devices) => {
+        this.view.updateDevices(devices);
     }
 
-    callbackUpdateDeviceSelector = (devices) => {
-        this.view.updateDeviceSelector(devices);
+    callbackUpdateDevicesDelay = (delays) => {
+        this.view.updateDevicesDelay(delays);
     }
     
-    // Callback for notifying the schedule view that cores have changed.
+    // Callback for notifying the schedule view that devices have changed.
     callbackNotifyChanges = () => {
-        this.viewSchedule.notifyChanges();
+        // this.viewSchedule.notifyChanges();
     }
     
     toString() {
-        return `ControllerCore with ${this.view} and ${this.model}`;
+        return `ControllerDevice with ${this.view} and ${this.model}`;
     }
 }

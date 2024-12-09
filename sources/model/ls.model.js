@@ -2,7 +2,9 @@
 
 class Model {
     _modelExportImport = null;
+    _modelDevice = null;
     _modelCore = null;
+    _modelNetworkDelay = null;
     _modelMemory = null;
     _modelInterface = null;
     _modelEntity = null;
@@ -18,7 +20,9 @@ class Model {
     // -----------------------------------------------------
     // Static constants.
 
+    static get DeviceStoreName()              { return 'DeviceStore'; }
     static get CoreStoreName()                { return 'CoreStore'; }
+    static get NetworkDelayStoreName()        { return 'NetworkDelayStore'; }
     static get MemoryStoreName()              { return 'MemoryStore'; }
     static get SystemInputStoreName()         { return 'SystemInputStore'; }
     static get SystemOutputStoreName()        { return 'SystemOutputStore'; }
@@ -33,7 +37,9 @@ class Model {
     
     static get ShortStoreNames() {
         return [
+            'devices',
             'cores',
+            'networkDelays',
             'memories',
             'inputs',
             'outputs',
@@ -55,6 +61,14 @@ class Model {
     set modelExportImport(modelExportImport) {
         this._modelExportImport = modelExportImport;
     }
+
+    get modelDevice() {
+        return this._modelDevice;
+    }
+
+    set modelDevice(modelDevice) {
+        this._modelDevice = modelDevice;
+    }
     
     get modelCore() {
         return this._modelCore;
@@ -62,6 +76,14 @@ class Model {
     
     set modelCore(modelCore) {
         this._modelCore = modelCore;
+    }
+
+    get modelNetworkDelay() {
+        return this._modelNetworkDelay;
+    }
+
+    set modelNetworkDelay(networkDelay) {
+        this._modelNetworkDelay = networkDelay;
     }
 
     get modelMemory() {
@@ -135,6 +157,8 @@ class Model {
     set modelDatabase(modelDatabase) {
         this._modelDatabase = modelDatabase;
         this._modelExportImport.registerModelDatabase(this._modelDatabase);
+        this._modelDevice.registerModelDatabase(this._modelDatabase);
+        this._modelNetworkDelay.registerModelDatabase(this._modelDatabase);
         this._modelCore.registerModelDatabase(this._modelDatabase);
         this._modelMemory.registerModelDatabase(this._modelDatabase);
         this._modelInterface.registerModelDatabase(this._modelDatabase);

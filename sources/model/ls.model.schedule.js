@@ -4,6 +4,7 @@ class ModelSchedule {
     database = null;
 
     modelEntity = null;
+    modelDevice = null;
     modelDependency = null;
     modelEventChain = null;
     modelConstraint = null;
@@ -20,6 +21,14 @@ class ModelSchedule {
     
     registerModelEntity(modelEntity) {
         this.modelEntity = modelEntity;
+    }
+    
+    registerModelDevice(modelDevice) {
+        this.modelDevice = modelDevice;
+    }
+    
+    registerModelDevice(modelDevice) {
+        this.modelDevice = modelDevice;
     }
 
     registerModelDependency(modelDependency) {
