@@ -8,6 +8,7 @@ class ViewNetworkDelay {
     bcdtField = null;
     acdtField = null;
     wcdtField = null;
+    distributionField = null;
 
     networkDelays = null;
     
@@ -25,6 +26,7 @@ class ViewNetworkDelay {
         this.bcdtField = this.root.querySelector('#view-platform-networkDelay-bcdt');
         this.acdtField = this.root.querySelector('#view-platform-networkDelay-bcdt');
         this.wcdtField = this.root.querySelector('#view-platform-networkDelay-bcdt');
+        this.distributionField = this.root.querySelector('#view-platform-networkDelay-distribution');
         
         this.submitButton = this.root.querySelector('#submitNetworkDelay');
 
@@ -75,6 +77,14 @@ class ViewNetworkDelay {
     set wcdt(wcdt) {
         this.wcdtField.value = wcdt;
     }
+
+    get distribution() {
+        return this.distributionField.value;
+    }
+
+    set distribution(distribution) {
+        this.distributionField.value = distribution;
+    }
     
     get networkDelayRow() {
         return {
@@ -82,7 +92,8 @@ class ViewNetworkDelay {
             'dest': this.dest,
             'bcdt': this.bcdt,
             'acdt': this.acdt,
-            'wcdt': this.wcdt
+            'wcdt': this.wcdt,
+            'distribution': this.distribution
         };
     }
     
@@ -92,7 +103,8 @@ class ViewNetworkDelay {
             'dest': this.dest,
             'bcdt': Math.abs(parseFloat(this.bcdt)),
             'acdt': Math.abs(parseFloat(this.acdt)),
-            'wcdt': Math.abs(parseFloat(this.wcdt))
+            'wcdt': Math.abs(parseFloat(this.wcdt)),
+            'distribution': this.distribution
         };
     }
     
@@ -140,19 +152,18 @@ class ViewNetworkDelay {
             return false;
         }
         
-        if (networkDelay.delay == null || networkDelay.delay.trim() == '' || isNaN(networkDelay.delay)) {
-            alert('Network delay has to be a decimal number.');
+        if (isNaN(networkDelay.bcdt) || isNaN(networkDelay.acdt) || isNaN(networkDelay.wcdt)) {
+            alert('Delay values should be a decimal number.');
             return false;
         }
 
-        //TODO: fix
-        const speedup = parseFloat(networkDelay.delay);
-        if (speedup < 0) {
+        if (parseFloat(networkDelay.bcdt) < 0 || parseFloat(networkDelay.acdt) < 0 || parseFloat(networkDelay.wcdt) < 0) {
             alert('Network delay cannot be negative.');
             return false;
         }
-        const delaySplit = networkDelay.delay.split('.');
-        if (delaySplit.length > 1 && delaySplit[1].length > 2) {
+        if ((networkDelay.bcdt.split('.').length > 1 && networkDelay.bcdt.split('.')[1].length > 2) ||
+            (networkDelay.acdt.split('.').length > 1 && networkDelay.acdt.split('.')[1].length > 2) ||
+            (networkDelay.wcdt.split('.').length > 1 && networkDelay.wcdt.split('.')[1].length > 2)) {
             alert('Network delay cannot have more than 2 decimal places.');
             return false;
         }
@@ -162,27 +173,33 @@ class ViewNetworkDelay {
 
     updateNetworkDelays(networkDelays) {
          this.networkDelays.selectAll('*').remove();
-        
-         const thisRef = this;
-         
-         this.networkDelays
-             .selectAll('li')
-             .data(networkDelays)
-             .enter()
-             .append('li')
-                 .html(networkDelay => `<span><b>${networkDelay.source} -> ${networkDelay.dest}: </b> ${networkDelay.delay}ms delay</span> ${Utility.AddDeleteButton(this.ElementIdPrefix, networkDelay.id)}`)
-             .on('click', function(event, data) {
-                 thisRef.networkDelays.node().querySelectorAll('li')
-                     .forEach((networkDelay) => {
-                         if (networkDelay !== this) { networkDelay.classList.remove('networkDelaySelected'); }
-                     });
-                 this.classList.toggle('networkDelaySelected');
-                 thisRef.populateParameterForm.bind(thisRef)(data);
-             });
-        
-        for (const networkDelay of networkDelays) {
-            this.setupDeleteButtonListener(`${networkDelay.id}`);
-        }
+
+        const table = this.networkDelays.append('table').attr('class', 'table-responsive table-bordered');
+
+        if (networkDelays.length > 0) {
+            table.append('thead')
+                .append('tr')
+                .selectAll('th')
+                .data(['Source', 'Destination', 'BCDT (ms)', 'ACDT (ms)', 'WCDT (ms)', 'Distribution', 'Delete'])
+                .enter()
+                .append('th')
+                .text(header => header)
+                .attr('class', 'p-2');
+
+            const tbody = table.append('tbody');
+
+            networkDelays.forEach(delay => {
+                    const row = tbody.append('tr');
+                    row.append('td').text(delay.source).attr('class', 'p-2');
+                    row.append('td').text(delay.dest).attr('class', 'p-2');
+                    row.append('td').text(delay.bcdt).attr('class', 'p-2');
+                    row.append('td').text(delay.acdt).attr('class', 'p-2');
+                    row.append('td').text(delay.wcdt).attr('class', 'p-2');
+                    row.append('td').text(delay.distribution).attr('class', 'p-2');
+                    row.append('td').html(Utility.AddDeleteButton(this.ElementIdPrefix, delay.id)).attr('class', 'p-2');
+                    this.setupDeleteButtonListener(`${delay.id}`);
+                });
+        };
     }
 
     updateDeviceSelector(devices) {

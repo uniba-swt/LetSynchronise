@@ -42,14 +42,13 @@ class ModelNetworkDelay {
             .then(this.refreshViews());
     }
 
-    deleteNetworkDelay(networkDelay) {
-        console.log(networkDelay)
-        return this.database.deleteObject(Model.NetworkDelayStoreName, networkDelay)
+    deleteNetworkDelay(index) {
+        return this.database.deleteObject(Model.NetworkDelayStoreName, Number(index))
             .then(this.refreshViews());
     }
     
-    getNetworkDelay(networkDelay) {
-        return this.database.getObject(Model.NetworkDelayStoreName, networkDelay)
+    getNetworkDelay(index) {
+        return this.database.getObject(Model.NetworkDelayStoreName, Number(index))
             .catch(error => {
                 return this.database.getAllObjects(Model.NetworkDelayStoreName)
                     .then(networkDelays => {
@@ -60,13 +59,15 @@ class ModelNetworkDelay {
             });
     }
 
-    getAllNetworkDelays() {
-        return this.database.getAllObjectsWithKeys(Model.NetworkDelayStoreName);
+    getNetworkDelay(source, dest) {
+        return this.getAllNetworkDelays().then(delays => {
+            return delays.find(delay => delay.source === source && delay.dest === dest);
+        });
     }
     
-    deleteCore(networkDelay) {
-        return this.database.deleteObject(Model.NetworkDelayStoreName, networkDelay)
-            .then(this.refreshViews());
+
+    getAllNetworkDelays() {
+        return this.database.getAllObjectsWithKeys(Model.NetworkDelayStoreName);
     }
     
     refreshViews() {

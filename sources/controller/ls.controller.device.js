@@ -5,6 +5,8 @@ class ControllerDevice {
     _viewSchedule = null;
     _model = null;
     _modelEntity = null;
+    _modelCore = null;
+    _modelNetworkDelay = null;
     
     constructor() { }
 
@@ -15,6 +17,7 @@ class ControllerDevice {
         this._view.registerSubmitHandler(this.handleCreateDevice);
         this._view.registerDelaySubmitHandler(this.handleDeviceDelay);
         this._view.registerDeleteHandler(this.handleDeleteDevice);
+        this._view.registerDeleteDelayHandler(this.handleDeleteDelay);
     }
 
     get view() {
@@ -57,6 +60,27 @@ class ControllerDevice {
     get modelEntity() {
         return this._modelEntity;
     }
+
+    set modelCore(modelCore) {
+        this._modelCore = modelCore;
+        
+        // Register the model core with the model.
+        this._model.registerModelCore(this._modelCore);
+    }
+    
+    get modelCore() {
+        return this._modelCore;
+    }
+
+    set modelNetworkDelay(modelNetworkDelay) {
+        this._modelNetworkDelay = modelNetworkDelay;
+
+        this._model.registerModelNetworkDelay(this._modelNetworkDelay);
+    }
+
+    get modelNetworkDelay() {
+        return this._modelNetworkDelay;
+    }
     
     
     // -----------------------------------------------------
@@ -76,6 +100,10 @@ class ControllerDevice {
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleDeleteDevice = (name) => {
         this.model.deleteDevice(name);
+    }
+
+    handleDeleteDelay = (protocol, device) => {
+        this.model.deleteDelay(protocol, device);
     }
     
     

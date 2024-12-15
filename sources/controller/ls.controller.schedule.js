@@ -5,6 +5,7 @@ class ControllerSchedule {
     _model = null;
     _modelEntity = null;
     _modelDevice = null;
+    _modelCore = null;
     _modelDependency = null;
     _modelEventChain = null;
     _modelConstraint = null;
@@ -80,8 +81,13 @@ class ControllerSchedule {
         this._model.registerModelDevice(this._modelDevice);
     }
     
-    get modelDevice() {
-        return this._modelDevice;
+    get modelCore() {
+        return this._modelCore;
+    }
+
+    set modelCore(modelCore) {
+        this._modelCore = modelCore;
+        this._model.registerModelCore(this._modelCore);
     }
     
     set modelDependency(modelDependency) {

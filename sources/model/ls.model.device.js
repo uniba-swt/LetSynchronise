@@ -7,6 +7,8 @@ class ModelDevice {
 
     database = null;
     modelEntity = null;
+    modelCore = null;
+    modelNetworkDelay = null;
 
     constructor() { }
     
@@ -38,6 +40,14 @@ class ModelDevice {
     registerModelEntity(modelEntity) {
         this.modelEntity = modelEntity;
     }
+
+    registerModelCore(modelCore) {
+        this.modelCore = modelCore;
+    }
+
+    registerModelNetworkDelay(modelNetworkDelay) {
+        this.modelNetworkDelay = modelNetworkDelay;
+    }
     
     // -----------------------------------------------------
     // Class methods
@@ -58,17 +68,17 @@ class ModelDevice {
             const existingProtocol = device.delays.find(p => p.protocol === deviceDelay.protocol)
 
             if (existingProtocol) {
-                existingProtocol.delay = deviceDelay.delay;
                 existingProtocol.bcdt = deviceDelay.bcdt;
                 existingProtocol.acdt = deviceDelay.acdt;
                 existingProtocol.wcdt = deviceDelay.wcdt;
+                existingProtocol.distribution = deviceDelay.distribution;
             } else {
                 device.delays.push({
                     protocol: deviceDelay.protocol,
-                    delay: deviceDelay.delay,
                     bcdt: deviceDelay.bcdt,
                     acdt: deviceDelay.acdt,
-                    wcdt: deviceDelay.wcdt
+                    wcdt: deviceDelay.wcdt,
+                    distribution: deviceDelay.distribution
                 })
             }
 
@@ -101,10 +111,20 @@ class ModelDevice {
         return this.database.deleteObject(Model.DeviceStoreName, name)
             .then(this.refreshViews());
     }
+
+    deleteDelay(protocol, device) {
+        this.database.getObject(Model.DeviceStoreName, device).then(device => {
+            device.delays = device.delays.filter(delay => delay.protocol !== protocol);
+
+            return this.database.putObject(Model.DeviceStoreName, device).then(this.refreshDelayViews());
+        })
+    }
     
     refreshViews() {
         return this.getAllDevices()
-            .then(result => this.updateDevices(result));
+            .then(result => this.updateDevices(result))
+            .then(result => this.modelCore.refreshViews())
+            .then(result => this.modelNetworkDelay.refreshViews());
             // .then(result => this.modelEntity.validate());
     }
 

@@ -5,6 +5,7 @@ class ModelSchedule {
 
     modelEntity = null;
     modelDevice = null;
+    modelCore = null;
     modelDependency = null;
     modelEventChain = null;
     modelConstraint = null;
@@ -25,6 +26,10 @@ class ModelSchedule {
     
     registerModelDevice(modelDevice) {
         this.modelDevice = modelDevice;
+    }
+    
+    registerModelCore(modelCore) {
+        this.modelCore = modelCore;
     }
     
     registerModelDevice(modelDevice) {
@@ -49,6 +54,7 @@ class ModelSchedule {
 
     // Create a single task instance.
     createTaskInstance(index, parameters, timePoint, executionTiming) {
+        // console.log(timePoint)
         let executionTime = null;
         if (executionTiming === 'BCET') {
             executionTime = parameters.bcet;
@@ -71,14 +77,16 @@ class ModelSchedule {
     }
     
     // Create all instances of a task within the makespan.
-    createTaskInstances(parameters, makespan, executionTiming) {
+    createTaskInstances(parameters, makespan, executionTiming, nextTask, index) {
         let instances = [ ];
+
         for (let timePoint = parameters.initialOffset; timePoint < makespan; timePoint += parameters.period) {
             instances.push(this.createTaskInstance(instances.length, parameters, timePoint, executionTiming));
         }
 
         return this.database.putObject(Model.EntityInstancesStoreName, {
             'name': parameters.name, 
+            'type': parameters.type,
             'initialOffset': parameters.initialOffset,
             'value': instances
         });
@@ -87,7 +95,12 @@ class ModelSchedule {
     // Create all instances of all tasks within the makespan.
     createAllTaskInstances(makespan, executionTiming) {
         const promiseAllTasksInstances = this.modelEntity.getAllTasks()
-            .then(tasks => Promise.all(tasks.map(task => this.createTaskInstances(task, makespan, executionTiming))))
+            .then(tasks => {
+                Promise.all(tasks.map((task, index) => {
+                    this.createTaskInstances(task, makespan, executionTiming, tasks[index + 1], index)
+            }))
+
+        })
             .then(result => this.database.getAllObjects(Model.EntityInstancesStoreName));
         return promiseAllTasksInstances;
     }
@@ -138,7 +151,7 @@ class ModelSchedule {
         return Promise.all([
             this.database.getObject(Model.EntityInstancesStoreName, dependency.source.task), 
             this.database.getObject(Model.EntityInstancesStoreName, dependency.destination.task)
-        ]).then(([sourceTaskInstances, destinationTaskInstances]) => {            
+        ]).then(([sourceTaskInstances, destinationTaskInstances]) => {      
             let instances = [];
             if (dependency.source.task == Model.SystemInterfaceName) {
                 // Dependency is system input --> task

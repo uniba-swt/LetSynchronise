@@ -48,6 +48,17 @@ class ModelDependency {
     // Class methods
 
     createDependency(dependency) {
+        Promise.all([this.modelEntity.getTask(dependency.source.task),
+                    this.modelEntity.getTask(dependency.destination.task)])
+                    .then(([sourceTask, destTask]) => {
+                        const sourceCore = sourceTask.core;
+                        const destCore = destTask.core;
+
+                        if (sourceCore != destCore) {
+                            this.modelEntity.addDelay(sourceTask, destTask)
+                        }
+                    })
+
         // Store dependency in Database
         return this.database.putObject(Model.DependencyStoreName, dependency)
             .then(this.refreshViews());

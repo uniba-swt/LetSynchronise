@@ -234,6 +234,32 @@ class Utility {
         
         localStorage.setItem(viewName, JSON.stringify(settings));
     }
+
+    static SortEntitiesInOrder(entities) {
+        let tasks = entities.filter(entity => entity.type === 'task');
+
+        let sorted = [];
+        for (const task of tasks) {
+            const decapsulationDelay = entities.find(entity => entity.type === "protocol delay" && entity.name.includes(task.name + " decapsulation"));
+            if (decapsulationDelay) {
+                sorted.push(decapsulationDelay);
+            }
+
+            sorted.push(task);
+
+            const encapsulationDelay = entities.find(entity => entity.type === "protocol delay" && entity.name.includes(task.name + " encapsulation"));
+            if (encapsulationDelay) {
+                sorted.push(encapsulationDelay);
+            }
+            
+            const networkDelay = entities.find(entity => entity.type == "network delay" && entity.name.includes(task.name + " =>"));
+            if (networkDelay) {
+                sorted.push(networkDelay);
+            }
+        }
+        
+        return sorted;
+    }
     
 }
 

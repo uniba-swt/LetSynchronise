@@ -182,6 +182,7 @@ class ViewEntity {
         // Package all the task paramters as is into an object.
         return {
             'name': this.name,
+            'type': 'task',
             'priority': this.priority,
             'initialOffset': this.initialOffset,
             'activationOffset': this.activationOffset,
@@ -201,6 +202,7 @@ class ViewEntity {
         // Package all the task paramters in their correct types into an object.
         return {
             'name': this.name.trim(),
+            'type': 'task',
             'priority': this.priority == null ? null : Math.abs(parseInt(this.priority, 10)),
             'initialOffset': Math.abs(parseFloat(this.initialOffset)) * Utility.MsToNs,
             'activationOffset': Math.abs(parseFloat(this.activationOffset)) * Utility.MsToNs,
