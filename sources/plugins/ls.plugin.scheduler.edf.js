@@ -18,10 +18,12 @@ class PluginSchedulerEdf {
         
         const scheduleElementSelected = ['schedule'];
         const schedule = await Plugin.DatabaseContentsGet(scheduleElementSelected);
-        const tasksInstances = await schedule[Model.EntityInstancesStoreName];
+        const tasksInstances = (await schedule[Model.EntityInstancesStoreName]).filter(entity => entity.type === "task");
 
         const coreElementSelected = ['cores'];
         const cores = (await Plugin.DatabaseContentsGet(coreElementSelected))[Model.CoreStoreName];
+
+        console.log(tasksInstances)
 
         const result = this.Algorithm(cores, tasksInstances, makespan);
         if (!result.schedulable) {
@@ -77,6 +79,10 @@ class PluginSchedulerEdf {
 
             for (const [taskNumber, task] of tasksInstances.entries()) {
                 if (taskInstanceIndices[taskNumber] == null) {
+                    continue;
+                }
+
+                if (task.type != 'task') {
                     continue;
                 }
                 

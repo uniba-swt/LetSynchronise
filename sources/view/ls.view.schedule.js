@@ -476,13 +476,16 @@ class ViewSchedule {
         for (const [index, taskInstances] of sortedEntities.entries()) {
             this.drawTaskInstances(taskInstances, svgElement, scale, index);
             taskIndices[taskInstances.name] = index;
-            
+
             for (const instance of taskInstances.value) {
-                for (const interval of instance.executionIntervals) {
-                    if (coreIndices[interval.core] === undefined) {
-                        coreIndices[interval.core] = Object.keys(coreIndices).length;
+                if (instance.type === "task") {
+                    for (const interval of instance.executionIntervals) {
+                        if (coreIndices[interval.core] === undefined) {
+                            coreIndices[interval.core] = Object.keys(coreIndices).length;
+                        }
                     }
                 }
+
             }
         }
         
@@ -581,7 +584,8 @@ class ViewSchedule {
                         this.updateRelatedEventChains(taskInstances.name, instance.instance);
                       });
             
-            // Add the task's execution times
+            if (instance.type === "task") {
+                            // Add the task's execution times
             const executionIntervals = instance.executionIntervals.map(interval => Utility.Interval.FromJson(interval));
             for (const interval of executionIntervals) {
                 graphInfo.append('rect')
@@ -613,6 +617,8 @@ class ViewSchedule {
                        .attr('y1', View.BarHeight + View.TickHeight + View.BarMargin)
                        .attr('y2', 0)
                        .attr('class', 'boundary');
+            }
+
         }
         
         // Create x-axis with correct scale.
@@ -673,32 +679,35 @@ class ViewSchedule {
         // Add the tasks' execution times
         for (const [index, taskInstances] of tasksInstances.entries()) {
             for (const instance of taskInstances.value) {
-                const executionIntervals = instance.executionIntervals.map(interval => Utility.Interval.FromJson(interval));
-                for (const interval of executionIntervals) {
-                    const coreIndex = coreIndices[interval.core];
-                    
-                    graphInfo.append('rect')
-                               .attr('x', scale(interval.startTime))
-                               .attr('y', View.BarHeight - (coreIndex + 1) * View.ExecutionHeight)
-                               .attr('width', scale(interval.duration))
-                               .attr('height', View.ExecutionHeight)
-                               .attr('class', 'time')
-                             .on('mouseover', () => {
-                               const title = `<b>${taskInstances.name}</b> instance ${instance.instance}`;
-                               const core = `Core ${interval.core}`;
-                               const executionInterval = `Execution interval: [${Utility.FormatTimeString(interval.startTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString((interval.startTime + interval.duration) / Utility.MsToNs, 2)}]ms`;
-                               tooltip.innerHTML = `${title} <br/> ${core} <br/> ${executionInterval}`;
-                               tooltip.style.visibility = 'visible';
-                             })
-                             .on('mousemove', (event) => {
-                               const [pointerX, pointerY] = d3.pointer(event, window);
-                               tooltip.style.top = `${pointerY - 4.3 * View.BarHeight}px`;
-                               tooltip.style.left = `${pointerX}px`;
-                             })
-                             .on('mouseout', () => {
-                               tooltip.style.visibility = 'hidden';
-                             });
+                if (instance.type == "task") {
+                    const executionIntervals = instance.executionIntervals.map(interval => Utility.Interval.FromJson(interval));
+                    for (const interval of executionIntervals) {
+                        const coreIndex = coreIndices[interval.core];
+                        
+                        graphInfo.append('rect')
+                                   .attr('x', scale(interval.startTime))
+                                   .attr('y', View.BarHeight - (coreIndex + 1) * View.ExecutionHeight)
+                                   .attr('width', scale(interval.duration))
+                                   .attr('height', View.ExecutionHeight)
+                                   .attr('class', 'time')
+                                 .on('mouseover', () => {
+                                   const title = `<b>${taskInstances.name}</b> instance ${instance.instance}`;
+                                   const core = `Core ${interval.core}`;
+                                   const executionInterval = `Execution interval: [${Utility.FormatTimeString(interval.startTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString((interval.startTime + interval.duration) / Utility.MsToNs, 2)}]ms`;
+                                   tooltip.innerHTML = `${title} <br/> ${core} <br/> ${executionInterval}`;
+                                   tooltip.style.visibility = 'visible';
+                                 })
+                                 .on('mousemove', (event) => {
+                                   const [pointerX, pointerY] = d3.pointer(event, window);
+                                   tooltip.style.top = `${pointerY - 4.3 * View.BarHeight}px`;
+                                   tooltip.style.left = `${pointerX}px`;
+                                 })
+                                 .on('mouseout', () => {
+                                   tooltip.style.visibility = 'hidden';
+                                 });
+                    }
                 }
+
             }
         }
 

@@ -54,7 +54,6 @@ class ModelSchedule {
 
     // Create a single task instance.
     createTaskInstance(index, parameters, timePoint, executionTiming) {
-        // console.log(timePoint)
         let executionTime = null;
         if (executionTiming === 'BCET') {
             executionTime = parameters.bcet;
@@ -77,9 +76,8 @@ class ModelSchedule {
     }
     
     // Create all instances of a task within the makespan.
-    createTaskInstances(parameters, makespan, executionTiming, nextTask, index) {
+    createTaskInstances(parameters, makespan, executionTiming) {
         let instances = [ ];
-
         for (let timePoint = parameters.initialOffset; timePoint < makespan; timePoint += parameters.period) {
             instances.push(this.createTaskInstance(instances.length, parameters, timePoint, executionTiming));
         }
@@ -88,19 +86,19 @@ class ModelSchedule {
             'name': parameters.name, 
             'type': parameters.type,
             'initialOffset': parameters.initialOffset,
-            'value': instances
+            'value': instances,
+            'executionTiming': executionTiming
         });
     }
     
     // Create all instances of all tasks within the makespan.
     createAllTaskInstances(makespan, executionTiming) {
         const promiseAllTasksInstances = this.modelEntity.getAllTasks()
-            .then(tasks => {
-                Promise.all(tasks.map((task, index) => {
-                    this.createTaskInstances(task, makespan, executionTiming, tasks[index + 1], index)
-            }))
-
-        })
+            .then(tasks => Promise.all(tasks.map(task => {
+                if (task.type === "task") {
+                    this.createTaskInstances(task, makespan, executionTiming);
+                }
+                })))
             .then(result => this.database.getAllObjects(Model.EntityInstancesStoreName));
         return promiseAllTasksInstances;
     }
@@ -183,14 +181,29 @@ class ModelSchedule {
                 const destinationInstances = destinationTaskInstances ? destinationTaskInstances.value : 0;
 
                 if (destinationInstances.length > 0) {
+                    let encapsulationDelays = [];
+                    let decapsulationDelays = [];
+                    let networkDelays = [];
 					const numberOfInstances = destinationInstances.length - (destinationInstances[destinationInstances.length - 1].letStartTime > makespan);
+
 					for (let destinationIndex = numberOfInstances - 1; destinationIndex > -1;  destinationIndex--) {
 						// Find latest sourceInstance
 						const destinationInstance = destinationInstances[destinationIndex];
 						const [sourceIndex, sourceInstance] = this.getLatestLetEndTime(sourceInstances, destinationInstance.letStartTime);
-				
+
 						instances.unshift(this.createDependencyInstance(dependency, sourceIndex, sourceInstance, destinationIndex, destinationInstance));
-					}
+
+                        if (sourceInstance.currentCore && destinationInstance.currentCore 
+                            && sourceInstance.currentCore != 'Default' && destinationInstance.currentCore != 'Default'
+                            && (sourceInstance.currentCore != destinationInstance.currentCore)) {
+                            this.createProtocolDelayInstances(sourceIndex, sourceInstance.letEndTime, 
+                                sourceTaskInstances.name + " encapsulation delay", sourceTaskInstances.executionTiming, encapsulationDelays)
+                            .then(delay => this.createNetworkDelayInstances(delay.letEndTime, sourceIndex, 
+                                sourceTaskInstances.name, destinationTaskInstances.name, sourceTaskInstances.executionTiming, networkDelays))
+                            .then(delay => this.createProtocolDelayInstances(destinationIndex, delay.letEndTime, 
+                                destinationTaskInstances.name + " decapsulation delay", destinationTaskInstances.executionTiming, decapsulationDelays));
+                        }
+					}  
                 }
             }
             
@@ -203,6 +216,83 @@ class ModelSchedule {
                 'value': instances
             });
         });
+    }
+
+    createProtocolDelayInstances(taskIndex, previousEndTime, taskName, executionTiming, delays) {
+        let delay;
+        return this.modelEntity.getTask(taskName).then(parameters => {
+            delay = this.createProtocolDelayInstance(taskIndex, previousEndTime, executionTiming, parameters, taskName);
+            delays.unshift(delay);
+        }).then(result => {
+            const data = {
+                'name': taskName, 
+                'type': "protocol delay",
+                'value': delays,
+                'executionTiming': executionTiming
+            }
+            
+            this.database.putObject(Model.EntityInstancesStoreName, data);
+            
+            return delay;
+        })     
+    }
+
+     createProtocolDelayInstance(taskIndex, previousEndTime, executionTiming, parameters, taskName) {
+        let executionTime = null;
+
+        if (executionTiming === 'BCET') {
+            executionTime = parameters.bcdt;
+        } else if (executionTiming === 'WCET') {
+            executionTime = parameters.wcdt;
+        } else {
+            executionTime = Utility.RandomInteger(parameters.bcet, parameters.acet, parameters.wcet, parameters.distribution);
+        }
+        
+        return {
+            'instance'          : taskName.includes('decapsulation') ? taskIndex - 1 : taskIndex,
+            'letStartTime'      : previousEndTime,
+            'letEndTime'        : previousEndTime + executionTime,
+            'executionTime'     : executionTime,
+        };
+    }
+
+    createNetworkDelayInstances(previousEndTime, taskIndex, sourceName, destName, executionTiming, delays) {
+        const taskName = sourceName + " => " + destName + " network delay";
+        let delay;
+
+        return this.modelEntity.getTask(taskName).then(parameters => {
+            delay = this.createNetworkDelayInstance(previousEndTime, taskIndex, executionTiming, parameters);
+            delays.unshift(delay);
+        }).then(result => {
+            const data = {
+                'name': taskName, 
+                'type': "network delay",
+                'value': delays,
+                'executionTiming': executionTiming
+            }
+
+            this.database.putObject(Model.EntityInstancesStoreName, data);
+            return delay;
+        })
+    }
+
+    createNetworkDelayInstance(previousEndTime, taskIndex, executionTiming, parameters) {
+        let executionTime = null;
+
+        if (executionTiming === 'BCET') {
+            executionTime = parameters.bcdt;
+        } else if (executionTiming === 'WCET') {
+            executionTime = parameters.wcdt;
+        } else {
+            executionTime = Utility.RandomInteger(parameters.bcet, parameters.acet, parameters.wcet, parameters.distribution);
+        }
+        
+        return {
+            'instance'          : taskIndex,
+            'letStartTime'      : previousEndTime,
+            'letEndTime'        : previousEndTime + executionTime,
+            'executionTime'     : executionTime,
+        };
     }
     
     // Create all instances of all dependencies.
