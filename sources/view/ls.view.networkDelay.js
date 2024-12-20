@@ -24,8 +24,8 @@ class ViewNetworkDelay {
         this.sourceField = this.root.querySelector('#view-platform-networkDelay-source');
         this.destField = this.root.querySelector('#view-platform-networkDelay-dest');
         this.bcdtField = this.root.querySelector('#view-platform-networkDelay-bcdt');
-        this.acdtField = this.root.querySelector('#view-platform-networkDelay-bcdt');
-        this.wcdtField = this.root.querySelector('#view-platform-networkDelay-bcdt');
+        this.acdtField = this.root.querySelector('#view-platform-networkDelay-acdt');
+        this.wcdtField = this.root.querySelector('#view-platform-networkDelay-wcdt');
         this.distributionField = this.root.querySelector('#view-platform-networkDelay-distribution');
         
         this.submitButton = this.root.querySelector('#submitNetworkDelay');
@@ -86,7 +86,7 @@ class ViewNetworkDelay {
         this.distributionField.value = distribution;
     }
     
-    get networkDelayRow() {
+    get networkDelayRaw() {
         return {
             'source': this.source,
             'dest': this.dest,
@@ -99,12 +99,13 @@ class ViewNetworkDelay {
     
     get networkDelayClean() {
         return {
-            'source': this.source,
-            'dest': this.dest,
-            'bcdt': Math.abs(parseFloat(this.bcdt)),
-            'acdt': Math.abs(parseFloat(this.acdt)),
-            'wcdt': Math.abs(parseFloat(this.wcdt)),
-            'distribution': this.distribution
+            'name': this.source + "-to-" + this.dest,
+            'source': this.source.trim(),
+            'dest': this.dest.trim(),
+            'bcdt': Math.abs(parseFloat(this.bcdt)) * Utility.MsToNs,
+            'acdt': Math.abs(parseFloat(this.acdt)) * Utility.MsToNs,
+            'wcdt': Math.abs(parseFloat(this.wcdt)) * Utility.MsToNs,
+            'distribution': this.distribution.trim()
         };
     }
     
@@ -134,7 +135,7 @@ class ViewNetworkDelay {
             event.preventDefault();
             
             // Validate the core.
-            if (this.validateNetworkDelay(this.networkDelayRow)) {
+            if (this.validateNetworkDelay(this.networkDelayRaw)) {
                 // Call the handler.
                 handler(this.networkDelayClean);
             }
@@ -172,7 +173,8 @@ class ViewNetworkDelay {
     }
 
     updateNetworkDelays(networkDelays) {
-         this.networkDelays.selectAll('*').remove();
+        this.networkDelays.selectAll('*').remove();
+        const thisRef = this;
 
         const table = this.networkDelays.append('table').attr('class', 'table-responsive table-bordered');
 
@@ -189,17 +191,39 @@ class ViewNetworkDelay {
             const tbody = table.append('tbody');
 
             networkDelays.forEach(delay => {
-                    const row = tbody.append('tr');
-                    row.append('td').text(delay.source).attr('class', 'p-2');
-                    row.append('td').text(delay.dest).attr('class', 'p-2');
-                    row.append('td').text(delay.bcdt).attr('class', 'p-2');
-                    row.append('td').text(delay.acdt).attr('class', 'p-2');
-                    row.append('td').text(delay.wcdt).attr('class', 'p-2');
-                    row.append('td').text(delay.distribution).attr('class', 'p-2');
-                    row.append('td').html(Utility.AddDeleteButton(this.ElementIdPrefix, delay.id)).attr('class', 'p-2');
-                    this.setupDeleteButtonListener(`${delay.id}`);
+                const row = tbody.append('tr');
+                row.append('td').text(delay.source).attr('class', 'p-2');
+                row.append('td').text(delay.dest).attr('class', 'p-2');
+                row.append('td').text(Number(delay.bcdt) / Utility.MsToNs).attr('class', 'p-2');
+                row.append('td').text(Number(delay.acdt) / Utility.MsToNs).attr('class', 'p-2');
+                row.append('td').text(Number(delay.wcdt) / Utility.MsToNs).attr('class', 'p-2');
+                row.append('td').text(delay.distribution).attr('class', 'p-2');
+                row.append('td').html(Utility.AddDeleteButton(this.ElementIdPrefix, delay.name)).attr('class', 'p-2');
+                this.setupDeleteButtonListener(`${delay.name}`);
+
+                row.on('click', function (event) {
+                    const clickedRow = event.currentTarget;
+                    const isSelected = clickedRow.classList.contains('networkDelaySelected');
+
+                    thisRef.networkDelays.node().querySelectorAll('tr')
+                        .forEach(rowElement => rowElement.classList.remove('networkDelaySelected'));
+
+                    if (!isSelected) {
+                        clickedRow.classList.add('networkDelaySelected');
+                        thisRef.populateDelayParameterForm(delay);
+                    }
                 });
+            });
         };
+    }
+
+    populateDelayParameterForm(parameters) {
+        this.source = parameters.source;
+        this.dest = parameters.dest;
+        this.bcdt = Number(parameters.bcdt) / Utility.MsToNs;
+        this.acdt = Number(parameters.acdt) / Utility.MsToNs;
+        this.wcdt = Number(parameters.wcdt) / Utility.MsToNs;
+        this.distribution = parameters.distribution;
     }
 
     updateDeviceSelector(devices) {

@@ -15,7 +15,7 @@ class ModelDatabase {
         dbOpenRequest.onupgradeneeded = function(event) {
             this.db = event.target.result;
             if (event.oldVersion < 3) {
-                this.db.createObjectStore(Model.NetworkDelayStoreName, {autoIncrement: true, unique: true});
+                this.db.createObjectStore(Model.NetworkDelayStoreName, {keyPath: 'name', unique: true});
                 this.db.createObjectStore(Model.DeviceStoreName, {keyPath: 'name', unique: true});
                 
                 if (event.oldVersion < 2) {

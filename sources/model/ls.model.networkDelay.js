@@ -9,8 +9,6 @@ class ModelNetworkDelay {
 
     constructor() { }
     
-    static get Default() { return {'source': 'none', 'dest': 'none', 'delay': 'none'}; }
-    
     // -----------------------------------------------------
     // Registration of callbacks from the controller
     
@@ -37,18 +35,36 @@ class ModelNetworkDelay {
     // Class methods
     
     createNetworkDelay(networkDelay) {
-        // Store core in Database
-        return this.database.putObject(Model.NetworkDelayStoreName, networkDelay)
-            .then(this.refreshViews());
-    }
+        this.getAllNetworkDelays().then(delays => {
+                const existingDelay = delays.find(delay => delay.name === networkDelay.name);
+    
+                if (existingDelay) {
+                    existingDelay.bcdt = networkDelay.bcdt;
+                    existingDelay.acdt = networkDelay.acdt;
+                    existingDelay.wcdt = networkDelay.wcdt;
+                    existingDelay.distribution = networkDelay.distribution;
 
-    deleteNetworkDelay(index) {
-        return this.database.deleteObject(Model.NetworkDelayStoreName, Number(index))
+                    return existingDelay
+                } else {
+                    return networkDelay;
+                }
+            })
+            .then(result => {
+                return this.database.putObject(Model.NetworkDelayStoreName, result);
+            })
+            .then(() => {
+                this.refreshViews();
+            })
+    }
+    
+
+    deleteNetworkDelay(delay) {
+        return this.database.deleteObject(Model.NetworkDelayStoreName, delay)
             .then(this.refreshViews());
     }
     
-    getNetworkDelay(index) {
-        return this.database.getObject(Model.NetworkDelayStoreName, Number(index))
+    getNetworkDelay(delay) {
+        return this.database.getObject(Model.NetworkDelayStoreName, delay)
             .catch(error => {
                 return this.database.getAllObjects(Model.NetworkDelayStoreName)
                     .then(networkDelays => {
@@ -67,7 +83,7 @@ class ModelNetworkDelay {
     
 
     getAllNetworkDelays() {
-        return this.database.getAllObjectsWithKeys(Model.NetworkDelayStoreName);
+        return this.database.getAllObjects(Model.NetworkDelayStoreName);
     }
     
     refreshViews() {

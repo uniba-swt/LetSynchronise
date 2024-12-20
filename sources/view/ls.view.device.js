@@ -142,9 +142,9 @@ class ViewDevice {
         return {
             'name': this.delayDevice.trim(),
             'protocol': this.protocolName.trim(),
-            'bcdt': Math.abs(parseFloat(this.bcdt)),
-            'acdt': Math.abs(parseFloat(this.acdt)),
-            'wcdt': Math.abs(parseFloat(this.wcdt)),
+            'bcdt': Math.abs(parseFloat(this.bcdt)) * Utility.MsToNs,
+            'acdt': Math.abs(parseFloat(this.acdt)) * Utility.MsToNs,
+            'wcdt': Math.abs(parseFloat(this.wcdt)) * Utility.MsToNs,
             'distribution': this.distribution.trim()
         };
     }
@@ -320,6 +320,7 @@ class ViewDevice {
 
     updateDevicesDelay(devices) {
         this.delays.selectAll('*').remove();
+        const thisRef = this;
 
         // To ensure that the devices with delays assigned get displayed
         const filteredData = devices.filter(device => device.delays && device.delays.length > 0);
@@ -343,21 +344,42 @@ class ViewDevice {
                     const row = tbody.append('tr');
                     row.append('td').text(device.name).attr('class', 'p-2');
                     row.append('td').text(delay.protocol).attr('class', 'p-2');
-                    row.append('td').text(delay.bcdt).attr('class', 'p-2');
-                    row.append('td').text(delay.acdt).attr('class', 'p-2');
-                    row.append('td').text(delay.wcdt).attr('class', 'p-2');
+                    row.append('td').text(Number(delay.bcdt) / Utility.MsToNs).attr('class', 'p-2');
+                    row.append('td').text(Number(delay.acdt) / Utility.MsToNs).attr('class', 'p-2');
+                    row.append('td').text(Number(delay.wcdt) / Utility.MsToNs).attr('class', 'p-2');
                     row.append('td').text(delay.distribution).attr('class', 'p-2');
                     row.append('td').html(Utility.AddDeleteButton(delay.protocol, device.name)).attr('class', 'p-2');
                     this.setupDeleteDelayButtonListener(delay.protocol, device.name);
+
+                    row.on('click', function (event) {
+                        const clickedRow = event.currentTarget;
+                        const isSelected = clickedRow.classList.contains('deviceDelaySelected');
+    
+                        thisRef.delays.node().querySelectorAll('tr')
+                            .forEach(rowElement => rowElement.classList.remove('deviceDelaySelected'));
+    
+                        if (!isSelected) {
+                            clickedRow.classList.add('deviceDelaySelected');
+                            thisRef.populateDelayParameterForm(device.name, delay);
+                        }
+                    });
                 });
             });
-        }
-        
+        } 
     }
     
     populateParameterForm(device) {
         this.name = device.name;
         this.speedup = device.speedup;
+    }
+
+    populateDelayParameterForm(deviceName, delayParameters) {
+        this.delayDevice = deviceName;
+        this.protocolName = delayParameters.protocol;
+        this.bcdt = Number(delayParameters.bcdt) / Utility.MsToNs;
+        this.acdt = Number(delayParameters.acdt) / Utility.MsToNs;
+        this.wcdt = Number(delayParameters.wcdt) / Utility.MsToNs;
+        this.distribution = delayParameters.distribution;
     }
     
     toString() {
