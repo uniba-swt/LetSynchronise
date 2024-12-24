@@ -104,6 +104,7 @@ controller.controllerSchedule.modelCore = model.modelCore;
 controller.controllerSchedule.modelDependency = model.modelDependency;
 controller.controllerSchedule.modelEventChain = model.modelEventChain;
 controller.controllerSchedule.modelConstraint = model.modelConstraint;
+controller.controllerSchedule.modelNetworkDelay = model.modelNetworkDelay;
 
 controller.controllerEventChain.view = view.viewEventChain;
 controller.controllerEventChain.model = model.modelEventChain;

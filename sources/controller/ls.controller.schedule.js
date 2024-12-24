@@ -9,6 +9,7 @@ class ControllerSchedule {
     _modelDependency = null;
     _modelEventChain = null;
     _modelConstraint = null;
+    _modelNetworkDelay = null;
         
     constructor() { }
 
@@ -121,6 +122,11 @@ class ControllerSchedule {
     
     get modelConstraint() {
         return this._modelConstraint;
+    }
+
+    set modelNetworkDelay(modelNetworkDelay) {
+        this._modelNetworkDelay = modelNetworkDelay;
+        this._model.registerModelNetworkDelay(this._modelNetworkDelay);
     }
     
     

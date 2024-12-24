@@ -9,6 +9,7 @@ class ModelSchedule {
     modelDependency = null;
     modelEventChain = null;
     modelConstraint = null;
+    modelNetworkDelay = null;
 
     constructor() { }
 
@@ -46,6 +47,10 @@ class ModelSchedule {
     
     registerModelConstraint(modelConstraint) {
         this.modelConstraint = modelConstraint;
+    }
+
+    registerModelNetworkDelay(modelNetworkDelay) {
+        this.modelNetworkDelay = modelNetworkDelay;
     }
     
         
@@ -149,7 +154,7 @@ class ModelSchedule {
         return Promise.all([
             this.database.getObject(Model.EntityInstancesStoreName, dependency.source.task), 
             this.database.getObject(Model.EntityInstancesStoreName, dependency.destination.task)
-        ]).then(([sourceTaskInstances, destinationTaskInstances]) => {      
+        ]).then(async ([sourceTaskInstances, destinationTaskInstances]) => {      
             let instances = [];
             if (dependency.source.task == Model.SystemInterfaceName) {
                 // Dependency is system input --> task
@@ -179,43 +184,134 @@ class ModelSchedule {
                 // Dependency is task --> task
                 const sourceInstances = sourceTaskInstances ? sourceTaskInstances.value : 0;
                 const destinationInstances = destinationTaskInstances ? destinationTaskInstances.value : 0;
-
+                
+                const average = await this.calculateAverageDelay(dependency.source.task, dependency.destination.task, sourceInstances, destinationInstances, sourceTaskInstances.executionTiming)
+                
                 if (destinationInstances.length > 0) {
                     let encapsulationDelays = [];
                     let decapsulationDelays = [];
                     let networkDelays = [];
-					const numberOfInstances = destinationInstances.length - (destinationInstances[destinationInstances.length - 1].letStartTime > makespan);
+                    const numberOfInstances = destinationInstances.length - (destinationInstances[destinationInstances.length - 1].letStartTime > makespan);
 
-					for (let destinationIndex = numberOfInstances - 1; destinationIndex > -1;  destinationIndex--) {
-						// Find latest sourceInstance
-						const destinationInstance = destinationInstances[destinationIndex];
-						const [sourceIndex, sourceInstance] = this.getLatestLetEndTime(sourceInstances, destinationInstance.letStartTime);
+                    for (let destinationIndex = numberOfInstances - 1; destinationIndex > -1;  destinationIndex--) {
+                        // Find latest sourceInstance
+                        const destinationInstance = destinationInstances[destinationIndex];
+                        const [sourceIndex, sourceInstance] = this.getLatestLetEndTime(sourceInstances, destinationInstance.letStartTime - average);
 
-						instances.unshift(this.createDependencyInstance(dependency, sourceIndex, sourceInstance, destinationIndex, destinationInstance));
+                        
+                        let totalDelay = 0;
+                        await Promise.all([this.getDevice(sourceInstance.currentCore), this.getDevice(destinationInstance.currentCore)])
+                            .then(([sourceDevice, destDevice]) => {
+                                if ((sourceDevice && destDevice)
+                                    && (sourceDevice.name != 'Default' && destDevice.name != 'Default')
+                                    && (sourceDevice != destDevice)) {
+                                        this.createProtocolDelayInstances(sourceIndex, sourceInstance.letEndTime, 
+                                            sourceTaskInstances.name + " encapsulation delay", sourceTaskInstances.executionTiming, encapsulationDelays)
+                                        .then(async encapsulationDelay => {
+                                            totalDelay += encapsulationDelay.executionTime;
+                                            let delayDependency = this.createDelayDependency(sourceTaskInstances.name, sourceTaskInstances.name + " encapsulation delay",
+                                                dependency.source.port, dependency.destination.port);
 
-                        if (sourceInstance.currentCore && destinationInstance.currentCore 
-                            && sourceInstance.currentCore != 'Default' && destinationInstance.currentCore != 'Default'
-                            && (sourceInstance.currentCore != destinationInstance.currentCore)) {
-                            this.createProtocolDelayInstances(sourceIndex, sourceInstance.letEndTime, 
-                                sourceTaskInstances.name + " encapsulation delay", sourceTaskInstances.executionTiming, encapsulationDelays)
-                            .then(delay => this.createNetworkDelayInstances(delay.letEndTime, sourceIndex, 
-                                sourceTaskInstances.name, destinationTaskInstances.name, sourceTaskInstances.executionTiming, networkDelays))
-                            .then(delay => this.createProtocolDelayInstances(destinationIndex, delay.letEndTime, 
-                                destinationTaskInstances.name + " decapsulation delay", destinationTaskInstances.executionTiming, decapsulationDelays));
-                        }
-					}  
+                                            instances.unshift(this.createDependencyInstance(delayDependency, sourceIndex, sourceInstance, destinationIndex, encapsulationDelay));
+
+                                            const delay = await this.createNetworkDelayInstances(encapsulationDelay.letEndTime, sourceIndex, 
+                                                sourceTaskInstances.name, destinationTaskInstances.name, sourceTaskInstances.executionTiming, networkDelays)
+
+                                            delayDependency = this.createDelayDependency(sourceTaskInstances.name + " encapsulation delay", sourceTaskInstances.name 
+                                                + " => " + destinationTaskInstances.name + " network delay",
+                                                dependency.source.port, dependency.destination.port);
+
+                                            instances.unshift(this.createDependencyInstance(delayDependency, sourceIndex, encapsulationDelay, destinationIndex, delay))
+                                            return delay
+                                        })
+                                        .then(async networkDelay => {
+                                            totalDelay += networkDelay.executionTime;
+                                            const delay = await this.createProtocolDelayInstances(destinationIndex, networkDelay.letEndTime, 
+                                            destinationTaskInstances.name + " decapsulation delay", destinationTaskInstances.executionTiming, decapsulationDelays)
+
+                                            const delayDependency = this.createDelayDependency(sourceTaskInstances.name 
+                                                + " => " + destinationTaskInstances.name + " network delay", destinationTaskInstances.name + " decapsulation delay",
+                                                dependency.source.port, dependency.destination.port);
+
+                                            instances.unshift(this.createDependencyInstance(delayDependency, sourceIndex, networkDelay, destinationIndex, delay))
+                                            return delay
+                                        })
+                                        .then(decapsulationDelay => {
+                                            const delayDependency = this.createDelayDependency(destinationTaskInstances.name + " decapsulation delay", 
+                                                destinationTaskInstances.name, dependency.source.port, dependency.destination.port)
+                                                
+                                            instances.unshift(this.createDependencyInstance(delayDependency, sourceIndex, decapsulationDelay, destinationIndex, destinationInstance))
+                                            totalDelay += decapsulationDelay.executionTime})
+                                    }
+                                    else {
+                                        instances.unshift(this.createDependencyInstance(dependency, sourceIndex, sourceInstance, destinationIndex, destinationInstance));
+                                    }
+                            })
+                    }  
                 }
             }
-            
+
             // Sort the instances in chronological order and give them an instance number
-            instances.sort((first, second) => { first.receiveEvent.timestamp - second.receiveEvent.timestamp });
+            instances.sort((first, second) => {
+                const timestampComparison = first.sendEvent.timestamp - second.sendEvent.timestamp;
+                return timestampComparison === 0 ? first.receiveEvent.taskInstance - second.receiveEvent.taskInstance : timestampComparison;
+            });
+
             instances.forEach((instance, index) => instance.instance = index);
+
         
             return this.database.putObject(Model.DependencyInstancesStoreName, {
                 'name': dependency.name,
                 'value': instances
             });
         });
+    }
+
+    createDelayDependency(source, destination, sourcePort, destPort) {
+        return {
+            'source': {'task': source, 'port': sourcePort},
+            'destination': {'task': destination, 'port': destPort}
+        }
+    }
+
+    async calculateAverageDelay(sourceName, destName, sourceTasks, destTasks, executionTiming) {
+        let delays = [];
+        for (let i = 0; i < sourceTasks.length; i++) {
+            let delay = 0;
+            if (sourceTasks[i] && destTasks[i]) {
+                const [source, dest] = await Promise.all([this.getDevice(sourceTasks[i].currentCore), this.getDevice(destTasks[i].currentCore)])
+                if (source && dest) {
+                    const networkDelay = await this.modelNetworkDelay.getNetworkDelay(source.name, dest.name)
+                    if (networkDelay) {
+                        if (executionTiming === "BCET") {
+                            delay += (source.delays[0].bcdt + dest.delays[0].bcdt);
+                            delay += networkDelay.bcdt;
+                        } else if (executionTiming === "WCET") {
+                            delay += (source.Delays[0].wcdt + dest.delays[0].wcdt);
+                            delay += networkDelay.wcdt;
+                        } else {
+                            const [sourceTask, destTask] = Promise.all([this.modelEntity.getTask(sourceName), this.modelEntity.getTask(destName)])
+                            if (sourceTask && destTask) {
+                                delay += Utility.RandomInteger(source.delays[0].bcdt, source.delays[0].acdt, source.delays[0].wcdt, sourceTask.distribution)
+                                delay += Utility.RandomInteger(dest.delays[0].bcdt, dest.delays[0].acdt, dest.delays[0].wcdt, destTask.distribution)
+                                delay += Utility.RandomInteger(networkDelay.bcdt, networkDelay.acdt, networkDelay.wcdt, networkDelay.distribution)
+                            }
+                        }
+                        delays.push(delay)
+                    }
+                }
+            }
+        }
+
+        const total = delays.reduce((sum, current) => sum + current, 0);
+
+        return delays.length > 0 ? total / delays.length : 0;
+    }
+
+    getDevice(core) {
+        return this.modelCore.getCore(core)
+            .then(result => this.modelDevice.getDevice(result.device))
+            .then(result => { return result });
     }
 
     createProtocolDelayInstances(taskIndex, previousEndTime, taskName, executionTiming, delays) {

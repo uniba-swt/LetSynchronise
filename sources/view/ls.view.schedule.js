@@ -823,7 +823,6 @@ class ViewSchedule {
             receiveEvent.timestamp = sendEvent.timestamp;
             receivePortName = receiveEvent.port;
         }
-        
         // Create the arrow
         const points = [
             { x: sendEvent.timestamp,                y: yOffset + taskIndices[sendEvent.task] * View.EntityHeight + adjustedSendEntityHeight },

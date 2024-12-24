@@ -62,18 +62,6 @@ class ModelNetworkDelay {
         return this.database.deleteObject(Model.NetworkDelayStoreName, delay)
             .then(this.refreshViews());
     }
-    
-    getNetworkDelay(delay) {
-        return this.database.getObject(Model.NetworkDelayStoreName, delay)
-            .catch(error => {
-                return this.database.getAllObjects(Model.NetworkDelayStoreName)
-                    .then(networkDelays => {
-                        let defaultNetworkDelay = networkDelays;
-
-                        return defaultNetworkDelay;
-                    });
-            });
-    }
 
     getNetworkDelay(source, dest) {
         return this.getAllNetworkDelays().then(delays => {
