@@ -201,7 +201,7 @@ class ModelEntity {
         }
         
         if (invalidTasks.length != 0) {
-            alert(`Tasks ${invalidTasks.join(', ')} are no longer valid.`);
+            // alert(`Tasks ${invalidTasks.join(', ')} are no longer valid.`);
         }
         
         return Promise.all(changedTasks.map(task => this.saveChangedTask(task)))

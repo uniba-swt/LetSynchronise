@@ -9,6 +9,7 @@ class ControllerEntity {
     _modelDependency = null;
     _modelEventChain = null;
     _modelNetworkDelay = null;
+    _modelSchedule = null;
     
     constructor() { }
     
@@ -95,6 +96,15 @@ class ControllerEntity {
         this._modelNetworkDelay = modelNetworkDelay;
         this._model.registerModelNetworkDelay(this._modelNetworkDelay);
     }
+
+    get modelSchedule() {
+        return this._modelSchedule;
+    }
+
+    set modelSchedule(modelSchedule) {
+        this._modelSchedule = modelSchedule;
+        //this._model.registerModelSchedule(this._modelSchedule);
+    }
     
 
     // -----------------------------------------------------
@@ -143,6 +153,7 @@ class ControllerEntity {
     // Callback for notifying the schedule view that tasks have changed.
     callbackNotifyChanges = () => {
         this.viewSchedule.notifyChanges();
+        this._modelSchedule.getSchedule();
     }
     
     

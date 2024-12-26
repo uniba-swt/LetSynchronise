@@ -89,6 +89,7 @@ controller.controllerEntity.modelDevice = model.modelDevice;
 controller.controllerEntity.modelDependency = model.modelDependency;
 controller.controllerEntity.modelEventChain = model.modelEventChain;
 controller.controllerEntity.modelNetworkDelay = model.modelNetworkDelay;
+controller.controllerEntity.modelSchedule = model.modelSchedule;
 
 controller.controllerDependency.view = view.viewDependency;
 controller.controllerDependency.model = model.modelDependency;

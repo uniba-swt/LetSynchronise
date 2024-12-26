@@ -186,6 +186,7 @@ class ModelSchedule {
                 const destinationInstances = destinationTaskInstances ? destinationTaskInstances.value : 0;
                 
                 const average = await this.calculateAverageDelay(dependency.source.task, dependency.destination.task, sourceInstances, destinationInstances, sourceTaskInstances.executionTiming)
+                console.log(average)
                 
                 if (destinationInstances.length > 0) {
                     let encapsulationDelays = [];
@@ -198,13 +199,12 @@ class ModelSchedule {
                         const destinationInstance = destinationInstances[destinationIndex];
                         const [sourceIndex, sourceInstance] = this.getLatestLetEndTime(sourceInstances, destinationInstance.letStartTime - average);
 
-                        
                         let totalDelay = 0;
                         await Promise.all([this.getDevice(sourceInstance.currentCore), this.getDevice(destinationInstance.currentCore)])
                             .then(([sourceDevice, destDevice]) => {
                                 if ((sourceDevice && destDevice)
                                     && (sourceDevice.name != 'Default' && destDevice.name != 'Default')
-                                    && (sourceDevice != destDevice)) {
+                                    && (sourceDevice.name != destDevice.name)) {
                                         this.createProtocolDelayInstances(sourceIndex, sourceInstance.letEndTime, 
                                             sourceTaskInstances.name + " encapsulation delay", sourceTaskInstances.executionTiming, encapsulationDelays)
                                         .then(async encapsulationDelay => {
@@ -239,7 +239,7 @@ class ModelSchedule {
                                         .then(decapsulationDelay => {
                                             const delayDependency = this.createDelayDependency(destinationTaskInstances.name + " decapsulation delay", 
                                                 destinationTaskInstances.name, dependency.source.port, dependency.destination.port)
-                                                
+
                                             instances.unshift(this.createDependencyInstance(delayDependency, sourceIndex, decapsulationDelay, destinationIndex, destinationInstance))
                                             totalDelay += decapsulationDelay.executionTime})
                                     }
