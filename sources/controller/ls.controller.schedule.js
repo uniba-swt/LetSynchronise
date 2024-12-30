@@ -169,10 +169,6 @@ class ControllerSchedule {
     handleZoom = () => {
         this.callbackGetSchedule(this.model.getSchedule());
     }
-
-    handleGetDelay = (source, dest) => {
-        console.log(this._modelDevice);
-    }
     
     
     // -----------------------------------------------------

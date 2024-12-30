@@ -3,12 +3,12 @@
 class ModelDevice {
     updateDevices = null;                 // Callback to function in ls.view.device
     updateDevicesDelay = null;
-    notifyChanges = null;               // Callback to function in ls.view.schedule
 
     database = null;
     modelEntity = null;
     modelCore = null;
     modelNetworkDelay = null;
+    modelDependency = null;
 
     constructor() { }
     
@@ -24,11 +24,6 @@ class ModelDevice {
     registerUpdateDevicesDelayCallback(callback) {
         this.updateDevicesDelay = callback;
     }
-    
-    registerNotifyChangesCallback(callback) {
-        this.notifyChanges = callback;
-    }
-    
 
     // -----------------------------------------------------
     // Registration of model database
@@ -48,6 +43,10 @@ class ModelDevice {
     registerModelNetworkDelay(modelNetworkDelay) {
         this.modelNetworkDelay = modelNetworkDelay;
     }
+
+    registerModelDependency(modelDependency) {
+        this.modelDependency = modelDependency;
+    }
     
     // -----------------------------------------------------
     // Class methods
@@ -56,7 +55,6 @@ class ModelDevice {
         // Store device in Database
         return this.database.putObject(Model.DeviceStoreName, device)
             .then(this.refreshViews());
-            // .then(this.notifyChanges());
     }
 
     addDelay(deviceDelay) {
@@ -84,6 +82,7 @@ class ModelDevice {
 
             return this.database.putObject(Model.DeviceStoreName, device)
                 .then(this.refreshDelayViews())
+                .then(this.modelDependency.updateAllDependencies())
         })
     }
     
@@ -125,7 +124,6 @@ class ModelDevice {
             .then(result => this.updateDevices(result))
             .then(result => this.modelCore.refreshViews())
             .then(result => this.modelNetworkDelay.refreshViews());
-            // .then(result => this.modelEntity.validate());
     }
 
     refreshDelayViews() {

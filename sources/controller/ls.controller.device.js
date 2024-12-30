@@ -7,6 +7,7 @@ class ControllerDevice {
     _modelEntity = null;
     _modelCore = null;
     _modelNetworkDelay = null;
+    _modelDependency = null;
     
     constructor() { }
 
@@ -38,7 +39,6 @@ class ControllerDevice {
         // Register the handlers when setting the model.
         this._model.registerUpdateDevicesCallback(this.callbackUpdateDevices);
         this._model.registerUpdateDevicesDelayCallback(this.callbackUpdateDevicesDelay);
-        this._model.registerNotifyChangesCallback(this.callbackNotifyChanges);
 
         // Hack to populate the View with devices once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
@@ -81,6 +81,11 @@ class ControllerDevice {
     get modelNetworkDelay() {
         return this._modelNetworkDelay;
     }
+
+    set modelDependency(modelDependency) {
+        this._modelDependency = modelDependency;
+        this._model.registerModelDependency(this._modelDependency);
+    }
     
     
     // -----------------------------------------------------
@@ -117,11 +122,6 @@ class ControllerDevice {
 
     callbackUpdateDevicesDelay = (delays) => {
         this.view.updateDevicesDelay(delays);
-    }
-    
-    // Callback for notifying the schedule view that devices have changed.
-    callbackNotifyChanges = () => {
-        // this.viewSchedule.notifyChanges();
     }
     
     toString() {

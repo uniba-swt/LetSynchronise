@@ -5,6 +5,7 @@ class ControllerDependency {
     _model = null;
     _modelEntity = null;
     _modelInterface = null;
+    _modelCore = null;
     
     constructor() { }
 
@@ -68,6 +69,15 @@ class ControllerDependency {
     
     get modelEventChain() {
         return this._modelEventChain;
+    }
+
+    get modelCore() {
+        return this._modelCore;
+    }
+
+    set modelCore(modelCore) {
+        this._modelCore = modelCore;
+        this._model.registerModelCore(this._modelCore);
     }
     
     

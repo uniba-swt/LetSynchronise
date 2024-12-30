@@ -202,7 +202,6 @@ class ViewDevice {
             event.preventDefault();
             
             if (this.validateDelayDevice(this.deviceDelayRaw)) {
-                console.log(this.deviceDelayClean)
                 handler(this.deviceDelayClean);
             }
         });

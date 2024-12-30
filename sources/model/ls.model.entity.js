@@ -121,6 +121,19 @@ class ModelEntity {
         return this.database.getAllObjects(Model.EntityInstancesStoreName);
     }
 
+    deleteDelay(name) {
+        const encapsulation = name.source.task + " encapsulation delay";
+        const network = name.source.task + " => " + name.destination.task + " network delay";
+        const decapsulation = name.destination.task + " decapsulation delay";
+
+        return this.database.deleteObject(Model.EntityStoreName, encapsulation)
+                .then(this.database.deleteObject(Model.EntityInstancesStoreName, encapsulation))
+                .then(this.database.deleteObject(Model.EntityStoreName, network))
+                .then(this.database.deleteObject(Model.EntityInstancesStoreName, network))
+                .then(this.database.deleteObject(Model.EntityStoreName, decapsulation))
+                .then(this.database.deleteObject(Model.EntityInstancesStoreName, decapsulation))
+    }
+
     deleteTask(name) {
         return this.database.deleteObject(Model.EntityStoreName, name)
             .then(this.database.deleteObject(Model.EntityInstancesStoreName, name))
@@ -145,8 +158,6 @@ class ModelEntity {
     }
 
     createProtocolDelay(task, device, position) {
-        console.log(position);
-
         return {
             name: position === 'source' ? task.name + " encapsulation delay" : task.name + " decapsulation delay",
             type: "protocol delay",
@@ -184,7 +195,7 @@ class ModelEntity {
     // Validate the tasks against the platform
     async validate() {
         const allCores = (await this.modelCore.getAllCores()).map(core => core.name);
-        const allTasks = await this.getAllTasks();
+        const allTasks = (await this.getAllTasks()).filter(task => task.type === 'task');
         
         let changedTasks = [];
         let invalidTasks = [];
@@ -201,7 +212,7 @@ class ModelEntity {
         }
         
         if (invalidTasks.length != 0) {
-            // alert(`Tasks ${invalidTasks.join(', ')} are no longer valid.`);
+            alert(`Tasks ${invalidTasks.join(', ')} are no longer valid.`);
         }
         
         return Promise.all(changedTasks.map(task => this.saveChangedTask(task)))

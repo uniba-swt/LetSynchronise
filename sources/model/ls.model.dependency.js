@@ -8,6 +8,7 @@ class ModelDependency {
     modelEntity = null;
     modelInterface = null;
     modelEventChain = null;
+    modelCore = null;
 
     constructor() { }
     
@@ -42,6 +43,10 @@ class ModelDependency {
     registerModelEventChain(modelEventChain) {
         this.modelEventChain = modelEventChain;
     }
+
+    registerModelCore(modelCore) {
+        this.modelCore = modelCore;
+    }
         
     
     // -----------------------------------------------------
@@ -50,12 +55,13 @@ class ModelDependency {
     createDependency(dependency) {
         Promise.all([this.modelEntity.getTask(dependency.source.task),
                     this.modelEntity.getTask(dependency.destination.task)])
-                    .then(([sourceTask, destTask]) => {
-                        const sourceCore = sourceTask.core;
-                        const destCore = destTask.core;
-
-                        if (sourceCore != destCore) {
-                            this.modelEntity.addDelay(sourceTask, destTask)
+                    .then(async ([sourceTask, destTask]) => {
+                        const sourceCore = await this.modelCore.getCore(sourceTask.core);
+                        const destCore = await this.modelCore.getCore(destTask.core);
+                        if (sourceCore.device !== 'Default' &&
+                            destCore.device !== 'Default' &&
+                            sourceCore.device !== destCore.device) {
+                                this.modelEntity.addDelay(sourceTask, destTask)
                         }
                     })
 
@@ -76,9 +82,13 @@ class ModelDependency {
         return this.database.getAllObjects(Model.DependencyInstancesStoreName);
     }
 
-    
+    updateAllDependencies() {
+        return this.getAllDependencies().then(result => result.map(dependency => this.createDependency(dependency)));
+    }
+
     deleteDependency(name) {
-        return this.database.deleteObject(Model.DependencyInstancesStoreName, name)
+        return this.getDependency(name).then(result => this.modelEntity.deleteDelay(result))
+            .then(this.database.deleteObject(Model.DependencyInstancesStoreName, name))
             .then(this.database.deleteObject(Model.DependencyStoreName, name))
             .then(this.refreshViews());
     }

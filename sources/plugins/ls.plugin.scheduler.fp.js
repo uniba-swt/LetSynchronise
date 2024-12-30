@@ -18,8 +18,9 @@ class PluginSchedulerFp {
         
         const systemElementSelected = ['schedule', 'tasks'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
-        const tasksInstances = await system[Model.EntityInstancesStoreName];
+        const tasksInstances = (await system[Model.EntityInstancesStoreName]).filter(entity => entity.type === 'task');
         const tasksParameters = await system[Model.EntityStoreName];
+        console.log(system)
 
         const coreElementSelected = ['cores'];
         const cores = (await Plugin.DatabaseContentsGet(coreElementSelected))[Model.CoreStoreName];

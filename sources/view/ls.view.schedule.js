@@ -457,7 +457,6 @@ class ViewSchedule {
     
     // Draw just the tasks and their instances.
     drawSchedule(tasksInstances) {
-        // console.log(tasksInstances)
         // Create function to scale the data along the x-axis of fixed-length
         const scale =
         d3.scaleLinear()
@@ -566,10 +565,15 @@ class ViewSchedule {
                        .attr('height', View.BarHeight)
                       .on('mouseover', () => {
                         const title = `<b>${taskInstances.name}</b> instance ${instance.instance}`;
-                        const periodInterval = `Period interval: [${Utility.FormatTimeString(instance.periodStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.periodEndTime / Utility.MsToNs, 2)}]ms`;
+                        let periodInterval = ''
+                        if (!taskInstances.name.includes('delay')) {
+                            periodInterval = `Period interval: [${Utility.FormatTimeString(instance.periodStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.periodEndTime / Utility.MsToNs, 2)}]ms`;
+                        }
                         const letInterval = `LET interval: [${Utility.FormatTimeString(instance.letStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.letEndTime / Utility.MsToNs, 2)}]ms`;
                         const executionTime = `Total execution time: ${Utility.FormatTimeString(instance.executionTime / Utility.MsToNs, 2)}ms`;
-                        tooltip.innerHTML = `${title} <br/> ${letInterval} <br/> ${periodInterval} <br/> ${executionTime}`;
+                        tooltip.innerHTML = !taskInstances.name.includes('delay') ? 
+                            `${title} <br/> ${letInterval} <br/> ${periodInterval} <br/> ${executionTime}` 
+                            : `${title} <br/> ${letInterval} <br/> ${executionTime}`;
                         tooltip.style.visibility = 'visible';
                       })
                       .on('mousemove', (event) => {
@@ -585,38 +589,38 @@ class ViewSchedule {
                       });
             
             if (instance.type === "task") {
-                            // Add the task's execution times
-            const executionIntervals = instance.executionIntervals.map(interval => Utility.Interval.FromJson(interval));
-            for (const interval of executionIntervals) {
-                graphInfo.append('rect')
-                           .attr('x', scale(interval.startTime))
-                           .attr('y', View.BarHeight - View.ExecutionHeight)
-                           .attr('width', scale(interval.duration))
-                           .attr('height', View.ExecutionHeight)
-                           .attr('class', 'time')
-                         .on('mouseover', () => {
-                           const core = `Core ${interval.core}`;
-                           const executionInterval = `Execution interval: [${Utility.FormatTimeString(interval.startTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString((interval.startTime + interval.duration) / Utility.MsToNs, 2)}]ms`;
-                           tooltip.innerHTML = `${core} <br/> ${executionInterval}`;
-                           tooltip.style.visibility = 'visible';
-                         })
-                         .on('mousemove', (event) => {
-                           const [pointerX, pointerY] = d3.pointer(event, window);
-                           tooltip.style.top = `${pointerY - 3 * View.BarHeight}px`;
-                           tooltip.style.left = `${pointerX}px`;
-                         })
-                         .on('mouseout', () => {
-                           tooltip.style.visibility = 'hidden';
-                         });
-            }
-            
-            // Add vertical line at the start of the period
-            graphInfo.append('line')
-                       .attr('x1', scale(instance.periodStartTime))
-                       .attr('x2', scale(instance.periodStartTime))
-                       .attr('y1', View.BarHeight + View.TickHeight + View.BarMargin)
-                       .attr('y2', 0)
-                       .attr('class', 'boundary');
+                // Add the task's execution times
+                const executionIntervals = instance.executionIntervals.map(interval => Utility.Interval.FromJson(interval));
+                for (const interval of executionIntervals) {
+                    graphInfo.append('rect')
+                            .attr('x', scale(interval.startTime))
+                            .attr('y', View.BarHeight - View.ExecutionHeight)
+                            .attr('width', scale(interval.duration))
+                            .attr('height', View.ExecutionHeight)
+                            .attr('class', 'time')
+                            .on('mouseover', () => {
+                            const core = `Core ${interval.core}`;
+                            const executionInterval = `Execution interval: [${Utility.FormatTimeString(interval.startTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString((interval.startTime + interval.duration) / Utility.MsToNs, 2)}]ms`;
+                            tooltip.innerHTML = `${core} <br/> ${executionInterval}`;
+                            tooltip.style.visibility = 'visible';
+                            })
+                            .on('mousemove', (event) => {
+                            const [pointerX, pointerY] = d3.pointer(event, window);
+                            tooltip.style.top = `${pointerY - 3 * View.BarHeight}px`;
+                            tooltip.style.left = `${pointerX}px`;
+                            })
+                            .on('mouseout', () => {
+                            tooltip.style.visibility = 'hidden';
+                            });
+                }
+                
+                // Add vertical line at the start of the period
+                graphInfo.append('line')
+                        .attr('x1', scale(instance.periodStartTime))
+                        .attr('x2', scale(instance.periodStartTime))
+                        .attr('y1', View.BarHeight + View.TickHeight + View.BarMargin)
+                        .attr('y2', 0)
+                        .attr('class', 'boundary');
             }
 
         }

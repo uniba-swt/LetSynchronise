@@ -18,12 +18,10 @@ class PluginSchedulerEdf {
         
         const scheduleElementSelected = ['schedule'];
         const schedule = await Plugin.DatabaseContentsGet(scheduleElementSelected);
-        const tasksInstances = (await schedule[Model.EntityInstancesStoreName]).filter(entity => entity.type === "task");
+        const tasksInstances = (await schedule[Model.EntityInstancesStoreName]).filter(entity => entity.type === 'task');
 
         const coreElementSelected = ['cores'];
         const cores = (await Plugin.DatabaseContentsGet(coreElementSelected))[Model.CoreStoreName];
-
-        console.log(tasksInstances)
 
         const result = this.Algorithm(cores, tasksInstances, makespan);
         if (!result.schedulable) {
@@ -61,9 +59,9 @@ class PluginSchedulerEdf {
         let taskInstanceIndices = new Array(tasksInstances.length).fill(0);
         
         // For all task instances, set their remaining execution times.
-        tasksInstances.forEach(taskInstances =>
+        tasksInstances.forEach(taskInstances => {
             taskInstances.value.forEach(instance => instance.remainingExecutionTime = instance.executionTime)
-        );
+        });
         
         // Schedule all the task instances in chronological (LET start time) and
         // earliest deadline order.
@@ -81,15 +79,9 @@ class PluginSchedulerEdf {
                 if (taskInstanceIndices[taskNumber] == null) {
                     continue;
                 }
-
-                if (task.type != 'task') {
-                    continue;
-                }
                 
                 const taskInstance = task.value[taskInstanceIndices[taskNumber]];
                 const taskInstanceDeadline = taskInstance.letEndTime;
-
-                // console.log("taskInstance: " + taskInstance + " taskInstanceDeadline: " + taskInstanceDeadline);
                 
                 // Use the core defined by the design, otherwise, select an available core.
                 let availableCore = taskInstance.currentCore;

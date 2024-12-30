@@ -186,7 +186,6 @@ class ModelSchedule {
                 const destinationInstances = destinationTaskInstances ? destinationTaskInstances.value : 0;
                 
                 const average = await this.calculateAverageDelay(dependency.source.task, dependency.destination.task, sourceInstances, destinationInstances, sourceTaskInstances.executionTiming)
-                console.log(average)
                 
                 if (destinationInstances.length > 0) {
                     let encapsulationDelays = [];
@@ -287,10 +286,10 @@ class ModelSchedule {
                             delay += (source.delays[0].bcdt + dest.delays[0].bcdt);
                             delay += networkDelay.bcdt;
                         } else if (executionTiming === "WCET") {
-                            delay += (source.Delays[0].wcdt + dest.delays[0].wcdt);
+                            delay += (source.delays[0].wcdt + dest.delays[0].wcdt);
                             delay += networkDelay.wcdt;
                         } else {
-                            const [sourceTask, destTask] = Promise.all([this.modelEntity.getTask(sourceName), this.modelEntity.getTask(destName)])
+                            const [sourceTask, destTask] = await Promise.all([this.modelEntity.getTask(sourceName), this.modelEntity.getTask(destName)])
                             if (sourceTask && destTask) {
                                 delay += Utility.RandomInteger(source.delays[0].bcdt, source.delays[0].acdt, source.delays[0].wcdt, sourceTask.distribution)
                                 delay += Utility.RandomInteger(dest.delays[0].bcdt, dest.delays[0].acdt, dest.delays[0].wcdt, destTask.distribution)
@@ -335,13 +334,14 @@ class ModelSchedule {
 
      createProtocolDelayInstance(taskIndex, previousEndTime, executionTiming, parameters, taskName) {
         let executionTime = null;
+        console.log(parameters)
 
         if (executionTiming === 'BCET') {
             executionTime = parameters.bcdt;
         } else if (executionTiming === 'WCET') {
             executionTime = parameters.wcdt;
         } else {
-            executionTime = Utility.RandomInteger(parameters.bcet, parameters.acet, parameters.wcet, parameters.distribution);
+            executionTime = Utility.RandomInteger(parameters.bcdt, parameters.acdt, parameters.wcdt, parameters.distribution);
         }
         
         return {
@@ -380,7 +380,7 @@ class ModelSchedule {
         } else if (executionTiming === 'WCET') {
             executionTime = parameters.wcdt;
         } else {
-            executionTime = Utility.RandomInteger(parameters.bcet, parameters.acet, parameters.wcet, parameters.distribution);
+            executionTime = Utility.RandomInteger(parameters.bcdt, parameters.acdt, parameters.wcdt, parameters.distribution);
         }
         
         return {
