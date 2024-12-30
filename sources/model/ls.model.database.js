@@ -159,7 +159,7 @@ class ModelDatabase {
             'memories'     : Model.MemoryStoreName,
             'inputs'       : Model.SystemInputStoreName,
             'outputs'      : Model.SystemOutputStoreName,
-            'entities'        : Model.EntityStoreName,
+            'entities'     : Model.EntityStoreName,
             'dependencies' : Model.DependencyStoreName,
             'eventChains'  : Model.EventChainStoreName,
             'constraints'  : Model.ConstraintStoreName,

@@ -334,7 +334,6 @@ class ModelSchedule {
 
      createProtocolDelayInstance(taskIndex, previousEndTime, executionTiming, parameters, taskName) {
         let executionTime = null;
-        console.log(parameters)
 
         if (executionTiming === 'BCET') {
             executionTime = parameters.bcdt;

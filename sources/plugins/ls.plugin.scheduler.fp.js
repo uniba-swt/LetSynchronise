@@ -16,7 +16,7 @@ class PluginSchedulerFp {
         await Plugin.CreateAllTaskInstances(makespan, executionTiming);
         await Plugin.CreateAllDependencyAndEventChainInstances(makespan);
         
-        const systemElementSelected = ['schedule', 'tasks'];
+        const systemElementSelected = ['schedule', 'entities'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
         const tasksInstances = (await system[Model.EntityInstancesStoreName]).filter(entity => entity.type === 'task');
         const tasksParameters = await system[Model.EntityStoreName];

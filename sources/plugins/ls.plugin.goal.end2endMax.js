@@ -11,9 +11,9 @@ class PluginGoalEnd2EndMax {
     
     // Updates the task parameters to maximise end-to-end reponse times.
     static async Result(scheduler, makespan) {
-        const taskElementSelected = ['tasks'];
+        const taskElementSelected = ['entities'];
         const system = await Plugin.DatabaseContentsGet(taskElementSelected);
-        let tasks = system[Model.EntityStoreName];
+        let tasks = (system[Model.EntityStoreName]).filter(entity => entity.type === 'task');
         
         this.Algorithm(tasks);
 

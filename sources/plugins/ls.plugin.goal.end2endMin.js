@@ -14,10 +14,10 @@ class PluginGoalEnd2EndMin {
     // and contracts the LET intervals based on min/max execution intervals.
     static async Result(scheduler, makespan) {
         // Retrieve the LET system.
-        const systemElementSelected = ['cores', 'tasks', 'eventChains', 'constraints'];
+        const systemElementSelected = ['cores', 'entities', 'eventChains', 'constraints'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
         const cores = await system[Model.CoreStoreName];
-        const tasks = await system[Model.EntityStoreName];
+        const tasks = (await system[Model.EntityStoreName]).filter(task => task.type === 'task');
         const eventChains = await system[Model.EventChainStoreName];
         const constraints = await system[Model.ConstraintStoreName];
         
