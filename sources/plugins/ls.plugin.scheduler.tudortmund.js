@@ -17,7 +17,7 @@ class PluginSchedulerTuDortmund {
         await Plugin.DeleteSchedule();
         
         // Retrieve the LET system.
-        const systemElementSelected = ['cores', 'inputs','outputs','tasks','dependencies','eventChains','constraints'];
+        const systemElementSelected = ['cores', 'inputs','outputs','entities','dependencies','eventChains','constraints'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
         
         // Add the executionTiming to system so that the external tool can access it.

@@ -91,9 +91,10 @@ class ModelEntity {
                     // Check whether the task port still exists.
                     if (parameters.outputs.some(output => (output == dependency.source.port)) == false) {
                         dependenciesToRemove.push(dependency);
-                    }
+                    } 
                 }
             }
+            this.modelDependency.updateAllDependencies();
         }
 
         // Store task parameters into Database
@@ -105,6 +106,7 @@ class ModelEntity {
     // Saves the changes to an existing task, without forcing the view to refresh
     saveChangedTask(task) {
         return this.database.putObject(Model.EntityStoreName, task)
+            .then(this.modelDependency.updateAllDependencies())
             .then(this.notifyChanges());
     }
     
@@ -121,17 +123,23 @@ class ModelEntity {
         return this.database.getAllObjects(Model.EntityInstancesStoreName);
     }
 
-    deleteDelay(name) {
-        const encapsulation = name.source.task + " encapsulation delay";
-        const network = name.source.task + " => " + name.destination.task + " network delay";
-        const decapsulation = name.destination.task + " decapsulation delay";
+    createDelay(delay) {
+        return this.database.putObject(Model.EntityStoreName, delay)
+    }
 
-        return this.database.deleteObject(Model.EntityStoreName, encapsulation)
-                .then(this.database.deleteObject(Model.EntityInstancesStoreName, encapsulation))
-                .then(this.database.deleteObject(Model.EntityStoreName, network))
-                .then(this.database.deleteObject(Model.EntityInstancesStoreName, network))
-                .then(this.database.deleteObject(Model.EntityStoreName, decapsulation))
-                .then(this.database.deleteObject(Model.EntityInstancesStoreName, decapsulation))
+    deleteDelay(name) {
+        if (name) {
+            const encapsulation = name.source.task + " encapsulation delay";
+            const network = name.source.task + " => " + name.destination.task + " network delay";
+            const decapsulation = name.destination.task + " decapsulation delay";
+    
+            return this.database.deleteObject(Model.EntityStoreName, encapsulation)
+                    .then(this.database.deleteObject(Model.EntityInstancesStoreName, encapsulation))
+                    .then(this.database.deleteObject(Model.EntityStoreName, network))
+                    .then(this.database.deleteObject(Model.EntityInstancesStoreName, network))
+                    .then(this.database.deleteObject(Model.EntityStoreName, decapsulation))
+                    .then(this.database.deleteObject(Model.EntityInstancesStoreName, decapsulation))
+        }
     }
 
     deleteTask(name) {
@@ -141,7 +149,7 @@ class ModelEntity {
     }
 
     addDelay(source, dest) {
-        this.createTask(source);
+        this.createDelay(source);
     
         this.addProtocolDelay(source, "source")
         .then(this.addNetworkDelay(source, dest))
@@ -153,7 +161,7 @@ class ModelEntity {
         return this.modelCore.getCore(task.core)
         .then(core => this.modelDevice.getDevice(core.device)
         .then(device => {
-            this.createTask(this.createProtocolDelay(task, device, position));
+            this.createDelay(this.createProtocolDelay(task, device, position));
         }))
     }
 
@@ -175,7 +183,7 @@ class ModelEntity {
         return Promise.all([this.modelCore.getCore(source.core), this.modelCore.getCore(dest.core)])
         .then(([sourceCore, destCore]) => this.modelNetworkDelay.getNetworkDelay(sourceCore.device, destCore.device)
         .then(delay => {
-            this.createTask(this.createNetworkDelay(source, dest, delay));
+            this.createDelay(this.createNetworkDelay(source, dest, delay));
         }))
     }
 

@@ -147,25 +147,64 @@ class ViewNetworkDelay {
     }
     
     
-    validateNetworkDelay(networkDelay) {
-        if (networkDelay.source == networkDelay.dest) {
+    validateNetworkDelay(parameters) {
+        if (parameters.source == parameters.dest) {
             alert('Source and destination cannot be the same');
             return false;
         }
         
-        if (isNaN(networkDelay.bcdt) || isNaN(networkDelay.acdt) || isNaN(networkDelay.wcdt)) {
+        if (isNaN(parameters.bcdt) || isNaN(parameters.acdt) || isNaN(parameters.wcdt)) {
             alert('Delay values should be a decimal number.');
             return false;
         }
 
-        if (parseFloat(networkDelay.bcdt) < 0 || parseFloat(networkDelay.acdt) < 0 || parseFloat(networkDelay.wcdt) < 0) {
+        if (parseFloat(parameters.bcdt) < 0 || parseFloat(parameters.acdt) < 0 || parseFloat(parameters.wcdt) < 0) {
             alert('Network delay cannot be negative.');
             return false;
         }
-        if ((networkDelay.bcdt.split('.').length > 1 && networkDelay.bcdt.split('.')[1].length > 2) ||
-            (networkDelay.acdt.split('.').length > 1 && networkDelay.acdt.split('.')[1].length > 2) ||
-            (networkDelay.wcdt.split('.').length > 1 && networkDelay.wcdt.split('.')[1].length > 2)) {
+        if ((parameters.bcdt.split('.').length > 1 && parameters.bcdt.split('.')[1].length > 2) ||
+            (parameters.acdt.split('.').length > 1 && parameters.acdt.split('.')[1].length > 2) ||
+            (parameters.wcdt.split('.').length > 1 && parameters.wcdt.split('.')[1].length > 2)) {
             alert('Network delay cannot have more than 2 decimal places.');
+            return false;
+        }
+
+        if (parseFloat(parameters.bcdt) <= 0) {
+            alert('BCDT has to be greater than 0.');
+            return false;
+        }
+        if (parseFloat(parameters.acdt) <= 0) {
+            alert('ACDT has to be greater than 0.');
+            return false;
+        }
+        if (parseFloat(parameters.wcdt) <= 0) {
+            alert('WCDT has to be greater than 0.');
+            return false;
+        }
+
+        const bcdt = parameters.bcdt * Utility.MsToNs;
+        const acdt = parameters.acdt * Utility.MsToNs;
+        const wcdt = parameters.wcdt * Utility.MsToNs;
+
+        if (!Number.isSafeInteger(bcdt)) {
+            alert('BCDT is unable to be represented with nanosecond precision.');
+            return false;
+        }
+        if (!Number.isSafeInteger(acdt)) {
+            alert('ACDT is unable to be represented with nanosecond precision.');
+            return false;
+        }
+        if (!Number.isSafeInteger(wcdt)) {
+            alert('WCDT is unable to be represented with nanosecond precision.');
+            return false;
+        }
+
+        if (wcdt < bcdt) {
+            alert('WCDT cannot be less than BCET.');
+            return false;
+        }
+        if (wcdt < acdt || acdt < bcdt) {
+            alert('ACDT cannot be less than BCDT or greater than WCDT.');
             return false;
         }
         

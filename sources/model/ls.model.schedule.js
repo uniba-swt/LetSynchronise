@@ -400,15 +400,21 @@ class ModelSchedule {
     // Each event chain instance is linear with no branching.
     // Event chain instances are found via forward reachability from the event chain's starting dependency.
     createEventChainInstances(dependencyInstances, chain) {
+        const filteredInstances = dependencyInstances.map(dependencyInstance => 
+            dependencyInstance.value.filter(instance => 
+                !instance.receiveEvent.task.includes("delay") && !instance.sendEvent.task.includes("delay")
+            )
+        );        
+        
         let nextSegment = chain.generator();
-        const startDependencies = this.getDependencyInstances(dependencyInstances, nextSegment.next().value);
+        const startDependencies = this.getDependencyInstances(filteredInstances, nextSegment.next().value);
         let chainInstances = startDependencies.map(dependency => new ChainInstance(chain.name, dependency));
 
         for (const segment of nextSegment) {
             let updatedChainInstances = [];
             for (const chainInstance of chainInstances) {
 
-                const nextEventInstances = this.getSpecificDependencyInstances(dependencyInstances, segment, chainInstance.last.segment.receiveEvent.taskInstance);
+                const nextEventInstances = this.getSpecificDependencyInstances(filteredInstances, segment, chainInstance.last.segment.receiveEvent.taskInstance);
                 for (const nextEventInstance of nextEventInstances) {
                     let chainInstanceCopy = chainInstance.copy;
                     chainInstanceCopy.last.successor = new ChainInstance(null, nextEventInstance);

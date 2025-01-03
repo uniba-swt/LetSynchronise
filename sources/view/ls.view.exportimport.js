@@ -111,7 +111,7 @@ class ViewExportImport {
             keys.push("outputs");
         }
         if (this.tasksChecked) {
-            keys.push("tasks");
+            keys.push("entities");
         }
         if (this.dependenciesChecked) {
             keys.push("dependencies");

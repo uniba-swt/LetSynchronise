@@ -201,7 +201,7 @@ class ViewDevice {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
             event.preventDefault();
             
-            if (this.validateDelayDevice(this.deviceDelayRaw)) {
+            if (this.validateDeviceDelay(this.deviceDelayRaw)) {
                 handler(this.deviceDelayClean);
             }
         });
@@ -248,27 +248,66 @@ class ViewDevice {
         return true;
     }
 
-    validateDelayDevice(delayDevice) {
-        if (!delayDevice.protocol || delayDevice.protocol.trim() == '') {
+    validateDeviceDelay(parameters) {
+        if (!parameters.protocol || parameters.protocol.trim() == '') {
             alert('Protocol name cannot be blank.');
             return false;
         }
-        if (delayDevice.protocol.trim().toLowerCase() == 'default') {
-            alert(`Protocol name cannot be "${delayDevice.protocol.trim()}".`);
+        if (parameters.protocol.trim().toLowerCase() == 'default') {
+            alert(`Protocol name cannot be "${parameters.protocol.trim()}".`);
             return false;
         }
-        if (!/^[A-Za-z]+$/.test(delayDevice.protocol)) {
+        if (!/^[A-Za-z]+$/.test(parameters.protocol)) {
             alert('Protocol name should only include alphabet letters.');
             return false;
         }
 
-        if (isNaN(delayDevice.bcdt) || isNaN(delayDevice.acdt) || isNaN(delayDevice.wcdt)) {
+        if (isNaN(parameters.bcdt) || isNaN(parameters.acdt) || isNaN(parameters.wcdt)) {
             alert('Delay values should be a decimal number.');
             return false;
         }
-        if (!delayDevice.bcdt || delayDevice.bcdt.trim() == '' 
-            || !delayDevice.acdt || delayDevice.acdt.trim() == '' || !delayDevice.wcdt || delayDevice.wcdt.trim() == '') {
+        if (!parameters.bcdt || parameters.bcdt.trim() == '' 
+            || !parameters.acdt || parameters.acdt.trim() == '' || !parameters.wcdt || parameters.wcdt.trim() == '') {
             alert('Delay values cannot be empty. Put 1 if unsure.');
+            return false;
+        }
+
+        if (parseFloat(parameters.bcdt) <= 0) {
+            alert('BCDT has to be greater than 0.');
+            return false;
+        }
+        if (parseFloat(parameters.acdt) <= 0) {
+            alert('ACDT has to be greater than 0.');
+            return false;
+        }
+        if (parseFloat(parameters.wcdt) <= 0) {
+            alert('WCDT has to be greater than 0.');
+            return false;
+        }
+
+        const bcdt = parameters.bcdt * Utility.MsToNs;
+        const acdt = parameters.acdt * Utility.MsToNs;
+        const wcdt = parameters.wcdt * Utility.MsToNs;
+
+        if (!Number.isSafeInteger(bcdt)) {
+            alert('BCDT is unable to be represented with nanosecond precision.');
+            return false;
+        }
+        if (!Number.isSafeInteger(acdt)) {
+            alert('ACDT is unable to be represented with nanosecond precision.');
+            return false;
+        }
+        if (!Number.isSafeInteger(wcdt)) {
+            alert('WCDT is unable to be represented with nanosecond precision.');
+            return false;
+        }
+
+        if (wcdt < bcdt) {
+            alert('WCDT cannot be less than BCET.');
+            return false;
+        }
+        if (wcdt < acdt || acdt < bcdt) {
+            alert('ACDT cannot be less than BCDT or greater than WCDT.');
             return false;
         }
         

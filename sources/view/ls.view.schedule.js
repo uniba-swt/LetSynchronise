@@ -476,20 +476,19 @@ class ViewSchedule {
             this.drawTaskInstances(taskInstances, svgElement, scale, index);
             taskIndices[taskInstances.name] = index;
 
-            for (const instance of taskInstances.value) {
-                if (instance.type === "task") {
+            if (taskInstances.type === 'task') {
+                for (const instance of taskInstances.value) {
                     for (const interval of instance.executionIntervals) {
                         if (coreIndices[interval.core] === undefined) {
                             coreIndices[interval.core] = Object.keys(coreIndices).length;
                         }
                     }
                 }
-
             }
         }
         
         // Draw the system load.
-        this.drawSystemLoad(sortedEntities, svgElement, scale, sortedEntities.length, coreIndices);
+        this.drawSystemLoad(sortedEntities.filter(entity => entity.type === 'task'), svgElement, scale, sortedEntities.length, coreIndices);
         
         // Set the SVG viewport.
         const svgWidth = View.Width;
@@ -558,18 +557,36 @@ class ViewSchedule {
 
         for (const instance of instances) {
             // Add the task's LET duration
+
+            if (taskInstances.name.includes('encapsulation')) {
+                graphInfo.append('rect').attr('class', 'sender')
+            }
+
             graphInfo.append('rect')
                        .attr('id', `${taskInstances.name}-${instance.instance}`)
                        .attr('x', scale(instance.letStartTime))
                        .attr('width', scale(instance.letEndTime - instance.letStartTime))
                        .attr('height', View.BarHeight)
+                       .attr('class', () => {
+                        if (taskInstances.name.includes('encapsulation')) {
+                            return 'sender'
+                        }
+                        if (taskInstances.name.includes('decapsulation')) {
+                            return 'receiver'
+                        }
+                        if (taskInstances.name.includes('network')) {
+                            return 'network'
+                        }
+                       })
                       .on('mouseover', () => {
                         const title = `<b>${taskInstances.name}</b> instance ${instance.instance}`;
                         let periodInterval = ''
                         if (!taskInstances.name.includes('delay')) {
                             periodInterval = `Period interval: [${Utility.FormatTimeString(instance.periodStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.periodEndTime / Utility.MsToNs, 2)}]ms`;
                         }
-                        const letInterval = `LET interval: [${Utility.FormatTimeString(instance.letStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.letEndTime / Utility.MsToNs, 2)}]ms`;
+                        const letInterval = taskInstances.type === 'task' ? 
+                            `LET interval: [${Utility.FormatTimeString(instance.letStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.letEndTime / Utility.MsToNs, 2)}]ms`
+                            : `Execution interval: [${Utility.FormatTimeString(instance.letStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.letEndTime / Utility.MsToNs, 2)}]ms`;;
                         const executionTime = `Total execution time: ${Utility.FormatTimeString(instance.executionTime / Utility.MsToNs, 2)}ms`;
                         tooltip.innerHTML = !taskInstances.name.includes('delay') ? 
                             `${title} <br/> ${letInterval} <br/> ${periodInterval} <br/> ${executionTime}` 
@@ -587,8 +604,8 @@ class ViewSchedule {
                       .on('click', () => {
                         this.updateRelatedEventChains(taskInstances.name, instance.instance);
                       });
-            
-            if (instance.type === "task") {
+
+            if (taskInstances.type === "task") {
                 // Add the task's execution times
                 const executionIntervals = instance.executionIntervals.map(interval => Utility.Interval.FromJson(interval));
                 for (const interval of executionIntervals) {
@@ -683,35 +700,33 @@ class ViewSchedule {
         // Add the tasks' execution times
         for (const [index, taskInstances] of tasksInstances.entries()) {
             for (const instance of taskInstances.value) {
-                if (instance.type == "task") {
-                    const executionIntervals = instance.executionIntervals.map(interval => Utility.Interval.FromJson(interval));
-                    for (const interval of executionIntervals) {
-                        const coreIndex = coreIndices[interval.core];
-                        
-                        graphInfo.append('rect')
-                                   .attr('x', scale(interval.startTime))
-                                   .attr('y', View.BarHeight - (coreIndex + 1) * View.ExecutionHeight)
-                                   .attr('width', scale(interval.duration))
-                                   .attr('height', View.ExecutionHeight)
-                                   .attr('class', 'time')
-                                 .on('mouseover', () => {
-                                   const title = `<b>${taskInstances.name}</b> instance ${instance.instance}`;
-                                   const core = `Core ${interval.core}`;
-                                   const executionInterval = `Execution interval: [${Utility.FormatTimeString(interval.startTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString((interval.startTime + interval.duration) / Utility.MsToNs, 2)}]ms`;
-                                   tooltip.innerHTML = `${title} <br/> ${core} <br/> ${executionInterval}`;
-                                   tooltip.style.visibility = 'visible';
-                                 })
-                                 .on('mousemove', (event) => {
-                                   const [pointerX, pointerY] = d3.pointer(event, window);
-                                   tooltip.style.top = `${pointerY - 4.3 * View.BarHeight}px`;
-                                   tooltip.style.left = `${pointerX}px`;
-                                 })
-                                 .on('mouseout', () => {
-                                   tooltip.style.visibility = 'hidden';
-                                 });
-                    }
-                }
 
+                const executionIntervals = instance.executionIntervals.map(interval => Utility.Interval.FromJson(interval));
+                for (const interval of executionIntervals) {
+                    const coreIndex = coreIndices[interval.core];
+                    
+                    graphInfo.append('rect')
+                                .attr('x', scale(interval.startTime))
+                                .attr('y', View.BarHeight - (coreIndex + 1) * View.ExecutionHeight)
+                                .attr('width', scale(interval.duration))
+                                .attr('height', View.ExecutionHeight)
+                                .attr('class', 'time')
+                                .on('mouseover', () => {
+                                const title = `<b>${taskInstances.name}</b> instance ${instance.instance}`;
+                                const core = `Core ${interval.core}`;
+                                const executionInterval = `Execution interval: [${Utility.FormatTimeString(interval.startTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString((interval.startTime + interval.duration) / Utility.MsToNs, 2)}]ms`;
+                                tooltip.innerHTML = `${title} <br/> ${core} <br/> ${executionInterval}`;
+                                tooltip.style.visibility = 'visible';
+                                })
+                                .on('mousemove', (event) => {
+                                const [pointerX, pointerY] = d3.pointer(event, window);
+                                tooltip.style.top = `${pointerY - 4.3 * View.BarHeight}px`;
+                                tooltip.style.left = `${pointerX}px`;
+                                })
+                                .on('mouseout', () => {
+                                tooltip.style.visibility = 'hidden';
+                                });
+                }
             }
         }
 

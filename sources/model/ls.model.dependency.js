@@ -53,9 +53,12 @@ class ModelDependency {
     // Class methods
 
     createDependency(dependency) {
-        Promise.all([this.modelEntity.getTask(dependency.source.task),
-                    this.modelEntity.getTask(dependency.destination.task)])
-                    .then(async ([sourceTask, destTask]) => {
+        if (!dependency.source.task.includes('system')
+            && !dependency.destination.task.includes("system")) {
+            Promise.all([this.modelEntity.getTask(dependency.source.task),
+                this.modelEntity.getTask(dependency.destination.task)])
+                .then(async ([sourceTask, destTask]) => {
+                    if (sourceTask?.core && destTask?.core) {
                         const sourceCore = await this.modelCore.getCore(sourceTask.core);
                         const destCore = await this.modelCore.getCore(destTask.core);
                         if (sourceCore.device !== 'Default' &&
@@ -63,7 +66,10 @@ class ModelDependency {
                             sourceCore.device !== destCore.device) {
                                 this.modelEntity.addDelay(sourceTask, destTask)
                         }
-                    })
+                    }
+                })
+        }
+
 
         // Store dependency in Database
         return this.database.putObject(Model.DependencyStoreName, dependency)
