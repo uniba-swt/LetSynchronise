@@ -53,27 +53,34 @@ class ModelDependency {
     // Class methods
 
     createDependency(dependency) {
-        if (!dependency.source.task.includes('system')
-            && !dependency.destination.task.includes("system")) {
-            Promise.all([this.modelEntity.getTask(dependency.source.task),
-                this.modelEntity.getTask(dependency.destination.task)])
-                .then(async ([sourceTask, destTask]) => {
-                    if (sourceTask?.core && destTask?.core) {
-                        const sourceCore = await this.modelCore.getCore(sourceTask.core);
-                        const destCore = await this.modelCore.getCore(destTask.core);
-                        if (sourceCore.device !== 'Default' &&
-                            destCore.device !== 'Default' &&
-                            sourceCore.device !== destCore.device) {
-                                this.modelEntity.addDelay(sourceTask, destTask)
-                        }
-                    }
-                })
-        }
-
-
         // Store dependency in Database
         return this.database.putObject(Model.DependencyStoreName, dependency)
             .then(this.refreshViews());
+    }
+
+    createDelayDependency(dependency, sourceDevice, destDevice, delayType) {
+        if (delayType === 'encapsulation') {
+            return {
+                'source': {'task': dependency.source.task, 'port': dependency.source.port},
+                'destination': {'task': sourceDevice.name + " " + delayType + " delay", 'port': dependency.destination.port}
+            }
+        } else if (delayType === 'network') {
+            return {
+                'source': {'task': sourceDevice.name + " encapsulation delay", 'port': dependency.source.port},
+                'destination': {'task': sourceDevice.name + " => " + destDevice.name + " " + delayType + " delay", 'port': dependency.destination.port}
+            }
+        } else if (delayType === 'decapsulation') {
+            return {
+                'source': {'task': sourceDevice.name + " => " + destDevice.name + " " + " network delay", 'port': dependency.source.port},
+                'destination': {'task': destDevice.name + " " + delayType + " delay", 'port': dependency.destination.port}
+            }
+        } else {
+            return {
+                'source': {'task': sourceDevice.name + " decapsulation delay", 'port': dependency.source.port},
+                'destination': {'task': dependency.destination.task, 'port': dependency.destination.port}
+            }
+        }
+
     }
     
     getDependency(name) {
@@ -88,13 +95,8 @@ class ModelDependency {
         return this.database.getAllObjects(Model.DependencyInstancesStoreName);
     }
 
-    updateAllDependencies() {
-        return this.getAllDependencies().then(result => result.map(dependency => this.createDependency(dependency)));
-    }
-
     deleteDependency(name) {
-        return this.getDependency(name).then(result => this.modelEntity.deleteDelay(result))
-            .then(this.database.deleteObject(Model.DependencyInstancesStoreName, name))
+        return this.database.deleteObject(Model.DependencyInstancesStoreName, name)
             .then(this.database.deleteObject(Model.DependencyStoreName, name))
             .then(this.refreshViews());
     }

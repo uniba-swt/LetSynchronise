@@ -153,6 +153,7 @@ Plugin.Register(PluginSchedulerFp);
 Plugin.Register(PluginSchedulerRandom);
 Plugin.Register(PluginSchedulerRm);
 Plugin.Register(PluginSchedulerTuDortmund);
+Plugin.Register(PluginSchedulerUntitled);
 
 // Register optimisation goal plug-ins.
 Plugin.Register(PluginGoalEnd2EndMax);

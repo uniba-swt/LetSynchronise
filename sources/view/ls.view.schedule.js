@@ -527,7 +527,7 @@ class ViewSchedule {
         if (instances.length == 0) {
             return;
         }
-        
+
         const firstPeriodStartTime = instances[0].periodStartTime;
         const lastPeriodDuration = instances[instances.length - 1].periodEndTime - instances[instances.length - 1].periodStartTime;
 

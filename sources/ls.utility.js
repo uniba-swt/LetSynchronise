@@ -240,25 +240,37 @@ class Utility {
 
         let sorted = [];
         for (const task of tasks) {
-            const decapsulationDelay = entities.find(entity => entity.type === "protocol delay" && entity.name.includes(task.name + " decapsulation"));
+            const decapsulationDelay = entities.find(entity => entity.name.includes(task.name + " decapsulation"));
             if (decapsulationDelay) {
                 sorted.push(decapsulationDelay);
             }
 
             sorted.push(task);
 
-            const encapsulationDelay = entities.find(entity => entity.type === "protocol delay" && entity.name.includes(task.name + " encapsulation"));
+            const encapsulationDelay = entities.find(entity => entity.name.includes(task.name + " encapsulation"));
             if (encapsulationDelay) {
                 sorted.push(encapsulationDelay);
             }
             
-            const networkDelay = entities.find(entity => entity.type == "network delay" && entity.name.includes(task.name + " =>"));
+            const networkDelay = entities.find(entity => entity.name.includes(task.name + " =>"));
             if (networkDelay) {
                 sorted.push(networkDelay);
             }
         }
-        
+    
         return sorted;
+    }
+
+    static GetDelayTime(delay, executionTiming) {
+        if (executionTiming === 'BCET') {
+            return delay.bcdt;
+        }
+        if (executionTiming === 'WCET') {
+            return delay.wcdt;
+        }
+        else {
+            return Utility.RandomInteger(delay.bcdt, delay.acdt, delay.wcdt, delay.distribution);
+        }
     }
     
 }

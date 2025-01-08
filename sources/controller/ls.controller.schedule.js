@@ -146,6 +146,9 @@ class ControllerSchedule {
             const makespan = this.view.schedulingParametersClean.makespan;
             const scheduler = this.view.schedulingParametersClean.scheduler;
             const executionTiming = this.view.schedulingParametersClean.executionTiming;
+            const untitledScheduler = Plugin.GetPlugin(Plugin.Type.Scheduler, 'Untitled Task Scheduling')
+            untitledScheduler.Result(makespan, executionTiming);
+
             scheduler.Result(makespan, executionTiming)
                 .then(result => this.callbackGetSchedule(this.model.getSchedule()));
         } else {

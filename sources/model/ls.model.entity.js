@@ -94,7 +94,6 @@ class ModelEntity {
                     } 
                 }
             }
-            this.modelDependency.updateAllDependencies();
         }
 
         // Store task parameters into Database
@@ -106,7 +105,6 @@ class ModelEntity {
     // Saves the changes to an existing task, without forcing the view to refresh
     saveChangedTask(task) {
         return this.database.putObject(Model.EntityStoreName, task)
-            .then(this.modelDependency.updateAllDependencies())
             .then(this.notifyChanges());
     }
     
@@ -123,21 +121,14 @@ class ModelEntity {
         return this.database.getAllObjects(Model.EntityInstancesStoreName);
     }
 
-    createDelay(delay) {
-        return this.database.putObject(Model.EntityStoreName, delay)
-    }
-
     deleteDelay(name) {
         if (name) {
             const encapsulation = name.source.task + " encapsulation delay";
             const network = name.source.task + " => " + name.destination.task + " network delay";
             const decapsulation = name.destination.task + " decapsulation delay";
     
-            return this.database.deleteObject(Model.EntityStoreName, encapsulation)
-                    .then(this.database.deleteObject(Model.EntityInstancesStoreName, encapsulation))
-                    .then(this.database.deleteObject(Model.EntityStoreName, network))
+            return this.database.deleteObject(Model.EntityInstancesStoreName, encapsulation)
                     .then(this.database.deleteObject(Model.EntityInstancesStoreName, network))
-                    .then(this.database.deleteObject(Model.EntityStoreName, decapsulation))
                     .then(this.database.deleteObject(Model.EntityInstancesStoreName, decapsulation))
         }
     }
@@ -148,56 +139,73 @@ class ModelEntity {
             .then(result => this.refreshViews());
     }
 
-    addDelay(source, dest) {
-        this.createDelay(source);
-    
-        this.addProtocolDelay(source, "source")
-        .then(this.addNetworkDelay(source, dest))
-        .then(this.addProtocolDelay(dest, "dest"))
-    }
-    
-
-    addProtocolDelay(task, position) {
-        return this.modelCore.getCore(task.core)
-        .then(core => this.modelDevice.getDevice(core.device)
-        .then(device => {
-            this.createDelay(this.createProtocolDelay(task, device, position));
-        }))
-    }
-
-    createProtocolDelay(task, device, position) {
+    createDelayInstance(sourceEndTime, executionTime, sourceDevice, destDevice, dependency) {
         return {
-            name: position === 'source' ? task.name + " encapsulation delay" : task.name + " decapsulation delay",
-            type: "protocol delay",
-            deviceName: device.name,
-            protocol: device.delays[0].protocol,
-            acdt: device.delays[0].acdt,
-            bcdt: device.delays[0].bcdt,
-            wcdt: device.delays[0].wcdt,
-            distribution: device.delays[0].distribution,
-        }
+            'instance'          : -1,
+            'letStartTime'      : sourceEndTime,
+            'letEndTime'        : sourceEndTime + executionTime,
+            'executionTime'     : executionTime,
+            'sourceDevice'      : sourceDevice.name,
+            'destinationDevice' : destDevice.name,
+            'dependency'        : dependency.name
+        };
     }
 
-
-    addNetworkDelay(source, dest) {
-        return Promise.all([this.modelCore.getCore(source.core), this.modelCore.getCore(dest.core)])
-        .then(([sourceCore, destCore]) => this.modelNetworkDelay.getNetworkDelay(sourceCore.device, destCore.device)
-        .then(delay => {
-            this.createDelay(this.createNetworkDelay(source, dest, delay));
-        }))
+    createAllDelayInstances(dependency, encapsulationDelays, networkDelays, decapsulationDelays) {
+        this.createDelayInstances(dependency, "encapsulation", encapsulationDelays);
+        this.createDelayInstances(dependency, "network", networkDelays);
+        this.createDelayInstances(dependency, "decapsulation", decapsulationDelays);
     }
 
-    createNetworkDelay(source, dest, delay) {
-        return {
-            name: source.name + " => " + dest.name + " network delay",
-            type: "network delay",
-            source: source.name + " (" + delay.source + ")",
-            dest: dest.name + " (" + delay.dest + ")",
-            acdt: delay.acdt,
-            bcdt: delay.bcdt,
-            wcdt: delay.wcdt,
-            distribution: delay.distribution,
+    createDelayInstances(dependency, type, delays) {
+        let delayType = type.toLowerCase();
+        let data = {}
+
+        if (delayType === 'network') {
+            data = {
+                'name': dependency.source.task + " => " + dependency.destination.task + " " + delayType + " delay",
+                'type': delayType,
+                'dependency': dependency.name,
+                'value': delays
+            }
+        } else if (delayType === 'encapsulation') {
+            data = {
+                'name': dependency.source.task + " " + delayType + " delay",
+                'type': delayType,
+                'dependency': dependency.name,
+                'value': delays
+            }
+        } else if (delayType === 'decapsulation') {
+            data = {
+                'name': dependency.destination.task + " " + delayType + " delay",
+                'type': delayType,
+                'dependency': dependency.name,
+                'value': delays
+            }
         }
+
+        this.getAllTaskInstances().then(entities => {
+            const delays = entities.filter(entity => entity.type !== 'task');
+
+            let found = false;
+            for (const delay of delays) {
+                if (delay.name === data.name) {
+                    found = true;
+
+                    if (!delay.dependency.includes(data.dependency)) {
+                        delay.dependency += `, ${data.dependency}`;
+                        delay.value = [...delay.value, ...data.value];
+                        this.database.putObject(Model.EntityInstancesStoreName, delay);
+                    }
+                    break;
+                }
+            }
+
+            if (!found) {
+                this.database.putObject(Model.EntityInstancesStoreName, data);
+            }
+        })
+
     }
     
     // Validate the tasks against the platform
