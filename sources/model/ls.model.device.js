@@ -82,7 +82,6 @@ class ModelDevice {
 
             return this.database.putObject(Model.DeviceStoreName, device)
                 .then(this.refreshDelayViews())
-                .then(this.modelDependency.updateAllDependencies())
         })
     }
     

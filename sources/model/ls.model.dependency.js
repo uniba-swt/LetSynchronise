@@ -58,29 +58,28 @@ class ModelDependency {
             .then(this.refreshViews());
     }
 
-    createDelayDependency(dependency, sourceDevice, destDevice, delayType) {
+    createDelayDependency(dependency, delayType) {
         if (delayType === 'encapsulation') {
             return {
                 'source': {'task': dependency.source.task, 'port': dependency.source.port},
-                'destination': {'task': sourceDevice.name + " " + delayType + " delay", 'port': dependency.destination.port}
+                'destination': {'task': dependency.source.task + " " + delayType + " delay", 'port': dependency.destination.port}
             }
         } else if (delayType === 'network') {
             return {
-                'source': {'task': sourceDevice.name + " encapsulation delay", 'port': dependency.source.port},
-                'destination': {'task': sourceDevice.name + " => " + destDevice.name + " " + delayType + " delay", 'port': dependency.destination.port}
+                'source': {'task': `${dependency.source.task} encapsulation delay`, 'port': dependency.source.port},
+                'destination': {'task': `${dependency.source.task} => ${dependency.destination.task} ${delayType} delay`, 'port': dependency.destination.port}
             }
         } else if (delayType === 'decapsulation') {
             return {
-                'source': {'task': sourceDevice.name + " => " + destDevice.name + " " + " network delay", 'port': dependency.source.port},
-                'destination': {'task': destDevice.name + " " + delayType + " delay", 'port': dependency.destination.port}
+                'source': {'task': `${dependency.source.task} => ${dependency.destination.task} network delay`, 'port': dependency.source.port},
+                'destination': {'task': `${dependency.destination.task} ${delayType} delay`, 'port': dependency.destination.port}
             }
         } else {
             return {
-                'source': {'task': sourceDevice.name + " decapsulation delay", 'port': dependency.source.port},
+                'source': {'task': `${dependency.destination.task} decapsulation delay`, 'port': dependency.source.port},
                 'destination': {'task': dependency.destination.task, 'port': dependency.destination.port}
             }
         }
-
     }
     
     getDependency(name) {

@@ -195,6 +195,10 @@ class ModelEntity {
                     if (!delay.dependency.includes(data.dependency)) {
                         delay.dependency += `, ${data.dependency}`;
                         delay.value = [...delay.value, ...data.value];
+
+                        delay.value.sort((first, second) => first.letStartTime - second.letStartTime);
+                        delay.value.forEach((instance, index) => instance.instance = index);
+
                         this.database.putObject(Model.EntityInstancesStoreName, delay);
                     }
                     break;

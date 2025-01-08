@@ -370,21 +370,25 @@ class ModelSchedule {
                         let sourceDevice = null, destDevice = null, networkDelay = null;
 
                         let flag = true;
-
                         while (flag) {
                             if (result) {
                                 [sourceDevice, destDevice, networkDelay] = result;
-                                const totalDelay = this.calculateTotalDelay(sourceDevice, destDevice, networkDelay, executionTiming)
-    
+                                const totalDelay = this.calculateTotalDelay(sourceDevice, destDevice, networkDelay, executionTiming);
+                        
                                 let [newSourceIndex, newSourceInstance] = this.getLatestLetEndTime(sourceInstances.value, 
-                                                                            destInstance.letStartTime - totalDelay);
-                                
+                                                                                destInstance.letStartTime - totalDelay);
+                        
                                 if (sourceIndex !== newSourceIndex) {
-                                    result = await this.getDevicesAndNetworkDelay(sourceInstance, destInstance);
+                                    result = await this.getDevicesAndNetworkDelay(newSourceInstance, destInstance);
                                     sourceIndex = newSourceIndex;
                                     sourceInstance = newSourceInstance;
                                 } else {
-                                    flag = false;
+                                    if (newSourceInstance.currentCore.device !== destInstance.currentCore.device) {
+                                        flag = false;
+                                    } else {
+                                        result = null;
+                                        flag = false;
+                                    }
                                 }
                             } else {
                                 flag = false;
@@ -395,22 +399,22 @@ class ModelSchedule {
                             encapsulationDelays.unshift(this.modelEntity.createDelayInstance(sourceInstance.letEndTime,
                                                         Utility.GetDelayTime(sourceDevice.delays[0], executionTiming),
                                                         sourceDevice, destDevice, currentDependency));
-                            const encapDependency = this.modelDependency.createDelayDependency(currentDependency, sourceDevice, destDevice, 'encapsulation');
+                            const encapDependency = this.modelDependency.createDelayDependency(currentDependency, 'encapsulation');
                             instances.unshift(this.createDependencyInstance(encapDependency, sourceIndex, sourceInstance, destIndex, encapsulationDelays[0]));
                             
                             networkDelays.unshift(this.modelEntity.createDelayInstance(encapsulationDelays[0].letEndTime,
                                                     Utility.GetDelayTime(networkDelay, executionTiming),
                                                     sourceDevice, destDevice, currentDependency));
-                            const netDependency = this.modelDependency.createDelayDependency(currentDependency, sourceDevice, destDevice, 'network');
+                            const netDependency = this.modelDependency.createDelayDependency(currentDependency, 'network');
                             instances.unshift(this.createDependencyInstance(netDependency, sourceIndex, encapsulationDelays[0], destIndex, networkDelays[0]))
 
                             decapsulationDelays.unshift(this.modelEntity.createDelayInstance(networkDelays[0].letEndTime,
                                                         Utility.GetDelayTime(destDevice.delays[0], executionTiming),
                                                         sourceDevice, destDevice, currentDependency));
-                            const decapDependency = this.modelDependency.createDelayDependency(currentDependency, sourceDevice, destDevice, 'decapsulation');
+                            const decapDependency = this.modelDependency.createDelayDependency(currentDependency, 'decapsulation');
                             instances.unshift(this.createDependencyInstance(decapDependency, sourceIndex, networkDelays[0], destIndex, decapsulationDelays[0]));
 
-                            const destDependency = this.modelDependency.createDelayDependency(currentDependency, sourceDevice);
+                            const destDependency = this.modelDependency.createDelayDependency(currentDependency);
                             instances.unshift(this.createDependencyInstance(destDependency, sourceIndex, decapsulationDelays[0], destIndex, destInstance));
                         } else {
                             instances.unshift(this.createDependencyInstance(currentDependency, sourceIndex, sourceInstance, destIndex, destInstance));

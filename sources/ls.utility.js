@@ -240,6 +240,11 @@ class Utility {
 
         let sorted = [];
         for (const task of tasks) {
+            const networkDelay = entities.find(entity => entity.name.includes("=> " + task.name));
+            if (networkDelay) {
+                sorted.push(networkDelay);
+            }
+
             const decapsulationDelay = entities.find(entity => entity.name.includes(task.name + " decapsulation"));
             if (decapsulationDelay) {
                 sorted.push(decapsulationDelay);
@@ -251,13 +256,8 @@ class Utility {
             if (encapsulationDelay) {
                 sorted.push(encapsulationDelay);
             }
-            
-            const networkDelay = entities.find(entity => entity.name.includes(task.name + " =>"));
-            if (networkDelay) {
-                sorted.push(networkDelay);
-            }
         }
-    
+
         return sorted;
     }
 

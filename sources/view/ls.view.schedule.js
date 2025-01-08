@@ -850,6 +850,8 @@ class ViewSchedule {
             { x: receiveEvent.timestamp,             y: yOffset + taskIndices[receiveEvent.task] * View.EntityHeight + adjustedReceiveEntityHeight }
         ]
 
+        // console.log(taskIndices, points, sendEvent, receiveEvent)
+
         let line = d3.line()
                      .x((point) => point.x)
                      .y((point) => point.y)

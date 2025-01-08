@@ -153,7 +153,6 @@ class ControllerEntity {
     // Callback for notifying the schedule view that tasks have changed.
     callbackNotifyChanges = () => {
         this.viewSchedule.notifyChanges();
-        this._modelSchedule.getSchedule();
     }
     
     
