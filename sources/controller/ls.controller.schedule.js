@@ -146,10 +146,11 @@ class ControllerSchedule {
             const makespan = this.view.schedulingParametersClean.makespan;
             const scheduler = this.view.schedulingParametersClean.scheduler;
             const executionTiming = this.view.schedulingParametersClean.executionTiming;
-            // const untitledScheduler = Plugin.GetPlugin(Plugin.Type.Scheduler, 'Untitled Task Scheduling')
-            // untitledScheduler.Result(makespan, executionTiming);
+            const untitledScheduler = Plugin.GetPlugin(Plugin.Type.Scheduler, 'Untitled Task Scheduling')
+            untitledScheduler.Result(makespan, executionTiming);
 
             scheduler.Result(makespan, executionTiming)
+                .then(result => this.model.createDelayRelatedInstances())
                 .then(result => this.callbackGetSchedule(this.model.getSchedule()));
         } else {
             this.callbackGetSchedule(this.model.getSchedule());
@@ -164,6 +165,7 @@ class ControllerSchedule {
         const goal = this.view.optimiserParametersClean.goal;
         goal.Result(scheduler, makespan)
             .then(result => scheduler.Result(makespan, executionTiming))
+            .then(result => this.model.createDelayRelatedInstances())
             .then(result => this.modelEntity.refreshViews())
             .then(result => this.callbackGetSchedule(this.model.getSchedule()));
     }

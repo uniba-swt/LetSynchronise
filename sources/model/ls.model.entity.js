@@ -123,9 +123,9 @@ class ModelEntity {
 
     deleteDelay(name) {
         if (name) {
-            const encapsulation = name.source.task + " encapsulation delay";
-            const network = name.source.task + " => " + name.destination.task + " network delay";
-            const decapsulation = name.destination.task + " decapsulation delay";
+            const encapsulation = `${name.source.task} => ${name.destination.task} encapsulation delay`;
+            const network = `${name.source.task} => ${name.destination.task} network delay`;
+            const decapsulation = `${name.source.task} => ${name.destination.task} decapsulation delay`;
     
             return this.database.deleteObject(Model.EntityInstancesStoreName, encapsulation)
                     .then(this.database.deleteObject(Model.EntityInstancesStoreName, network))
@@ -163,21 +163,21 @@ class ModelEntity {
 
         if (delayType === 'network') {
             data = {
-                'name': dependency.source.task + " => " + dependency.destination.task + " " + delayType + " delay",
+                'name': `${dependency.source.task} => ${dependency.destination.task} ${delayType} delay`,
                 'type': delayType,
                 'dependency': dependency.name,
                 'value': delays
             }
         } else if (delayType === 'encapsulation') {
             data = {
-                'name': dependency.source.task + " " + delayType + " delay",
+                'name': `${dependency.source.task} => ${dependency.destination.task} ${delayType} delay`,
                 'type': delayType,
                 'dependency': dependency.name,
                 'value': delays
             }
         } else if (delayType === 'decapsulation') {
             data = {
-                'name': dependency.destination.task + " " + delayType + " delay",
+                'name': `${dependency.source.task} => ${dependency.destination.task} ${delayType} delay`,
                 'type': delayType,
                 'dependency': dependency.name,
                 'value': delays

@@ -420,7 +420,7 @@ class ViewSchedule {
         const tasksInstances = await schedule['promiseAllTasksInstances'];
         const dependenciesSet = await schedule['promiseAllDependenciesInstances'];
         const eventChainInstances = await schedule['promiseAllEventChainInstances'];
-                
+
         if (taskParametersSet.length < 1) {
             this.prologue = 0;
             this.hyperPeriod = 0;
@@ -428,6 +428,7 @@ class ViewSchedule {
             this.updatePrologue(taskParametersSet);
             this.updateHyperPeriod(taskParametersSet);
         }
+        console.log(tasksInstances)
         
         // Draw new task schedule.
         const {svgElement, scale, taskIndices, coreIndices} = this.drawSchedule(tasksInstances);
@@ -849,8 +850,7 @@ class ViewSchedule {
             { x: receiveEvent.timestamp - xOffset,   y: yOffset + taskIndices[receiveEvent.task] * View.EntityHeight + adjustedReceiveEntityHeight },
             { x: receiveEvent.timestamp,             y: yOffset + taskIndices[receiveEvent.task] * View.EntityHeight + adjustedReceiveEntityHeight }
         ]
-
-        // console.log(taskIndices, points, sendEvent, receiveEvent)
+        //console.log(sendEvent, receiveEvent, points, taskIndices)
 
         let line = d3.line()
                      .x((point) => point.x)

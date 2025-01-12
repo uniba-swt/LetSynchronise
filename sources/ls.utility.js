@@ -237,24 +237,32 @@ class Utility {
 
     static SortEntitiesInOrder(entities) {
         let tasks = entities.filter(entity => entity.type === 'task');
+        console.log(entities)
 
         let sorted = [];
         for (const task of tasks) {
-            const networkDelay = entities.find(entity => entity.name.includes("=> " + task.name));
-            if (networkDelay) {
-                sorted.push(networkDelay);
+            const networkDelays = entities.filter(entity => entity.name.includes(`=> ${task.name} network`));
+            if (networkDelays.length > 0) {
+                for (const delay of networkDelays) {
+                    sorted.push(delay)
+                }
             }
 
-            const decapsulationDelay = entities.find(entity => entity.name.includes(task.name + " decapsulation"));
-            if (decapsulationDelay) {
-                sorted.push(decapsulationDelay);
+            const decapsulationDelays = entities.filter(entity => entity.name.includes(`=> ${task.name} decapsulation`));
+            if (decapsulationDelays) {
+                for (const delay of decapsulationDelays) {
+                    sorted.push(delay)
+                }
             }
 
             sorted.push(task);
 
-            const encapsulationDelay = entities.find(entity => entity.name.includes(task.name + " encapsulation"));
-            if (encapsulationDelay) {
-                sorted.push(encapsulationDelay);
+            const pattern = new RegExp(`${task.name}\\s*=>\\s*.*\\s*encapsulation`);
+            const encapsulationDelays = entities.filter(entity => pattern.test(entity.name));
+            if (encapsulationDelays) {
+                for (const delay of encapsulationDelays) {
+                    sorted.push(delay)
+                }
             }
         }
 

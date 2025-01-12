@@ -62,21 +62,21 @@ class ModelDependency {
         if (delayType === 'encapsulation') {
             return {
                 'source': {'task': dependency.source.task, 'port': dependency.source.port},
-                'destination': {'task': dependency.source.task + " " + delayType + " delay", 'port': dependency.destination.port}
+                'destination': {'task': `${dependency.source.task} => ${dependency.destination.task} ${delayType} delay`, 'port': dependency.destination.port}
             }
         } else if (delayType === 'network') {
             return {
-                'source': {'task': `${dependency.source.task} encapsulation delay`, 'port': dependency.source.port},
+                'source': {'task': `${dependency.source.task} => ${dependency.destination.task} encapsulation delay`, 'port': dependency.source.port},
                 'destination': {'task': `${dependency.source.task} => ${dependency.destination.task} ${delayType} delay`, 'port': dependency.destination.port}
             }
         } else if (delayType === 'decapsulation') {
             return {
                 'source': {'task': `${dependency.source.task} => ${dependency.destination.task} network delay`, 'port': dependency.source.port},
-                'destination': {'task': `${dependency.destination.task} ${delayType} delay`, 'port': dependency.destination.port}
+                'destination': {'task': `${dependency.source.task} => ${dependency.destination.task} ${delayType} delay`, 'port': dependency.destination.port}
             }
         } else {
             return {
-                'source': {'task': `${dependency.destination.task} decapsulation delay`, 'port': dependency.source.port},
+                'source': {'task': `${dependency.source.task} => ${dependency.destination.task} decapsulation delay`, 'port': dependency.source.port},
                 'destination': {'task': dependency.destination.task, 'port': dependency.destination.port}
             }
         }

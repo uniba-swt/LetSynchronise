@@ -333,19 +333,18 @@ class ModelSchedule {
     }
     
     // Get task schedule for given makespan.
-    getSchedule() {
-        this.createDelayRelatedInstances();
-
+    async getSchedule() {
         return {
             'promiseAllTasks': this.modelEntity.getAllTasks(),
             'promiseAllTasksInstances': this.database.getAllObjects(Model.EntityInstancesStoreName),
             'promiseAllDependenciesInstances': this.modelDependency.getAllDependencyInstances(),
             'promiseAllEventChainInstances': this.modelEventChain.getAllEventChainsInstances()
-        };
+        }
     }
+    
 
     createDelayRelatedInstances() {
-        Promise.all([this.modelDependency.getAllDependencyInstances(),this.modelDependency.getAllDependencies()])
+        return Promise.all([this.modelDependency.getAllDependencyInstances(),this.modelDependency.getAllDependencies()])
         .then(async ([dependencyInstances, dependencies]) => {
             const filteredDependencies = dependencyInstances.map(dependency => ({
                 ...dependency,
@@ -366,6 +365,11 @@ class ModelSchedule {
                     for (let destIndex = destInstances.value.length - 1; destIndex > -1; destIndex--) {
                         const destInstance = destInstances.value[destIndex];
                         let [sourceIndex, sourceInstance] = this.getLatestLetEndTime(sourceInstances.value, destInstance.letStartTime)
+
+                        if(sourceInstance.letEndTime === 0) {
+                            continue;
+                        }
+
                         let result = await this.getDevicesAndNetworkDelay(sourceInstance, destInstance);
                         let sourceDevice = null, destDevice = null, networkDelay = null;
 
@@ -393,6 +397,10 @@ class ModelSchedule {
                             } else {
                                 flag = false;
                             }
+                        }
+
+                        if(sourceInstance.letEndTime === 0) {
+                            continue;
                         }
 
                         if (result) {
@@ -427,7 +435,7 @@ class ModelSchedule {
                     });
         
                     instances.forEach((instance, index) => instance.instance = index);
-                    
+
                     if (encapsulationDelays.length > 0 &&
                         networkDelays.length > 0 &&
                         decapsulationDelays.length > 0) {
