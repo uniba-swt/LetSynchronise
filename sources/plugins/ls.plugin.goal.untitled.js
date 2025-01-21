@@ -1,22 +1,22 @@
 'use strict';
 
-class PluginGoalIlp {
+class PluginGoalUntitled {
     // Plug-in Metadata
-    static get Name()     { return 'Minimise End-to-End Response Times (ILP, Single Core)'; }
-    static get Author()   { return 'Matthew Kuo'; }
+    static get Name()     { return 'Untitled Task Scheduling'; }
+    static get Author()   { return 'Jamie Lee'; }
     static get Type()     { return Plugin.Type.Goal; }
-    static get Platform() { return Plugin.Platform.SingleCore; }
-    static get Category() { return Plugin.Category.ResponseTime; }
+    static get Platform() { return Plugin.Platform.MultiCore; }
+    static get Category() { return Plugin.Category.NonPreemptive; }
 
-    // Triggers an external web tool (https://github.com/mkuo005/LET-LP-Scheduler) to create 
-    // and solve an ILP formulation of the system to minimise end-to-end response times.
-    // Only supports task sets that have been allocated to the same core.
+    
+    // Triggers an external web tool (https://github.com/mkuo005/end-to-end) to schedule  
+    // task executions.
     static async Result(scheduler, makespan) {
         // Delete existing schedule.
         await Plugin.DeleteSchedule();
         
         // Retrieve the LET system.
-        const systemElementSelected = ['cores', 'inputs','outputs','entities','dependencies','eventChains','constraints'];
+        const systemElementSelected = ['cores', 'inputs','outputs','entities','dependencies','eventChains','constraints', 'devices', 'networkDelays'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
         
         // Add the makespan to system so that the ILP Solver can access it.
@@ -34,17 +34,10 @@ class PluginGoalIlp {
             .then(result => Plugin.DatabaseContentsSet(optimisedSchedule, scheduleElementSelected))
             .then(result => Plugin.CreateAllDependencyAndEventChainInstances(makespan));
     }
-    
-    // Trigger an external optimisation tool.
+
+    // Trigger an external scheduling tool.
     static async Algorithm(system) {
-        // ILP formulation only supports single core systems.
-        if (system[Model.CoreStoreName] != null && Object.keys(system[Model.CoreStoreName]).length > 1) {
-            if (!confirm('Multicore systems are not supported by this plugin! Proceed with the optimisation?')) {
-                return null;
-            }
-        }
-    
-        const url = 'http://localhost:8181/ilp'
+        const url = 'http://localhost:8181/untitled'
         return fetch(url, {
             method: 'POST',
             body: JSON.stringify(system),
@@ -61,5 +54,6 @@ class PluginGoalIlp {
             return null;
         });
     }
+
     
 }

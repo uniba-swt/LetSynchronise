@@ -428,7 +428,7 @@ class ViewSchedule {
             this.updatePrologue(taskParametersSet);
             this.updateHyperPeriod(taskParametersSet);
         }
-        console.log(tasksInstances)
+        // console.log(tasksInstances)
         
         // Draw new task schedule.
         const {svgElement, scale, taskIndices, coreIndices} = this.drawSchedule(tasksInstances);

@@ -237,10 +237,19 @@ class Utility {
 
     static SortEntitiesInOrder(entities) {
         let tasks = entities.filter(entity => entity.type === 'task');
-        console.log(entities)
+        // console.log(entities)
 
         let sorted = [];
         for (const task of tasks) {
+
+            const pattern = new RegExp(`.*\\s*=>\\s*${task.name}\\s*encapsulation`);
+            const encapsulationDelays = entities.filter(entity => pattern.test(entity.name));
+            if (encapsulationDelays) {
+                for (const delay of encapsulationDelays) {
+                    sorted.push(delay)
+                }
+            }
+            
             const networkDelays = entities.filter(entity => entity.name.includes(`=> ${task.name} network`));
             if (networkDelays.length > 0) {
                 for (const delay of networkDelays) {
@@ -257,13 +266,7 @@ class Utility {
 
             sorted.push(task);
 
-            const pattern = new RegExp(`${task.name}\\s*=>\\s*.*\\s*encapsulation`);
-            const encapsulationDelays = entities.filter(entity => pattern.test(entity.name));
-            if (encapsulationDelays) {
-                for (const delay of encapsulationDelays) {
-                    sorted.push(delay)
-                }
-            }
+
         }
 
         return sorted;
