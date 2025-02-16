@@ -159,7 +159,7 @@ Plugin.Register(PluginGoalEnd2EndMax);
 Plugin.Register(PluginGoalEnd2EndMin);
 Plugin.Register(PluginGoalIlp);
 Plugin.Register(PluginGoalRandom);
-Plugin.Register(PluginGoalUntitled);
+Plugin.Register(PluginGoalMultiCore);
 view.viewSchedule.updateOptimiserPluginSelectors();
 
 console.info(Plugin.ToString());

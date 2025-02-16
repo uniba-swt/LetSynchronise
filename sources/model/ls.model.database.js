@@ -155,7 +155,7 @@ class ModelDatabase {
     getObjectStoreNames(elements) {
         const elementMap = {
             'devices'      : Model.DeviceStoreName,
-            'networkDelays' : Model.NetworkDelayStoreName,
+            'networkDelays': Model.NetworkDelayStoreName,
             'cores'        : Model.CoreStoreName,
             'memories'     : Model.MemoryStoreName,
             'inputs'       : Model.SystemInputStoreName,
@@ -170,7 +170,7 @@ class ModelDatabase {
                                 Model.EventChainInstanceStoreName,
                                 Model.EntityInstancesStoreName,
                                 Model.NetworkDelayStoreName,
-                             ]
+                             ],
         };
         
         return elements.flatMap(element => elementMap[element]);

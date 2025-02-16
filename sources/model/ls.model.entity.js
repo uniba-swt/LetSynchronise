@@ -133,6 +133,14 @@ class ModelEntity {
         }
     }
 
+    async deleteAllDelayInstances() {
+        const allInstances = await this.getAllTaskInstances()
+        let fileteredDelays = []
+        fileteredDelays = allInstances.filter(instance => instance.name.includes("delay"))
+
+        return fileteredDelays.map(delay => this.database.deleteObject(Model.EntityInstancesStoreName, delay.name))
+    }
+
     deleteTask(name) {
         return this.database.deleteObject(Model.EntityStoreName, name)
             .then(this.database.deleteObject(Model.EntityInstancesStoreName, name))

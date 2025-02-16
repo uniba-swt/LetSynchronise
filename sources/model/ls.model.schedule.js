@@ -404,6 +404,7 @@ class ModelSchedule {
                         }
 
                         if (result) {
+                            console.log("here")
                             encapsulationDelays.unshift(this.modelEntity.createDelayInstance(sourceInstance.letEndTime,
                                                         Utility.GetDelayTime(sourceDevice.delays[0], executionTiming),
                                                         sourceDevice, destDevice, currentDependency));
@@ -468,6 +469,7 @@ class ModelSchedule {
     }
 
     async getDevicesAndNetworkDelay(source, dest) {
+        console.log(source, dest)
         if (dest.currentCore?.device &&
             source.currentCore?.device &&
             dest.currentCore.device !== 'Default' &&

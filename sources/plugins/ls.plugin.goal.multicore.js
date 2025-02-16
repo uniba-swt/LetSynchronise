@@ -1,24 +1,40 @@
 'use strict';
 
-class PluginGoalUntitled {
+class PluginGoalMultiCore {
     // Plug-in Metadata
-    static get Name()     { return 'Untitled Task Scheduling'; }
+    static get Name()     { return 'Multi-Core Scheduling'; }
     static get Author()   { return 'Jamie Lee'; }
     static get Type()     { return Plugin.Type.Goal; }
     static get Platform() { return Plugin.Platform.MultiCore; }
-    static get Category() { return Plugin.Category.NonPreemptive; }
+    static get Category() { return Plugin.Category.ResponseTime; }
 
     
     // Triggers an external web tool (https://github.com/mkuo005/end-to-end) to schedule  
     // task executions.
     static async Result(scheduler, makespan) {
-        // Delete existing schedule.
-        await Plugin.DeleteSchedule();
-        
         // Retrieve the LET system.
-        const systemElementSelected = ['cores', 'inputs','outputs','entities','dependencies','eventChains','constraints', 'devices', 'networkDelays'];
+        const systemElementSelected = ['cores', 'schedule', 'devices', 'networkDelays', 'entities', 'dependencies'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
-        
+
+        if(Object.keys(system['CoreStore']).length < 1) {
+            alert('Please add cores.');
+            return false;
+        }
+
+        if(Object.keys(system['DependencyStore']).length > 0) {
+            if (Object.keys(system['NetworkDelayStore']).length < 1) {
+                alert('Please add network delays.');
+                return false;
+            }
+
+            for (const device of system['DeviceStore']) {
+                if (!device['delays']) {
+                    alert(`Please add protocol delay for ${device['name']}`);
+                    return false;
+                }
+            }   
+        }
+
         // Add the makespan to system so that the ILP Solver can access it.
         system['PluginParameters'] = { 'Makespan' : makespan };
         
@@ -27,17 +43,19 @@ class PluginGoalUntitled {
         if (optimisedSchedule == null) {
             return
         }
+
+        await Plugin.DeleteSchedule();
         
         // Save the externally optimised task schedule and compute the dependency and event chain instances.
         const scheduleElementSelected = ['schedule'];
-        return Plugin.DatabaseContentsDelete(scheduleElementSelected)
-            .then(result => Plugin.DatabaseContentsSet(optimisedSchedule, scheduleElementSelected))
+        return Plugin.DatabaseContentsSet(optimisedSchedule, scheduleElementSelected)
             .then(result => Plugin.CreateAllDependencyAndEventChainInstances(makespan));
     }
 
     // Trigger an external scheduling tool.
     static async Algorithm(system) {
-        const url = 'http://localhost:8181/untitled'
+        const url = 'http://localhost:8181/multicore'
+
         return fetch(url, {
             method: 'POST',
             body: JSON.stringify(system),
@@ -54,6 +72,4 @@ class PluginGoalUntitled {
             return null;
         });
     }
-
-    
 }

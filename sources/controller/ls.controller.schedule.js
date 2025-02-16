@@ -162,7 +162,7 @@ class ControllerSchedule {
         const executionTiming = this.view.schedulingParametersClean.executionTiming;
         const goal = this.view.optimiserParametersClean.goal;
         goal.Result(scheduler, makespan)
-            .then(result => scheduler.Result(makespan, executionTiming))
+            .then(result => this.modelEntity.deleteAllDelayInstances())
             .then(result => this.model.createDelayRelatedInstances())
             .then(result => this.modelEntity.refreshViews())
             .then(result => this.callbackGetSchedule(this.model.getSchedule()));
