@@ -1,8 +1,8 @@
 'use strict';
 
-class PluginGoalMultiCore {
+class PluginGoalMinimiseCoreUsage {
     // Plug-in Metadata
-    static get Name()     { return 'Multi-Core Scheduling'; }
+    static get Name()     { return 'Minimise Core Usage (WCET)'; }
     static get Author()   { return 'Jamie Lee'; }
     static get Type()     { return Plugin.Type.Goal; }
     static get Platform() { return Plugin.Platform.MultiCore; }
@@ -13,26 +13,12 @@ class PluginGoalMultiCore {
     // task executions.
     static async Result(scheduler, makespan) {
         // Retrieve the LET system.
-        const systemElementSelected = ['cores', 'schedule', 'devices', 'networkDelays', 'entities', 'dependencies'];
+        const systemElementSelected = ['cores', 'schedule', 'entities'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
 
         if(Object.keys(system['CoreStore']).length < 1) {
             alert('Please add cores.');
             return false;
-        }
-
-        if(Object.keys(system['DependencyStore']).length > 0) {
-            if (Object.keys(system['NetworkDelayStore']).length < 1) {
-                alert('Please add network delays.');
-                return false;
-            }
-
-            for (const device of system['DeviceStore']) {
-                if (!device['delays']) {
-                    alert(`Please add protocol delay for ${device['name']}`);
-                    return false;
-                }
-            }   
         }
 
         // Add the makespan to system so that the ILP Solver can access it.
@@ -54,7 +40,7 @@ class PluginGoalMultiCore {
 
     // Trigger an external scheduling tool.
     static async Algorithm(system) {
-        const url = 'http://localhost:8181/multicore'
+        const url = 'http://localhost:8181/min-core-usage'
 
         return fetch(url, {
             method: 'POST',

@@ -169,7 +169,6 @@ class ModelDatabase {
                                 Model.DependencyInstancesStoreName,
                                 Model.EventChainInstanceStoreName,
                                 Model.EntityInstancesStoreName,
-                                Model.NetworkDelayStoreName,
                              ],
         };
         
