@@ -13,7 +13,7 @@ class PluginGoalEnd2EndMinMC {
     // task executions.
     static async Result(scheduler, makespan) {
         // Retrieve the LET system.
-        const systemElementSelected = ['cores', 'schedule', 'devices', 'networkDelays', 'entities', 'dependencies'];
+        const systemElementSelected = ['cores', 'devices', 'networkDelays', 'entities', 'dependencies'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
 
         if(Object.keys(system['CoreStore']).length < 1) {
@@ -21,8 +21,9 @@ class PluginGoalEnd2EndMinMC {
             return false;
         }
 
-        if(Object.keys(system['DependencyStore']).length > 0) {
+        if(Object.keys(system['DependencyStore']).length < 1) {
             alert('Please add task dependencies.')
+            return false;
         }
 
         for (const device of system['DeviceStore']) {
