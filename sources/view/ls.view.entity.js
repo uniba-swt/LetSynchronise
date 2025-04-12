@@ -799,6 +799,8 @@ class ViewEntity {
         
         // Delete the existing preview of the task set, if it exists
         this.taskSet.selectAll('*').remove();
+
+        taskParametersSet = Utility.SortEntitiesInOrder(taskParametersSet);
         
         for (const taskParameters of taskParametersSet) {
             const core = cores.find(core => core.name == taskParameters.core);

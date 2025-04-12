@@ -421,6 +421,8 @@ class ViewSchedule {
         const dependenciesSet = await schedule['promiseAllDependenciesInstances'];
         const eventChainInstances = await schedule['promiseAllEventChainInstances'];
 
+        Utility.SortEntitiesInOrder(tasksInstances)
+
         if (taskParametersSet.length < 1) {
             this.prologue = 0;
             this.hyperPeriod = 0;
@@ -428,7 +430,6 @@ class ViewSchedule {
             this.updatePrologue(taskParametersSet);
             this.updateHyperPeriod(taskParametersSet);
         }
-        // console.log(tasksInstances)
         
         // Draw new task schedule.
         const {svgElement, scale, taskIndices, coreIndices} = this.drawSchedule(tasksInstances);

@@ -26,8 +26,8 @@ class Model {
     static get MemoryStoreName()              { return 'MemoryStore'; }
     static get SystemInputStoreName()         { return 'SystemInputStore'; }
     static get SystemOutputStoreName()        { return 'SystemOutputStore'; }
-    static get EntityStoreName()                { return 'EntityStore'; }
-    static get EntityInstancesStoreName()       { return 'EntityInstancesStore'; }
+    static get EntityStoreName()              { return 'EntityStore'; }
+    static get EntityInstancesStoreName()     { return 'EntityInstancesStore'; }
     static get DependencyStoreName()          { return 'DependencyStore'; }
     static get DependencyInstancesStoreName() { return 'DependencyInstancesStore'; }
     static get EventChainStoreName()          { return 'EventChainStore'; }

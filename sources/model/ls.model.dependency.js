@@ -55,7 +55,7 @@ class ModelDependency {
     createDependency(dependency) {
         // Store dependency in Database
         return this.database.putObject(Model.DependencyStoreName, dependency)
-            .then(this.refreshViews());
+            .then(() => this.refreshViews());
     }
 
     createDelayDependency(dependency, delayType) {
@@ -115,6 +115,48 @@ class ModelDependency {
         return Promise.all([promiseDependency, promiseAllDependencies])
             .then(([sourceDependency, allDependencies]) => allDependencies
                 .filter(dependency => (dependency.source.task == sourceDependency.destination.task)));
+    }
+
+    async generateRandomDependencies(numDependencies) {
+        const tasks = await this.modelEntity.getAllTasks();
+
+        let dependencies = [];
+        const limit = tasks.length * (tasks.length - 1)
+
+        while (dependencies.length < numDependencies && dependencies.length < limit) {
+            let sourceIndex = Utility.RandomNumber(tasks.length);
+            let destinationIndex = 0;
+
+            let flag = true;
+            while(flag) {
+                destinationIndex = Utility.RandomNumber(tasks.length);
+
+                if (destinationIndex != sourceIndex) {
+                    flag = false;
+                }
+            }
+
+            dependencies.push(this.createRandomDependencies(tasks, sourceIndex, destinationIndex));
+            console.log(dependencies.length)
+        }
+
+        console.log(dependencies)
+
+        return Promise.all(dependencies.map(dependency => this.createDependency(dependency)));
+    }
+
+    createRandomDependencies(tasks, sourceIndex, destinationIndex) {
+        return {
+            name: `dep_${sourceIndex + 1}-to-${destinationIndex + 1}`,
+            source: {
+                port: "out1",
+                task: tasks[sourceIndex].name
+            },
+            destination: {
+                port: "in1",
+                task: tasks[destinationIndex].name
+            }
+        }
     }
     
     // Validate task dependencies against system and task inputs and outputs.

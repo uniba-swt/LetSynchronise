@@ -219,6 +219,47 @@ class ModelEntity {
         })
 
     }
+
+    async generateRandomTasks(parameters) {
+        let tasks = []
+
+        for (let i = 1; i <= parameters.numTasks; i++) {
+            tasks.push(this.createRandomTask(parameters, i))
+        }
+
+        return Promise.all(tasks.map(task => this.createTask(task)));
+    }
+
+    createRandomTask(parameters, i) {
+        const period = parameters.period[Utility.RandomNumber(parameters.period.length)];
+
+        const minDuration = period >= parameters.minDuration ? parameters.minDuration : period;
+        const maxDuration = period <= parameters.maxDuration ? period : parameters.maxDuration;
+        const duration = Utility.RandomInteger(minDuration, maxDuration, 'Normal');
+        
+        const maxWCET = parameters.maxWCET <= duration ? parameters.maxWCET : duration;
+        const minWCET = parameters.minWCET <= duration ? parameters.minWCET : duration;
+        const wcet = Utility.RandomInteger(minWCET, maxWCET, 'Normal');
+
+        const initialOffset = Utility.RandomInteger(parameters.minInitialOffset, parameters.maxInitialOffset, 'Normal');
+
+        return {
+            name: `t${i}`,
+            type: 'task',
+            acet: wcet,
+            bcet: wcet,
+            wcet: wcet,
+            core: null,
+            distribution: "Normal",
+            inputs: ["in1"],
+            outputs: ["out1"],
+            priority: null,
+            activationOffset: 0,
+            initialOffset: initialOffset,
+            period: period,
+            duration: duration
+        }
+    }
     
     // Validate the tasks against the platform
     async validate() {

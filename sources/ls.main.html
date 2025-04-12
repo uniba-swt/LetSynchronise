@@ -51,6 +51,7 @@
     <script src="sources/view/ls.view.constraint.js"></script>
     <script src="sources/view/ls.view.schedule.js"></script>
     <script src="sources/view/ls.view.analyse.js"></script>
+    <script src="sources/view/ls.view.randomTasks.js"></script>
 
     <script src="sources/controller/ls.controller.js"></script>
     <script src="sources/controller/ls.controller.exportImport.js"></script>
@@ -65,6 +66,7 @@
     <script src="sources/controller/ls.controller.constraint.js"></script>
     <script src="sources/controller/ls.controller.schedule.js"></script>
     <script src="sources/controller/ls.controller.analyse.js"></script>
+    <script src="sources/controller/ls.controller.randomTasks.js"></script>
 
     <script src="sources/ls.utility.js"></script>
 
@@ -590,13 +592,140 @@
                     <button id="submitTask" type="submit" class="btn btn-primary">Save</button>
                     <button id="clearTask" type="reset" class="btn btn-danger">Clear</button>
                 </div>
-            
-                <div>
-                    <div id="view-task-preview"></div>
+            </form>
+
+            <form class="row">
+                <div class="col-auto gx-3 gy-2">
+                    <button id="generateRandom" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#generate-random-taskset-modal">Generate Random Task Set</button>
                 </div>
             </form>
+
+            <div>
+                <div id="view-task-preview"></div>
+            </div>
             
             <div class="m-5"></div>
+
+            <!-- Modal for generate random task set -->
+            <div class="modal fade" id="generate-random-taskset-modal" tabindex="-1" aria-labelledby="generate-random-modal-label" aria-hidden="false">
+                <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="generate-random-modal-label">Set Task Parameters</h5>
+                        </div>
+                        
+                        <div class="modal-body" id="view-random-tasks-modal-body">
+                            <form class="row g-3" id="view-random-tasks">
+                                <div class="input-group">
+                                    <span for="view-num-tasks" class="input-group-text">Number of tasks</span>
+                                    <input required type="text" class="form-control" id="view-num-tasks" value="2">
+                                </div>
+
+                                <div class="btn-group btn-group-toggle" data-bs-toggle="buttons">
+                                    <span class="input-group-text">LET Period</span>
+                                    <label class="btn btn-secondary">
+                                        <input type="checkbox" name="view-random-tasks-period" id="view-random-tasks-period-1" value="1" autocomplete="off" checked> 1
+                                    </label>
+
+                                    <label class="btn btn-secondary">
+                                        <input type="checkbox" name="view-random-tasks-period" id="view-random-tasks-period-2" value="2" autocomplete="off"> 2
+                                    </label>
+
+                                    <label class="btn btn-secondary">
+                                        <input type="checkbox" name="view-random-tasks-period" id="view-random-tasks-period-5" value="5" autocomplete="off"> 5
+                                    </label>
+
+                                    <label class="btn btn-secondary">
+                                        <input type="checkbox" name="view-random-tasks-period" id="view-random-tasks-period-10" value="10" autocomplete="off"> 10
+                                    </label>
+
+                                    <label class="btn btn-secondary">
+                                        <input type="checkbox" name="view-random-tasks-period" id="view-random-tasks-period-20" value="20" autocomplete="off"> 20
+                                    </label>
+
+                                    <label class="btn btn-secondary">
+                                        <input type="checkbox" name="view-random-tasks-period" id="view-random-tasks-period-50" value="50" autocomplete="off"> 50
+                                    </label>
+
+                                    <label class="btn btn-secondary">
+                                        <input type="checkbox" name="view-random-tasks-period" id="view-random-tasks-period-100" value="100" autocomplete="off"> 100
+                                    </label>
+
+                                    <label class="btn btn-secondary">
+                                        <input type="checkbox" name="view-random-tasks-period" id="view-random-tasks-period-200" value="200" autocomplete="off"> 200
+                                    </label>
+
+                                    <label class="btn btn-secondary">
+                                        <input type="checkbox" name="view-random-tasks-period" id="view-random-tasks-period-1000" value="1000" autocomplete="off"> 1,000
+                                    </label>
+                                </div>
+
+
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <div class="input-group mb-3">
+                                            <span for="view-min-duration" class="input-group-text">Minimum LET Duration</span>
+                                            <input required type="text" class="form-control" id="view-min-duration" value="1">
+                                            <span class="input-group-text">ms</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="input-group mb-3">
+                                            <span for="view-max-duration" class="input-group-text">Maximum LET Duration</span>
+                                            <input required type="text" class="form-control" id="view-max-duration" value="2">
+                                            <span class="input-group-text">ms</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <div class="input-group mb-3">
+                                            <span for="view-min-initial-offset" class="input-group-text">Minimum Initial Offset</span>
+                                            <input required type="text" class="form-control" id="view-min-initial-offset" value="0">
+                                            <span class="input-group-text">ms</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="input-group mb-3">
+                                            <span for="view-max-initial-offset" class="input-group-text">Maximum Initial Offset</span>
+                                            <input required type="text" class="form-control" id="view-max-initial-offset" value="2">
+                                            <span class="input-group-text">ms</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <div class="input-group mb-3">
+                                            <span for="view-min-wcet" class="input-group-text">Minimum WCET</span>
+                                            <input required type="text" class="form-control" id="view-min-wcet" value="1">
+                                            <span class="input-group-text">ms</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="input-group mb-3">
+                                            <span for="view-max-wcet" class="input-group-text">Maximum WCET</span>
+                                            <input required type="text" class="form-control" id="view-max-wcet" value="2">
+                                            <span class="input-group-text">ms</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="input-group">
+                                    <span for="view-num-dependencies" class="input-group-text">Number of Dependencies</span>
+                                    <input required type="text" class="form-control" id="view-num-dependencies" value="2">
+                                </div>
+                            </form>
+
+                            <div class="modal-footer">
+                                <button id="submit-random-tasks" type="submit" form="view-random-tasks" class="btn btn-primary">Generate</button>
+                                <button id="generate-random-close" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             
             <h3>Current Task Set</h3>

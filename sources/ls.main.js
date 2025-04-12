@@ -30,6 +30,7 @@ view.viewEventChain = new ViewEventChain();
 view.viewConstraint = new ViewConstraint();
 view.viewSchedule = new ViewSchedule();
 view.viewAnalyse = new ViewAnalyse();
+view.viewRandomTasks = new ViewRandomTasks();
 
 // Define the controller implementations.
 let controller = new Controller();
@@ -45,6 +46,7 @@ controller.controllerEventChain = new ControllerEventChain();
 controller.controllerConstraint = new ControllerConstraint();
 controller.controllerSchedule = new ControllerSchedule();
 controller.controllerAnalyse = new ControllerAnalyse();
+controller.controllerRandomTasks = new ControllerRandomTasks();
 
 // Link the models and views to their respective controllers.
 controller.controllerExportImport.view = view.viewExportImport;
@@ -124,6 +126,10 @@ controller.controllerAnalyse.viewSchedule = view.viewSchedule;
 controller.controllerAnalyse.model = model.modelAnalyse;
 controller.controllerAnalyse.modelConstraint = model.modelConstraint;
 controller.controllerAnalyse.modelEventChain = model.modelEventChain;
+
+controller.controllerRandomTasks.view = view.viewRandomTasks;
+controller.controllerRandomTasks.modelEntity = model.modelEntity;
+controller.controllerRandomTasks.modelDependency = model.modelDependency;
 
 console.info(controller.toString());
 
