@@ -2,7 +2,7 @@
 
 class PluginGoalIlp {
     // Plug-in Metadata
-    static get Name()     { return 'Minimise End-to-End Response Times (ILP, Single Core)'; }
+    static get Name()     { return 'Minimise End-to-End Response Times (ILP)'; }
     static get Author()   { return 'Matthew Kuo'; }
     static get Type()     { return Plugin.Type.Goal; }
     static get Platform() { return Plugin.Platform.SingleCore; }
@@ -37,13 +37,6 @@ class PluginGoalIlp {
     
     // Trigger an external optimisation tool.
     static async Algorithm(system) {
-        // ILP formulation only supports single core systems.
-        if (system[Model.CoreStoreName] != null && Object.keys(system[Model.CoreStoreName]).length > 1) {
-            if (!confirm('Multicore systems are not supported by this plugin! Proceed with the optimisation?')) {
-                return null;
-            }
-        }
-    
         const url = 'http://localhost:8181/'
         return fetch(url, {
             method: 'POST',
