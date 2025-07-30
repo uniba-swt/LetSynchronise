@@ -1,6 +1,6 @@
 'use strict';
 
-class ViewTask {
+class ViewEntity {
     root = null;
     
     nameField = null;
@@ -63,7 +63,7 @@ class ViewTask {
     
     
     get ElementIdPrefix() {
-        return 'task';
+        return 'entity';
     }
     
     get name() {
@@ -182,6 +182,7 @@ class ViewTask {
         // Package all the task paramters as is into an object.
         return {
             'name': this.name,
+            'type': 'task',
             'priority': this.priority,
             'initialOffset': this.initialOffset,
             'activationOffset': this.activationOffset,
@@ -201,6 +202,7 @@ class ViewTask {
         // Package all the task paramters in their correct types into an object.
         return {
             'name': this.name.trim(),
+            'type': 'task',
             'priority': this.priority == null ? null : Math.abs(parseInt(this.priority, 10)),
             'initialOffset': Math.abs(parseFloat(this.initialOffset)) * Utility.MsToNs,
             'activationOffset': Math.abs(parseFloat(this.activationOffset)) * Utility.MsToNs,
@@ -797,6 +799,8 @@ class ViewTask {
         
         // Delete the existing preview of the task set, if it exists
         this.taskSet.selectAll('*').remove();
+
+        taskParametersSet = Utility.SortEntitiesInOrder(taskParametersSet);
         
         for (const taskParameters of taskParametersSet) {
             const core = cores.find(core => core.name == taskParameters.core);
@@ -840,6 +844,6 @@ class ViewTask {
     }
     
     toString() {
-        return "ViewTask";
+        return "ViewEntity";
     }
 }

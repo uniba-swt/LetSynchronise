@@ -8,6 +8,12 @@ class Utility {
     static ValidName(name) {
         return (/^([A-Za-z]|_)([A-Za-z0-9]|_)*$/).test(name);
     }
+
+    static ValidInteger(value) {
+        const parsed = parseInt(value, 10);
+
+        return Number.isInteger(parsed) && parsed.toString() == value.trim();
+    }
     
     static MaxOfArray(array) {
         return array.reduce(function(a, b) {
@@ -80,9 +86,8 @@ class Utility {
         return scale * Math.pow(-Math.log(1 - random), 1 / shape) / upperBound;
     }
     
-    static RandomInteger(min, avg, max, distribution) {
+    static RandomInteger(min, max, distribution) {
         const range = max - min;
-        
         let delta = 0;
         switch (distribution) {
             case 'Normal':
@@ -97,6 +102,10 @@ class Utility {
         }
         
         return min + Math.trunc(delta);
+    }
+
+    static RandomNumber(max) {
+        return Math.floor(Math.random() * max);
     }
     
     static FormatTimeString(time, digits) {
@@ -233,6 +242,57 @@ class Utility {
         }
         
         localStorage.setItem(viewName, JSON.stringify(settings));
+    }
+
+    static SortEntitiesInOrder(entities) {
+        let tasks = entities.filter(entity => entity.type === 'task');
+        tasks.sort((a, b) => {
+            const numA = parseInt(a.name.match(/\d+/)[0]);
+            const numB = parseInt(b.name.match(/\d+/)[0]);
+            return numA - numB;
+        });
+
+        let sorted = [];
+        for (const task of tasks) {
+
+            const pattern = new RegExp(`.*\\s*=>\\s*${task.name}\\s*encapsulation`);
+            const encapsulationDelays = entities.filter(entity => pattern.test(entity.name));
+            if (encapsulationDelays) {
+                for (const delay of encapsulationDelays) {
+                    sorted.push(delay)
+                }
+            }
+            
+            const networkDelays = entities.filter(entity => entity.name.includes(`=> ${task.name} network`));
+            if (networkDelays.length > 0) {
+                for (const delay of networkDelays) {
+                    sorted.push(delay)
+                }
+            }
+
+            const decapsulationDelays = entities.filter(entity => entity.name.includes(`=> ${task.name} decapsulation`));
+            if (decapsulationDelays) {
+                for (const delay of decapsulationDelays) {
+                    sorted.push(delay)
+                }
+            }
+
+            sorted.push(task);
+        }
+
+        return sorted;
+    }
+
+    static GetDelayTime(delay, executionTiming) {
+        if (executionTiming === 'BCET') {
+            return delay.bcdt;
+        }
+        if (executionTiming === 'WCET') {
+            return delay.wcdt;
+        }
+        else {
+            return Utility.RandomInteger(delay.bcdt, delay.acdt, delay.wcdt, delay.distribution);
+        }
     }
     
 }

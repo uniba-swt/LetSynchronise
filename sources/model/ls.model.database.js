@@ -9,24 +9,29 @@ class ModelDatabase {
             return;
         }
         
-        const dbOpenRequest = window.indexedDB.open('letDatabase', 1);
+        const dbOpenRequest = window.indexedDB.open('letDatabase', 3);
 
         // Upgrade old database schemas.
         dbOpenRequest.onupgradeneeded = function(event) {
             this.db = event.target.result;
-            if (event.oldVersion < 1) {
-                this.db.createObjectStore(Model.CoreStoreName, {keyPath: 'name', unique: true});
-                this.db.createObjectStore(Model.MemoryStoreName, {keyPath: 'name', unique: true});
-                this.db.createObjectStore(Model.SystemInputStoreName, {keyPath: 'name', unique: true});
-                this.db.createObjectStore(Model.SystemOutputStoreName, {keyPath: 'name', unique: true});
-                this.db.createObjectStore(Model.TaskStoreName, {keyPath: 'name', unique: true});
-                this.db.createObjectStore(Model.TaskInstancesStoreName, {keyPath:'name', unique: true});
-                this.db.createObjectStore(Model.DependencyStoreName, {keyPath: 'name', unique: true});
-                this.db.createObjectStore(Model.DependencyInstancesStoreName, {keyPath: 'name', unique: true});
-                this.db.createObjectStore(Model.EventChainStoreName, {keyPath: 'name', unique: true});
-                this.db.createObjectStore(Model.EventChainInstanceStoreName, {keyPath: 'name', unique: true});
-                this.db.createObjectStore(Model.ConstraintStoreName, {keyPath: 'name', unique: true});
-                this.db.createObjectStore(Model.ConstraintInstancesStoreName, {keyPath: 'name', unique: true});
+            if (event.oldVersion < 3) {
+                this.db.createObjectStore(Model.NetworkDelayStoreName, {keyPath: 'name', unique: true});
+                this.db.createObjectStore(Model.DeviceStoreName, {keyPath: 'name', unique: true});
+                
+                if (event.oldVersion < 2) {
+                    this.db.createObjectStore(Model.CoreStoreName, {keyPath: 'name', unique: true});
+                    this.db.createObjectStore(Model.MemoryStoreName, {keyPath: 'name', unique: true});
+                    this.db.createObjectStore(Model.SystemInputStoreName, {keyPath: 'name', unique: true});
+                    this.db.createObjectStore(Model.SystemOutputStoreName, {keyPath: 'name', unique: true});
+                    this.db.createObjectStore(Model.DependencyStoreName, {keyPath: 'name', unique: true});
+                    this.db.createObjectStore(Model.DependencyInstancesStoreName, {keyPath: 'name', unique: true});
+                    this.db.createObjectStore(Model.EntityStoreName, {keyPath: 'name', unique: true});
+                    this.db.createObjectStore(Model.EntityInstancesStoreName, {keyPath:'name', unique: true});
+                    this.db.createObjectStore(Model.EventChainStoreName, {keyPath: 'name', unique: true});
+                    this.db.createObjectStore(Model.EventChainInstanceStoreName, {keyPath: 'name', unique: true});
+                    this.db.createObjectStore(Model.ConstraintStoreName, {keyPath: 'name', unique: true});
+                    this.db.createObjectStore(Model.ConstraintInstancesStoreName, {keyPath: 'name', unique: true});
+                }
             }
         }
         
@@ -97,6 +102,30 @@ class ModelDatabase {
             }
         });
     }
+
+    getAllObjectsWithKeys(storeName) {
+        return new Promise((resolve, reject) => {
+            const objectStore = this.getObjectStore(storeName, 'readonly', reject);
+            const items = [];
+    
+            const cursorRequest = objectStore.openCursor();
+    
+            cursorRequest.onsuccess = function(event) {
+                const cursor = event.target.result;
+                if (cursor) {
+                    items.push({ id: cursor.key, ...cursor.value });
+                    cursor.continue();
+                } else {
+                    resolve(items);
+                }
+            };
+    
+            cursorRequest.onerror = function(event) {
+                reject(event.target.error);
+            };
+        });
+    }
+    
     
     deleteObject(storeName, index, promiseResolve, promiseReject) {
         return new Promise((resolve, reject) => {
@@ -125,11 +154,13 @@ class ModelDatabase {
     
     getObjectStoreNames(elements) {
         const elementMap = {
+            'devices'      : Model.DeviceStoreName,
+            'networkDelays': Model.NetworkDelayStoreName,
             'cores'        : Model.CoreStoreName,
             'memories'     : Model.MemoryStoreName,
             'inputs'       : Model.SystemInputStoreName,
             'outputs'      : Model.SystemOutputStoreName,
-            'tasks'        : Model.TaskStoreName,
+            'entities'     : Model.EntityStoreName,
             'dependencies' : Model.DependencyStoreName,
             'eventChains'  : Model.EventChainStoreName,
             'constraints'  : Model.ConstraintStoreName,
@@ -137,8 +168,8 @@ class ModelDatabase {
                                 Model.ConstraintInstancesStoreName,
                                 Model.DependencyInstancesStoreName,
                                 Model.EventChainInstanceStoreName,
-                                Model.TaskInstancesStoreName
-                             ]
+                                Model.EntityInstancesStoreName,
+                             ],
         };
         
         return elements.flatMap(element => elementMap[element]);

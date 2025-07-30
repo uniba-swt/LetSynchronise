@@ -52,7 +52,7 @@ class PluginImporterNative {
         if (Object.keys(dependencies).length > 0
                 && system[Model.SystemInputStoreName] === undefined 
                 && system[Model.SystemOutputStoreName] === undefined 
-                && system[Model.TaskStoreName] === undefined) {
+                && system[Model.EntityStoreName] === undefined) {
             alert('File to import defines task dependencies but no input/output interface or tasks have been defined.');
             return false;
         }
@@ -83,7 +83,7 @@ class PluginImporterNative {
         
         const inputs = system[Model.SystemInputStoreName];
         const outputs = system[Model.SystemOutputStoreName];
-        const tasks = system[Model.TaskStoreName];
+        const tasks = system[Model.EntityStoreName];
         if (dependency.source.task == Model.SystemInterfaceName) {
             let systemInterface = this.GetSystemInterface(dependency.source.port, inputs);
             if (systemInterface === null) {

@@ -6,7 +6,7 @@ class ModelExportImport {
     modelCore = null;
     modelMemory = null;
     modelInterface = null;
-    modelTask = null;
+    modelEntity = null;
     modelDependency = null;
     modelEventChain = null;
     modelConstraint = null;
@@ -33,8 +33,8 @@ class ModelExportImport {
         this.modelInterface = modelInterface;
     }
 
-    registerModelTask(modelTask) {
-        this.modelTask = modelTask;
+    registerModelEntity(modelEntity) {
+        this.modelEntity = modelEntity;
     }
     
     registerModelDependency(modelDependency) {
@@ -80,7 +80,7 @@ class ModelExportImport {
         return this.modelInterface.refreshViews()
             .then(this.modelCore.refreshViews())
             .then(this.modelMemory.refreshViews())
-            .then(this.modelTask.refreshViews());
+            .then(this.modelEntity.refreshViews());
     }
     
     

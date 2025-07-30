@@ -1,24 +1,26 @@
 'use strict';
 
-class PluginGoalIlp {
+class PluginGoalMinimiseCoreUsage {
     // Plug-in Metadata
-    static get Name()     { return 'Minimise End-to-End Response Times (ILP, Single Core)'; }
-    static get Author()   { return 'Matthew Kuo'; }
+    static get Name()     { return 'Minimise Core Usage (WCET)'; }
+    static get Author()   { return 'Jamie Lee'; }
     static get Type()     { return Plugin.Type.Goal; }
-    static get Platform() { return Plugin.Platform.SingleCore; }
+    static get Platform() { return Plugin.Platform.MultiCore; }
     static get Category() { return Plugin.Category.ResponseTime; }
 
-    // Triggers an external web tool (https://github.com/mkuo005/LET-LP-Scheduler) to create 
-    // and solve an ILP formulation of the system to minimise end-to-end response times.
-    // Only supports task sets that have been allocated to the same core.
+    
+    // Triggers an external web tool (https://github.com/mkuo005/end-to-end) to schedule  
+    // task executions.
     static async Result(scheduler, makespan) {
-        // Delete existing schedule.
-        await Plugin.DeleteSchedule();
-        
         // Retrieve the LET system.
-        const systemElementSelected = ['cores', 'inputs','outputs','entities','dependencies','eventChains','constraints'];
+        const systemElementSelected = ['cores', 'schedule', 'entities'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
-        
+
+        if(Object.keys(system['CoreStore']).length < 1) {
+            alert('Please add cores.');
+            return false;
+        }
+
         // Add the makespan to system so that the ILP Solver can access it.
         system['PluginParameters'] = { 'Makespan' : makespan };
         
@@ -27,24 +29,19 @@ class PluginGoalIlp {
         if (optimisedSchedule == null) {
             return
         }
+
+        await Plugin.DeleteSchedule();
         
         // Save the externally optimised task schedule and compute the dependency and event chain instances.
         const scheduleElementSelected = ['schedule'];
-        return Plugin.DatabaseContentsDelete(scheduleElementSelected)
-            .then(result => Plugin.DatabaseContentsSet(optimisedSchedule, scheduleElementSelected))
+        return Plugin.DatabaseContentsSet(optimisedSchedule, scheduleElementSelected)
             .then(result => Plugin.CreateAllDependencyAndEventChainInstances(makespan));
     }
-    
-    // Trigger an external optimisation tool.
+
+    // Trigger an external scheduling tool.
     static async Algorithm(system) {
-        // ILP formulation only supports single core systems.
-        if (system[Model.CoreStoreName] != null && Object.keys(system[Model.CoreStoreName]).length > 1) {
-            if (!confirm('Multicore systems are not supported by this plugin! Proceed with the optimisation?')) {
-                return null;
-            }
-        }
-    
-        const url = 'http://localhost:8181/ilp'
+        const url = 'http://localhost:8181/min-core-usage'
+
         return fetch(url, {
             method: 'POST',
             body: JSON.stringify(system),
@@ -61,5 +58,4 @@ class PluginGoalIlp {
             return null;
         });
     }
-    
 }

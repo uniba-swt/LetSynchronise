@@ -2,10 +2,12 @@
 
 class Controller {
     controllerExportImport = null;
+    controllerDevice = null;
     controllerCore = null;
+    controllerNetworkDelay = null;
     controllerMemory = null;
     controllerInterface = null;
-    controllerTask = null;
+    controllerEntity = null;
     controllerDependency = null;
     controllerEventChain = null;
     controllerConstraint = null;
@@ -37,10 +39,12 @@ class Controller {
     toString() {
         return ['Controller contains ...',
                 `  ${this.controllerExportImport}, `,
+                `  ${this.controllerDevice}, `,
                 `  ${this.controllerCore}, `,
+                `  ${this.controllerNetworkDelay}, `,
                 `  ${this.controllerMemory}, `,
                 `  ${this.controllerInterface}, `,
-                `  ${this.controllerTask}, `,
+                `  ${this.controllerEntity}, `,
                 `  ${this.controllerDependency}, `,
                 `  ${this.controllerEventChain},`,
                 `  ${this.controllerConstraint},`,

@@ -146,9 +146,12 @@ class ViewDependency {
     }
     
     updateDependencySelectors(taskParametersSet, systemInputs, systemOutputs) {
-        const sources = taskParametersSet.map(taskParameters => Utility.TaskPorts(taskParameters.name, taskParameters.outputs)).flat();
-        const destinations = taskParametersSet.map(taskParameters => Utility.TaskPorts(taskParameters.name, taskParameters.inputs)).flat();
-        
+        const sources = taskParametersSet.filter(taskParameters => taskParameters.type === 'task').map(taskParameters => 
+                Utility.TaskPorts(taskParameters.name, taskParameters.outputs)
+            ).flat();
+        const destinations = taskParametersSet.filter(taskParameters => taskParameters.type === 'task').map(taskParameters => 
+                Utility.TaskPorts(taskParameters.name, taskParameters.inputs)
+            ).flat();
         // Create list of available sources and destinations
         this.updateTaskDependencyPorts(d3.select(this.sourceField), sources.sort(), systemInputs.sort());
         this.updateTaskDependencyPorts(d3.select(this.destinationField), destinations.sort(), systemOutputs.sort());

@@ -420,7 +420,9 @@ class ViewSchedule {
         const tasksInstances = await schedule['promiseAllTasksInstances'];
         const dependenciesSet = await schedule['promiseAllDependenciesInstances'];
         const eventChainInstances = await schedule['promiseAllEventChainInstances'];
-                
+
+        Utility.SortEntitiesInOrder(tasksInstances)
+
         if (taskParametersSet.length < 1) {
             this.prologue = 0;
             this.hyperPeriod = 0;
@@ -443,13 +445,15 @@ class ViewSchedule {
     
     // Compute prologue of the schedule and display it.
     updatePrologue(taskParametersSet) {
-        const initialOffsets = taskParametersSet.map(taskParameters => taskParameters.initialOffset).flat();
+        const initialOffsets = taskParametersSet.filter(taskParameters => taskParameters.type === 'task')
+        .map(taskParameters => taskParameters.period).flat();
         this.prologue = Utility.MaxOfArray(initialOffsets) / Utility.MsToNs;
     }
     
     // Compute the hyper-period of the schedule and display it.
     updateHyperPeriod(taskParametersSet) {
-        const periods = taskParametersSet.map(taskParameters => taskParameters.period).flat();
+        const periods = taskParametersSet.filter(taskParameters => taskParameters.type === 'task')
+        .map(taskParameters => taskParameters.period).flat();
         this.hyperPeriod = Utility.LeastCommonMultipleOfArray(periods) / Utility.MsToNs;
     }
     
@@ -464,35 +468,39 @@ class ViewSchedule {
         // Delete the existing schedule, if they exist and set up the canvas.
         this.schedule.selectAll('*').remove();
         const svgElement = this.schedule.append('svg');
+
+        const sortedEntities = Utility.SortEntitiesInOrder(tasksInstances);
         
         // Draw the task instances.
         let taskIndices = { };
         let coreIndices = { };
-        for (const [index, taskInstances] of tasksInstances.entries()) {
+        for (const [index, taskInstances] of sortedEntities.entries()) {
             this.drawTaskInstances(taskInstances, svgElement, scale, index);
             taskIndices[taskInstances.name] = index;
-            
-            for (const instance of taskInstances.value) {
-                for (const interval of instance.executionIntervals) {
-                    if (coreIndices[interval.core] === undefined) {
-                        coreIndices[interval.core] = Object.keys(coreIndices).length;
+
+            if (taskInstances.type === 'task') {
+                for (const instance of taskInstances.value) {
+                    for (const interval of instance.executionIntervals) {
+                        if (coreIndices[interval.core] === undefined) {
+                            coreIndices[interval.core] = Object.keys(coreIndices).length;
+                        }
                     }
                 }
             }
         }
         
         // Draw the system load.
-        this.drawSystemLoad(tasksInstances, svgElement, scale, tasksInstances.length, coreIndices);
+        this.drawSystemLoad(sortedEntities.filter(entity => entity.type === 'task'), svgElement, scale, sortedEntities.length, coreIndices);
         
         // Set the SVG viewport.
         const svgWidth = View.Width;
-        const svgHeight = (tasksInstances.length + 1) * View.TaskHeight + (Object.keys(coreIndices).length - 1) * View.ExecutionHeight;
+        const svgHeight = (sortedEntities.length + 1) * View.EntityHeight + (Object.keys(coreIndices).length - 1) * View.ExecutionHeight;
         svgElement
             .attr('viewBox', [this.svgOrigin, 0, svgWidth, svgHeight]);
         
         return {svgElement: svgElement, scale: scale, taskIndices: taskIndices, coreIndices: coreIndices};
     }
-    
+
     // Draw just the instances of a given task.
     drawTaskInstances(taskInstances, svgElement, scale, index) {
         const tooltip = this.scheduleTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
@@ -505,7 +513,7 @@ class ViewSchedule {
         // Group for textual information
         const textInfo =
         group.append('g')
-               .attr('transform', `translate(0, ${index * View.TaskHeight + View.SvgPadding})`);
+               .attr('transform', `translate(0, ${index * View.EntityHeight + View.SvgPadding})`);
 
         // Add the task's name, inputs, and outputs
         textInfo.append('text')
@@ -515,13 +523,13 @@ class ViewSchedule {
         // Group for graphical information
         const graphInfo =
         group.append('g')
-               .attr('transform', `translate(0, ${index * View.TaskHeight + 2.5 * View.SvgPadding})`);
+               .attr('transform', `translate(0, ${index * View.EntityHeight + 2.5 * View.SvgPadding})`);
         
         const instances = taskInstances.value;
         if (instances.length == 0) {
             return;
         }
-        
+
         const firstPeriodStartTime = instances[0].periodStartTime;
         const lastPeriodDuration = instances[instances.length - 1].periodEndTime - instances[instances.length - 1].periodStartTime;
 
@@ -551,17 +559,40 @@ class ViewSchedule {
 
         for (const instance of instances) {
             // Add the task's LET duration
+
+            if (taskInstances.name.includes('encapsulation')) {
+                graphInfo.append('rect').attr('class', 'sender')
+            }
+
             graphInfo.append('rect')
                        .attr('id', `${taskInstances.name}-${instance.instance}`)
                        .attr('x', scale(instance.letStartTime))
                        .attr('width', scale(instance.letEndTime - instance.letStartTime))
                        .attr('height', View.BarHeight)
+                       .attr('class', () => {
+                        if (taskInstances.name.includes('encapsulation')) {
+                            return 'sender'
+                        }
+                        if (taskInstances.name.includes('decapsulation')) {
+                            return 'receiver'
+                        }
+                        if (taskInstances.name.includes('network')) {
+                            return 'network'
+                        }
+                       })
                       .on('mouseover', () => {
                         const title = `<b>${taskInstances.name}</b> instance ${instance.instance}`;
-                        const periodInterval = `Period interval: [${Utility.FormatTimeString(instance.periodStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.periodEndTime / Utility.MsToNs, 2)}]ms`;
-                        const letInterval = `LET interval: [${Utility.FormatTimeString(instance.letStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.letEndTime / Utility.MsToNs, 2)}]ms`;
+                        let periodInterval = ''
+                        if (!taskInstances.name.includes('delay')) {
+                            periodInterval = `Period interval: [${Utility.FormatTimeString(instance.periodStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.periodEndTime / Utility.MsToNs, 2)}]ms`;
+                        }
+                        const letInterval = taskInstances.type === 'task' ? 
+                            `LET interval: [${Utility.FormatTimeString(instance.letStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.letEndTime / Utility.MsToNs, 2)}]ms`
+                            : `Execution interval: [${Utility.FormatTimeString(instance.letStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.letEndTime / Utility.MsToNs, 2)}]ms`;;
                         const executionTime = `Total execution time: ${Utility.FormatTimeString(instance.executionTime / Utility.MsToNs, 2)}ms`;
-                        tooltip.innerHTML = `${title} <br/> ${letInterval} <br/> ${periodInterval} <br/> ${executionTime}`;
+                        tooltip.innerHTML = !taskInstances.name.includes('delay') ? 
+                            `${title} <br/> ${letInterval} <br/> ${periodInterval} <br/> ${executionTime}` 
+                            : `${title} <br/> ${letInterval} <br/> ${executionTime}`;
                         tooltip.style.visibility = 'visible';
                       })
                       .on('mousemove', (event) => {
@@ -575,39 +606,42 @@ class ViewSchedule {
                       .on('click', () => {
                         this.updateRelatedEventChains(taskInstances.name, instance.instance);
                       });
-            
-            // Add the task's execution times
-            const executionIntervals = instance.executionIntervals.map(interval => Utility.Interval.FromJson(interval));
-            for (const interval of executionIntervals) {
-                graphInfo.append('rect')
-                           .attr('x', scale(interval.startTime))
-                           .attr('y', View.BarHeight - View.ExecutionHeight)
-                           .attr('width', scale(interval.duration))
-                           .attr('height', View.ExecutionHeight)
-                           .attr('class', 'time')
-                         .on('mouseover', () => {
-                           const core = `Core ${interval.core}`;
-                           const executionInterval = `Execution interval: [${Utility.FormatTimeString(interval.startTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString((interval.startTime + interval.duration) / Utility.MsToNs, 2)}]ms`;
-                           tooltip.innerHTML = `${core} <br/> ${executionInterval}`;
-                           tooltip.style.visibility = 'visible';
-                         })
-                         .on('mousemove', (event) => {
-                           const [pointerX, pointerY] = d3.pointer(event, window);
-                           tooltip.style.top = `${pointerY - 3 * View.BarHeight}px`;
-                           tooltip.style.left = `${pointerX}px`;
-                         })
-                         .on('mouseout', () => {
-                           tooltip.style.visibility = 'hidden';
-                         });
+
+            if (taskInstances.type === "task") {
+                // Add the task's execution times
+                const executionIntervals = instance.executionIntervals.map(interval => Utility.Interval.FromJson(interval));
+                for (const interval of executionIntervals) {
+                    graphInfo.append('rect')
+                            .attr('x', scale(interval.startTime))
+                            .attr('y', View.BarHeight - View.ExecutionHeight)
+                            .attr('width', scale(interval.duration))
+                            .attr('height', View.ExecutionHeight)
+                            .attr('class', 'time')
+                            .on('mouseover', () => {
+                            const core = `Core ${interval.core}`;
+                            const executionInterval = `Execution interval: [${Utility.FormatTimeString(interval.startTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString((interval.startTime + interval.duration) / Utility.MsToNs, 2)}]ms`;
+                            tooltip.innerHTML = `${core} <br/> ${executionInterval}`;
+                            tooltip.style.visibility = 'visible';
+                            })
+                            .on('mousemove', (event) => {
+                            const [pointerX, pointerY] = d3.pointer(event, window);
+                            tooltip.style.top = `${pointerY - 3 * View.BarHeight}px`;
+                            tooltip.style.left = `${pointerX}px`;
+                            })
+                            .on('mouseout', () => {
+                            tooltip.style.visibility = 'hidden';
+                            });
+                }
+                
+                // Add vertical line at the start of the period
+                graphInfo.append('line')
+                        .attr('x1', scale(instance.periodStartTime))
+                        .attr('x2', scale(instance.periodStartTime))
+                        .attr('y1', View.BarHeight + View.TickHeight + View.BarMargin)
+                        .attr('y2', 0)
+                        .attr('class', 'boundary');
             }
-            
-            // Add vertical line at the start of the period
-            graphInfo.append('line')
-                       .attr('x1', scale(instance.periodStartTime))
-                       .attr('x2', scale(instance.periodStartTime))
-                       .attr('y1', View.BarHeight + View.TickHeight + View.BarMargin)
-                       .attr('y2', 0)
-                       .attr('class', 'boundary');
+
         }
         
         // Create x-axis with correct scale.
@@ -638,7 +672,7 @@ class ViewSchedule {
         // Group for textual information
         const textInfo =
         group.append('g')
-               .attr('transform', `translate(0, ${index * View.TaskHeight + View.SvgPadding})`);
+               .attr('transform', `translate(0, ${index * View.EntityHeight + View.SvgPadding})`);
 
         textInfo.append('text')
                   .text(`System load`);
@@ -647,7 +681,7 @@ class ViewSchedule {
         // Group for graphical information
         const graphInfo =
         group.append('g')
-               .attr('transform', `translate(0, ${index * View.TaskHeight + (Object.keys(coreIndices).length - 1) * View.ExecutionHeight + 2.5 * View.SvgPadding})`);
+               .attr('transform', `translate(0, ${index * View.EntityHeight + (Object.keys(coreIndices).length - 1) * View.ExecutionHeight + 2.5 * View.SvgPadding})`);
         
         // Add horizontal line for the makespan
         graphInfo.append('line')
@@ -668,31 +702,32 @@ class ViewSchedule {
         // Add the tasks' execution times
         for (const [index, taskInstances] of tasksInstances.entries()) {
             for (const instance of taskInstances.value) {
+
                 const executionIntervals = instance.executionIntervals.map(interval => Utility.Interval.FromJson(interval));
                 for (const interval of executionIntervals) {
                     const coreIndex = coreIndices[interval.core];
                     
                     graphInfo.append('rect')
-                               .attr('x', scale(interval.startTime))
-                               .attr('y', View.BarHeight - (coreIndex + 1) * View.ExecutionHeight)
-                               .attr('width', scale(interval.duration))
-                               .attr('height', View.ExecutionHeight)
-                               .attr('class', 'time')
-                             .on('mouseover', () => {
-                               const title = `<b>${taskInstances.name}</b> instance ${instance.instance}`;
-                               const core = `Core ${interval.core}`;
-                               const executionInterval = `Execution interval: [${Utility.FormatTimeString(interval.startTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString((interval.startTime + interval.duration) / Utility.MsToNs, 2)}]ms`;
-                               tooltip.innerHTML = `${title} <br/> ${core} <br/> ${executionInterval}`;
-                               tooltip.style.visibility = 'visible';
-                             })
-                             .on('mousemove', (event) => {
-                               const [pointerX, pointerY] = d3.pointer(event, window);
-                               tooltip.style.top = `${pointerY - 4.3 * View.BarHeight}px`;
-                               tooltip.style.left = `${pointerX}px`;
-                             })
-                             .on('mouseout', () => {
-                               tooltip.style.visibility = 'hidden';
-                             });
+                                .attr('x', scale(interval.startTime))
+                                .attr('y', View.BarHeight - (coreIndex + 1) * View.ExecutionHeight)
+                                .attr('width', scale(interval.duration))
+                                .attr('height', View.ExecutionHeight)
+                                .attr('class', 'time')
+                                .on('mouseover', () => {
+                                const title = `<b>${taskInstances.name}</b> instance ${instance.instance}`;
+                                const core = `Core ${interval.core}`;
+                                const executionInterval = `Execution interval: [${Utility.FormatTimeString(interval.startTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString((interval.startTime + interval.duration) / Utility.MsToNs, 2)}]ms`;
+                                tooltip.innerHTML = `${title} <br/> ${core} <br/> ${executionInterval}`;
+                                tooltip.style.visibility = 'visible';
+                                })
+                                .on('mousemove', (event) => {
+                                const [pointerX, pointerY] = d3.pointer(event, window);
+                                tooltip.style.top = `${pointerY - 4.3 * View.BarHeight}px`;
+                                tooltip.style.left = `${pointerX}px`;
+                                })
+                                .on('mouseout', () => {
+                                tooltip.style.visibility = 'hidden';
+                                });
                 }
             }
         }
@@ -719,10 +754,10 @@ class ViewSchedule {
             .append('a')
                 .attr('class', 'dropdown-item active')
                 .text('All');
-    
+
         let svgGroups = [ ];
         for (const dependencies of dependenciesSet) {
-            dependencies.value.forEach(dependency => this.drawDependency(svgElement, scale, taskIndices, dependencies.name, dependency));              
+            dependencies.value.forEach(dependency => this.drawDependency(svgElement, scale, taskIndices, dependencies.name, dependency));
 
             svgGroups.push(...dependencies.value.map(dependency => svgElement.select(`path#${dependencies.name}-${dependency.instance}`)));
                         
@@ -794,8 +829,8 @@ class ViewSchedule {
         
         // Create dangling arrows if one of the tasks is Model.SystemInterfaceName
         // Need an additional y-offset
-        const adjustedSendTaskHeight = (sendEvent.task == Model.SystemInterfaceName) ? -0.4 * View.TaskHeight : 0;
-        const adjustedReceiveTaskHeight = (receiveEvent.task == Model.SystemInterfaceName) ? 0.4 * View.TaskHeight : 0 ;
+        const adjustedSendEntityHeight = (sendEvent.task == Model.SystemInterfaceName) ? -0.4 * View.EntityHeight : 0;
+        const adjustedReceiveEntityHeight = (receiveEvent.task == Model.SystemInterfaceName) ? 0.4 * View.EntityHeight : 0 ;
         
         // Change the name and timestamp of the system event
         if (sendEvent.task == Model.SystemInterfaceName) {
@@ -809,14 +844,14 @@ class ViewSchedule {
             receiveEvent.timestamp = sendEvent.timestamp;
             receivePortName = receiveEvent.port;
         }
-        
         // Create the arrow
         const points = [
-            { x: sendEvent.timestamp,                y: yOffset + taskIndices[sendEvent.task] * View.TaskHeight + adjustedSendTaskHeight },
-            { x: sendEvent.timestamp + xOffset,      y: yOffset + taskIndices[sendEvent.task] * View.TaskHeight + adjustedSendTaskHeight },
-            { x: receiveEvent.timestamp - xOffset,   y: yOffset + taskIndices[receiveEvent.task] * View.TaskHeight + adjustedReceiveTaskHeight },
-            { x: receiveEvent.timestamp,             y: yOffset + taskIndices[receiveEvent.task] * View.TaskHeight + adjustedReceiveTaskHeight }
+            { x: sendEvent.timestamp,                y: yOffset + taskIndices[sendEvent.task] * View.EntityHeight + adjustedSendEntityHeight },
+            { x: sendEvent.timestamp + xOffset,      y: yOffset + taskIndices[sendEvent.task] * View.EntityHeight + adjustedSendEntityHeight },
+            { x: receiveEvent.timestamp - xOffset,   y: yOffset + taskIndices[receiveEvent.task] * View.EntityHeight + adjustedReceiveEntityHeight },
+            { x: receiveEvent.timestamp,             y: yOffset + taskIndices[receiveEvent.task] * View.EntityHeight + adjustedReceiveEntityHeight }
         ]
+        //console.log(sendEvent, receiveEvent, points, taskIndices)
 
         let line = d3.line()
                      .x((point) => point.x)
