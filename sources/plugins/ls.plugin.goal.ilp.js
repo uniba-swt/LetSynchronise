@@ -5,7 +5,7 @@ class PluginGoalIlp {
     static get Name()     { return 'Minimise End-to-End Response Times (ILP)'; }
     static get Author()   { return 'Matthew Kuo'; }
     static get Type()     { return Plugin.Type.Goal; }
-    static get Platform() { return Plugin.Platform.SingleCore; }
+    static get Platform() { return Plugin.Platform.MultiCore; }
     static get Category() { return Plugin.Category.ResponseTime; }
 
     // Triggers an external web tool (https://github.com/mkuo005/LET-LP-Scheduler) to create 
