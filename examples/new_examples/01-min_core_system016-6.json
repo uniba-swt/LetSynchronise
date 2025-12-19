@@ -1,0 +1,718 @@
+{
+    "CoreStore": [
+        {
+            "name": "c1",
+            "speedup": 1,
+            "device": "d1"
+        },
+        {
+            "name": "c2",
+            "speedup": 1,
+            "device": "d2"
+        },
+        {
+            "name": "c3",
+            "speedup": 1,
+            "device": "d1"
+        }
+    ],
+    "DeviceStore": [
+        {
+            "name": "d1",
+            "sppedup": 1,
+            "delays": [
+                {
+                    "protocol": "tcp",
+                    "acdt": 500000,
+                    "bcdt": 500000,
+                    "wcdt": 500000,
+                    "distribution": "Normal"
+                }
+            ]
+        },
+        {
+            "name": "d2",
+            "sppedup": 1,
+            "delays": [
+                {
+                    "protocol": "tcp",
+                    "acdt": 500000,
+                    "bcdt": 500000,
+                    "wcdt": 500000,
+                    "distribution": "Normal"
+                }
+            ]
+        }
+    ],
+    "NetworkDelayStore": [
+        {
+            "name": "d1-to-d2",
+            "source": "d1",
+            "dest": "d2",
+            "acdt": 1000000,
+            "bcdt": 1000000,
+            "wcdt": 1000000,
+            "distribution": "Normal"
+        },
+        {
+            "name": "d2-to-d1",
+            "source": "d2",
+            "dest": "d1",
+            "acdt": 1000000,
+            "bcdt": 1000000,
+            "wcdt": 1000000,
+            "distribution": "Normal"
+        }
+    ],
+    "EntityStore": [
+        {
+            "name": "t1",
+            "type": "task",
+            "acet": 305214,
+            "bcet": 305214,
+            "wcet": 305214,
+            "core": null,
+            "distribution": "Normal",
+            "inputs": [
+                "in1"
+            ],
+            "outputs": [
+                "out1"
+            ],
+            "priority": null,
+            "activationOffset": 0,
+            "initialOffset": 271421,
+            "period": 2000000,
+            "duration": 615838
+        },
+        {
+            "name": "t2",
+            "type": "task",
+            "acet": 431548,
+            "bcet": 431548,
+            "wcet": 431548,
+            "core": null,
+            "distribution": "Normal",
+            "inputs": [
+                "in1"
+            ],
+            "outputs": [
+                "out1"
+            ],
+            "priority": null,
+            "activationOffset": 0,
+            "initialOffset": 1680268,
+            "period": 2000000,
+            "duration": 1205771
+        }
+    ],
+    "DependencyStore": [
+        {
+            "name": "t1-t2",
+            "source": {
+                "port": "out1",
+                "task": "t1"
+            },
+            "destination": {
+                "port": "in1",
+                "task": "t2"
+            }
+        }
+    ],
+    "EntityInstancesStore": [
+        {
+            "name": "t1",
+            "type": "task",
+            "initialOffset": 271421,
+            "value": [
+                {
+                    "instance": 0,
+                    "periodStartTime": 271421,
+                    "periodEndTime": 2271421,
+                    "letStartTime": 271421,
+                    "letEndTime": 887259,
+                    "executionTime": 305214,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 887259.0,
+                            "startTime": 582045.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 1,
+                    "periodStartTime": 2271421,
+                    "periodEndTime": 4271421,
+                    "letStartTime": 2271421,
+                    "letEndTime": 2887259,
+                    "executionTime": 305214,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 2576635.0,
+                            "startTime": 2271421.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 2,
+                    "periodStartTime": 4271421,
+                    "periodEndTime": 6271421,
+                    "letStartTime": 4271421,
+                    "letEndTime": 4887259,
+                    "executionTime": 305214,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 4576635.0,
+                            "startTime": 4271421.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 3,
+                    "periodStartTime": 6271421,
+                    "periodEndTime": 8271421,
+                    "letStartTime": 6271421,
+                    "letEndTime": 6887259,
+                    "executionTime": 305214,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 6576635.0,
+                            "startTime": 6271421.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 4,
+                    "periodStartTime": 8271421,
+                    "periodEndTime": 10271421,
+                    "letStartTime": 8271421,
+                    "letEndTime": 8887259,
+                    "executionTime": 305214,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 8576635.0,
+                            "startTime": 8271421.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 5,
+                    "periodStartTime": 10271421,
+                    "periodEndTime": 12271421,
+                    "letStartTime": 10271421,
+                    "letEndTime": 10887259,
+                    "executionTime": 305214,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 10576635.0,
+                            "startTime": 10271421.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 6,
+                    "periodStartTime": 12271421,
+                    "periodEndTime": 14271421,
+                    "letStartTime": 12271421,
+                    "letEndTime": 12887259,
+                    "executionTime": 305214,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 12576635.0,
+                            "startTime": 12271421.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 7,
+                    "periodStartTime": 14271421,
+                    "periodEndTime": 16271421,
+                    "letStartTime": 14271421,
+                    "letEndTime": 14887259,
+                    "executionTime": 305214,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 14576635.0,
+                            "startTime": 14271421.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 8,
+                    "periodStartTime": 16271421,
+                    "periodEndTime": 18271421,
+                    "letStartTime": 16271421,
+                    "letEndTime": 16887259,
+                    "executionTime": 305214,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 16576635.0,
+                            "startTime": 16271421.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 9,
+                    "periodStartTime": 18271421,
+                    "periodEndTime": 20271421,
+                    "letStartTime": 18271421,
+                    "letEndTime": 18887259,
+                    "executionTime": 305214,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 18576635.0,
+                            "startTime": 18271421.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 10,
+                    "periodStartTime": 20271421,
+                    "periodEndTime": 22271421,
+                    "letStartTime": 20271421,
+                    "letEndTime": 20887259,
+                    "executionTime": 305214,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 20576635.0,
+                            "startTime": 20271421.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 11,
+                    "periodStartTime": 22271421,
+                    "periodEndTime": 24271421,
+                    "letStartTime": 22271421,
+                    "letEndTime": 22887259,
+                    "executionTime": 305214,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 22576635.0,
+                            "startTime": 22271421.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 12,
+                    "periodStartTime": 24271421,
+                    "periodEndTime": 26271421,
+                    "letStartTime": 24271421,
+                    "letEndTime": 24887259,
+                    "executionTime": 305214,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 24576635.0,
+                            "startTime": 24271421.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 13,
+                    "periodStartTime": 26271421,
+                    "periodEndTime": 28271421,
+                    "letStartTime": 26271421,
+                    "letEndTime": 26887259,
+                    "executionTime": 305214,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 26576635.0,
+                            "startTime": 26271421.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 14,
+                    "periodStartTime": 28271421,
+                    "periodEndTime": 30271421,
+                    "letStartTime": 28271421,
+                    "letEndTime": 28887259,
+                    "executionTime": 305214,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 28576635.0,
+                            "startTime": 28271421.0
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "t2",
+            "type": "task",
+            "initialOffset": 1680268,
+            "value": [
+                {
+                    "instance": 0,
+                    "periodStartTime": 1680268,
+                    "periodEndTime": 3680268,
+                    "letStartTime": 1680268,
+                    "letEndTime": 2886039,
+                    "executionTime": 431548,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 2271421.0,
+                            "startTime": 1839873.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 1,
+                    "periodStartTime": 3680268,
+                    "periodEndTime": 5680268,
+                    "letStartTime": 3680268,
+                    "letEndTime": 4886039,
+                    "executionTime": 431548,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 4271421.0,
+                            "startTime": 3839873.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 2,
+                    "periodStartTime": 5680268,
+                    "periodEndTime": 7680268,
+                    "letStartTime": 5680268,
+                    "letEndTime": 6886039,
+                    "executionTime": 431548,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 6271421.0,
+                            "startTime": 5839873.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 3,
+                    "periodStartTime": 7680268,
+                    "periodEndTime": 9680268,
+                    "letStartTime": 7680268,
+                    "letEndTime": 8886039,
+                    "executionTime": 431548,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 8271421.0,
+                            "startTime": 7839873.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 4,
+                    "periodStartTime": 9680268,
+                    "periodEndTime": 11680268,
+                    "letStartTime": 9680268,
+                    "letEndTime": 10886039,
+                    "executionTime": 431548,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 10271421.0,
+                            "startTime": 9839873.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 5,
+                    "periodStartTime": 11680268,
+                    "periodEndTime": 13680268,
+                    "letStartTime": 11680268,
+                    "letEndTime": 12886039,
+                    "executionTime": 431548,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 12271421.0,
+                            "startTime": 11839873.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 6,
+                    "periodStartTime": 13680268,
+                    "periodEndTime": 15680268,
+                    "letStartTime": 13680268,
+                    "letEndTime": 14886039,
+                    "executionTime": 431548,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 14271421.0,
+                            "startTime": 13839873.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 7,
+                    "periodStartTime": 15680268,
+                    "periodEndTime": 17680268,
+                    "letStartTime": 15680268,
+                    "letEndTime": 16886039,
+                    "executionTime": 431548,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 16271421.0,
+                            "startTime": 15839873.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 8,
+                    "periodStartTime": 17680268,
+                    "periodEndTime": 19680268,
+                    "letStartTime": 17680268,
+                    "letEndTime": 18886039,
+                    "executionTime": 431548,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 18271421.0,
+                            "startTime": 17839873.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 9,
+                    "periodStartTime": 19680268,
+                    "periodEndTime": 21680268,
+                    "letStartTime": 19680268,
+                    "letEndTime": 20886039,
+                    "executionTime": 431548,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 20271421.0,
+                            "startTime": 19839873.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 10,
+                    "periodStartTime": 21680268,
+                    "periodEndTime": 23680268,
+                    "letStartTime": 21680268,
+                    "letEndTime": 22886039,
+                    "executionTime": 431548,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 22271421.0,
+                            "startTime": 21839873.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 11,
+                    "periodStartTime": 23680268,
+                    "periodEndTime": 25680268,
+                    "letStartTime": 23680268,
+                    "letEndTime": 24886039,
+                    "executionTime": 431548,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 24271421.0,
+                            "startTime": 23839873.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 12,
+                    "periodStartTime": 25680268,
+                    "periodEndTime": 27680268,
+                    "letStartTime": 25680268,
+                    "letEndTime": 26886039,
+                    "executionTime": 431548,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 26271421.0,
+                            "startTime": 25839873.0
+                        }
+                    ]
+                },
+                {
+                    "instance": 13,
+                    "periodStartTime": 27680268,
+                    "periodEndTime": 29680268,
+                    "letStartTime": 27680268,
+                    "letEndTime": 28886039,
+                    "executionTime": 431548,
+                    "currentCore": {
+                        "name": "c3",
+                        "speedup": 1,
+                        "device": "d1"
+                    },
+                    "executionIntervals": [
+                        {
+                            "core": "c3",
+                            "endTime": 28271421.0,
+                            "startTime": 27839873.0
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
