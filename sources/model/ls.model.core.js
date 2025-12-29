@@ -43,10 +43,7 @@ class ModelCore {
     registerModelDevice(modelDevice) {
         this.modelDevice = modelDevice;
     }
-
-    registerModelDevice(modelDevice) {
-        this.modelDevice = modelDevice;
-    }
+    
     
     // -----------------------------------------------------
     // Class methods

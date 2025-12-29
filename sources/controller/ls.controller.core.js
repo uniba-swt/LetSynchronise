@@ -93,6 +93,7 @@ class ControllerCore {
         this.view.updateCores(cores);
     }
 
+    // Callback for updating the displayed device selector.
     callbackUpdateDeviceSelector = (devices) => {
         this.view.updateDeviceSelector(devices);
     }

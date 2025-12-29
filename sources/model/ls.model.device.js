@@ -5,10 +5,8 @@ class ModelDevice {
     updateDevicesDelay = null;
 
     database = null;
-    modelEntity = null;
     modelCore = null;
     modelNetworkDelay = null;
-    modelDependency = null;
 
     constructor() { }
     
@@ -32,10 +30,6 @@ class ModelDevice {
         this.database = database;
     }
 
-    registerModelEntity(modelEntity) {
-        this.modelEntity = modelEntity;
-    }
-
     registerModelCore(modelCore) {
         this.modelCore = modelCore;
     }
@@ -43,10 +37,7 @@ class ModelDevice {
     registerModelNetworkDelay(modelNetworkDelay) {
         this.modelNetworkDelay = modelNetworkDelay;
     }
-
-    registerModelDependency(modelDependency) {
-        this.modelDependency = modelDependency;
-    }
+    
     
     // -----------------------------------------------------
     // Class methods

@@ -4,10 +4,8 @@ class ControllerDevice {
     _view = null;
     _viewSchedule = null;
     _model = null;
-    _modelEntity = null;
     _modelCore = null;
     _modelNetworkDelay = null;
-    _modelDependency = null;
     
     constructor() { }
 
@@ -16,7 +14,7 @@ class ControllerDevice {
         
         // Register the handlers when setting the view.
         this._view.registerSubmitHandler(this.handleCreateDevice);
-        this._view.registerDelaySubmitHandler(this.handleDeviceDelay);
+        this._view.registerDelaySubmitHandler(this.handleCreateDelay);
         this._view.registerDeleteHandler(this.handleDeleteDevice);
         this._view.registerDeleteDelayHandler(this.handleDeleteDelay);
     }
@@ -49,17 +47,6 @@ class ControllerDevice {
     get model() {
         return this._model;
     }
-    
-    set modelEntity(modelEntity) {
-        this._modelEntity = modelEntity;
-        
-        // Register the model task with the model.
-        this._model.registerModelEntity(this._modelEntity);
-    }
-    
-    get modelEntity() {
-        return this._modelEntity;
-    }
 
     set modelCore(modelCore) {
         this._modelCore = modelCore;
@@ -81,11 +68,6 @@ class ControllerDevice {
     get modelNetworkDelay() {
         return this._modelNetworkDelay;
     }
-
-    set modelDependency(modelDependency) {
-        this._modelDependency = modelDependency;
-        this._model.registerModelDependency(this._modelDependency);
-    }
     
     
     // -----------------------------------------------------
@@ -97,8 +79,8 @@ class ControllerDevice {
         this.model.createDevice(device);
     }
 
-    handleDeviceDelay = (device) => {
-        this.model.addDelay(device);
+    handleCreateDelay = (delay) => {
+        this.model.addDelay(delay);
     }
     
     // Handler for deleting a device.

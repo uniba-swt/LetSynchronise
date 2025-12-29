@@ -3,8 +3,10 @@
 class ControllerExportImport {
     _view = null;
     _model = null;
+    _modelDevice = null;
     _modelCore = null;
     _modelMemory = null;
+    _modelNetworkDelay = null;
     _modelInterface = null;
     _modelEntity = null;
     _modelDependency = null;
@@ -47,11 +49,15 @@ class ControllerExportImport {
         return this._model;
     }
     
-    set modelInterface(modelInterface) {
-        this._modelInterface = modelInterface;
+    get modelDevice() {
+    	return this._modelDevice;
+    }
+    
+    set modelDevice(modelDevice) {
+        this._modelDevice = modelDevice;
         
-        // Register the model interface with the model.
-        this._model.registerModelInterface(this._modelInterface);
+        // Register the model device with the model.
+        this._model.registerModelDevice(this._modelDevice);
     }
     
     get modelCore() {
@@ -74,6 +80,24 @@ class ControllerExportImport {
         
         // Register the model memory with the model.
         this._model.registerModelMemory(this._modelMemory);
+    }
+    
+    get modelNetworkDelay() {
+        return this._modelNetworkDelay;
+    }
+    
+    set modelNetworkDelay(modelNetworkDelay) {
+        this._modelNetworkDelay = modelNetworkDelay;
+        
+        // Register this model network delay with the model.
+        this._model.registerModelNetworkDelay(this._modelNetworkDelay);
+    }
+    
+    set modelInterface(modelInterface) {
+        this._modelInterface = modelInterface;
+        
+        // Register the model interface with the model.
+        this._model.registerModelInterface(this._modelInterface);
     }
     
     get modelInterface() {
@@ -136,7 +160,7 @@ class ControllerExportImport {
 
     // Handler for importing a system
     handleImportSystem = (system, elementsSelected) => {
-    	if (system != null) {
+        if (system != null) {
             this.model.importSystem(system, elementsSelected);
         }
     }

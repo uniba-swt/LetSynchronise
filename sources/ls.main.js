@@ -51,8 +51,10 @@ controller.controllerRandomTasks = new ControllerRandomTasks();
 // Link the models and views to their respective controllers.
 controller.controllerExportImport.view = view.viewExportImport;
 controller.controllerExportImport.model = model.modelExportImport;
+controller.controllerExportImport.modelDevice = model.modelDevice;
 controller.controllerExportImport.modelCore = model.modelCore;
 controller.controllerExportImport.modelMemory = model.modelMemory;
+controller.controllerExportImport.modelNetworkDelay = model.modelNetworkDelay;
 controller.controllerExportImport.modelInterface = model.modelInterface;
 controller.controllerExportImport.modelEntity = model.modelEntity;
 controller.controllerExportImport.modelDependency = model.modelDependency;
@@ -63,7 +65,6 @@ controller.controllerDevice.view = view.viewDevice;
 controller.controllerDevice.model = model.modelDevice;
 controller.controllerDevice.modelCore = model.modelCore;
 controller.controllerDevice.modelNetworkDelay = model.modelNetworkDelay;
-controller.controllerDevice.modelDependency = model.modelDependency;
 
 controller.controllerCore.view = view.viewCore;
 controller.controllerCore.viewSchedule = view.viewSchedule;
@@ -161,10 +162,10 @@ Plugin.Register(PluginSchedulerRm);
 Plugin.Register(PluginSchedulerTuDortmund);
 
 // Register optimisation goal plug-ins.
+Plugin.Register(PluginGoalRandom);
 Plugin.Register(PluginGoalEnd2EndMax);
 Plugin.Register(PluginGoalEnd2EndMin);
 Plugin.Register(PluginGoalIlp);
-Plugin.Register(PluginGoalRandom);
 Plugin.Register(PluginGoalMinimiseCoreUsage);
 Plugin.Register(PluginGoalEnd2EndMinMC);
 view.viewSchedule.updateOptimiserPluginSelectors();
