@@ -13,10 +13,10 @@ class PluginGoalMinimiseCoreUsage {
     // task executions.
     static async Result(scheduler, makespan) {
         // Retrieve the LET system.
-        const systemElementSelected = ['cores', 'schedule', 'entities'];
+        const systemElementSelected = ['cores', 'entities', 'schedule'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
 
-        if(Object.keys(system['CoreStore']).length < 1) {
+        if (Object.keys(system['CoreStore']).length < 1) {
             alert('Please add cores.');
             return false;
         }
@@ -29,13 +29,13 @@ class PluginGoalMinimiseCoreUsage {
         if (optimisedSchedule == null) {
             return
         }
-
-        await Plugin.DeleteSchedule();
         
         // Save the externally optimised task schedule and compute the dependency and event chain instances.
         const scheduleElementSelected = ['schedule'];
-        return Plugin.DatabaseContentsSet(optimisedSchedule, scheduleElementSelected)
-            .then(result => Plugin.CreateAllDependencyAndEventChainInstances(makespan));
+        return Plugin.DeleteSchedule()
+            .then(result => Plugin.DatabaseContentsSet(optimisedSchedule, scheduleElementSelected))
+            .then(result => Plugin.CreateAllDependencyAndEventChainInstances()
+            .then(result => Plugin.CreateAllNetworkDelayInstances()));
     }
 
     // Trigger an external scheduling tool.

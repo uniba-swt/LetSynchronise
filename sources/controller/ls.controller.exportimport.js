@@ -49,10 +49,6 @@ class ControllerExportImport {
         return this._model;
     }
     
-    get modelDevice() {
-    	return this._modelDevice;
-    }
-    
     set modelDevice(modelDevice) {
         this._modelDevice = modelDevice;
         
@@ -60,8 +56,8 @@ class ControllerExportImport {
         this._model.registerModelDevice(this._modelDevice);
     }
     
-    get modelCore() {
-        return this._modelCore;
+    get modelDevice() {
+    	return this._modelDevice;
     }
     
     set modelCore(modelCore) {
@@ -71,8 +67,8 @@ class ControllerExportImport {
         this._model.registerModelCore(this._modelCore);
     }
     
-    get modelMemory() {
-        return this._modelMemory;
+    get modelCore() {
+        return this._modelCore;
     }
     
     set modelMemory(modelMemory) {
@@ -81,16 +77,20 @@ class ControllerExportImport {
         // Register the model memory with the model.
         this._model.registerModelMemory(this._modelMemory);
     }
-    
-    get modelNetworkDelay() {
-        return this._modelNetworkDelay;
+
+    get modelMemory() {
+        return this._modelMemory;
     }
-    
+        
     set modelNetworkDelay(modelNetworkDelay) {
         this._modelNetworkDelay = modelNetworkDelay;
         
         // Register this model network delay with the model.
         this._model.registerModelNetworkDelay(this._modelNetworkDelay);
+    }
+
+    get modelNetworkDelay() {
+        return this._modelNetworkDelay;
     }
     
     set modelInterface(modelInterface) {

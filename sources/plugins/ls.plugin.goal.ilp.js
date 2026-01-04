@@ -16,7 +16,7 @@ class PluginGoalIlp {
         await Plugin.DeleteSchedule();
         
         // Retrieve the LET system.
-        const systemElementSelected = ['cores', 'inputs','outputs','entities','dependencies','eventChains','constraints'];
+        const systemElementSelected = ['cores', 'inputs', 'outputs', 'entities', 'dependencies', 'eventChains', 'constraints'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
         
         // Add the makespan to system so that the ILP Solver can access it.
@@ -32,7 +32,8 @@ class PluginGoalIlp {
         const scheduleElementSelected = ['schedule'];
         return Plugin.DatabaseContentsDelete(scheduleElementSelected)
             .then(result => Plugin.DatabaseContentsSet(optimisedSchedule, scheduleElementSelected))
-            .then(result => Plugin.CreateAllDependencyAndEventChainInstances(makespan));
+            .then(result => Plugin.CreateAllDependencyAndEventChainInstances()
+            .then(result => Plugin.CreateAllNetworkDelayInstances()));
     }
     
     // Trigger an external optimisation tool.

@@ -3,13 +3,13 @@
 class ControllerSchedule {
     _view = null;
     _model = null;
-    _modelEntity = null;
     _modelDevice = null;
     _modelCore = null;
+    _modelNetworkDelay = null;
+    _modelEntity = null;
     _modelDependency = null;
     _modelEventChain = null;
     _modelConstraint = null;
-    _modelNetworkDelay = null;
         
     constructor() { }
 
@@ -52,17 +52,6 @@ class ControllerSchedule {
     get model() {
         return this._model;
     }
-    
-    set modelEntity(modelEntity) {
-        this._modelEntity = modelEntity;
-        
-        // Register the model task with the model.
-        this._model.registerModelEntity(this._modelEntity);
-    }
-    
-    get modelEntity() {
-        return this._modelEntity;
-    }
 
     set modelDevice(modelDevice) {
         this._modelDevice = modelDevice;
@@ -74,13 +63,6 @@ class ControllerSchedule {
     get modelDevice() {
         return this._modelDevice;
     }
-
-    set modelDevice(modelDevice) {
-        this._modelDevice = modelDevice;
-        
-        // Register the model task with the model.
-        this._model.registerModelDevice(this._modelDevice);
-    }
     
     get modelCore() {
         return this._modelCore;
@@ -89,6 +71,26 @@ class ControllerSchedule {
     set modelCore(modelCore) {
         this._modelCore = modelCore;
         this._model.registerModelCore(this._modelCore);
+    }
+    
+    get modelNetworkDelay() {
+        return this._modelNetworkDelay;
+    }
+    
+    set modelNetworkDelay(modelNetworkDelay) {
+        this._modelNetworkDelay = modelNetworkDelay;
+        this._model.registerModelNetworkDelay(this._modelNetworkDelay);
+    }
+    
+    set modelEntity(modelEntity) {
+        this._modelEntity = modelEntity;
+        
+        // Register the model task with the model.
+        this._model.registerModelEntity(this._modelEntity);
+    }
+    
+    get modelEntity() {
+        return this._modelEntity;
     }
     
     set modelDependency(modelDependency) {
@@ -123,11 +125,6 @@ class ControllerSchedule {
     get modelConstraint() {
         return this._modelConstraint;
     }
-
-    set modelNetworkDelay(modelNetworkDelay) {
-        this._modelNetworkDelay = modelNetworkDelay;
-        this._model.registerModelNetworkDelay(this._modelNetworkDelay);
-    }
     
     
     // -----------------------------------------------------
@@ -148,7 +145,6 @@ class ControllerSchedule {
             const executionTiming = this.view.schedulingParametersClean.executionTiming;
 
             scheduler.Result(makespan, executionTiming)
-                .then(result => this.model.createDelayRelatedInstances())
                 .then(result => this.callbackGetSchedule(this.model.getSchedule()));
         } else {
             this.callbackGetSchedule(this.model.getSchedule());
@@ -162,8 +158,7 @@ class ControllerSchedule {
         const executionTiming = this.view.schedulingParametersClean.executionTiming;
         const goal = this.view.optimiserParametersClean.goal;
         goal.Result(scheduler, makespan)
-            .then(result => this.modelEntity.deleteAllDelayInstances())
-            .then(result => this.model.createDelayRelatedInstances())
+            .then(result => scheduler.Result(makespan, executionTiming))
             .then(result => this.modelEntity.refreshViews())
             .then(result => this.callbackGetSchedule(this.model.getSchedule()));
     }

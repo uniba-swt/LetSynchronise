@@ -33,7 +33,8 @@ class PluginSchedulerTuDortmund {
         const scheduleElementSelected = ['schedule'];
         return Plugin.DatabaseContentsDelete(scheduleElementSelected)
             .then(result => Plugin.DatabaseContentsSet(computedSchedule, scheduleElementSelected))
-            .then(result => Plugin.CreateAllDependencyAndEventChainInstances(makespan));
+            .then(result => Plugin.CreateAllDependencyAndEventChainInstances()
+            .then(result => Plugin.CreateAllNetworkDelayInstances()));
     }
 
     // Trigger an external scheduling tool.

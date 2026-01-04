@@ -86,7 +86,7 @@ class Utility {
         return scale * Math.pow(-Math.log(1 - random), 1 / shape) / upperBound;
     }
     
-    static RandomInteger(min, max, distribution) {
+    static RandomInteger(min, avg, max, distribution) {
         const range = max - min;
         let delta = 0;
         switch (distribution) {

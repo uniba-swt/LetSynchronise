@@ -16,12 +16,12 @@ class PluginGoalEnd2EndMinMC {
         const systemElementSelected = ['cores', 'devices', 'networkDelays', 'entities', 'dependencies'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
 
-        if(Object.keys(system['CoreStore']).length < 1) {
+        if (Object.keys(system['CoreStore']).length < 1) {
             alert('Please add cores.');
             return false;
         }
 
-        if(Object.keys(system['DependencyStore']).length < 1) {
+        if (Object.keys(system['DependencyStore']).length < 1) {
             alert('Please add task dependencies.')
             return false;
         }
@@ -46,13 +46,13 @@ class PluginGoalEnd2EndMinMC {
         if (optimisedSchedule == null) {
             return
         }
-
-        await Plugin.DeleteSchedule();
         
         // Save the externally optimised task schedule and compute the dependency and event chain instances.
         const scheduleElementSelected = ['schedule'];
-        return Plugin.DatabaseContentsSet(optimisedSchedule, scheduleElementSelected)
-            .then(result => Plugin.CreateAllDependencyAndEventChainInstances(makespan));
+        return Plugin.DeleteSchedule()
+            .then(result => Plugin.DatabaseContentsSet(optimisedSchedule, scheduleElementSelected))
+            .then(result => Plugin.CreateAllDependencyAndEventChainInstances()
+            .then(result => Plugin.CreateAllNetworkDelayInstances()));
     }
 
     // Trigger an external scheduling tool.

@@ -74,7 +74,7 @@ class ModelEntity {
 
     async createTask(parameters) {
         if (parameters.type == "task") {
-            // Delete dependencies that relied on task ports that are no longer exist.
+            // Delete dependencies that relied on task ports that no longer exist.
             let dependenciesToRemove = [];
             let dependencies = await this.modelDependency.getAllDependencies();
             for (const dependency of dependencies) {
@@ -121,33 +121,13 @@ class ModelEntity {
         return this.database.getAllObjects(Model.EntityInstancesStoreName);
     }
 
-    deleteDelay(name) {
-        if (name) {
-            const encapsulation = `${name.source.task} => ${name.destination.task} encapsulation delay`;
-            const network = `${name.source.task} => ${name.destination.task} network delay`;
-            const decapsulation = `${name.source.task} => ${name.destination.task} decapsulation delay`;
-    
-            return this.database.deleteObject(Model.EntityInstancesStoreName, encapsulation)
-                    .then(this.database.deleteObject(Model.EntityInstancesStoreName, network))
-                    .then(this.database.deleteObject(Model.EntityInstancesStoreName, decapsulation))
-        }
-    }
-
-    async deleteAllDelayInstances() {
-        const allInstances = await this.getAllTaskInstances()
-        let fileteredDelays = []
-        fileteredDelays = allInstances.filter(instance => instance.name.includes("delay"))
-
-        return fileteredDelays.map(delay => this.database.deleteObject(Model.EntityInstancesStoreName, delay.name))
-    }
-
     deleteTask(name) {
         return this.database.deleteObject(Model.EntityStoreName, name)
             .then(this.database.deleteObject(Model.EntityInstancesStoreName, name))
             .then(result => this.refreshViews());
     }
 
-    createDelayInstance(sourceEndTime, executionTime, sourceDevice, destDevice, dependency) {
+    static CreateDelayInstance(sourceEndTime, executionTime, sourceDevice, destDevice, dependency) {
         return {
             'instance'          : -1,
             'letStartTime'      : sourceEndTime,
@@ -158,32 +138,12 @@ class ModelEntity {
             'dependency'        : dependency.name
         };
     }
-
-    createAllDelayInstances(dependency, encapsulationDelays, networkDelays, decapsulationDelays) {
-        this.createDelayInstances(dependency, "encapsulation", encapsulationDelays);
-        this.createDelayInstances(dependency, "network", networkDelays);
-        this.createDelayInstances(dependency, "decapsulation", decapsulationDelays);
-    }
-
+    
     createDelayInstances(dependency, type, delays) {
         let delayType = type.toLowerCase();
-        let data = {}
+        let data = { }
 
-        if (delayType === 'network') {
-            data = {
-                'name': `${dependency.source.task} => ${dependency.destination.task} ${delayType} delay`,
-                'type': delayType,
-                'dependency': dependency.name,
-                'value': delays
-            }
-        } else if (delayType === 'encapsulation') {
-            data = {
-                'name': `${dependency.source.task} => ${dependency.destination.task} ${delayType} delay`,
-                'type': delayType,
-                'dependency': dependency.name,
-                'value': delays
-            }
-        } else if (delayType === 'decapsulation') {
+        if (delayType === 'encapsulation' || delayType === 'network' || delayType === 'decapsulation') {
             data = {
                 'name': `${dependency.source.task} => ${dependency.destination.task} ${delayType} delay`,
                 'type': delayType,
@@ -195,11 +155,8 @@ class ModelEntity {
         this.getAllTaskInstances().then(entities => {
             const delays = entities.filter(entity => entity.type !== 'task');
 
-            let found = false;
             for (const delay of delays) {
                 if (delay.name === data.name) {
-                    found = true;
-
                     if (!delay.dependency.includes(data.dependency)) {
                         delay.dependency += `, ${data.dependency}`;
                         delay.value = [...delay.value, ...data.value];
@@ -207,24 +164,51 @@ class ModelEntity {
                         delay.value.sort((first, second) => first.letStartTime - second.letStartTime);
                         delay.value.forEach((instance, index) => instance.instance = index);
 
-                        this.database.putObject(Model.EntityInstancesStoreName, delay);
+                        return this.database.putObject(Model.EntityInstancesStoreName, delay);
                     }
-                    break;
+                    
+                    return;
                 }
             }
 
-            if (!found) {
-                this.database.putObject(Model.EntityInstancesStoreName, data);
-            }
+			return this.database.putObject(Model.EntityInstancesStoreName, data);
         })
+    }
+    
+    createAllDelayInstances(dependency, encapsulationDelays, networkDelays, decapsulationDelays) {
+    	return Promise.all([
+			this.createDelayInstances(dependency, 'encapsulation', encapsulationDelays),
+			this.createDelayInstances(dependency, 'network', networkDelays),
+			this.createDelayInstances(dependency, 'decapsulation', decapsulationDelays)
+    	]);
+    }
+    
+    // TODO
+    deleteDelay(name) {
+        if (name) {
+            const encapsulation = `${name.source.task} => ${name.destination.task} encapsulation delay`;
+            const network = `${name.source.task} => ${name.destination.task} network delay`;
+            const decapsulation = `${name.source.task} => ${name.destination.task} decapsulation delay`;
+    
+            return this.database.deleteObject(Model.EntityInstancesStoreName, encapsulation)
+                    .then(this.database.deleteObject(Model.EntityInstancesStoreName, network))
+                    .then(this.database.deleteObject(Model.EntityInstancesStoreName, decapsulation));
+        }
+    }
 
+    async deleteAllDelayInstances() {
+        const allInstances = await this.getAllTaskInstances();
+        let fileteredDelays = [ ];
+        fileteredDelays = allInstances.filter(instance => instance.name.includes("delay"));
+
+        return Promise.all(fileteredDelays.map(delay => this.database.deleteObject(Model.EntityInstancesStoreName, delay.name)));
     }
 
     async generateRandomTasks(parameters) {
-        let tasks = []
+        let tasks = [ ];
 
         for (let i = 1; i <= parameters.numTasks; i++) {
-            tasks.push(this.createRandomTask(parameters, i))
+            tasks.push(this.createRandomTask(parameters, i));
         }
 
         return Promise.all(tasks.map(task => this.createTask(task)));
@@ -235,11 +219,13 @@ class ModelEntity {
 
         const minDuration = period >= parameters.minDuration ? parameters.minDuration : period;
         const maxDuration = period <= parameters.maxDuration ? period : parameters.maxDuration;
-        const duration = Utility.RandomInteger(minDuration, maxDuration, 'Normal');
+        const avgDuration = (maxDuration + minDuration) / 2;
+        const duration = Utility.RandomInteger(minDuration, avgDuration, maxDuration, 'Normal');
         
         const maxWCET = parameters.maxWCET <= duration ? parameters.maxWCET : duration;
         const minWCET = parameters.minWCET <= duration ? parameters.minWCET : duration;
-        const wcet = Utility.RandomInteger(minWCET, maxWCET, 'Normal');
+        const avgWCET = (maxWCET + minWCET) / 2;
+        const wcet = Utility.RandomInteger(minWCET, avgWCET, maxWCET, 'Normal');
 
         const initialOffset = Utility.RandomInteger(parameters.minInitialOffset, parameters.maxInitialOffset, 'Normal');
 

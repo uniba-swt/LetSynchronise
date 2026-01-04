@@ -11,10 +11,10 @@ class PluginSchedulerEdf {
     
     // Uses an earliest deadline first algorithm to schedule task executions.
     static async Result(makespan, executionTiming) {
-        // Create task instances, execution times, data dependencies, and event chains.
+        // Create instances of tasks, execution times, network delays, data dependencies, and event chains.
         await Plugin.DeleteSchedule();
         await Plugin.CreateAllTaskInstances(makespan, executionTiming);
-        await Plugin.CreateAllDependencyAndEventChainInstances(makespan);
+        await Plugin.CreateAllDependencyAndEventChainInstances();
         
         const scheduleElementSelected = ['schedule'];
         const schedule = await Plugin.DatabaseContentsGet(scheduleElementSelected);
@@ -29,7 +29,9 @@ class PluginSchedulerEdf {
         }
         
         return Plugin.DatabaseContentsDelete(scheduleElementSelected)
-            .then(Plugin.DatabaseContentsSet(schedule, scheduleElementSelected));
+            .then(result => Plugin.DatabaseContentsSet(schedule, scheduleElementSelected))
+            // Network delays can only be generated after tasks have been allocated to cores/devices
+            .then(result => Plugin.CreateAllNetworkDelayInstances());
     }
     
     // Preemptive, earliest deadline first, multicore, no task migration.

@@ -215,6 +215,7 @@ class ModelDatabase {
         return Promise.all(importPromises);
     }
     
+    
     // Schedule delete.
 
     deleteSchedule = function(instancesStoreNames) {

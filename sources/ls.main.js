@@ -69,8 +69,8 @@ controller.controllerDevice.modelNetworkDelay = model.modelNetworkDelay;
 controller.controllerCore.view = view.viewCore;
 controller.controllerCore.viewSchedule = view.viewSchedule;
 controller.controllerCore.model = model.modelCore;
-controller.controllerCore.modelEntity = model.modelEntity;
 controller.controllerCore.modelDevice = model.modelDevice;
+controller.controllerCore.modelEntity = model.modelEntity;
 
 controller.controllerNetworkDelay.view = view.viewNetworkDelay;
 controller.controllerNetworkDelay.model = model.modelNetworkDelay;
@@ -82,35 +82,35 @@ controller.controllerMemory.model = model.modelMemory;
 controller.controllerInterface.view = view.viewInterface;
 controller.controllerInterface.model = model.modelInterface;
 controller.controllerInterface.modelDependency = model.modelDependency;
-controller.controllerInterface.modelConstraint = model.modelConstraint;
 controller.controllerInterface.modelEventChain = model.modelEventChain;
+controller.controllerInterface.modelConstraint = model.modelConstraint;
 
 controller.controllerEntity.view = view.viewEntity;
 controller.controllerEntity.viewSchedule = view.viewSchedule;
 controller.controllerEntity.model = model.modelEntity;
-controller.controllerEntity.modelCore = model.modelCore;
 controller.controllerEntity.modelDevice = model.modelDevice;
+controller.controllerEntity.modelCore = model.modelCore;
+controller.controllerEntity.modelNetworkDelay = model.modelNetworkDelay;
 controller.controllerEntity.modelDependency = model.modelDependency;
 controller.controllerEntity.modelEventChain = model.modelEventChain;
-controller.controllerEntity.modelNetworkDelay = model.modelNetworkDelay;
 controller.controllerEntity.modelSchedule = model.modelSchedule;
 
 controller.controllerDependency.view = view.viewDependency;
 controller.controllerDependency.model = model.modelDependency;
+controller.controllerDependency.modelCore = model.modelCore;
 controller.controllerDependency.modelEntity = model.modelEntity;
 controller.controllerDependency.modelInterface = model.modelInterface;
 controller.controllerDependency.modelEventChain = model.modelEventChain;
-controller.controllerDependency.modelCore = model.modelCore;
 
 controller.controllerSchedule.view = view.viewSchedule;
 controller.controllerSchedule.model = model.modelSchedule;
-controller.controllerSchedule.modelEntity = model.modelEntity;
 controller.controllerSchedule.modelDevice = model.modelDevice;
 controller.controllerSchedule.modelCore = model.modelCore;
+controller.controllerSchedule.modelNetworkDelay = model.modelNetworkDelay;
+controller.controllerSchedule.modelEntity = model.modelEntity;
 controller.controllerSchedule.modelDependency = model.modelDependency;
 controller.controllerSchedule.modelEventChain = model.modelEventChain;
 controller.controllerSchedule.modelConstraint = model.modelConstraint;
-controller.controllerSchedule.modelNetworkDelay = model.modelNetworkDelay;
 
 controller.controllerEventChain.view = view.viewEventChain;
 controller.controllerEventChain.model = model.modelEventChain;

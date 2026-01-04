@@ -11,10 +11,16 @@ class PluginSchedulerRandom {
     
     // Random non-preemptive scheduling of task execution.
     static async Result(makespan, executionTiming) {
-        // Create instances of tasks, execution times, data dependencies, and event chains.
+        // Does not support Systeml-Level LET
+		if (!confirm('SL-LET systems are not supported by this plugin! Proceed with the scheduling?')) {
+			return null;
+		}
+    
+        // Create instances of tasks, execution times, network delays, data dependencies, and event chains.
         await Plugin.DeleteSchedule();
         await Plugin.CreateAllTaskInstances(makespan, executionTiming);
-        await Plugin.CreateAllDependencyAndEventChainInstances(makespan);
+        await Plugin.CreateAllDependencyAndEventChainInstances();
+        await Plugin.CreateAllNetworkDelayInstances();
         
         const scheduleElementSelected = ['schedule'];
         const schedule = await Plugin.DatabaseContentsGet(scheduleElementSelected);
@@ -29,7 +35,7 @@ class PluginSchedulerRandom {
         }
         
         return Plugin.DatabaseContentsDelete(scheduleElementSelected)
-            .then(Plugin.DatabaseContentsSet(schedule, scheduleElementSelected));
+            .then(result => Plugin.DatabaseContentsSet(schedule, scheduleElementSelected));
     }
     
     // Non-preemptive random, multicore, no task migration.

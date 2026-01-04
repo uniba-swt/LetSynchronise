@@ -348,7 +348,7 @@ class ViewEntity {
         }
         
         if (taskParameters.duration == null || taskParameters.duration.trim() == '' || isNaN(taskParameters.duration)) {
-            alert('Duration offset has to be a decimal number.');
+            alert('Duration has to be a decimal number.');
             return false;
         }
         const duration = parseFloat(taskParameters.duration);
@@ -358,12 +358,12 @@ class ViewEntity {
         }
         const durationNs = duration * Utility.MsToNs;
         if (!Number.isSafeInteger(durationNs)) {
-            alert('Duration offset is unable to be represented with nanosecond precision.');
+            alert('Duration is unable to be represented with nanosecond precision.');
             return false;
         }
         
         if (taskParameters.period == null || taskParameters.period.trim() == '' || isNaN(taskParameters.period)) {
-            alert('Period offset has to be a decimal number.');
+            alert('Period has to be a decimal number.');
             return false;
         }
         const period = parseFloat(taskParameters.period);

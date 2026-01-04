@@ -11,10 +11,10 @@ class PluginSchedulerFp {
     
     // Uses a fixed-priority algorithm to schedule task executions.
     static async Result(makespan, executionTiming) {
-        // Create instances of tasks, execution times, data dependencies, and event chains.
+        // Create instances of tasks, execution times, network delays, data dependencies, and event chains.
         await Plugin.DeleteSchedule();
         await Plugin.CreateAllTaskInstances(makespan, executionTiming);
-        await Plugin.CreateAllDependencyAndEventChainInstances(makespan);
+        await Plugin.CreateAllDependencyAndEventChainInstances();
         
         const systemElementSelected = ['schedule', 'entities'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
@@ -30,7 +30,9 @@ class PluginSchedulerFp {
         }
         
         return Plugin.DatabaseContentsDelete(systemElementSelected)
-            .then(Plugin.DatabaseContentsSet(system, systemElementSelected));
+            .then(result => Plugin.DatabaseContentsSet(system, systemElementSelected))
+            // Network delays can only be generated after tasks have been allocated to cores/devices
+            .then(result => Plugin.CreateAllNetworkDelayInstances());
     }
     
     // Preemptive, fixed-priority, multicore, no task migration.
