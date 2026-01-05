@@ -57,10 +57,10 @@ class ModelSchedule {
     createTaskInstance(index, parameters, timePoint, executionTiming) {
         let executionTime = null;
         switch (executionTiming) {
-            case 'BCET':
+            case 'Best Case':
                 executionTime = parameters.bcet;
                 break;
-            case 'WCET':
+            case 'Worst Case':
                 executionTime = parameters.wcet;
                 break;
             default:
@@ -412,8 +412,8 @@ class ModelSchedule {
                     
                         const encapsulationDelayInstance = ModelEntity.CreateDelayInstance(
                             sourceInstance.letEndTime,
-                            Utility.GetDelayTime(sourceDevice.delays[0], executionTiming),
-                            sourceDevice, 
+                            ModelSchedule.GetDelayTime(sourceDevice.delays[0], executionTiming),
+                            sourceDevice,
                             destDevice, 
                             currentDependency
                         );
@@ -425,8 +425,8 @@ class ModelSchedule {
                         
                         const networkDelayInstance = ModelEntity.CreateDelayInstance(
                             encapsulationDelayInstances[0].letEndTime,
-                            Utility.GetDelayTime(networkDelay, executionTiming),
-                            sourceDevice, 
+                            ModelSchedule.GetDelayTime(networkDelay, executionTiming),
+                            sourceDevice,
                             destDevice, 
                             currentDependency
                         );
@@ -438,8 +438,8 @@ class ModelSchedule {
 
                         const decapsulationDelayInstance = ModelEntity.CreateDelayInstance(
                             networkDelayInstances[0].letEndTime,
-                            Utility.GetDelayTime(destDevice.delays[0], executionTiming),
-                            sourceDevice, 
+                            ModelSchedule.GetDelayTime(destDevice.delays[0], executionTiming),
+                            sourceDevice,
                             destDevice, 
                             currentDependency
                         );
@@ -493,19 +493,30 @@ class ModelSchedule {
         }
     
         // We do not check the instance number because it is unimportant.
-        // We do not check the executionTime because a duplicate instance should have the same time.
-        return instances.find(instance => 
+        // We do not check the executionTime or letEndTime because a duplicate instance should have the same times.
+        //
+        return instances.find(instance =>
             instance.destinationDevice == other.destinationDevice
             && instance.sourceDevice == other.sourceDevice
             && instance.letStartTime == other.letStartTime
-            && instance.letEndTime == other.letEndTime
         ) != null;
     }
 
     calculateTotalDelay(source, dest, network, executionTiming) {
-        return Utility.GetDelayTime(source.delays[0], executionTiming) + 
-                Utility.GetDelayTime(dest.delays[0], executionTiming) +
-                Utility.GetDelayTime(network, executionTiming);
+        return ModelSchedule.GetDelayTime(source.delays[0], executionTiming) +
+               ModelSchedule.GetDelayTime(dest.delays[0], executionTiming) +
+               ModelSchedule.GetDelayTime(network, executionTiming);
+    }
+    
+    static GetDelayTime(delay, executionTiming) {
+        switch (executionTiming) {
+            case 'Best Case':
+                return delay.bcdt;
+            case 'Worst Case':
+                return delay.wcdt;
+            default:
+                return Utility.RandomInteger(delay.bcdt, delay.acdt, delay.wcdt, delay.distribution);
+        }
     }
 
     async getDevicesAndNetworkDelay(source, dest) {

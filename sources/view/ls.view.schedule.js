@@ -421,8 +421,6 @@ class ViewSchedule {
         const dependenciesSet = await schedule['promiseAllDependenciesInstances'];
         const eventChainInstances = await schedule['promiseAllEventChainInstances'];
 
-        Utility.SortEntitiesInOrder(tasksInstances)
-
         if (taskParametersSet.length < 1) {
             this.prologue = 0;
             this.hyperPeriod = 0;

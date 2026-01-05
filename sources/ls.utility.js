@@ -311,17 +311,6 @@ class Utility {
 
         return sorted;
     }
-
-    static GetDelayTime(delay, executionTiming) {
-        switch (executionTiming) {
-            case 'BCET':
-                return delay.bcdt;
-            case 'WCET':
-                return delay.wcdt;
-            default:
-                return Utility.RandomInteger(delay.bcdt, delay.acdt, delay.wcdt, delay.distribution);
-        }
-    }
     
 }
 

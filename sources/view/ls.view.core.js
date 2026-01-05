@@ -49,11 +49,11 @@ class ViewCore {
     }
 
     get device() {
-        return this.deviceField.value ? this.deviceField.value : 'n/a';
+        return this.deviceField.value;
     }
     
     set device(device) {
-        device ? this.deviceField.value = device : this.deviceField.value = 'n/a';
+        this.deviceField.value = device;
     }
     
     get coreRaw() {
@@ -147,8 +147,7 @@ class ViewCore {
             .data(cores)
             .enter()
             .append('li')
-                .html(core => `<span><b>${core.name}:</b> ${core.speedup}&times; speedup 
-                    ${core.device == 'n/a' ? '' : `(${core.device})`}</span> 
+                .html(core => `<span><b>${core.name}:</b> ${core.speedup}&times; speedup (${core.device})</span> 
                     ${Utility.AddDeleteButton(this.ElementIdPrefix, core.name)}`)
             .on('click', function(event, data) {
                 thisRef.cores.node().querySelectorAll('li')
