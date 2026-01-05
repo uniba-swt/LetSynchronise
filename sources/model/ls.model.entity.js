@@ -215,19 +215,17 @@ class ModelEntity {
     }
 
     createRandomTask(parameters, i) {
-        const period = parameters.period[Utility.RandomNumber(parameters.period.length)];
+        const period = parameters.period[Utility.RandomInteger(0, null, parameters.period.length)];
 
         const minDuration = period >= parameters.minDuration ? parameters.minDuration : period;
         const maxDuration = period <= parameters.maxDuration ? period : parameters.maxDuration;
-        const avgDuration = (maxDuration + minDuration) / 2;
-        const duration = Utility.RandomInteger(minDuration, avgDuration, maxDuration, 'Normal');
+        const duration = Utility.RandomInteger(minDuration, null, maxDuration, 'Normal');
         
         const maxWCET = parameters.maxWCET <= duration ? parameters.maxWCET : duration;
         const minWCET = parameters.minWCET <= duration ? parameters.minWCET : duration;
-        const avgWCET = (maxWCET + minWCET) / 2;
-        const wcet = Utility.RandomInteger(minWCET, avgWCET, maxWCET, 'Normal');
+        const wcet = Utility.RandomInteger(minWCET, null, maxWCET, 'Normal');
 
-        const initialOffset = Utility.RandomInteger(parameters.minInitialOffset, parameters.maxInitialOffset, 'Normal');
+        const initialOffset = Utility.RandomInteger(parameters.minInitialOffset, null, parameters.maxInitialOffset, 'Normal');
 
         return {
             name: `t${i}`,

@@ -56,12 +56,16 @@ class ModelSchedule {
     // Create a single task instance.
     createTaskInstance(index, parameters, timePoint, executionTiming) {
         let executionTime = null;
-        if (executionTiming === 'BCET') {
-            executionTime = parameters.bcet;
-        } else if (executionTiming === 'WCET') {
-            executionTime = parameters.wcet;
-        } else {
-            executionTime = Utility.RandomInteger(parameters.bcet, parameters.acet, parameters.wcet, parameters.distribution);
+        switch (executionTiming) {
+            case 'BCET':
+                executionTime = parameters.bcet;
+                break;
+            case 'WCET':
+                executionTime = parameters.wcet;
+                break;
+            default:
+                executionTime = Utility.RandomInteger(parameters.bcet, parameters.acet, parameters.wcet, parameters.distribution);
+                break;
         }
         
         return {

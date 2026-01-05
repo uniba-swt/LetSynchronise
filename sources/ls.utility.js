@@ -10,9 +10,35 @@ class Utility {
     }
 
     static ValidInteger(value) {
-        const parsed = parseInt(value, 10);
-
-        return Number.isInteger(parsed) && parsed.toString() == value.trim();
+        if (Number.isInteger(value)) {
+            return true;
+        }
+        
+        if (value == null || isNaN(value) || typeof value != 'string') {
+            return false;
+        }
+        
+        return (/^-?(\d+)$/).test(value.trim());
+    }
+    
+    static ValidPositiveInteger(value) {
+        return Utility.ValidInteger(value) && parseInt(value) >= 0;
+    }
+    
+    static ValidDecimal(value) {
+        if (typeof value == 'number') {
+            return true;
+        }
+        
+        if (value == null || isNaN(value) || typeof value != 'string') {
+            return false;
+        }
+        
+        return (/^-?(\d+)$/).test(value.trim()) || (/^-?(\d*).(\d+)$/).test(value.trim());
+    }
+    
+    static ValidPositiveDecimal(value) {
+        return Utility.ValidDecimal(value) && parseFloat(value) >= 0;
     }
     
     static MaxOfArray(array) {
@@ -86,8 +112,12 @@ class Utility {
         return scale * Math.pow(-Math.log(1 - random), 1 / shape) / upperBound;
     }
     
-    static RandomInteger(min, avg, max, distribution) {
+    static RandomInteger(min, avg, max, distribution = 'Uniform') {
         const range = max - min;
+        if (avg == null) {
+            avg = (max + min) / 2;
+        }
+        
         let delta = 0;
         switch (distribution) {
             case 'Normal':
@@ -99,13 +129,12 @@ class Utility {
             case 'Weibull':
                 delta = range * Utility.WeibullSample(1, 2, 3);
                 break;
+            default:
+                console.error(`Unknown distribution: ${distribution}`);
+                break;
         }
         
         return min + Math.trunc(delta);
-    }
-
-    static RandomNumber(max) {
-        return Math.floor(Math.random() * max);
     }
     
     static FormatTimeString(time, digits) {
@@ -284,14 +313,13 @@ class Utility {
     }
 
     static GetDelayTime(delay, executionTiming) {
-        if (executionTiming === 'BCET') {
-            return delay.bcdt;
-        }
-        if (executionTiming === 'WCET') {
-            return delay.wcdt;
-        }
-        else {
-            return Utility.RandomInteger(delay.bcdt, delay.acdt, delay.wcdt, delay.distribution);
+        switch (executionTiming) {
+            case 'BCET':
+                return delay.bcdt;
+            case 'WCET':
+                return delay.wcdt;
+            default:
+                return Utility.RandomInteger(delay.bcdt, delay.acdt, delay.wcdt, delay.distribution);
         }
     }
     

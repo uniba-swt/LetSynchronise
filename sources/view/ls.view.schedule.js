@@ -368,8 +368,8 @@ class ViewSchedule {
     
     // Validate the scheduler input fields.
     validateSchedulingParameters(schedulingParameters) {
-        if (schedulingParameters.makespan == null || schedulingParameters.makespan.trim() == '' || isNaN(schedulingParameters.makespan)) {
-            alert('Makespan has to be a decimal number.');
+        if (!Utility.ValidPositiveDecimal(schedulingParameters.makespan)) {
+            alert('Makespan has to be a positive decimal number.');
             return false;
         }
         const makespan = parseFloat(schedulingParameters.makespan);

@@ -153,58 +153,62 @@ class ViewNetworkDelay {
             return false;
         }
         
-        if (isNaN(parameters.bcdt) || isNaN(parameters.acdt) || isNaN(parameters.wcdt)) {
-            alert('Delay values should be a decimal number.');
+        if (!Utility.ValidPositiveDecimal(parameters.bcdt)) {
+            alert('BCDT has to be a positive decimal number.');
             return false;
         }
-
-        if (parseFloat(parameters.bcdt) < 0 || parseFloat(parameters.acdt) < 0 || parseFloat(parameters.wcdt) < 0) {
-            alert('Network delay cannot be negative.');
-            return false;
-        }
-        if ((parameters.bcdt.split('.').length > 1 && parameters.bcdt.split('.')[1].length > 2) ||
-            (parameters.acdt.split('.').length > 1 && parameters.acdt.split('.')[1].length > 2) ||
-            (parameters.wcdt.split('.').length > 1 && parameters.wcdt.split('.')[1].length > 2)) {
-            alert('Network delay cannot have more than 2 decimal places.');
-            return false;
-        }
-
-        if (parseFloat(parameters.bcdt) <= 0) {
+        const bcdt = parseFloat(parameters.bcdt);
+        if (bcdt <= 0) {
             alert('BCDT has to be greater than 0.');
             return false;
         }
-        if (parseFloat(parameters.acdt) <= 0) {
-            alert('ACDT has to be greater than 0.');
-            return false;
-        }
-        if (parseFloat(parameters.wcdt) <= 0) {
-            alert('WCDT has to be greater than 0.');
-            return false;
-        }
-
-        const bcdt = parameters.bcdt * Utility.MsToNs;
-        const acdt = parameters.acdt * Utility.MsToNs;
-        const wcdt = parameters.wcdt * Utility.MsToNs;
-
-        if (!Number.isSafeInteger(bcdt)) {
+        const bcdtNs = bcdt * Utility.MsToNs;
+        if (!Number.isSafeInteger(bcdtNs)) {
             alert('BCDT is unable to be represented with nanosecond precision.');
             return false;
         }
-        if (!Number.isSafeInteger(acdt)) {
+        
+        if (!Utility.ValidPositiveDecimal(parameters.acdt)) {
+            alert('ACDT has to be a positive decimal number.');
+            return false;
+        }
+        const acdt = parseFloat(parameters.acdt);
+        if (acdt <= 0) {
+            alert('ACDT has to be greater than 0.');
+            return false;
+        }
+        const acdtNs = acdt * Utility.MsToNs;
+        if (!Number.isSafeInteger(acdtNs)) {
             alert('ACDT is unable to be represented with nanosecond precision.');
             return false;
         }
-        if (!Number.isSafeInteger(wcdt)) {
+        
+        if (!Utility.ValidPositiveDecimal(parameters.wcdt)) {
+            alert('WCDT has to be a positive decimal number.');
+            return false;
+        }
+        const wcdt = parseFloat(parameters.wcdt);
+        if (wcdt <= 0) {
+            alert('WCDT has to be greater than 0.');
+            return false;
+        }
+        const wcdtNs = wcdt * Utility.MsToNs;
+        if (!Number.isSafeInteger(wcdtNs)) {
             alert('WCDT is unable to be represented with nanosecond precision.');
             return false;
         }
 
         if (wcdt < bcdt) {
-            alert('WCDT cannot be less than BCET.');
+            alert('WCDT cannot be less than BCDT.');
             return false;
         }
         if (wcdt < acdt || acdt < bcdt) {
             alert('ACDT cannot be less than BCDT or greater than WCDT.');
+            return false;
+        }
+        
+        if (parameters.distribution == null || parameters.distribution.trim() == '') {
+            alert('Choose type of delay distribution.');
             return false;
         }
         
@@ -277,17 +281,18 @@ class ViewNetworkDelay {
 
     deviceOptions(parentElement, devices) {
         parentElement.selectAll('*').remove();
-        parentElement.append('option')
+        parentElement
+            .append('option')
             .property('selected', true)
             .attr('value', 'Default')
-            .text('');
+            .text('Default');
         
         devices.forEach(device => 
             parentElement
                 .append('option')
                 .attr('value', device.name)
                 .text(device.name)
-        )
+        );
     }
     
     toString() {

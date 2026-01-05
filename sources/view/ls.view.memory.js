@@ -120,25 +120,16 @@ class ViewMemory {
             return false;
         }
         
-        if (memory.size == null || memory.size.trim() == '' || isNaN(memory.size) || parseInt(memory.size).toString() != memory.size.trim()) {
-            alert('Size has to be an integer number.');
-            return false;
-        }
-        if (parseInt(memory.size) < 0) {
-            alert('Size cannot be negative.');
+        if (!Utility.ValidPositiveInteger(memory.size)) {
+            alert('Size has to be a positive integer number.');
             return false;
         }
         
-        if (memory.latency == null || memory.latency.trim() == '' || isNaN(memory.latency)) {
-            alert('Latency has to be a decimal number.');
+        if (!Utility.ValidPositiveDecimal(memory.latency)) {
+            alert('Latency has to be a positive decimal number.');
             return false;
         }
-        const latency = parseFloat(memory.latency);
-        if (latency < 0) {
-            alert('Latency cannot be negative.');
-            return false;
-        }
-        const latencyNs = latency * Utility.MsToNs;
+        const latencyNs = parseFloat(memory.latency) * Utility.MsToNs;
         if (!Number.isSafeInteger(latencyNs)) {
             alert('Latency is unable to be represented with nanosecond precision.');
             return false;

@@ -85,6 +85,6 @@ class ControllerNetworkDelay {
     }
     
     toString() {
-        return `ControllerCore with ${this.view} and ${this.model}`;
+        return `ControllerNetworkDelay with ${this.view} and ${this.model}`;
     }
 }

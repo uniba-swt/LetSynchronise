@@ -311,44 +311,33 @@ class ViewEntity {
             return false;
         }
 
-        if (taskParameters.priority != null
-                && (isNaN(taskParameters.priority) || parseInt(taskParameters.priority) < 0 || taskParameters.priority.split(".").length != 1)) {
+        if (taskParameters.priority != null && !Utility.ValidPositiveInteger(taskParameters.priority)) {
             alert('Priority has to be a positive integer. Lowest priority is 0.');
             return false;
         }
 
-        if (taskParameters.initialOffset == null || taskParameters.initialOffset.trim() == '' || isNaN(taskParameters.initialOffset)) {
-            alert('Initial offset has to be a decimal number.');
+        if (!Utility.ValidPositiveDecimal(taskParameters.initialOffset)) {
+            alert('Initial offset has to be a positive decimal number.');
             return false;
         }
-        const initialOffset = parseFloat(taskParameters.initialOffset);
-        if (initialOffset < 0) {
-            alert('Initial offset cannot be negative.');
-            return false;
-        }
-        const initialOffsetNs = initialOffset * Utility.MsToNs;
+        const initialOffsetNs = parseFloat(taskParameters.initialOffset) * Utility.MsToNs;
         if (!Number.isSafeInteger(initialOffsetNs)) {
             alert('Initial offset is unable to be represented with nanosecond precision.');
             return false;
         }
 
-        if (taskParameters.activationOffset == null || taskParameters.activationOffset.trim() == '' || isNaN(taskParameters.activationOffset)) {
-            alert('Activation offset has to be a decimal number.');
+        if (!Utility.ValidPositiveDecimal(taskParameters.activationOffset)) {
+            alert('Activation offset has to be a positive decimal number.');
             return false;
         }
-        const activationOffset = parseFloat(taskParameters.activationOffset);
-        if (activationOffset < 0) {
-            alert('Activation offset cannot be negative.');
-            return false;
-        }
-        const activationOffsetNs = activationOffset * Utility.MsToNs;
+        const activationOffsetNs = parseFloat(taskParameters.activationOffset) * Utility.MsToNs;
         if (!Number.isSafeInteger(activationOffsetNs)) {
             alert('Activation offset is unable to be represented with nanosecond precision.');
             return false;
         }
         
-        if (taskParameters.duration == null || taskParameters.duration.trim() == '' || isNaN(taskParameters.duration)) {
-            alert('Duration has to be a decimal number.');
+        if (!Utility.ValidPositiveDecimal(taskParameters.duration)) {
+            alert('Duration has to be a positive decimal number.');
             return false;
         }
         const duration = parseFloat(taskParameters.duration);
@@ -362,8 +351,8 @@ class ViewEntity {
             return false;
         }
         
-        if (taskParameters.period == null || taskParameters.period.trim() == '' || isNaN(taskParameters.period)) {
-            alert('Period has to be a decimal number.');
+        if (!Utility.ValidPositiveDecimal(taskParameters.period)) {
+            alert('Period has to be a positive decimal number.');
             return false;
         }
         const period = parseFloat(taskParameters.period);
@@ -424,8 +413,8 @@ class ViewEntity {
             return false;
         }
         
-        if (taskParameters.wcet == null || taskParameters.wcet.trim() == '' || isNaN(taskParameters.wcet)) {
-            alert('WCET has to be a decimal number.');
+        if (!Utility.ValidPositiveDecimal(taskParameters.wcet)) {
+            alert('WCET has to be a positive decimal number.');
             return false;
         }
         const wcet = parseFloat(taskParameters.wcet);
@@ -439,8 +428,8 @@ class ViewEntity {
             return false;
         }
         
-        if (taskParameters.acet == null || taskParameters.acet.trim() == '' || isNaN(taskParameters.acet)) {
-            alert('ACET has to be a decimal number.');
+        if (!Utility.ValidPositiveDecimal(taskParameters.acet)) {
+            alert('ACET has to be a positive decimal number.');
             return false;
         }
         const acet = parseFloat(taskParameters.acet);
@@ -454,16 +443,11 @@ class ViewEntity {
             return false;
         }
         
-        if (taskParameters.bcet == null || taskParameters.bcet.trim() == '' || isNaN(taskParameters.bcet)) {
-            alert('BCET has to be a decimal number.');
+        if (!Utility.ValidPositiveDecimal(taskParameters.bcet)) {
+            alert('BCET has to be a positive decimal number.');
             return false;
         }
-        const bcet = parseFloat(taskParameters.bcet);
-        if (bcet < 0) {
-            alert('BCET has to be greater than or equal to 0.');
-            return false;
-        }
-        const bcetNs = bcet * Utility.MsToNs;
+        const bcetNs = parseFloat(taskParameters.bcet) * Utility.MsToNs;
         if (!Number.isSafeInteger(bcetNs)) {
             alert('BCET is unable to be represented with nanosecond precision.');
             return false;
@@ -503,36 +487,27 @@ class ViewEntity {
             return false;
         }
 
-        if (taskParameters.priority != null
-                && (isNaN(taskParameters.priority) || parseInt(taskParameters.priority) < 0 || `${taskParameters.priority}`.split(".").length != 1)) {
+        if (taskParameters.priority != null && !Utility.ValidPositiveInteger(taskParameters.priority)) {
             return false;
         }
 
-        if (taskParameters.initialOffset == null || isNaN(taskParameters.initialOffset)) {
+        if (!Utility.ValidPositiveDecimal(taskParameters.initialOffset)) {
             return false;
         }
-        const initialOffset = parseFloat(taskParameters.initialOffset);
-        if (initialOffset < 0) {
-            return false;
-        }
-        const initialOffsetNs = initialOffset * Utility.MsToNs;
+        const initialOffsetNs = parseFloat(taskParameters.initialOffset) * Utility.MsToNs;
         if (!Number.isSafeInteger(initialOffsetNs)) {
             return false;
         }
 
-        if (taskParameters.activationOffset == null || isNaN(taskParameters.activationOffset)) {
+        if (!Utility.ValidPositiveDecimal(taskParameters.activationOffset)) {
             return false;
         }
-        const activationOffset = parseFloat(taskParameters.activationOffset);
-        if (activationOffset < 0) {
-            return false;
-        }
-        const activationOffsetNs = activationOffset * Utility.MsToNs;
+        const activationOffsetNs = parseFloat(taskParameters.activationOffset) * Utility.MsToNs;
         if (!Number.isSafeInteger(activationOffsetNs)) {
             return false;
         }
         
-        if (taskParameters.duration == null || isNaN(taskParameters.duration)) {
+        if (!Utility.ValidPositiveDecimal(taskParameters.duration)) {
             return false;
         }
         const duration = parseFloat(taskParameters.duration);
@@ -544,7 +519,7 @@ class ViewEntity {
             return false;
         }
         
-        if (taskParameters.period == null || isNaN(taskParameters.period)) {
+        if (!Utility.ValidPositiveDecimal(taskParameters.period)) {
             return false;
         }
         const period = parseFloat(taskParameters.period);
@@ -566,7 +541,7 @@ class ViewEntity {
             return false;
         }
 
-        if (taskParameters.wcet == null || isNaN(taskParameters.wcet)) {
+        if (!Utility.ValidPositiveDecimal(taskParameters.wcet)) {
             return false;
         }
         const wcet = parseFloat(taskParameters.wcet);
@@ -578,7 +553,7 @@ class ViewEntity {
             return false;
         }
         
-        if (taskParameters.acet == null || isNaN(taskParameters.acet)) {
+        if (!Utility.ValidPositiveDecimal(taskParameters.acet)) {
             return false;
         }
         const acet = parseFloat(taskParameters.acet);
@@ -590,14 +565,10 @@ class ViewEntity {
             return false;
         }
         
-        if (taskParameters.bcet == null || isNaN(taskParameters.bcet)) {
+        if (!Utility.ValidPositiveDecimal(taskParameters.bcet)) {
             return false;
         }
-        const bcet = parseFloat(taskParameters.bcet);
-        if (bcet < 0) {
-            return false;
-        }
-        const bcetNs = bcet * Utility.MsToNs;
+        const bcetNs = parseFloat(taskParameters.bcet) * Utility.MsToNs;
         if (!Number.isSafeInteger(bcetNs)) {
             return false;
         }

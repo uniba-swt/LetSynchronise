@@ -124,12 +124,12 @@ class ModelDependency {
         const limit = tasks.length * (tasks.length - 1)
 
         while (dependencies.length < numDependencies && dependencies.length < limit) {
-            let sourceIndex = Utility.RandomNumber(tasks.length);
+            let sourceIndex = Utility.RandomInteger(0, null, tasks.length);
             let destinationIndex = 0;
 
             let flag = true;
             while(flag) {
-                destinationIndex = Utility.RandomNumber(tasks.length);
+                destinationIndex = Utility.RandomInteger(0, null, tasks.length);
 
                 if (destinationIndex != sourceIndex) {
                     flag = false;

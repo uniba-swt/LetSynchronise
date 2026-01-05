@@ -166,23 +166,17 @@ class ViewConstraint {
             return false;
         }
         
-        if (constraint.time == null || isNaN(constraint.time)) {
-            alert('Time has to be a decimal number.');
+        if (!Utility.ValidPositiveDecimal(constraint.time)) {
+            alert('Time has to be a positive decimal number.');
             return false;
         }
-        const time = parseFloat(constraint.time);
-        if (time < 0) {
-            alert('Time cannot be negative.');
-            return false;
-        }
-        const timeNs = time * Utility.MsToNs;
+        const timeNs = parseFloat(constraint.time) * Utility.MsToNs;
         if (!Number.isSafeInteger(timeNs)) {
             alert('Time is unable to be represented with nanosecond precision.');
             return false;
         }
         
-        if (constraint.priority != null
-                && (isNaN(constraint.priority) || parseInt(constraint.priority) < 0 || constraint.priority.split(".").length != 1)) {
+        if (constraint.priority != null && !Utility.ValidPositiveInteger(constraint.priority)) {
             alert('Priority has to be a positive integer. Lowest priority is 0.');
             return false;
         }

@@ -71,25 +71,6 @@ class ViewCore {
             'device': this.device.trim(),
         };
     }
-
-    updateDeviceSelector(devices) {
-        devices.sort();
-
-        let deviceDropdown = d3.select(this.deviceField);
-
-        deviceDropdown.selectAll('*').remove();
-        deviceDropdown.append('option')
-            .property('selected', true)
-            .attr('value', 'Default')
-            .text('Default');
-        
-        devices.forEach(device => 
-            deviceDropdown
-                .append('option')
-                .attr('value', device.name)
-                .text(device.name)
-        )
-    }
     
     
     // -----------------------------------------------------
@@ -143,18 +124,8 @@ class ViewCore {
             return false;
         }
         
-        if (core.speedup == null || core.speedup.trim() == '' || isNaN(core.speedup)) {
-            alert('Speedup has to be a decimal number.');
-            return false;
-        }
-        const speedup = parseFloat(core.speedup);
-        if (speedup < 0) {
-            alert('Soeedup cannot be negative.');
-            return false;
-        }
-        const speedupSplit = core.speedup.split('.');
-        if (speedupSplit.length > 1 && speedupSplit[1].length > 2) {
-            alert('Speedup cannot have more than 2 decimal places.');
+        if (!Utility.ValidPositiveDecimal(core.speedup)) {
+            alert('Speedup has to be a positive decimal number.');
             return false;
         }
         
@@ -196,6 +167,27 @@ class ViewCore {
     populateParameterForm(core) {
         this.name = core.name;
         this.speedup = core.speedup;
+        this.device = core.device;
+    }
+    
+    updateDeviceSelector(devices) {
+        devices.sort();
+        
+        let deviceDropdown = d3.select(this.deviceField);
+        
+        deviceDropdown.selectAll('*').remove();
+        deviceDropdown
+            .append('option')
+            .property('selected', true)
+            .attr('value', 'Default')
+            .text('Default');
+        
+        devices.forEach(device =>
+            deviceDropdown
+                .append('option')
+                .attr('value', device.name)
+                .text(device.name)
+        );
     }
     
     toString() {

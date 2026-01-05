@@ -30,8 +30,8 @@ class ViewDevice {
         this.nameField = this.root.querySelector('#view-platform-device-name');
         this.speedupField = this.root.querySelector('#view-platform-device-speedup');
 
-        this.delayDeviceField = this.root.querySelector("#view-platform-delay-device");
-        this.protocolNameField = this.root.querySelector("#view-platform-delay-protocol-name");
+        this.delayDeviceField = this.root.querySelector("#view-platform-device-delay");
+        this.protocolNameField = this.root.querySelector("#view-platform-device-protocol-name");
         this.bcdtField = this.root.querySelector("#view-platform-device-protocol-bcdt");
         this.acdtField = this.root.querySelector("#view-platform-device-protocol-acdt");
         this.wcdtField = this.root.querySelector("#view-platform-device-protocol-wcdt");
@@ -192,8 +192,6 @@ class ViewDevice {
                 handler(this.deviceClean);
             }
         });
-
-        
     }
 
     registerDelaySubmitHandler(handler) {
@@ -230,18 +228,8 @@ class ViewDevice {
             return false;
         }
         
-        if (device.speedup == null || device.speedup.trim() == '' || isNaN(device.speedup)) {
-            alert('Speedup has to be a decimal number.');
-            return false;
-        }
-        const speedup = parseFloat(device.speedup);
-        if (speedup < 0) {
-            alert('Speedup cannot be negative.');
-            return false;
-        }
-        const speedupSplit = device.speedup.split('.');
-        if (speedupSplit.length > 1 && speedupSplit[1].length > 2) {
-            alert('Speedup cannot have more than 2 decimal places.');
+        if (!Utility.ValidPositiveDecimal(device.speedup)) {
+            alert('Speedup has to be a positive decimal number.');
             return false;
         }
         
@@ -249,65 +237,76 @@ class ViewDevice {
     }
 
     validateDeviceDelay(parameters) {
+        if (parameters.name == 'null ') {
+            alert('Choose a device for the protocol delay.');
+            return false;
+        }
+        
         if (!parameters.protocol || parameters.protocol.trim() == '') {
             alert('Protocol name cannot be blank.');
             return false;
         }
-        if (parameters.protocol.trim().toLowerCase() == 'default') {
-            alert(`Protocol name cannot be "${parameters.protocol.trim()}".`);
-            return false;
-        }
-        if (!/^[A-Za-z]+$/.test(parameters.protocol)) {
-            alert('Protocol name should only include alphabet letters.');
+        if (!Utility.ValidName(parameters.protocol)) {
+            alert('Protocol name can only start with an alphabetical or underscore character, and continue with alphanumerical or underscore characters.');
             return false;
         }
 
-        if (isNaN(parameters.bcdt) || isNaN(parameters.acdt) || isNaN(parameters.wcdt)) {
-            alert('Delay values should be a decimal number.');
+        if (!Utility.ValidPositiveDecimal(parameters.bcdt)) {
+            alert('BCDT has to be a positive decimal number.');
             return false;
         }
-        if (!parameters.bcdt || parameters.bcdt.trim() == '' 
-            || !parameters.acdt || parameters.acdt.trim() == '' || !parameters.wcdt || parameters.wcdt.trim() == '') {
-            alert('Delay values cannot be empty. Put 1 if unsure.');
-            return false;
-        }
-
-        if (parseFloat(parameters.bcdt) <= 0) {
+        const bcdt = parseFloat(parameters.bcdt);
+        if (bcdt <= 0) {
             alert('BCDT has to be greater than 0.');
             return false;
         }
-        if (parseFloat(parameters.acdt) <= 0) {
-            alert('ACDT has to be greater than 0.');
-            return false;
-        }
-        if (parseFloat(parameters.wcdt) <= 0) {
-            alert('WCDT has to be greater than 0.');
-            return false;
-        }
-
-        const bcdt = parameters.bcdt * Utility.MsToNs;
-        const acdt = parameters.acdt * Utility.MsToNs;
-        const wcdt = parameters.wcdt * Utility.MsToNs;
-
-        if (!Number.isSafeInteger(bcdt)) {
+        const bcdtNs = bcdt * Utility.MsToNs;
+        if (!Number.isSafeInteger(bcdtNs)) {
             alert('BCDT is unable to be represented with nanosecond precision.');
             return false;
         }
-        if (!Number.isSafeInteger(acdt)) {
+        
+        if (!Utility.ValidPositiveDecimal(parameters.acdt)) {
+            alert('ACDT has to be a positive decimal number.');
+            return false;
+        }
+        const acdt = parseFloat(parameters.acdt);
+        if (acdt <= 0) {
+            alert('ACDT has to be greater than 0.');
+            return false;
+        }
+        const acdtNs = acdt * Utility.MsToNs;
+        if (!Number.isSafeInteger(acdtNs)) {
             alert('ACDT is unable to be represented with nanosecond precision.');
             return false;
         }
-        if (!Number.isSafeInteger(wcdt)) {
+        
+        if (!Utility.ValidPositiveDecimal(parameters.wcdt)) {
+            alert('WCDT has to be a positive decimal number.');
+            return false;
+        }
+        const wcdt = parseFloat(parameters.wcdt);
+        if (wcdt <= 0) {
+            alert('WCDT has to be greater than 0.');
+            return false;
+        }
+        const wcdtNs = wcdt * Utility.MsToNs;
+        if (!Number.isSafeInteger(wcdtNs)) {
             alert('WCDT is unable to be represented with nanosecond precision.');
             return false;
         }
 
-        if (wcdt < bcdt) {
-            alert('WCDT cannot be less than BCET.');
+        if (wcdtNs < bcdtNs) {
+            alert('WCDT cannot be less than BCDT.');
             return false;
         }
-        if (wcdt < acdt || acdt < bcdt) {
+        if (wcdtNs < acdtNs || acdtNs < bcdtNs) {
             alert('ACDT cannot be less than BCDT or greater than WCDT.');
+            return false;
+        }
+        
+        if (parameters.distribution == null || parameters.distribution.trim() == '') {
+            alert('Choose type of delay distribution.');
             return false;
         }
         
@@ -336,7 +335,7 @@ class ViewDevice {
             });
 
         for (const device of devices) {
-            this.setupDeleteButtonListener(`${device.name}`);
+            this.setupDeleteButtonListener(device.name);
         }
 
         const dropdown = d3.select(this.delayDeviceField);
@@ -350,7 +349,7 @@ class ViewDevice {
         
         devices.sort();
         devices.forEach(device => 
-            dropdown.append('option').attr('value', `${device.name}`).text(device.name)
+            dropdown.append('option').attr('value', device.name).text(device.name)
         )
 
         this.updateDevicesDelay(devices);
