@@ -36,7 +36,7 @@ class PluginGoalEnd2EndMin {
         // Run iterative optimisation heuristic.
         await this.Algorithm(cores, tasks, graph, scheduler);
 
-        const taskElementSelected = ['tasks'];
+        const taskElementSelected = ['entities'];
         return Plugin.DatabaseContentsDelete(taskElementSelected)
             .then(Plugin.DatabaseContentsSet(system, taskElementSelected));
     }
@@ -183,7 +183,7 @@ class PluginGoalEnd2EndMin {
         const prologue = Utility.MaxOfArray(initialOffsets);
         const hyperPeriod = Utility.LeastCommonMultipleOfArray(periods);
         const makespan = prologue + hyperPeriod;
-        const executionTiming = 'WCET';
+        const executionTiming = 'Worst Case';
         
         let currentTaskSet = new Set();         // Current set of tasks considered for scheduling.
         let firstTaskInstanceOfInterest = { };  // First task instances that communicate directly according to the task dependency graph.

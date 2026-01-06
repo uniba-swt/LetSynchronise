@@ -166,7 +166,7 @@ class ModelDatabase {
                                 Model.DependencyInstancesStoreName,
                                 Model.EventChainInstanceStoreName,
                                 Model.EntityInstancesStoreName,
-                             ],
+                             ]
         };
         
         return elements.flatMap(element => elementMap[element]);
