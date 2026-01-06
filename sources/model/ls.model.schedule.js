@@ -205,16 +205,11 @@ class ModelSchedule {
             .then(dependencies => Promise.all(dependencies.map(dependency => this.createDependencyInstances(dependency, makespan))));
     }
     
+    // TOOD: Extend to support SL-LET network delays.
     // Creates all instances of an event chain from the given dependencyInstances.
     // Each event chain instance is linear with no branching.
     // Event chain instances are found via forward reachability from the event chain's starting dependency.
     createEventChainInstances(dependencyInstances, chain) {
-//        const filteredInstances = dependencyInstances.map(dependencyInstance => 
-//            dependencyInstance.value.filter(instance => 
-//                !instance.receiveEvent.task.includes("delay") && !instance.sendEvent.task.includes("delay")
-//            )
-//        );
-        
         const filteredInstances = dependencyInstances;
         
         let nextSegment = chain.generator();
@@ -336,25 +331,19 @@ class ModelSchedule {
     }
     
     // Create all network delay instances from all dependency instances.
-    // All task-to-core/device allocations also need to be known.
+    // All task-to-core/device allocations need to be known.
     createAllNetworkDelayInstances(executionTiming) {
         return Promise.all([
             this.modelDependency.getAllDependencyInstances(),
             this.modelDependency.getAllDependencies()
         ]).then(async ([dependencyInstances, dependencies]) => {
-            const filteredDependencies = dependencyInstances.map(dependency => ({
-                ...dependency,
-                value: dependency.value.filter(instance => 
-                    instance.sendEvent.port !== 'SystemInput' && instance.receiveEvent.port !== 'SystemOutput')}))
-            .filter(dependency => dependency.value.length > 0);
+            const filteredDependencies = dependencyInstances.filter(instance =>
+                                            instance.value.length > 0
+                                            && instance.value[0].sendEvent.task !== Model.SystemInterfaceName
+                                            && instance.value[0].receiveEvent.task !== Model.SystemInterfaceName);
             
             let instancesPromises = [ ];
-            
             for (const dependency of filteredDependencies) {
-                if (dependency.value.length == 0) {
-                    continue;
-                }
-                
                 const currentDependency = dependencies.find(item => dependency.name === item.name)
                 const sourceInstances = await this.database.getObject(Model.EntityInstancesStoreName, dependency.value[0].sendEvent.task);
                 const destInstances = await this.database.getObject(Model.EntityInstancesStoreName, dependency.value[0].receiveEvent.task);
@@ -372,10 +361,11 @@ class ModelSchedule {
                         continue;
                     }
 
+                    let sourceDevice = null;
+                    let destDevice = null;
+                    let networkDelay = null;
                     let devicesAndNetworkDelay = await this.getDevicesAndNetworkDelay(sourceInstance, destInstance);
-                    let sourceDevice = null, destDevice = null, networkDelay = null;
 
-                    let flag = true;
                     while (devicesAndNetworkDelay) {
                         [sourceDevice, destDevice, networkDelay] = devicesAndNetworkDelay;
                         // FIXME: For random executionTiming, the total delay will be inconsistent with the actual delaya!

@@ -273,38 +273,21 @@ class Utility {
         localStorage.setItem(viewName, JSON.stringify(settings));
     }
 
-    static SortEntitiesInOrder(entities) {
-        let tasks = entities.filter(entity => entity.type === 'task');
-        tasks.sort((a, b) => {
-            const numA = parseInt(a.name.match(/\d+/)[0]);
-            const numB = parseInt(b.name.match(/\d+/)[0]);
-            return numA - numB;
-        });
-
+    // Sort the entities and entity instances such that all network delays appear before any task.
+    static SortEntities(entities) {
         let sorted = [];
+
+        // Group the netowrk delays together based on the receiver task.
+        let tasks = entities.filter(entity => entity.type === 'task').sort();
         for (const task of tasks) {
-
-            const pattern = new RegExp(`.*\\s*=>\\s*${task.name}\\s*encapsulation`);
-            const encapsulationDelays = entities.filter(entity => pattern.test(entity.name));
-            if (encapsulationDelays) {
-                for (const delay of encapsulationDelays) {
-                    sorted.push(delay)
-                }
-            }
+            const encapsulationDelays = entities.filter(entity => entity.name.endsWith(`=> ${task.name} encapsulation delay`));
+            sorted = [...sorted, ...encapsulationDelays];
             
-            const networkDelays = entities.filter(entity => entity.name.includes(`=> ${task.name} network`));
-            if (networkDelays.length > 0) {
-                for (const delay of networkDelays) {
-                    sorted.push(delay)
-                }
-            }
+            const networkDelays = entities.filter(entity => entity.name.endsWith(`=> ${task.name} network delay`));
+            sorted = [...sorted, ...networkDelays];
 
-            const decapsulationDelays = entities.filter(entity => entity.name.includes(`=> ${task.name} decapsulation`));
-            if (decapsulationDelays) {
-                for (const delay of decapsulationDelays) {
-                    sorted.push(delay)
-                }
-            }
+            const decapsulationDelays = entities.filter(entity => entity.name.endsWith(`=> ${task.name} decapsulation delay`));
+            sorted = [...sorted, ...decapsulationDelays];
 
             sorted.push(task);
         }

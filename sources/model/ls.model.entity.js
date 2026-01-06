@@ -112,7 +112,6 @@ class ModelEntity {
         return this.database.getAllObjects(Model.EntityStoreName);
     }
     
-
     getTask(task) {
         return this.database.getObject(Model.EntityStoreName, task);
     }
@@ -276,7 +275,8 @@ class ModelEntity {
         return Promise.all([this.getAllTasks(), this.modelCore.getAllCores()])
             .then(([tasks, cores]) => {
                 const filteredTasks = tasks.filter(task => task.type === 'task');
-                this.updateTasks(filteredTasks, cores)})
+                this.updateTasks(filteredTasks, cores)
+            })
             .then(result => this.clearPreview())
             .then(result => this.modelCore.getAllCores())
             .then(result => this.updateCoreSelector(result))

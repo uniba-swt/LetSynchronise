@@ -467,7 +467,7 @@ class ViewSchedule {
         this.schedule.selectAll('*').remove();
         const svgElement = this.schedule.append('svg');
 
-        const sortedEntities = Utility.SortEntitiesInOrder(tasksInstances);
+        const sortedEntities = Utility.SortEntities(tasksInstances);
         
         // Draw the task instances.
         let taskIndices = { };
