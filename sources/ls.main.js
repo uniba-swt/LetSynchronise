@@ -105,7 +105,6 @@ controller.controllerDependency.modelEventChain = model.modelEventChain;
 controller.controllerSchedule.view = view.viewSchedule;
 controller.controllerSchedule.model = model.modelSchedule;
 controller.controllerSchedule.modelDevice = model.modelDevice;
-controller.controllerSchedule.modelCore = model.modelCore;
 controller.controllerSchedule.modelNetworkDelay = model.modelNetworkDelay;
 controller.controllerSchedule.modelEntity = model.modelEntity;
 controller.controllerSchedule.modelDependency = model.modelDependency;
@@ -171,3 +170,7 @@ Plugin.Register(PluginGoalEnd2EndMinMC);
 view.viewSchedule.updateOptimiserPluginSelectors();
 
 console.info(Plugin.ToString());
+
+
+// Run tests
+//PluginGoalEnd2EndMinTest.Run();

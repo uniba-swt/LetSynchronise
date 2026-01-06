@@ -127,9 +127,9 @@ class ModelEntity {
             .then(result => this.refreshViews());
     }
 
-    static CreateDelayInstance(sourceEndTime, executionTime, sourceDevice, destDevice, dependency) {
+    static CreateDelayInstance(instance, sourceEndTime, executionTime, sourceDevice, destDevice, dependency) {
         return {
-            'instance'          : -1,
+            'instance'          : instance,
             'letStartTime'      : sourceEndTime,
             'letEndTime'        : sourceEndTime + executionTime,
             'executionTime'     : executionTime,

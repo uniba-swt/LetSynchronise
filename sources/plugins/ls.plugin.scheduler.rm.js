@@ -31,7 +31,7 @@ class PluginSchedulerRm {
         return Plugin.DatabaseContentsDelete(scheduleElementSelected)
             .then(result => Plugin.DatabaseContentsSet(schedule, scheduleElementSelected))
             // Network delays can only be generated after tasks have been allocated to cores/devices
-            .then(result => Plugin.CreateAllNetworkDelayInstances());
+            .then(result => Plugin.CreateAllNetworkDelayInstances(executionTiming));
     }
     
     // Preemptive, rate-monotonic, multicore, no task migration.

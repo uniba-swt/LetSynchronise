@@ -4,7 +4,6 @@ class ModelSchedule {
     database = null;
 
     modelDevice = null;
-    modelCore = null;
     modelNetworkDelay = null;
     modelEntity = null;
     modelDependency = null;
@@ -23,10 +22,6 @@ class ModelSchedule {
 
     registerModelDevice(modelDevice) {
         this.modelDevice = modelDevice;
-    }
-    
-    registerModelCore(modelCore) {
-        this.modelCore = modelCore;
     }
     
     registerModelNetworkDelay(modelNetworkDelay) {
@@ -91,8 +86,7 @@ class ModelSchedule {
             'name': parameters.name, 
             'type': parameters.type,
             'initialOffset': parameters.initialOffset,
-            'value': instances,
-            'executionTiming': executionTiming
+            'value': instances
         });
     }
     
@@ -109,19 +103,19 @@ class ModelSchedule {
     }
     
     // Create a single dependency instance.
-    createDependencyInstance(dependency, sourceIndex, sourceInstance, destinationIndex, destinationInstance) {
+    createDependencyInstance(dependency, sourceInstance, destinationInstance) {
         return {
             'instance': -1,
             'receiveEvent': {
                 'task': dependency.destination.task,
                 'port': dependency.destination.port,
-                'taskInstance': destinationIndex,
+                'taskInstance': destinationInstance.instance,
                 'timestamp': destinationInstance.letStartTime
             },
             'sendEvent': {
                 'task': dependency.source.task,
                 'port': dependency.source.port,
-                'taskInstance': sourceIndex,
+                'taskInstance': sourceInstance.instance,
                 'timestamp': sourceInstance.letEndTime
             }       
         };
@@ -132,19 +126,16 @@ class ModelSchedule {
         for (let taskIndex = taskInstances.length - 1; taskIndex > -1;  taskIndex--) {
             const taskInstance = taskInstances[taskIndex];
             if (taskInstance.letEndTime <= timePoint) {
-                return [taskIndex, taskInstance];
+                return taskInstance;
             }
         }
         
-        return [ 
-            -1,
-            {
-                'periodStartTime': 0,
-                'letStartTime': 0,
-                'letEndTime': 0,
-                'periodEndTime': 0
-            }
-        ]
+        return {
+            'periodStartTime': 0,
+            'letStartTime': 0,
+            'letEndTime': 0,
+            'periodEndTime': 0
+        }
     }
 
     // Create all instances of a dependency.
@@ -154,7 +145,7 @@ class ModelSchedule {
         return Promise.all([
             this.database.getObject(Model.EntityInstancesStoreName, dependency.source.task), 
             this.database.getObject(Model.EntityInstancesStoreName, dependency.destination.task)
-        ]).then(async ([sourceTaskInstances, destinationTaskInstances]) => {      
+        ]).then(([sourceTaskInstances, destinationTaskInstances]) => {
             let instances = [];
             if (dependency.source.task == Model.SystemInterfaceName) {
                 // Dependency is system input --> task
@@ -165,7 +156,7 @@ class ModelSchedule {
 					for (let destinationIndex = numberOfInstances - 1; destinationIndex > -1;  destinationIndex--) {
 						// Make the source index and instance of system input the same as the destination
 						const destinationInstance = destinationInstances[destinationIndex];
-						instances.unshift(this.createDependencyInstance(dependency, destinationIndex, {letEndTime: destinationInstance.letStartTime}, destinationIndex, destinationInstance));
+						instances.unshift(this.createDependencyInstance(dependency, {instance: destinationInstance.instance, letEndTime: destinationInstance.letStartTime}, destinationInstance));
 					}
                 }
             } else if (dependency.destination.task == Model.SystemInterfaceName) {
@@ -177,7 +168,7 @@ class ModelSchedule {
 					for (let sourceIndex = numberOfInstances - 1; sourceIndex > -1;  sourceIndex--) {
 						// Make the destination index and instance of the system output the same as the source
 						const sourceInstance = sourceInstances[sourceIndex];
-						instances.unshift(this.createDependencyInstance(dependency, sourceIndex, sourceInstance, sourceIndex, {letStartTime: sourceInstance.letEndTime}));
+						instances.unshift(this.createDependencyInstance(dependency, sourceInstance, {instance: sourceInstance.instance, letStartTime: sourceInstance.letEndTime}));
 					}
                 }
             } else {
@@ -190,9 +181,9 @@ class ModelSchedule {
 					for (let destinationIndex = numberOfInstances - 1; destinationIndex > -1;  destinationIndex--) {
 						// Find latest sourceInstance
 						const destinationInstance = destinationInstances[destinationIndex];
-						const [sourceIndex, sourceInstance] = this.getLatestLetEndTime(sourceInstances, destinationInstance.letStartTime);
+						const sourceInstance = this.getLatestLetEndTime(sourceInstances, destinationInstance.letStartTime);
 				
-						instances.unshift(this.createDependencyInstance(dependency, sourceIndex, sourceInstance, destinationIndex, destinationInstance));
+						instances.unshift(this.createDependencyInstance(dependency, sourceInstance, destinationInstance));
 					}
                 }
             }
@@ -218,11 +209,13 @@ class ModelSchedule {
     // Each event chain instance is linear with no branching.
     // Event chain instances are found via forward reachability from the event chain's starting dependency.
     createEventChainInstances(dependencyInstances, chain) {
-        const filteredInstances = dependencyInstances.map(dependencyInstance => 
-            dependencyInstance.value.filter(instance => 
-                !instance.receiveEvent.task.includes("delay") && !instance.sendEvent.task.includes("delay")
-            )
-        );        
+//        const filteredInstances = dependencyInstances.map(dependencyInstance => 
+//            dependencyInstance.value.filter(instance => 
+//                !instance.receiveEvent.task.includes("delay") && !instance.sendEvent.task.includes("delay")
+//            )
+//        );
+        
+        const filteredInstances = dependencyInstances;
         
         let nextSegment = chain.generator();
         const startDependencies = this.getDependencyInstances(filteredInstances, nextSegment.next().value);
@@ -333,18 +326,18 @@ class ModelSchedule {
     }
     
     // Get task schedule for given makespan.
-    async getSchedule() {
+    getSchedule() {
         return {
             'promiseAllTasks': this.modelEntity.getAllTasks(),
             'promiseAllTasksInstances': this.database.getAllObjects(Model.EntityInstancesStoreName),
             'promiseAllDependenciesInstances': this.modelDependency.getAllDependencyInstances(),
             'promiseAllEventChainInstances': this.modelEventChain.getAllEventChainsInstances()
-        }
+        };
     }
     
     // Create all network delay instances from all dependency instances.
     // All task-to-core/device allocations also need to be known.
-    createAllNetworkDelayInstances() {
+    createAllNetworkDelayInstances(executionTiming) {
         return Promise.all([
             this.modelDependency.getAllDependencyInstances(),
             this.modelDependency.getAllDependencies()
@@ -365,7 +358,6 @@ class ModelSchedule {
                 const currentDependency = dependencies.find(item => dependency.name === item.name)
                 const sourceInstances = await this.database.getObject(Model.EntityInstancesStoreName, dependency.value[0].sendEvent.task);
                 const destInstances = await this.database.getObject(Model.EntityInstancesStoreName, dependency.value[0].receiveEvent.task);
-                const executionTiming = sourceInstances.executionTiming;
                 
                 let instances = [ ];
                 let encapsulationDelayInstances = [ ];
@@ -374,9 +366,9 @@ class ModelSchedule {
 
                 for (let destIndex = destInstances.value.length - 1; destIndex > -1; destIndex--) {
                     const destInstance = destInstances.value[destIndex];
-                    let [sourceIndex, sourceInstance] = this.getLatestLetEndTime(sourceInstances.value, destInstance.letStartTime)
+                    let sourceInstance = this.getLatestLetEndTime(sourceInstances.value, destInstance.letStartTime)
 
-                    if (sourceIndex == -1) {
+                    if (sourceInstance.instance == -1) {
                         continue;
                     }
 
@@ -386,13 +378,13 @@ class ModelSchedule {
                     let flag = true;
                     while (devicesAndNetworkDelay) {
                         [sourceDevice, destDevice, networkDelay] = devicesAndNetworkDelay;
+                        // FIXME: For random executionTiming, the total delay will be inconsistent with the actual delaya!
                         const totalDelay = this.calculateTotalDelay(sourceDevice, destDevice, networkDelay, executionTiming);
                 
-                        let [newSourceIndex, newSourceInstance] = this.getLatestLetEndTime(sourceInstances.value, destInstance.letStartTime - totalDelay);
+                        let newSourceInstance = this.getLatestLetEndTime(sourceInstances.value, destInstance.letStartTime - totalDelay);
                 
-                        if (sourceIndex !== newSourceIndex) {
+                        if (sourceInstance.instance !== newSourceInstance.instance ) {
                             devicesAndNetworkDelay = await this.getDevicesAndNetworkDelay(newSourceInstance, destInstance);
-                            sourceIndex = newSourceIndex;
                             sourceInstance = newSourceInstance;
                         } else {
                             if (newSourceInstance.currentCore.device == destInstance.currentCore.device) {
@@ -403,7 +395,7 @@ class ModelSchedule {
                         }
                     }
 
-                    if (sourceIndex == -1) {
+                    if (sourceInstance.instance == -1) {
                         continue;
                     }
 
@@ -411,6 +403,7 @@ class ModelSchedule {
                         // Do not add duplicate network delays.
                     
                         const encapsulationDelayInstance = ModelEntity.CreateDelayInstance(
+                            encapsulationDelayInstances.length,
                             sourceInstance.letEndTime,
                             ModelSchedule.GetDelayTime(sourceDevice.delays[0], executionTiming),
                             sourceDevice,
@@ -420,10 +413,11 @@ class ModelSchedule {
                         if (!ModelSchedule.NetworkDelayInstanceIsDuplicate(encapsulationDelayInstances, encapsulationDelayInstance)) {
                             encapsulationDelayInstances.unshift(encapsulationDelayInstance);
                             const encapDependency = this.modelDependency.createDelayDependency(currentDependency, 'encapsulation');
-                            instances.unshift(this.createDependencyInstance(encapDependency, sourceIndex, sourceInstance, destIndex, encapsulationDelayInstances[0]));
+                            instances.unshift(this.createDependencyInstance(encapDependency, sourceInstance, encapsulationDelayInstances[0]));
                         }
                         
                         const networkDelayInstance = ModelEntity.CreateDelayInstance(
+                            networkDelayInstances.length,
                             encapsulationDelayInstances[0].letEndTime,
                             ModelSchedule.GetDelayTime(networkDelay, executionTiming),
                             sourceDevice,
@@ -433,10 +427,11 @@ class ModelSchedule {
                         if (!ModelSchedule.NetworkDelayInstanceIsDuplicate(networkDelayInstances, networkDelayInstance)) {
                             networkDelayInstances.unshift(networkDelayInstance);
                             const netDependency = this.modelDependency.createDelayDependency(currentDependency, 'network');
-                            instances.unshift(this.createDependencyInstance(netDependency, sourceIndex, encapsulationDelayInstances[0], destIndex, networkDelayInstances[0]));
+                            instances.unshift(this.createDependencyInstance(netDependency, encapsulationDelayInstances[0], networkDelayInstances[0]));
                         }
 
                         const decapsulationDelayInstance = ModelEntity.CreateDelayInstance(
+                            decapsulationDelayInstances.length,
                             networkDelayInstances[0].letEndTime,
                             ModelSchedule.GetDelayTime(destDevice.delays[0], executionTiming),
                             sourceDevice,
@@ -446,13 +441,13 @@ class ModelSchedule {
                         if (!ModelSchedule.NetworkDelayInstanceIsDuplicate(decapsulationDelayInstances, decapsulationDelayInstance)) {
                             decapsulationDelayInstances.unshift(decapsulationDelayInstance);
                             const decapDependency = this.modelDependency.createDelayDependency(currentDependency, 'decapsulation');
-                            instances.unshift(this.createDependencyInstance(decapDependency, sourceIndex, networkDelayInstances[0], destIndex, decapsulationDelayInstances[0]));
+                            instances.unshift(this.createDependencyInstance(decapDependency, networkDelayInstances[0], decapsulationDelayInstances[0]));
                         }
 
                         const destDependency = this.modelDependency.createDelayDependency(currentDependency);
-                        instances.unshift(this.createDependencyInstance(destDependency, sourceIndex, decapsulationDelayInstances[0], destIndex, destInstance));
+                        instances.unshift(this.createDependencyInstance(destDependency, decapsulationDelayInstances[0], destInstance));
                     } else {
-                        instances.unshift(this.createDependencyInstance(currentDependency, sourceIndex, sourceInstance, destIndex, destInstance));
+                        instances.unshift(this.createDependencyInstance(currentDependency, sourceInstance, destInstance));
                     }                        
                 }
 

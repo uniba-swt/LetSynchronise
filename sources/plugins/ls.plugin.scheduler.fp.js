@@ -32,7 +32,7 @@ class PluginSchedulerFp {
         return Plugin.DatabaseContentsDelete(systemElementSelected)
             .then(result => Plugin.DatabaseContentsSet(system, systemElementSelected))
             // Network delays can only be generated after tasks have been allocated to cores/devices
-            .then(result => Plugin.CreateAllNetworkDelayInstances());
+            .then(result => Plugin.CreateAllNetworkDelayInstances(executionTiming));
     }
     
     // Preemptive, fixed-priority, multicore, no task migration.

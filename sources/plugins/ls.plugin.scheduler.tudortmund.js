@@ -34,7 +34,7 @@ class PluginSchedulerTuDortmund {
         return Plugin.DatabaseContentsDelete(scheduleElementSelected)
             .then(result => Plugin.DatabaseContentsSet(computedSchedule, scheduleElementSelected))
             .then(result => Plugin.CreateAllDependencyAndEventChainInstances()
-            .then(result => Plugin.CreateAllNetworkDelayInstances()));
+            .then(result => Plugin.CreateAllNetworkDelayInstances(executionTiming)));
     }
 
     // Trigger an external scheduling tool.

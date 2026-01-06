@@ -4,7 +4,6 @@ class ControllerSchedule {
     _view = null;
     _model = null;
     _modelDevice = null;
-    _modelCore = null;
     _modelNetworkDelay = null;
     _modelEntity = null;
     _modelDependency = null;
@@ -62,15 +61,6 @@ class ControllerSchedule {
     
     get modelDevice() {
         return this._modelDevice;
-    }
-    
-    get modelCore() {
-        return this._modelCore;
-    }
-
-    set modelCore(modelCore) {
-        this._modelCore = modelCore;
-        this._model.registerModelCore(this._modelCore);
     }
     
     get modelNetworkDelay() {

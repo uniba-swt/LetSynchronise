@@ -20,7 +20,6 @@ class PluginSchedulerRandom {
         await Plugin.DeleteSchedule();
         await Plugin.CreateAllTaskInstances(makespan, executionTiming);
         await Plugin.CreateAllDependencyAndEventChainInstances();
-        await Plugin.CreateAllNetworkDelayInstances();
         
         const scheduleElementSelected = ['schedule'];
         const schedule = await Plugin.DatabaseContentsGet(scheduleElementSelected);
@@ -35,7 +34,9 @@ class PluginSchedulerRandom {
         }
         
         return Plugin.DatabaseContentsDelete(scheduleElementSelected)
-            .then(result => Plugin.DatabaseContentsSet(schedule, scheduleElementSelected));
+            .then(result => Plugin.DatabaseContentsSet(schedule, scheduleElementSelected))
+            // Network delays can only be generated after tasks have been allocated to cores/devices
+            .then(result => Plugin.CreateAllNetworkDelayInstances(executionTiming));
     }
     
     // Non-preemptive random, multicore, no task migration.

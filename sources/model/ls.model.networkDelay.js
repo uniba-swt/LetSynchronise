@@ -64,9 +64,8 @@ class ModelNetworkDelay {
     }
 
     getNetworkDelay(source, dest) {
-        return this.getAllNetworkDelays().then(delays => {
-            return delays.find(delay => delay.source === source && delay.dest === dest);
-        });
+        return this.getAllNetworkDelays()
+            .then(delays => delays.find(delay => delay.source === source && delay.dest === dest));
     }
     
 
