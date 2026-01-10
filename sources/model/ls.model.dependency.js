@@ -121,42 +121,35 @@ class ModelDependency {
         const tasks = await this.modelEntity.getAllTasks();
 
         let dependencies = [];
-        const limit = tasks.length * (tasks.length - 1)
-
-        while (dependencies.length < numDependencies && dependencies.length < limit) {
-            let sourceIndex = Utility.RandomInteger(0, null, tasks.length);
-            let destinationIndex = 0;
-
-            let flag = true;
-            while(flag) {
-                destinationIndex = Utility.RandomInteger(0, null, tasks.length);
-
-                if (destinationIndex != sourceIndex) {
-                    flag = false;
-                }
-            }
-
-            dependencies.push(this.createRandomDependencies(tasks, sourceIndex, destinationIndex));
-            console.log(dependencies.length)
+        for (let i = 0; i < numDependencies; ++i) {
+            const sourceIndex = Utility.RandomInteger(0, null, tasks.length - 1);
+            const destinationIndex = (sourceIndex + Utility.RandomInteger(1, null, tasks.length - 1)) % tasks.length;
+            dependencies.push(this.generateRandomDependency(tasks, sourceIndex, destinationIndex));
         }
 
-        console.log(dependencies)
-
-        return Promise.all(dependencies.map(dependency => this.createDependency(dependency)));
+        return Promise.all(dependencies);
     }
 
-    createRandomDependencies(tasks, sourceIndex, destinationIndex) {
-        return {
-            name: `dep_${sourceIndex + 1}-to-${destinationIndex + 1}`,
-            source: {
-                port: "out1",
-                task: tasks[sourceIndex].name
+    async generateRandomDependency(tasks, sourceIndex, destinationIndex) {
+        const sourceTask = tasks[sourceIndex];
+        const sourceTaskOutputs = sourceTask.outputs;
+        const sourceTaskOutput = sourceTaskOutputs[Utility.RandomInteger(0, null, sourceTaskOutputs.length - 1)];
+        
+        const destinationTask = tasks[destinationIndex];
+        const destinationTaskInputs = destinationTask.inputs;
+        const destinationTaskInput = destinationTaskInputs[Utility.RandomInteger(0, null, destinationTaskInputs.length - 1)];
+
+        return this.createDependency({
+            'name'       : `dep-${tasks[sourceIndex].name}→${tasks[destinationIndex].name}`,
+            'source'     : {
+                'port'   : sourceTaskOutput,
+                'task'   : sourceTask.name
             },
-            destination: {
-                port: "in1",
-                task: tasks[destinationIndex].name
+            'destination': {
+                'port'   : destinationTaskInput,
+                'task'   : destinationTask.name
             }
-        }
+        });
     }
     
     // Validate task dependencies against system and task inputs and outputs.

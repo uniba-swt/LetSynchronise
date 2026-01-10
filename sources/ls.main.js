@@ -25,12 +25,12 @@ view.viewNetworkDelay = new ViewNetworkDelay();
 view.viewMemory = new ViewMemory();
 view.viewInterface = new ViewInterface();
 view.viewEntity = new ViewEntity();
+view.viewRandomTasks = new ViewRandomTasks();
 view.viewDependency = new ViewDependency();
 view.viewEventChain = new ViewEventChain();
 view.viewConstraint = new ViewConstraint();
 view.viewSchedule = new ViewSchedule();
 view.viewAnalyse = new ViewAnalyse();
-view.viewRandomTasks = new ViewRandomTasks();
 
 // Define the controller implementations.
 let controller = new Controller();
@@ -41,12 +41,12 @@ controller.controllerNetworkDelay = new ControllerNetworkDelay();
 controller.controllerMemory = new ControllerMemory();
 controller.controllerInterface = new ControllerInterface();
 controller.controllerEntity = new ControllerEntity();
+controller.controllerRandomTasks = new ControllerRandomTasks();
 controller.controllerDependency = new ControllerDependency();
 controller.controllerEventChain = new ControllerEventChain();
 controller.controllerConstraint = new ControllerConstraint();
 controller.controllerSchedule = new ControllerSchedule();
 controller.controllerAnalyse = new ControllerAnalyse();
-controller.controllerRandomTasks = new ControllerRandomTasks();
 
 // Link the models and views to their respective controllers.
 controller.controllerExportImport.view = view.viewExportImport;
@@ -95,6 +95,10 @@ controller.controllerEntity.modelDependency = model.modelDependency;
 controller.controllerEntity.modelEventChain = model.modelEventChain;
 controller.controllerEntity.modelSchedule = model.modelSchedule;
 
+controller.controllerRandomTasks.view = view.viewRandomTasks;
+controller.controllerRandomTasks.modelEntity = model.modelEntity;
+controller.controllerRandomTasks.modelDependency = model.modelDependency;
+
 controller.controllerDependency.view = view.viewDependency;
 controller.controllerDependency.model = model.modelDependency;
 controller.controllerDependency.modelCore = model.modelCore;
@@ -126,10 +130,6 @@ controller.controllerAnalyse.viewSchedule = view.viewSchedule;
 controller.controllerAnalyse.model = model.modelAnalyse;
 controller.controllerAnalyse.modelConstraint = model.modelConstraint;
 controller.controllerAnalyse.modelEventChain = model.modelEventChain;
-
-controller.controllerRandomTasks.view = view.viewRandomTasks;
-controller.controllerRandomTasks.modelEntity = model.modelEntity;
-controller.controllerRandomTasks.modelDependency = model.modelDependency;
 
 console.info(controller.toString());
 

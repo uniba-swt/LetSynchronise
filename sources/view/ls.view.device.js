@@ -199,6 +199,7 @@ class ViewDevice {
             // Prevent the default behaviour of submitting the form and the reloading of the webpage.
             event.preventDefault();
             
+            // Validate the network delay.
             if (this.validateDeviceDelay(this.deviceDelayRaw)) {
                 handler(this.deviceDelayClean);
             }

@@ -134,7 +134,7 @@ class Utility {
                 break;
         }
         
-        return min + Math.trunc(delta);
+        return min + Math.round(delta);
     }
     
     static FormatTimeString(time, digits) {

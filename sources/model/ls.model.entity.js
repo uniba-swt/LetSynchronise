@@ -203,45 +203,37 @@ class ModelEntity {
         return Promise.all(fileteredDelays.map(delay => this.database.deleteObject(Model.EntityInstancesStoreName, delay.name)));
     }
 
-    async generateRandomTasks(parameters) {
-        let tasks = [ ];
-
-        for (let i = 1; i <= parameters.numTasks; i++) {
-            tasks.push(this.createRandomTask(parameters, i));
-        }
-
-        return Promise.all(tasks.map(task => this.createTask(task)));
+    generateRandomTasks(parameters) {
+        return Promise.all(Array.from({ length: parameters.numTasks}, (_, i) => this.generateRandomTask(parameters, i)));
     }
 
-    createRandomTask(parameters, i) {
-        const period = parameters.period[Utility.RandomInteger(0, null, parameters.period.length)];
-
-        const minDuration = period >= parameters.minDuration ? parameters.minDuration : period;
-        const maxDuration = period <= parameters.maxDuration ? period : parameters.maxDuration;
-        const duration = Utility.RandomInteger(minDuration, null, maxDuration, 'Normal');
+    generateRandomTask(parameters, i) {
+        const period = parameters.periods[Utility.RandomInteger(0, null, parameters.periods.length - 1)];
+        const initialOffset = Utility.RandomInteger(parameters.minInitialOffset, null, parameters.maxInitialOffset);
         
-        const maxWCET = parameters.maxWCET <= duration ? parameters.maxWCET : duration;
-        const minWCET = parameters.minWCET <= duration ? parameters.minWCET : duration;
-        const wcet = Utility.RandomInteger(minWCET, null, maxWCET, 'Normal');
-
-        const initialOffset = Utility.RandomInteger(parameters.minInitialOffset, null, parameters.maxInitialOffset, 'Normal');
-
-        return {
-            name: `t${i}`,
-            type: 'task',
-            acet: wcet,
-            bcet: wcet,
-            wcet: wcet,
-            core: null,
-            distribution: "Normal",
-            inputs: ["in1"],
-            outputs: ["out1"],
-            priority: null,
-            activationOffset: 0,
-            initialOffset: initialOffset,
-            period: period,
-            duration: duration
-        }
+        // Min and max duration is a percentage of the chosen LET period.
+        const duration = period * Utility.RandomInteger(parameters.minDuration, null, parameters.maxDuration).toPrecision(5) / 100;
+        // Min and max utilisation is a percentage of the chosen LET duration.
+        const wcet = duration * Utility.RandomInteger(parameters.minUtilisation, null, parameters.maxUtilisation).toPrecision(5) / 100;
+        const bcet = Utility.RandomInteger(0, null, wcet).toPrecision(5) / 1;
+        const acet = (wcet + bcet) / 2;
+        
+        return this.createTask({
+            'type'            : 'task',
+            'name'            : `t${i}`,
+            'priority'        : null,
+            'initialOffset'   : initialOffset,
+            'activationOffset': 0,
+            'duration'        : duration,
+            'period'          : period,
+            'inputs'          : [ 'in1' ],
+            'outputs'         : [ 'out1' ],
+            'wcet'            : wcet,
+            'acet'            : acet,
+            'bcet'            : bcet,
+            'distribution'    : 'Normal',
+            'core'            : null
+        });
     }
     
     // Validate the tasks against the platform

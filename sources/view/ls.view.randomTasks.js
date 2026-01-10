@@ -2,25 +2,44 @@
 
 class ViewRandomTasks {
     root = null;
+    modal = null;
     
-    randomTasksModalBody = null;
+    openModalButton = null;
     
     numTasksField = null;
-    periodField = null;
+    numDependenciesField = null;
+    periodsField = null;
     minDurationField = null;
     maxDurationField = null;
     minInitialOffsetField = null;
     maxInitialOffsetField = null;
-    minWCETField = null;
-    maxWCETField = null;
-    numDependenciesField = null;
+    minUtilisationField = null;
+    maxUtilisationField = null;
 
     submitButton = null;
     
     constructor() {
-        this.root = document.querySelector('#nav-design-tab'); 
+        this.root = document.querySelector('#nav-design');
+
+        // Open the random task set generator
+        this.openModalButton = this.root.querySelector('#generateRandom');
+
+        // Define and generate a random task set
+        this.modal = this.root.querySelector('#generate-random-taskset-modal');
+        this.numTasksField = this.modal.querySelector('#view-num-tasks');
+        this.numDependenciesField = this.modal.querySelector('#view-num-dependencies');
+        this.periodsField = this.modal.querySelector('#view-random-tasks-periods');
+        this.minDurationField = this.modal.querySelector('#view-min-duration');
+        this.maxDurationField = this.modal.querySelector('#view-max-duration');
+        this.minInitialOffsetField = this.modal.querySelector('#view-min-initial-offset');
+        this.maxInitialOffsetField = this.modal.querySelector('#view-max-initial-offset');
+        this.minUtilisationField = this.modal.querySelector('#view-min-utilisation');
+        this.maxUtilisationField = this.modal.querySelector('#view-max-utilisation');
         
-        this.randomTasksModalBody = d3.select('#view-random-tasks-modal-body');
+        this.submitButton = this.modal.querySelector('#submit-random-tasks');
+        
+        // Listeners
+        this.setupOpenModalButtonListener();
     }
 
     get numTasks() {
@@ -31,14 +50,31 @@ class ViewRandomTasks {
         this.numTasksField.value = numTasks;
     }
 
-    get period() {
-        return this.periodField.value;
+    get periods() {
+        const selectedPeriods = this.periodsField.querySelectorAll('input:checked');
+        return [...selectedPeriods].map(period => period.value);
     }
 
-    set period(period) {
-        this.periodField.value = period;
+    set periods(periods) {
+        this.periodsField.value = periods;
     }
 
+    get minInitialOffset() {
+        return this.minInitialOffsetField.value;
+    }
+    
+    set minInitialOffset(minInitialOffset) {
+        this.minInitialOffsetField.value = minInitialOffset;
+    }
+    
+    get maxInitialOffset() {
+        return this.maxInitialOffsetField.value;
+    }
+    
+    set maxInitialOffset(maxInitialOffset) {
+        this.maxInitialOffsetField.value = maxInitialOffset;
+    }
+    
     get minDuration() {
         return this.minDurationField.value;
     }
@@ -55,36 +91,20 @@ class ViewRandomTasks {
         this.maxDurationField.value = maxDuration;
     }
 
-    get minInitialOffset() {
-        return this.minInitialOffsetField.value;
+    get minUtilisation() {
+        return this.minUtilisationField.value;
     }
 
-    set minInitialOffset(minInitialOffset) {
-        this.minInitialOffsetField.value = minInitialOffset;
+    set minUtilisation(minUtilisation) {
+        this.minUtilisationField.value = minUtilisation;
     }
 
-    get maxInitialOffset() {
-        return this.maxInitialOffsetField.value;
+    get maxUtilisation() {
+        return this.maxUtilisationField.value;
     }
 
-    set maxInitialOffset(maxInitialOffset) {
-        this.maxInitialOffsetField.value = maxInitialOffset;
-    }
-
-    get minWCET() {
-        return this.minWCETField.value;
-    }
-
-    set minWCET(minWCET) {
-        this.minWCETField.value = minWCET;
-    }
-
-    get maxWCET() {
-        return this.maxWCETField.value;
-    }
-
-    set maxWCET(maxWCET) {
-        this.maxWCETField.value = maxWCET;
+    set maxUtilisation(maxUtilisation) {
+        this.maxUtilisationField.value = maxUtilisation;
     }
 
     get numDependencies() {
@@ -98,163 +118,153 @@ class ViewRandomTasks {
     get randomTasksRaw() {
         return {
             'numTasks': this.numTasks,
-            'period': this.period,
+            'numDependencies': this.numDependencies,
+            'periods': this.periods,
             'minDuration': this.minDuration,
             'maxDuration': this.maxDuration,
             'minInitialOffset': this.minInitialOffset,
             'maxInitialOffset': this.maxInitialOffset,
-            'minWCET': this.minWCET,
-            'maxWCET': this.maxWCET,
-            'numDependencies': this.numDependencies
+            'minUtilisation': this.minUtilisation,
+            'maxUtilisation': this.maxUtilisation
         }
     }
 
     get randomTasksClean() {
-        let newPeriod = [];
-        for (let p of this.period) {
-            newPeriod.push(Math.abs(parseFloat(p.trim())) * Utility.MsToNs);
-        }
-
-        this.periodField.value = newPeriod
-
         return {
             'numTasks': parseInt(this.numTasks.trim()),
-            'period': this.period,
-            'minDuration': Math.abs(parseFloat(this.minDuration.trim())) * Utility.MsToNs,
-            'maxDuration': Math.abs(parseFloat(this.maxDuration.trim())) * Utility.MsToNs,
+            'numDependencies': parseInt(this.numDependencies.trim()),
+            'periods': this.periods.map(period => parseInt(period.trim()) * Utility.MsToNs),
             'minInitialOffset': Math.abs(parseFloat(this.minInitialOffset.trim())) * Utility.MsToNs,
             'maxInitialOffset': Math.abs(parseFloat(this.maxInitialOffset.trim())) * Utility.MsToNs,
-            'minWCET': Math.abs(parseFloat(this.minWCET.trim())) * Utility.MsToNs,
-            'maxWCET': Math.abs(parseFloat(this.maxWCET.trim())) * Utility.MsToNs,
-            'numDependencies': parseInt(this.numDependencies.trim())
+            'minDuration': Math.abs(parseInt(this.minDuration.trim())),
+            'maxDuration': Math.abs(parseInt(this.maxDuration.trim())),
+            'minUtilisation': Math.abs(parseInt(this.minUtilisation.trim())),
+            'maxUtilisation': Math.abs(parseInt(this.maxUtilisation.trim()))
         }
     }
 
+    
+    // -----------------------------------------------------
+    // Setup listeners
+    
+    setupOpenModalButtonListener() {
+        this.openModalButton.addEventListener('click', event => {
+            // Prevent the default behaviour of submitting the form and the reloading of the webpage.
+            event.preventDefault();
+        });
+    }
+    
 
     // -----------------------------------------------------
     // Registration of handlers from the controller
-
-    registerSubmitHandler(handler) {
-        const modal = document.getElementById('generate-random-taskset-modal');
-
-        if(modal) {
-            modal.addEventListener('shown.bs.modal', () => {
-                this.submitButton = modal.querySelector('#submit-random-tasks');
-
-                this.submitButton.addEventListener('click', event => {
-                    this.setFormFields(modal);
-                    event.preventDefault();
-
-                    if (this.validateParameters(this.randomTasksRaw)) {
-                        handler(this.randomTasksClean);
-
-                        modal.querySelector('#view-random-tasks').reset()
-                        bootstrap.Modal.getInstance(modal).hide();
-                    }
-                })
-            })
-        }
-    }
-
-    setFormFields(modal) {
-        this.numTasksField = modal.querySelector('#view-num-tasks');
-        this.periodField = modal.querySelectorAll('input[name="view-random-tasks-period"]:checked');
-        this.minDurationField = modal.querySelector('#view-min-duration');
-        this.maxDurationField = modal.querySelector('#view-max-duration');
-        this.minInitialOffsetField = modal.querySelector('#view-min-initial-offset');
-        this.maxInitialOffsetField = modal.querySelector('#view-max-initial-offset');
-        this.minWCETField = modal.querySelector('#view-min-wcet');
-        this.maxWCETField = modal.querySelector('#view-max-wcet');
-        this.numDependenciesField = modal.querySelector('#view-num-dependencies');
-
-        let periods = []
-        for (let p of this.periodField) {
-            periods.push(p.value)
-        }
-
-        this.periodField.value = periods
-    }
     
-    clearRandomTasksModal() {
-        this.randomTasksModalBody.selectAll('*').remove();
+    registerSubmitHandler(handler) {
+        this.submitButton.addEventListener('click', event => {
+            // Prevent the default behaviour of submitting the form and the reloading of the webpage.
+            event.preventDefault();
+            
+            // Validate the task set parameters.
+            if (this.validateParameters(this.randomTasksRaw)) {
+                handler(this.randomTasksClean);
+
+                bootstrap.Modal.getInstance(this.modal).hide();
+            }
+        });
     }
 
     validateParameters(parameters) {
-        const minDuration = parseFloat(parameters.minDuration.trim());
-        const maxDuration = parseFloat(parameters.maxDuration.trim());
-        const minInitialOffset = parseFloat(parameters.minInitialOffset.trim());
-        const maxInitialOffset = parseFloat(parameters.maxInitialOffset.trim());
-        const minWCET = parseFloat(parameters.minWCET.trim());
-        const maxWCET = parseFloat(parameters.maxWCET.trim());
-
-        if (isNaN(parameters.numTasks)) {
-            alert('Number of tasks value must be a number.');
+        if (!Utility.ValidPositiveInteger(parameters.numTasks)) {
+            alert('Number of tasks has to be a positive integer number.')
             return false;
         }
-        if (!Utility.ValidInteger(parameters.numTasks)) {
-            alert('Number of tasks value must be an integer.')
+        const numTasks = parseInt(parameters.numTasks);
+        if (numTasks == 0) {
+            alert('Number of tasks has to be at least one.')
             return false;
         }
-
-        if (parameters.period.length == 0) {
-            alert('You must select at least 1 LET Period.');
+        
+        if (!Utility.ValidPositiveInteger(parameters.numDependencies)) {
+            alert('Number of dependencies has to be a positive integer number.')
             return false;
         }
 
-        if (isNaN(minDuration)) {
-            alert('Minimum LET Duration must be a number.');
+        if (parameters.periods.length == 0) {
+            alert('At least one period has to be selected.');
             return false;
         }
-        if (isNaN(maxDuration)) {
-            alert('Maximum LET Duration must be a number.');
+        
+        if (!Utility.ValidPositiveDecimal(parameters.minInitialOffset)) {
+            alert('Minimum initial offset has to be a positive decimal number.');
             return false;
         }
+        const minInitialOffsetNs = parseFloat(parameters.minInitialOffset) * Utility.MsToNs;
+        if (!Number.isSafeInteger(minInitialOffsetNs)) {
+            alert('Minimum initial offset is unable to be represented with nanosecond precision.');
+            return false;
+        }
+        
+        if (!Utility.ValidPositiveDecimal(parameters.maxInitialOffset)) {
+            alert('Maximum initial offset has to be a positive decimal number.');
+            return false;
+        }
+        const maxInitialOffsetNs = parseFloat(parameters.maxInitialOffset) * Utility.MsToNs;
+        if (!Number.isSafeInteger(maxInitialOffsetNs)) {
+            alert('Maximum initial offset is unable to be represented with nanosecond precision.');
+            return false;
+        }
+        
+        if (minInitialOffsetNs > maxInitialOffsetNs) {
+            alert("Minimum initial offset cannot be greater than the maximum initial offset.");
+            return false;
+        }
+
+        if (!Utility.ValidPositiveInteger(parameters.minDuration)) {
+            alert('Minimum duration has to be a positive integer percentage.');
+            return false;
+        }
+        const minDuration = parseInt(parameters.minDuration.trim());
+        if (minDuration > 100) {
+            alert('Minimum duration cannot be greater than 100%.');
+            return false;
+        }
+
+        if (!Utility.ValidPositiveInteger(parameters.maxDuration)) {
+            alert('Maximum duration has to be a positive integer percentage.');
+            return false;
+        }
+        const maxDuration = parseInt(parameters.maxDuration.trim());
+        if (maxDuration > 100) {
+            alert('Maximum duration cannot be greater than 100%.');
+            return false;
+        }
+        
         if (minDuration > maxDuration) {
-            alert('Minimum LET Duration cannot be greater than Maximum LET Duration.');
+            alert('Minimum duration cannot be greater than the maximum duration.');
             return false;
         }
 
-        if (isNaN(minInitialOffset)) {
-            alert('Minimum Initial Offset must be a number.');
+        if (!Utility.ValidPositiveInteger(parameters.minUtilisation)) {
+            alert('Minimum utilisation has to be a positive integer percentage.');
             return false;
         }
-        if (isNaN(maxInitialOffset)) {
-            alert('Maximum Initial Offset must be a number.');
-            return false;
-        }
-        if (minInitialOffset > maxInitialOffset) {
-            alert("Minimum Initial Offset cannot be greater than Maximum Initial Offset.");
+        const minUtilisation = parseInt(parameters.minUtilisation.trim());
+        if (minUtilisation > 100) {
+            alert('Minimum utilisation cannot be greater than 100%.');
             return false;
         }
 
-        if (isNaN(minWCET)) {
-            alert('Minimum WCET must be a number.');
+        if (!Utility.ValidPositiveInteger(parameters.maxUtilisation)) {
+            alert('Maximum utilisation has to be a positive integer percentage.');
             return false;
         }
-        if (isNaN(maxWCET)) {
-            alert('Maximum WCET must be a number.');
+        const maxUtilisation = parseInt(parameters.maxUtilisation.trim());
+        if (maxUtilisation > 100) {
+            alert('Maximum utilisation cannot be greater than 100%.');
             return false;
         }
-        if (minWCET > maxWCET) {
-            alert('Minimum WCET cannot be greater than Maximum WCET');
-            return false;
-        }
-
-        if (maxWCET > maxDuration || minWCET > maxDuration) {
-            alert('WCET values cannot be greater than Maximum LET Duration');
-            return false;
-        }
-
-        let flag = false;
-
-        for (let p of parameters.period) {
-            if (parseFloat(p.trim()) >= maxDuration) {
-                flag = true;
-            }
-        }
-
-        if (!flag) {
-            alert('A LET Period that is greater than Maximum LET Duration must be selected.');
+        
+        if (minUtilisation > maxUtilisation) {
+            alert('Minimum utilisation cannot be greater than the maximum utilisation.');
             return false;
         }
 

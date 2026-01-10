@@ -37,21 +37,16 @@ class ControllerRandomTasks {
 
     // -----------------------------------------------------
     // Handlers for events from the view to the model
-
-    // Handler for updating the schedule analysis.
+    
+    // Handler for generating a random task set.
     handleGenerateRandomTasks = (parameters) => {
-        const elements = ['schedule', 'inputs', 'outputs', 'entities', 'dependencies', 'eventChains', 'constraints']
+        const elements = ['schedule', 'entities', 'dependencies', 'eventChains', 'constraints']
 
         return Plugin.ModelDatabase.deleteSystem(elements)
             .then(result => this.modelEntity.generateRandomTasks(parameters))
             .then(result => this.modelDependency.generateRandomDependencies(parameters.numDependencies));
     }
     
-    
-    // -----------------------------------------------------
-    // Callbacks for events from the model to the view
-    
-    // Callback for updating the schedule analysis.
     
     toString() {
         return `ControllerRandomTasks with ${this.view} and ${this.model}`;
