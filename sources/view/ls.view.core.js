@@ -49,7 +49,11 @@ class ViewCore {
     }
 
     get device() {
-        return this.deviceField.value;
+        if (this.deviceField.value == null || this.deviceField.value.trim() == ModelDevice.Default.name) {
+            return null;
+        } else {
+            return this.deviceField.value;
+        }
     }
     
     set device(device) {
@@ -68,7 +72,7 @@ class ViewCore {
         return {
             'name': this.name.trim(),
             'speedup': Math.abs(parseFloat(this.speedup)),
-            'device': this.device.trim(),
+            'device': this.device == null ? null : this.device.trim(),
         };
     }
     
@@ -109,13 +113,12 @@ class ViewCore {
         this.deleteHandler = handler;
     }
     
-    
     validateCore(core) {
         if (core.name == null || core.name.trim() == '') {
             alert('Core name cannot be blank.');
             return false;
         }
-        if (core.name.trim().toLowerCase() == 'default') {
+        if (core.name.trim().toLowerCase() == ModelCore.Default.name.toLowerCase()) {
             alert(`Core name cannot be "${core.name.trim()}".`);
             return false;
         }
@@ -143,7 +146,7 @@ class ViewCore {
             .data(cores)
             .enter()
             .append('li')
-                .html(core => `<span><b>${core.name}:</b> ${core.speedup}&times; speedup (${core.device})</span> 
+                .html(core => `<span><b>${core.name}:</b> ${core.speedup}&times; speedup (${core.device == null ? ModelDevice.Default.name : core.device})</span> 
                     ${Utility.AddDeleteButton(this.ElementIdPrefix, core.name)}`)
             .on('click', function(event, data) {
                 thisRef.cores.node().querySelectorAll('li')
@@ -162,7 +165,7 @@ class ViewCore {
     populateParameterForm(core) {
         this.name = core.name;
         this.speedup = core.speedup;
-        this.device = core.device;
+        this.device = core.device == null ? ModelDevice.Default.name : core.device;
     }
     
     updateDeviceSelector(devices) {
@@ -174,8 +177,8 @@ class ViewCore {
         deviceDropdown
             .append('option')
             .property('selected', true)
-            .attr('value', 'Default')
-            .text('Default');
+            .attr('value', ModelDevice.Default.name)
+            .text(ModelDevice.Default.name);
         
         devices.forEach(device =>
             deviceDropdown

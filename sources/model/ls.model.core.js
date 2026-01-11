@@ -94,8 +94,8 @@ class ModelCore {
         
         let changedCores = [];
         for (const core of allCores) {
-            if (!allDeveices.includes(core.device)) {
-                core.device = ModelDevice.Default.name;
+            if (core.device != null && !allDeveices.includes(core.device)) {
+                core.device = null;
                 changedCores.push(this.saveChangedCore(core));
             }
         }

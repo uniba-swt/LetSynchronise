@@ -4,6 +4,7 @@ class ModelSchedule {
     database = null;
 
     modelDevice = null;
+    modelCore = null;
     modelNetworkDelay = null;
     modelEntity = null;
     modelDependency = null;
@@ -21,6 +22,10 @@ class ModelSchedule {
     }
 
     registerModelDevice(modelDevice) {
+        this.modelDevice = modelDevice;
+    }
+    
+    registerModelCore(modelDevice) {
         this.modelDevice = modelDevice;
     }
     
@@ -507,11 +512,12 @@ class ModelSchedule {
     }
 
     async getDevicesAndNetworkDelay(source, dest) {
-        if (dest.currentCore?.device &&
-            source.currentCore?.device &&
-            dest.currentCore.device !== ModelDevice.Default.name &&
-            source.currentCore.device !== ModelDevice.Default.name &&
-            dest.currentCore.device !== source.currentCore.device) {
+        if (dest.currentCore != null && source.currentCore != null) {
+            const allCores = await this.modelCore.getAllCores();
+            
+            
+            && dest.currentCore.device != null && source.currentCore.device != null
+            && dest.currentCore.device !== source.currentCore.device) {
                 const [sourceDevice, destDevice] = await Promise.all([
                     this.modelDevice.getDevice(source.currentCore.device),
                     this.modelDevice.getDevice(dest.currentCore.device)

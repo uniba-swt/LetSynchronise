@@ -38,8 +38,12 @@ class ViewNetworkDelay {
         return 'networkDelay';
     }
     
-    get source() {
-        return this.sourceField.value;
+    get source() {        
+        if (this.sourceField.value == null || this.sourceField.value.trim() == ModelDevice.Default.name) {
+            return null;
+        } else {
+            return this.sourceField.value;
+        }
     }
     
     set source(source) {
@@ -47,7 +51,11 @@ class ViewNetworkDelay {
     }
     
     get dest() {
-        return this.destField.value;
+        if (this.destField.value == null || this.destField.value.trim() == ModelDevice.Default.name) {
+            return null;
+        } else {
+            return this.destField.value;
+        }
     }
     
     set dest(dest) {
@@ -100,8 +108,8 @@ class ViewNetworkDelay {
     get networkDelayClean() {
         return {
             'name': this.source + "-to-" + this.dest,
-            'source': this.source.trim(),
-            'dest': this.dest.trim(),
+            'source': this.source == null ? null : this.source.trim(),
+            'dest': this.dest == null ? null : this.dest.trim(),
             'bcdt': Math.abs(parseFloat(this.bcdt)) * Utility.MsToNs,
             'acdt': Math.abs(parseFloat(this.acdt)) * Utility.MsToNs,
             'wcdt': Math.abs(parseFloat(this.wcdt)) * Utility.MsToNs,
@@ -235,8 +243,8 @@ class ViewNetworkDelay {
 
             networkDelays.forEach(delay => {
                 const row = tbody.append('tr');
-                row.append('td').text(delay.source).attr('class', 'p-2');
-                row.append('td').text(delay.dest).attr('class', 'p-2');
+                row.append('td').text(delay.source == null ? ModelDevice.Default.name : delay.source).attr('class', 'p-2');
+                row.append('td').text(delay.dest== null ? ModelDevice.Default.name : delay.dest).attr('class', 'p-2');
                 row.append('td').text(Number(delay.bcdt) / Utility.MsToNs).attr('class', 'p-2');
                 row.append('td').text(Number(delay.acdt) / Utility.MsToNs).attr('class', 'p-2');
                 row.append('td').text(Number(delay.wcdt) / Utility.MsToNs).attr('class', 'p-2');
@@ -261,8 +269,8 @@ class ViewNetworkDelay {
     }
 
     populateDelayParameterForm(parameters) {
-        this.source = parameters.source;
-        this.dest = parameters.dest;
+        this.source = parameters.source == null ? ModelDevice.Default.name : parameters.source;
+        this.dest = parameters.source == null ? ModelDevice.Default.name : parameters.dest;
         this.bcdt = Number(parameters.bcdt) / Utility.MsToNs;
         this.acdt = Number(parameters.acdt) / Utility.MsToNs;
         this.wcdt = Number(parameters.wcdt) / Utility.MsToNs;
