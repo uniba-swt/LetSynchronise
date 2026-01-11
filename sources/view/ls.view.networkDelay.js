@@ -270,7 +270,7 @@ class ViewNetworkDelay {
 
     populateDelayParameterForm(parameters) {
         this.source = parameters.source == null ? ModelDevice.Default.name : parameters.source;
-        this.dest = parameters.source == null ? ModelDevice.Default.name : parameters.dest;
+        this.dest = parameters.dest == null ? ModelDevice.Default.name : parameters.dest;
         this.bcdt = Number(parameters.bcdt) / Utility.MsToNs;
         this.acdt = Number(parameters.acdt) / Utility.MsToNs;
         this.wcdt = Number(parameters.wcdt) / Utility.MsToNs;
@@ -278,13 +278,13 @@ class ViewNetworkDelay {
     }
 
     updateDeviceSelector(devices) {
-        devices.sort();
+        const filteredDevices = devices.filter(device => Object.keys(device.delays).length > 0).sort();
 
-        let source = d3.select(this.sourceField);
-        let dest = d3.select(this.destField);
+        const sourceElement = d3.select(this.sourceField);
+        const destElement = d3.select(this.destField);
 
-        this.deviceOptions(source, devices);
-        this.deviceOptions(dest, devices);
+        this.deviceOptions(sourceElement, filteredDevices);
+        this.deviceOptions(destElement, filteredDevices);
     }
 
     deviceOptions(parentElement, devices) {

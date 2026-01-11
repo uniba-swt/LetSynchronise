@@ -118,7 +118,8 @@ class ModelDevice {
     
     refreshDelayViews() {
         return this.getAllDevices()
-            .then(result => this.updateDevicesDelay(result));
+            .then(result => this.updateDevicesDelay(result))
+            .then(result => this.modelNetworkDelay.validate());
     }
     
     toString() {
