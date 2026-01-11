@@ -92,7 +92,7 @@ class ModelEntity {
             .then(result => this.notifyChanges());
     }
     
-    // Saves the changes to an existing task, without forcing the view to refresh
+    // Saves the changes to an existing task, without forcing the view to refresh.
     saveChangedTask(task) {
         return this.database.putObject(Model.EntityStoreName, task)
             .then(result => this.notifyChanges());
@@ -237,7 +237,7 @@ class ModelEntity {
         for (const task of allTasks) {
             if (task.core != null && !allCores.includes(task.core)) {
                 task.core = null;
-                changedTasks.push(task);
+                changedTasks.push(this.saveChangedTask(task));
             }
             
             const core = await this.modelCore.getCore(task.core);
@@ -247,10 +247,10 @@ class ModelEntity {
         }
         
         if (invalidTasks.length != 0) {
-            alert(`Tasks ${invalidTasks.join(', ')} are no longer valid.`);
+            alert(`Tasks ${invalidTasks.join(', ')} are no longer valid, e.g., because their WCET now exceeds their LET duration.`);
         }
         
-        return Promise.all(changedTasks.map(task => this.saveChangedTask(task)))
+        return Promise.all(changedTasks)
             .then(result => this.refreshViews());
     }
     

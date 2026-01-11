@@ -79,10 +79,24 @@ class ModelNetworkDelay {
         return this.database.getAllObjects(Model.NetworkDelayStoreName);
     }
     
+    // Validate network delays against devices.
+    async validate() {
+        const allDeveices = (await this.modelDevice.getAllDevices()).map(device => device.name);
+        const allNetworkDelays = await this.getAllNetworkDelays();
+        
+        for (const networkDelay of allNetworkDelays) {
+            if (!allDeveices.includes(networkDelay.source) || !allDeveices.includes(networkDelay.dest)) {
+                await this.deleteNetworkDelay(networkDelay.name);
+            }
+        }
+        
+        return this.refreshViews();
+    }
+    
     refreshViews() {
         return this.getAllNetworkDelays()
             .then(result => this.updateNetworkDelays(result))
-            .then(devices => this.modelDevice.getAllDevices())
+            .then(result => this.modelDevice.getAllDevices())
             .then(devices => this.updateDeviceSelector(devices));
     }
     

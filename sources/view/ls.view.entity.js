@@ -167,7 +167,7 @@ class ViewEntity {
     }
     
     get core() {
-        if (this.coreField.value == null || this.coreField.value.trim() == 'Default') {
+        if (this.coreField.value == null || this.coreField.value.trim() == ModelCore.Default.name) {
             return null;
         } else {
             return this.coreField.value;
@@ -254,7 +254,7 @@ class ViewEntity {
             this.acet = '';
             this.bcet = '';
             this.distribution = 'Normal';
-            this.core = 'Default';
+            this.core = ModelCore.Default.name;
             
             // Clear the preview.
             this.clearPreview();
@@ -602,8 +602,8 @@ class ViewEntity {
         parentElement
             .append('option')
                 .property('selected', true)
-                .attr('value', 'Default')
-                .text('Default');
+                .attr('value', ModelCore.Default.name)
+                .text(ModelCore.Default.name);
 
         cores.forEach(core =>
             parentElement
@@ -807,7 +807,7 @@ class ViewEntity {
         this.acet = taskParameters.acet / Utility.MsToNs;
         this.bcet = taskParameters.bcet / Utility.MsToNs;
         this.distribution = taskParameters.distribution;
-        this.core = taskParameters.core == null ? 'Default' : taskParameters.core;
+        this.core = taskParameters.core == null ? ModelCore.Default.name : taskParameters.core;
     }
         
     formatTaskParametersInfo(taskParameters) {

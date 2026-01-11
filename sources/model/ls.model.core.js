@@ -51,8 +51,14 @@ class ModelCore {
     createCore(core) {
         // Store core in Database
         return this.database.putObject(Model.CoreStoreName, core)
-            .then(this.refreshViews())
-            .then(this.notifyChanges());
+            .then(result => this.refreshViews())
+            .then(result => this.notifyChanges());
+    }
+    
+    // Saves the changes to an existing core, without forcing the view to refresh.
+    saveChangedCore(core) {
+        return this.database.putObject(Model.CoreStoreName, core)
+            .then(result => this.notifyChanges());
     }
     
     getCore(name) {
@@ -79,6 +85,23 @@ class ModelCore {
         return this.database.deleteObject(Model.CoreStoreName, name)
             .then(result => this.refreshViews())
             .then(result => this.notifyChanges());
+    }
+    
+    // Validate cores against devices.
+    async validate() {
+        const allDeveices = (await this.modelDevice.getAllDevices()).map(device => device.name);
+        const allCores = await this.getAllCores();
+        
+        let changedCores = [];
+        for (const core of allCores) {
+            if (!allDeveices.includes(core.device)) {
+                core.device = ModelDevice.Default.name;
+                changedCores.push(this.saveChangedCore(core));
+            }
+        }
+        
+        return Promise.all(changedCores)
+            .then(result => this.refreshViews());
     }
     
     refreshViews() {

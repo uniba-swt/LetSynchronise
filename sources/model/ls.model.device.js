@@ -83,32 +83,22 @@ class ModelDevice {
     refreshViews() {
         return this.getAllDevices()
             .then(result => this.updateDevices(result))
-            .then(result => this.modelCore.refreshViews())
-            .then(result => this.modelNetworkDelay.refreshViews());
+            .then(result => this.modelCore.validate())
+            .then(result => this.modelNetworkDelay.validate());
     }
     
-    addDelay(deviceDelay) {
+    createDelay(deviceDelay) {
         this.database.getObject(Model.DeviceStoreName, deviceDelay.name).then(device => {
             if (!device.delays) {
-                device.delays = []
+                device.delays = { };
             }
             
-            const existingProtocol = device.delays.find(delay => delay.protocol === deviceDelay.protocol)
-            
-            if (existingProtocol) {
-                existingProtocol.bcdt = deviceDelay.bcdt;
-                existingProtocol.acdt = deviceDelay.acdt;
-                existingProtocol.wcdt = deviceDelay.wcdt;
-                existingProtocol.distribution = deviceDelay.distribution;
-            } else {
-                device.delays.push({
-                    'protocol': deviceDelay.protocol,
-                    'bcdt': deviceDelay.bcdt,
-                    'acdt': deviceDelay.acdt,
-                    'wcdt': deviceDelay.wcdt,
-                    'distribution': deviceDelay.distribution
-                });
-            }
+            device.delays[deviceDelay.protocol] = {
+                'bcdt': deviceDelay.bcdt,
+                'acdt': deviceDelay.acdt,
+                'wcdt': deviceDelay.wcdt,
+                'distribution': deviceDelay.distribution
+            };
             
             return this.database.putObject(Model.DeviceStoreName, device)
                 .then(result => this.refreshDelayViews())
@@ -119,7 +109,7 @@ class ModelDevice {
     deleteDelay(protocol, device) {
         this.database.getObject(Model.DeviceStoreName, device)
             .then(device => {
-                device.delays = device.delays.filter(delay => delay.protocol !== protocol);
+                delete device.delays[protocol];                
                 return this.database.putObject(Model.DeviceStoreName, device);
             })
             .then(result => this.refreshDelayViews())

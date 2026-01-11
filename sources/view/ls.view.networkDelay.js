@@ -284,8 +284,8 @@ class ViewNetworkDelay {
         parentElement
             .append('option')
             .property('selected', true)
-            .attr('value', 'Default')
-            .text('Default');
+            .attr('value', ModelDevice.Default.name)
+            .text(ModelDevice.Default.name);
         
         devices.forEach(device => 
             parentElement

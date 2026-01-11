@@ -365,11 +365,14 @@ class ModelSchedule {
                     let destDevice = null;
                     let networkDelay = null;
                     let devicesAndNetworkDelay = await this.getDevicesAndNetworkDelay(sourceInstance, destInstance);
+                    let encapsulationDelayTime = null;
+                    let networkDelayTime = null;
+                    let decapsulationDelayTime = null;
 
                     while (devicesAndNetworkDelay) {
                         [sourceDevice, destDevice, networkDelay] = devicesAndNetworkDelay;
-                        // FIXME: For random executionTiming, the total delay will be inconsistent with the actual delaya!
-                        const totalDelay = this.calculateTotalDelay(sourceDevice, destDevice, networkDelay, executionTiming);
+                        [encapsulationDelayTime, networkDelayTime, decapsulationDelayTime] = this.getDelays(sourceDevice, destDevice, networkDelay, executionTiming);
+                        const totalDelay = encapsulationDelayTime + networkDelayTime + decapsulationDelayTime;
                 
                         let newSourceInstance = this.getLatestLetEndTime(sourceInstances.value, destInstance.letStartTime - totalDelay);
                 
@@ -395,7 +398,7 @@ class ModelSchedule {
                         const encapsulationDelayInstance = ModelEntity.CreateDelayInstance(
                             encapsulationDelayInstances.length,
                             sourceInstance.letEndTime,
-                            ModelSchedule.GetDelayTime(sourceDevice.delays[0], executionTiming),
+                            encapsulationDelayTime,
                             sourceDevice,
                             destDevice, 
                             currentDependency
@@ -409,7 +412,7 @@ class ModelSchedule {
                         const networkDelayInstance = ModelEntity.CreateDelayInstance(
                             networkDelayInstances.length,
                             encapsulationDelayInstances[0].letEndTime,
-                            ModelSchedule.GetDelayTime(networkDelay, executionTiming),
+                            networkDelayTime,
                             sourceDevice,
                             destDevice, 
                             currentDependency
@@ -423,7 +426,7 @@ class ModelSchedule {
                         const decapsulationDelayInstance = ModelEntity.CreateDelayInstance(
                             decapsulationDelayInstances.length,
                             networkDelayInstances[0].letEndTime,
-                            ModelSchedule.GetDelayTime(destDevice.delays[0], executionTiming),
+                            decapsulationDelayTime,
                             sourceDevice,
                             destDevice, 
                             currentDependency
@@ -479,7 +482,6 @@ class ModelSchedule {
     
         // We do not check the instance number because it is unimportant.
         // We do not check the executionTime or letEndTime because a duplicate instance should have the same times.
-        //
         return instances.find(instance =>
             instance.destinationDevice == other.destinationDevice
             && instance.sourceDevice == other.sourceDevice
@@ -487,10 +489,10 @@ class ModelSchedule {
         ) != null;
     }
 
-    calculateTotalDelay(source, dest, network, executionTiming) {
-        return ModelSchedule.GetDelayTime(source.delays[0], executionTiming) +
-               ModelSchedule.GetDelayTime(dest.delays[0], executionTiming) +
-               ModelSchedule.GetDelayTime(network, executionTiming);
+    getDelays(source, dest, network, executionTiming) {
+        return [ModelSchedule.GetDelayTime(Object.values(source.delays)[0], executionTiming),
+               ModelSchedule.GetDelayTime(Object.values(dest.delays)[0], executionTiming),
+               ModelSchedule.GetDelayTime(network, executionTiming)];
     }
     
     static GetDelayTime(delay, executionTiming) {
@@ -507,8 +509,8 @@ class ModelSchedule {
     async getDevicesAndNetworkDelay(source, dest) {
         if (dest.currentCore?.device &&
             source.currentCore?.device &&
-            dest.currentCore.device !== 'Default' &&
-            source.currentCore.device !== 'Default' &&
+            dest.currentCore.device !== ModelDevice.Default.name &&
+            source.currentCore.device !== ModelDevice.Default.name &&
             dest.currentCore.device !== source.currentCore.device) {
                 const [sourceDevice, destDevice] = await Promise.all([
                     this.modelDevice.getDevice(source.currentCore.device),

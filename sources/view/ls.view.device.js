@@ -220,7 +220,7 @@ class ViewDevice {
             alert('Device name cannot be blank.');
             return false;
         }
-        if (device.name.trim().toLowerCase() == 'default') {
+        if (device.name.trim().toLowerCase() == ModelDevice.Default.name.toLowerCase()) {
             alert(`Device name cannot be "${device.name.trim()}".`);
             return false;
         }
@@ -325,7 +325,8 @@ class ViewDevice {
             .data(devices)
             .enter()
             .append('li')
-                .html(device => `<span><b>${device.name}:</b> ${device.speedup}&times; speedup</span> ${Utility.AddDeleteButton(this.ElementIdPrefix, device.name)}`)
+                .html(device => `<span><b>${device.name}:</b> ${device.speedup}&times; speedup</span>
+                    ${Utility.AddDeleteButton(this.ElementIdPrefix, device.name)}`)
             .on('click', function(event, data) {
                 thisRef.devices.node().querySelectorAll('li')
                     .forEach((device) => {
@@ -358,52 +359,57 @@ class ViewDevice {
 
     updateDevicesDelay(devices) {
         this.delays.selectAll('*').remove();
+        
         const thisRef = this;
 
-        // To ensure that the devices with delays assigned get displayed
-        const filteredData = devices.filter(device => device.delays && device.delays.length > 0);
+        // Ignore devices with empty protocol delays.
+        const filteredDevices = devices.filter(device => device.delays && Object.keys(device.delays).length > 0);
 
-        const table = this.delays.append('table').attr('class', 'table-responsive table-bordered');
-
-        if (filteredData.length > 0) {
-            table.append('thead')
-                .append('tr')
-                .selectAll('th')
-                .data(['Device Name', 'Protocol Name', 'BCDT (ms)', 'ACDT (ms)', 'WCDT (ms)', 'Distribution', 'Delete'])
-                .enter()
+        if (filteredDevices.length == 0) {
+            return;
+        }
+        
+        const table = this.delays
+            .append('table')
+              .attr('class', 'table-responsive table-bordered');
+        
+        table.append('thead')
+            .append('tr')
+            .selectAll('th')
+              .data(['Device Name', 'Protocol Name', 'BCDT (ms)', 'ACDT (ms)', 'WCDT (ms)', 'Distribution', 'Delete'])
+              .enter()
                 .append('th')
                 .text(header => header)
                 .attr('class', 'p-2');
 
-            const tbody = table.append('tbody');
+        const tbody = table.append('tbody');
 
-            filteredData.forEach(device => {
-                device.delays.forEach(delay => {
-                    const row = tbody.append('tr');
-                    row.append('td').text(device.name).attr('class', 'p-2');
-                    row.append('td').text(delay.protocol).attr('class', 'p-2');
-                    row.append('td').text(Number(delay.bcdt) / Utility.MsToNs).attr('class', 'p-2');
-                    row.append('td').text(Number(delay.acdt) / Utility.MsToNs).attr('class', 'p-2');
-                    row.append('td').text(Number(delay.wcdt) / Utility.MsToNs).attr('class', 'p-2');
-                    row.append('td').text(delay.distribution).attr('class', 'p-2');
-                    row.append('td').html(Utility.AddDeleteButton(delay.protocol, device.name)).attr('class', 'p-2');
-                    this.setupDeleteDelayButtonListener(delay.protocol, device.name);
-
-                    row.on('click', function (event) {
-                        const clickedRow = event.currentTarget;
-                        const isSelected = clickedRow.classList.contains('deviceDelaySelected');
-    
-                        thisRef.delays.node().querySelectorAll('tr')
-                            .forEach(rowElement => rowElement.classList.remove('deviceDelaySelected'));
-    
-                        if (!isSelected) {
-                            clickedRow.classList.add('deviceDelaySelected');
-                            thisRef.populateDelayParameterForm(device.name, delay);
-                        }
-                    });
+        filteredDevices.forEach(device => {
+            for (const [protocol, delay] of Object.entries(device.delays)) {
+                const row = tbody.append('tr');
+                row.append('td').text(device.name).attr('class', 'p-2');
+                row.append('td').text(protocol).attr('class', 'p-2');
+                row.append('td').text(delay.bcdt / Utility.MsToNs).attr('class', 'p-2');
+                row.append('td').text(delay.acdt / Utility.MsToNs).attr('class', 'p-2');
+                row.append('td').text(delay.wcdt / Utility.MsToNs).attr('class', 'p-2');
+                row.append('td').text(delay.distribution).attr('class', 'p-2');
+                row.append('td').html(Utility.AddDeleteButton(protocol, device.name)).attr('class', 'p-2');
+                
+                row.on('click', function (event) {
+                    const clickedRow = event.currentTarget;
+                    const isSelected = clickedRow.classList.contains('deviceDelaySelected');
+                    
+                    thisRef.delays.node().querySelectorAll('tr').forEach(rowElement => rowElement.classList.remove('deviceDelaySelected'));
+                    
+                    if (!isSelected) {
+                        clickedRow.classList.add('deviceDelaySelected');
+                        thisRef.populateDelayParameterForm(device.name, protocol, delay);
+                    }
                 });
-            });
-        } 
+
+                this.setupDeleteDelayButtonListener(protocol, device.name);
+            }
+        });
     }
     
     populateParameterForm(device) {
@@ -411,12 +417,12 @@ class ViewDevice {
         this.speedup = device.speedup;
     }
 
-    populateDelayParameterForm(deviceName, delayParameters) {
+    populateDelayParameterForm(deviceName, protocolName, delayParameters) {
         this.delayDevice = deviceName;
-        this.protocolName = delayParameters.protocol;
-        this.bcdt = Number(delayParameters.bcdt) / Utility.MsToNs;
-        this.acdt = Number(delayParameters.acdt) / Utility.MsToNs;
-        this.wcdt = Number(delayParameters.wcdt) / Utility.MsToNs;
+        this.protocolName = protocolName;
+        this.bcdt = delayParameters.bcdt / Utility.MsToNs;
+        this.acdt = delayParameters.acdt / Utility.MsToNs;
+        this.wcdt = delayParameters.wcdt / Utility.MsToNs;
         this.distribution = delayParameters.distribution;
     }
     

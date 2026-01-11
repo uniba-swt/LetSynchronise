@@ -81,7 +81,7 @@ class ControllerDevice {
     }
 
     handleCreateDelay = (delay) => {
-        this.model.addDelay(delay);
+        this.model.createDelay(delay);
     }
     
     // Handler for deleting a device.

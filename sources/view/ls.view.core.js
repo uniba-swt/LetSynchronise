@@ -131,10 +131,6 @@ class ViewCore {
         
         return true;
     }
-    
-    updateCoreSelectors(tasks) {
-        // TODO: Implement
-    }
             
     updateCores(cores) {
         // Display cores
