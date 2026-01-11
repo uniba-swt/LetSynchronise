@@ -5,10 +5,8 @@ class ControllerEntity {
     _viewSchedule = null;
     _model = null;
     _modelCore = null;
-    _modelDevice = null;
     _modelDependency = null;
     _modelEventChain = null;
-    _modelNetworkDelay = null;
     _modelSchedule = null;
     
     constructor() { }
@@ -64,11 +62,6 @@ class ControllerEntity {
     get modelCore() {
         return this._modelCore;
     }
-
-    set modelDevice(modelDevice) {
-        this._modelDevice = modelDevice;
-        this._model.registerModelDevice(this._modelDevice);
-    }
     
     set modelDependency(modelDependency) {
         this._modelDependency = modelDependency;
@@ -90,11 +83,6 @@ class ControllerEntity {
     
     get modelEventChain() {
         return this._modelEventChain;
-    }
-
-    set modelNetworkDelay(modelNetworkDelay) {
-        this._modelNetworkDelay = modelNetworkDelay;
-        this._model.registerModelNetworkDelay(this._modelNetworkDelay);
     }
 
     get modelSchedule() {

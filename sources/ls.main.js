@@ -62,6 +62,7 @@ controller.controllerExportImport.modelEventChain = model.modelEventChain;
 controller.controllerExportImport.modelConstraint = model.modelConstraint;
 
 controller.controllerDevice.view = view.viewDevice;
+controller.controllerDevice.viewSchedule = view.viewSchedule;
 controller.controllerDevice.model = model.modelDevice;
 controller.controllerDevice.modelCore = model.modelCore;
 controller.controllerDevice.modelNetworkDelay = model.modelNetworkDelay;
@@ -73,6 +74,7 @@ controller.controllerCore.modelDevice = model.modelDevice;
 controller.controllerCore.modelEntity = model.modelEntity;
 
 controller.controllerNetworkDelay.view = view.viewNetworkDelay;
+controller.controllerNetworkDelay.viewSchedule = view.viewSchedule;
 controller.controllerNetworkDelay.model = model.modelNetworkDelay;
 controller.controllerNetworkDelay.modelDevice = model.modelDevice;
 
@@ -88,7 +90,6 @@ controller.controllerInterface.modelConstraint = model.modelConstraint;
 controller.controllerEntity.view = view.viewEntity;
 controller.controllerEntity.viewSchedule = view.viewSchedule;
 controller.controllerEntity.model = model.modelEntity;
-controller.controllerEntity.modelDevice = model.modelDevice;
 controller.controllerEntity.modelCore = model.modelCore;
 controller.controllerEntity.modelNetworkDelay = model.modelNetworkDelay;
 controller.controllerEntity.modelDependency = model.modelDependency;

@@ -58,6 +58,42 @@ class ModelDependency {
             .then(() => this.refreshViews());
     }
 
+    generateRandomDependency(tasks, sourceIndex, destinationIndex) {
+        const sourceTask = tasks[sourceIndex];
+        const sourceTaskOutputs = sourceTask.outputs;
+        const sourceTaskOutput = sourceTaskOutputs[Utility.RandomInteger(0, null, sourceTaskOutputs.length - 1)];
+        
+        const destinationTask = tasks[destinationIndex];
+        const destinationTaskInputs = destinationTask.inputs;
+        const destinationTaskInput = destinationTaskInputs[Utility.RandomInteger(0, null, destinationTaskInputs.length - 1)];
+        
+        return this.createDependency({
+            'name'       : `dep-${tasks[sourceIndex].name}→${tasks[destinationIndex].name}`,
+            'source'     : {
+                'port'   : sourceTaskOutput,
+                'task'   : sourceTask.name
+            },
+            'destination': {
+                'port'   : destinationTaskInput,
+                'task'   : destinationTask.name
+            }
+        });
+    }
+    
+    async generateRandomDependencies(numDependencies) {
+        const tasks = await this.modelEntity.getAllTasks();
+        
+        let dependencies = [];
+        for (let i = 0; i < numDependencies; ++i) {
+            const sourceIndex = Utility.RandomInteger(0, null, tasks.length - 1);
+            const destinationIndex = (sourceIndex + Utility.RandomInteger(1, null, tasks.length - 1)) % tasks.length;
+            dependencies.push(this.generateRandomDependency(tasks, sourceIndex, destinationIndex));
+        }
+        
+        return Promise.all(dependencies);
+    }
+    
+    // TODO
     createDelayDependency(dependency, delayType) {
         if (delayType === 'encapsulation') {
             return {
@@ -115,41 +151,6 @@ class ModelDependency {
         return Promise.all([promiseDependency, promiseAllDependencies])
             .then(([sourceDependency, allDependencies]) => allDependencies
                 .filter(dependency => (dependency.source.task == sourceDependency.destination.task)));
-    }
-
-    async generateRandomDependencies(numDependencies) {
-        const tasks = await this.modelEntity.getAllTasks();
-
-        let dependencies = [];
-        for (let i = 0; i < numDependencies; ++i) {
-            const sourceIndex = Utility.RandomInteger(0, null, tasks.length - 1);
-            const destinationIndex = (sourceIndex + Utility.RandomInteger(1, null, tasks.length - 1)) % tasks.length;
-            dependencies.push(this.generateRandomDependency(tasks, sourceIndex, destinationIndex));
-        }
-
-        return Promise.all(dependencies);
-    }
-
-    async generateRandomDependency(tasks, sourceIndex, destinationIndex) {
-        const sourceTask = tasks[sourceIndex];
-        const sourceTaskOutputs = sourceTask.outputs;
-        const sourceTaskOutput = sourceTaskOutputs[Utility.RandomInteger(0, null, sourceTaskOutputs.length - 1)];
-        
-        const destinationTask = tasks[destinationIndex];
-        const destinationTaskInputs = destinationTask.inputs;
-        const destinationTaskInput = destinationTaskInputs[Utility.RandomInteger(0, null, destinationTaskInputs.length - 1)];
-
-        return this.createDependency({
-            'name'       : `dep-${tasks[sourceIndex].name}→${tasks[destinationIndex].name}`,
-            'source'     : {
-                'port'   : sourceTaskOutput,
-                'task'   : sourceTask.name
-            },
-            'destination': {
-                'port'   : destinationTaskInput,
-                'task'   : destinationTask.name
-            }
-        });
     }
     
     // Validate task dependencies against system and task inputs and outputs.

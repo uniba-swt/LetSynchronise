@@ -2,6 +2,7 @@
 
 class ControllerNetworkDelay {
     _view = null;
+    _viewSchedule = null;
     _model = null;
     _modelDevice = null;
     
@@ -32,10 +33,10 @@ class ControllerNetworkDelay {
         
         // Register the handlers when setting the model.
         this._model.registerUpdateNetworkDelaysCallback(this.callbackUpdateNetworkDelays);
+        this._model.registerUpdateDeviceSelectorCallback(this.callbackUpdateDeviceSelector);
+        this._model.registerNotifyChangesCallback(this.callbackNotifyChanges);
 
-        this._model.registerUpdateDeviceSelectorCallback(this.callbackUpdateDeviceSelector)
-
-        // Hack to populate the View with cores once the database is ready
+        // Hack to populate the View with network delays once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
             this._model.refreshViews();
         });
@@ -59,13 +60,13 @@ class ControllerNetworkDelay {
     // -----------------------------------------------------
     // Handlers for events from the view to the model
     
-    // Handler for creating a core.
+    // Handler for creating a network delay.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleCreateNetworkDelay = (networkDelay) => {
         this.model.createNetworkDelay(networkDelay);
     }
     
-    // Handler for deleting a core.
+    // Handler for deleting a network delay.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
     handleDeleteNetworkDelay = (networkDelay) => {
         this.model.deleteNetworkDelay(networkDelay);
@@ -75,13 +76,19 @@ class ControllerNetworkDelay {
     // -----------------------------------------------------
     // Callbacks for events from the model to the view
     
-    // Callback for updating the displayed cores.
+    // Callback for updating the displayed network delays.
     callbackUpdateNetworkDelays = (networkDelays) => {
         this.view.updateNetworkDelays(networkDelays);
     }
 
+    // Callbackk for updating the displayed device selectors
     callbackUpdateDeviceSelector = (devices) => {
         this.view.updateDeviceSelector(devices);
+    }
+    
+    // Callback for notifying the schedule view that tasks have changed.
+    callbackNotifyChanges = () => {
+        this.viewSchedule.notifyChanges();
     }
     
     toString() {

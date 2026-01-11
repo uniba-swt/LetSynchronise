@@ -77,7 +77,8 @@ class ModelCore {
     
     deleteCore(name) {
         return this.database.deleteObject(Model.CoreStoreName, name)
-            .then(this.refreshViews());
+            .then(result => this.refreshViews())
+            .then(result => this.notifyChanges());
     }
     
     refreshViews() {

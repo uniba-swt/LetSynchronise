@@ -37,6 +37,7 @@ class ControllerDevice {
         // Register the handlers when setting the model.
         this._model.registerUpdateDevicesCallback(this.callbackUpdateDevices);
         this._model.registerUpdateDevicesDelayCallback(this.callbackUpdateDevicesDelay);
+        this._model.registerNotifyChangesCallback(this.callbackNotifyChanges);
 
         // Hack to populate the View with devices once the database is ready
         window.addEventListener('DatabaseReady', (event) => {
@@ -102,8 +103,14 @@ class ControllerDevice {
         this.view.updateDevices(devices);
     }
 
+    // Callback for updating the displayed protocol delays.
     callbackUpdateDevicesDelay = (delays) => {
         this.view.updateDevicesDelay(delays);
+    }
+    
+    // Callback for notifying the schedule view that tasks have changed.
+    callbackNotifyChanges = () => {
+        this.viewSchedule.notifyChanges();
     }
     
     toString() {

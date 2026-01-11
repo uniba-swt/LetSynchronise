@@ -1,8 +1,9 @@
 'use strict';
 
 class ModelDevice {
-    updateDevices = null;                 // Callback to function in ls.view.device
-    updateDevicesDelay = null;
+    updateDevices = null;               // Callback to function in ls.view.device
+    updateDevicesDelay = null;          // Callback to function in ls.view.device
+    notifyChanges = null;               // Callback to function in ls.view.schedule
 
     database = null;
     modelCore = null;
@@ -38,6 +39,10 @@ class ModelDevice {
         this.modelNetworkDelay = modelNetworkDelay;
     }
     
+    registerNotifyChangesCallback(callback) {
+        this.notifyChanges = callback;
+    }
+    
     
     // -----------------------------------------------------
     // Class methods
@@ -45,35 +50,8 @@ class ModelDevice {
     createDevice(device) {
         // Store device in Database
         return this.database.putObject(Model.DeviceStoreName, device)
-            .then(this.refreshViews());
-    }
-
-    addDelay(deviceDelay) {
-        this.database.getObject(Model.DeviceStoreName, deviceDelay.name).then(device => {
-            if (!device.delays) {
-                device.delays = []
-            }
-
-            const existingProtocol = device.delays.find(p => p.protocol === deviceDelay.protocol)
-
-            if (existingProtocol) {
-                existingProtocol.bcdt = deviceDelay.bcdt;
-                existingProtocol.acdt = deviceDelay.acdt;
-                existingProtocol.wcdt = deviceDelay.wcdt;
-                existingProtocol.distribution = deviceDelay.distribution;
-            } else {
-                device.delays.push({
-                    protocol: deviceDelay.protocol,
-                    bcdt: deviceDelay.bcdt,
-                    acdt: deviceDelay.acdt,
-                    wcdt: deviceDelay.wcdt,
-                    distribution: deviceDelay.distribution
-                })
-            }
-
-            return this.database.putObject(Model.DeviceStoreName, device)
-                .then(this.refreshDelayViews())
-        })
+            .then(result => this.refreshViews())
+            .then(result => this.notifyChanges());
     }
     
     getDevice(name) {
@@ -98,15 +76,8 @@ class ModelDevice {
     
     deleteDevice(name) {
         return this.database.deleteObject(Model.DeviceStoreName, name)
-            .then(this.refreshViews());
-    }
-
-    deleteDelay(protocol, device) {
-        this.database.getObject(Model.DeviceStoreName, device).then(device => {
-            device.delays = device.delays.filter(delay => delay.protocol !== protocol);
-
-            return this.database.putObject(Model.DeviceStoreName, device).then(this.refreshDelayViews());
-        })
+            .then(result => this.refreshViews())
+            .then(result => this.notifyChanges());
     }
     
     refreshViews() {
@@ -115,7 +86,46 @@ class ModelDevice {
             .then(result => this.modelCore.refreshViews())
             .then(result => this.modelNetworkDelay.refreshViews());
     }
+    
+    addDelay(deviceDelay) {
+        this.database.getObject(Model.DeviceStoreName, deviceDelay.name).then(device => {
+            if (!device.delays) {
+                device.delays = []
+            }
+            
+            const existingProtocol = device.delays.find(delay => delay.protocol === deviceDelay.protocol)
+            
+            if (existingProtocol) {
+                existingProtocol.bcdt = deviceDelay.bcdt;
+                existingProtocol.acdt = deviceDelay.acdt;
+                existingProtocol.wcdt = deviceDelay.wcdt;
+                existingProtocol.distribution = deviceDelay.distribution;
+            } else {
+                device.delays.push({
+                    'protocol': deviceDelay.protocol,
+                    'bcdt': deviceDelay.bcdt,
+                    'acdt': deviceDelay.acdt,
+                    'wcdt': deviceDelay.wcdt,
+                    'distribution': deviceDelay.distribution
+                });
+            }
+            
+            return this.database.putObject(Model.DeviceStoreName, device)
+                .then(result => this.refreshDelayViews())
+                .then(result => this.notifyChanges());
+        })
+    }
 
+    deleteDelay(protocol, device) {
+        this.database.getObject(Model.DeviceStoreName, device)
+            .then(device => {
+                device.delays = device.delays.filter(delay => delay.protocol !== protocol);
+                return this.database.putObject(Model.DeviceStoreName, device);
+            })
+            .then(result => this.refreshDelayViews())
+            .then(result => this.notifyChanges());
+    }
+    
     refreshDelayViews() {
         return this.getAllDevices()
             .then(result => this.updateDevicesDelay(result));

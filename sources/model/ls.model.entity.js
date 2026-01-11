@@ -9,8 +9,6 @@ class ModelEntity {
 
     database = null;
     modelCore = null;
-    modelDevice = null;
-    modelNetworkDelay = null;
     modelDependency = null;
     modelEventChain = null;
         
@@ -51,10 +49,6 @@ class ModelEntity {
     registerModelCore(modelCore) {
         this.modelCore = modelCore;
     }
-
-    registerModelDevice(modelDevice) {
-        this.modelDevice = modelDevice
-    }
     
     registerModelDependency(modelDependency) {
         this.modelDependency = modelDependency;
@@ -62,10 +56,6 @@ class ModelEntity {
     
     registerModelEventChain(modelEventChain) {
         this.modelEventChain = modelEventChain;
-    }
-
-    registerModelNetworkDelay(modeltNetworkDelay) {
-        this.modelNetworkDelay = modeltNetworkDelay;
     }
     
     
@@ -98,14 +88,47 @@ class ModelEntity {
 
         // Store task parameters into Database
         return this.database.putObject(Model.EntityStoreName, parameters)
-            .then(this.refreshViews())
-            .then(this.notifyChanges());
+            .then(result => this.refreshViews())
+            .then(result => this.notifyChanges());
     }
     
     // Saves the changes to an existing task, without forcing the view to refresh
     saveChangedTask(task) {
         return this.database.putObject(Model.EntityStoreName, task)
-            .then(this.notifyChanges());
+            .then(result => this.notifyChanges());
+    }
+    
+    generateRandomTasks(parameters) {
+        return Promise.all(Array.from({ length: parameters.numTasks}, (_, i) => this.generateRandomTask(parameters, i)));
+    }
+    
+    generateRandomTask(parameters, i) {
+        const period = parameters.periods[Utility.RandomInteger(0, null, parameters.periods.length - 1)];
+        const initialOffset = Utility.RandomInteger(parameters.minInitialOffset, null, parameters.maxInitialOffset);
+        
+        // Min and max duration is a percentage of the chosen LET period.
+        const duration = period * Utility.RandomInteger(parameters.minDuration, null, parameters.maxDuration).toPrecision(5) / 100;
+        // Min and max utilisation is a percentage of the chosen LET duration.
+        const wcet = duration * Utility.RandomInteger(parameters.minUtilisation, null, parameters.maxUtilisation).toPrecision(5) / 100;
+        const bcet = Utility.RandomInteger(0, null, wcet).toPrecision(5) / 1;
+        const acet = (wcet + bcet) / 2;
+        
+        return this.createTask({
+            'type'            : 'task',
+            'name'            : `t${i}`,
+            'priority'        : null,
+            'initialOffset'   : initialOffset,
+            'activationOffset': 0,
+            'duration'        : duration,
+            'period'          : period,
+            'inputs'          : [ 'in1' ],
+            'outputs'         : [ 'out1' ],
+            'wcet'            : wcet,
+            'acet'            : acet,
+            'bcet'            : bcet,
+            'distribution'    : 'Normal',
+            'core'            : null
+        });
     }
     
     getAllTasks() {
@@ -122,8 +145,9 @@ class ModelEntity {
 
     deleteTask(name) {
         return this.database.deleteObject(Model.EntityStoreName, name)
-            .then(this.database.deleteObject(Model.EntityInstancesStoreName, name))
-            .then(result => this.refreshViews());
+            .then(result => this.database.deleteObject(Model.EntityInstancesStoreName, name))
+            .then(result => this.refreshViews())
+            .then(result => this.notifyChanges());
     }
 
     static CreateDelayInstance(instance, sourceEndTime, executionTime, sourceDevice, destDevice, dependency) {
@@ -190,8 +214,8 @@ class ModelEntity {
             const decapsulation = `${name.source.task} => ${name.destination.task} decapsulation delay`;
     
             return this.database.deleteObject(Model.EntityInstancesStoreName, encapsulation)
-                    .then(this.database.deleteObject(Model.EntityInstancesStoreName, network))
-                    .then(this.database.deleteObject(Model.EntityInstancesStoreName, decapsulation));
+                .then(result => this.database.deleteObject(Model.EntityInstancesStoreName, network))
+                .then(result => this.database.deleteObject(Model.EntityInstancesStoreName, decapsulation));
         }
     }
 
@@ -201,39 +225,6 @@ class ModelEntity {
         fileteredDelays = allInstances.filter(instance => instance.name.includes("delay"));
 
         return Promise.all(fileteredDelays.map(delay => this.database.deleteObject(Model.EntityInstancesStoreName, delay.name)));
-    }
-
-    generateRandomTasks(parameters) {
-        return Promise.all(Array.from({ length: parameters.numTasks}, (_, i) => this.generateRandomTask(parameters, i)));
-    }
-
-    generateRandomTask(parameters, i) {
-        const period = parameters.periods[Utility.RandomInteger(0, null, parameters.periods.length - 1)];
-        const initialOffset = Utility.RandomInteger(parameters.minInitialOffset, null, parameters.maxInitialOffset);
-        
-        // Min and max duration is a percentage of the chosen LET period.
-        const duration = period * Utility.RandomInteger(parameters.minDuration, null, parameters.maxDuration).toPrecision(5) / 100;
-        // Min and max utilisation is a percentage of the chosen LET duration.
-        const wcet = duration * Utility.RandomInteger(parameters.minUtilisation, null, parameters.maxUtilisation).toPrecision(5) / 100;
-        const bcet = Utility.RandomInteger(0, null, wcet).toPrecision(5) / 1;
-        const acet = (wcet + bcet) / 2;
-        
-        return this.createTask({
-            'type'            : 'task',
-            'name'            : `t${i}`,
-            'priority'        : null,
-            'initialOffset'   : initialOffset,
-            'activationOffset': 0,
-            'duration'        : duration,
-            'period'          : period,
-            'inputs'          : [ 'in1' ],
-            'outputs'         : [ 'out1' ],
-            'wcet'            : wcet,
-            'acet'            : acet,
-            'bcet'            : bcet,
-            'distribution'    : 'Normal',
-            'core'            : null
-        });
     }
     
     // Validate the tasks against the platform
@@ -260,7 +251,7 @@ class ModelEntity {
         }
         
         return Promise.all(changedTasks.map(task => this.saveChangedTask(task)))
-            .then(this.refreshViews());
+            .then(result => this.refreshViews());
     }
     
     refreshViews() {

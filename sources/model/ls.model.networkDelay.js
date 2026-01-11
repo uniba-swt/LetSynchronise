@@ -1,8 +1,9 @@
 'use strict';
 
 class ModelNetworkDelay {
-    updateNetworkDelays = null;
-    updateDeviceSelector = null;
+    updateNetworkDelays = null;         // Callback to function in ls.view.networkDelay
+    updateDeviceSelector = null;        // Callback to function in ls.view.networkDelay
+    notifyChanges = null;               // Callback to function in ls.view.schedule
 
     database = null;
     modelDevice = null;
@@ -31,13 +32,19 @@ class ModelNetworkDelay {
         this.modelDevice = modelDevice;
     }
     
+    registerNotifyChangesCallback(callback) {
+        this.notifyChanges = callback;
+    }
+    
+    
     // -----------------------------------------------------
     // Class methods
     
     createNetworkDelay(networkDelay) {
-        this.getAllNetworkDelays().then(delays => {
+        this.getAllNetworkDelays()
+            .then(delays => {
                 const existingDelay = delays.find(delay => delay.name === networkDelay.name);
-    
+
                 if (existingDelay) {
                     existingDelay.bcdt = networkDelay.bcdt;
                     existingDelay.acdt = networkDelay.acdt;
@@ -49,18 +56,17 @@ class ModelNetworkDelay {
                     return networkDelay;
                 }
             })
-            .then(result => {
-                return this.database.putObject(Model.NetworkDelayStoreName, result);
-            })
-            .then(() => {
-                this.refreshViews();
-            })
+            .then(result => this.database.putObject(Model.NetworkDelayStoreName, result))
+            .then(result => this.refreshViews())
+            .then(result => this.notifyChanges());
     }
     
 
     deleteNetworkDelay(delay) {
         return this.database.deleteObject(Model.NetworkDelayStoreName, delay)
-            .then(this.refreshViews());
+            .then(result => this.refreshViews())
+            .then(result => this.notifyChanges());
+
     }
 
     getNetworkDelay(source, dest) {
