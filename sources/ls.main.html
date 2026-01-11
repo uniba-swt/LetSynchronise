@@ -849,6 +849,14 @@
             
             <form class="row">
                 <div class="col-auto">
+                    <div class="input-group">
+                        <span class="input-group-text" for="view-schedule-zoom">Zoom by scrolling + shift key</span>
+                        <span class="input-group-text" id="zoom">100</span>
+                        <span class="input-group-text">%</span>
+                    </div>
+                </div>
+                
+                <div class="col-auto">
                     <button id="analyse" type="submit" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#analyse-modal">Analyse</button>
                 </div>
                 
@@ -866,19 +874,11 @@
                 <div class="col">
                     <div class="input-group">
                         <span class="input-group-text" for="view-schedule-event-chain">Event Chain</span>
-                        <select id="view-schedule-event-chain" class="form-select" style="max-width: 150px">
+                        <select id="view-schedule-event-chain" class="form-select">
                             <option disabled selected>Choose ...</option>
                         </select>
                         <span for="makespan" class="input-group-text">Instance</span>
-                        <input type="range" class="form-control form-range w-25" min="0" max="0" id="instance" value="0"/>
-                    </div>
-                </div>
-
-                <div class="col-3">
-                    <div class="input-group">
-                        <span class="input-group-text" for="view-schedule-zoom">Zoom by scrolling + shift key</span>
-                        <input required type="text" class="form-control" id="zoom" value="100" readonly/>
-                        <span class="input-group-text">%</span>
+                        <input id="instance" type="range" class="form-control form-range" min="0" max="0" value="0"/>
                     </div>
                 </div>
             </form>
