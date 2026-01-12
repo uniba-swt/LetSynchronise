@@ -36,7 +36,7 @@ class ModelAnalyse {
 
     // -----------------------------------------------------
     // Class methods
-
+    
     getAnalyse() {
         // Get all event chain instances and all constraints.
         // Collect all the event chain instances of each constraint, and compute their maxLatency.
@@ -46,14 +46,7 @@ class ModelAnalyse {
             .then(([allConstraints, allChainInstances]) => {
 
                 // Make sure that the event chains are sorted by chain name and then instance number.
-                allChainInstances.sort(function(a, b) {
-                    // Sort based on event chain name.
-                    if (a.chainName < b.chainName) { return -1; }
-                    if (a.chainName > b.chainName) { return 1; }
-
-                    // Sort instances of the same event chain by their instance number.
-                    return a.instance - b.instance;
-                });
+                allChainInstances.sort(Utility.CompareChainInstance);
 
                 // Compute all available metrics on every event chain instance, grouped by event chain name.
                 let groupedChainInstances = { };

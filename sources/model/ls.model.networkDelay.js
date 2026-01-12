@@ -69,11 +69,21 @@ class ModelNetworkDelay {
 
     }
 
-    getNetworkDelay(source, dest) {
-        return this.getAllNetworkDelays()
-            .then(delays => delays.find(delay => delay.source === source && delay.dest === dest));
+    async getNetworkDelay(source, dest) {
+        const allNetworkDelays = await this.getAllNetworkDelays();
+        let networkDelay = allNetworkDelays.find(delay => delay.source === source && delay.dest === dest);
+        
+        // If a network delay cannot be found, try with a default destination device.
+        if (networkDelay == null) {
+            networkDelay = allNetworkDelays.find(delay => delay.source === source && delay.dest === null);
+        }
+        // ... otherwise, try with a default source device.
+        if (networkDelay == null) {
+            networkDelay = allNetworkDelays.find(delay => delay.source === null && delay.dest === dest);
+        }
+        
+        return networkDelay;
     }
-    
 
     getAllNetworkDelays() {
         return this.database.getAllObjects(Model.NetworkDelayStoreName);
@@ -81,12 +91,12 @@ class ModelNetworkDelay {
     
     // Validate network delays against devices.
     async validate() {
-        const allDeveices = (await this.modelDevice.getAllDevices()).map(device => device.name);
+        const allDevices = (await this.modelDevice.getAllDevices()).map(device => device.name);
         const allNetworkDelays = await this.getAllNetworkDelays();
         
         for (const networkDelay of allNetworkDelays) {
-            if (networkDelay.source != null && !allDeveices.includes(networkDelay.source)
-                    || networkDelay.dest != null && !allDeveices.includes(networkDelay.dest)) {
+            if (networkDelay.source != null && !allDevices.includes(networkDelay.source)
+                    || networkDelay.dest != null && !allDevices.includes(networkDelay.dest)) {
                 await this.deleteNetworkDelay(networkDelay.name);
             }
         }

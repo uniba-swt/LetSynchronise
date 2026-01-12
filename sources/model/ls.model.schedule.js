@@ -189,7 +189,7 @@ class ModelSchedule {
             }
             
             // Sort the instances in chronological order and give them an instance number
-            instances.sort((first, second) => { first.receiveEvent.timestamp - second.receiveEvent.timestamp });
+            instances.sort(Utility.CompareDependencyInstanceByReceiveEvent);
             instances.forEach((instance, index) => instance.instance = index);
         
             return this.database.putObject(Model.DependencyInstancesStoreName, {
@@ -445,23 +445,19 @@ class ModelSchedule {
                 }
 
                 if (encapsulationDelayInstances.length > 0 && networkDelayInstances.length > 0 && decapsulationDelayInstances.length > 0) {
-                    encapsulationDelayInstances.sort((first, second) => { first.letStartTime - second.letStartTime });
+                    encapsulationDelayInstances.sort(Utility.CompareEntityLetStartTime);
                     encapsulationDelayInstances.forEach((instance, index) => instance.instance = index);
                     
-                    networkDelayInstances.sort((first, second) => { first.letStartTime - second.letStartTime });
+                    networkDelayInstances.sort(Utility.CompareEntityLetStartTime);
                     networkDelayInstances.forEach((instance, index) => instance.instance = index);
 
-                    decapsulationDelayInstances.sort((first, second) => { first.letStartTime - second.letStartTime });
+                    decapsulationDelayInstances.sort(Utility.CompareEntityLetStartTime);
                     decapsulationDelayInstances.forEach((instance, index) => instance.instance = index);
                     
                     instancesPromises.push(this.modelEntity.createAllDelayInstances(currentDependency, encapsulationDelayInstances, networkDelayInstances, decapsulationDelayInstances));
                 }
 
-                instances.sort((first, second) => {
-                    const timestampComparison = first.sendEvent.timestamp - second.sendEvent.timestamp;
-                    return timestampComparison === 0 ? first.receiveEvent.taskInstance - second.receiveEvent.taskInstance : timestampComparison;
-                });
-    
+                instances.sort(Utility.CompareDependencyInstanceBySendAndReceiveEvents);
                 instances.forEach((instance, index) => instance.instance = index);
                 
                 const newDependencyInstance = this.database.putObject(Model.DependencyInstancesStoreName, {
@@ -516,9 +512,21 @@ class ModelSchedule {
                 this.modelNetworkDelay.getNetworkDelay(source.currentCore.device, dest.currentCore.device)
             ]);
 
-            if (sourceDevice == null || destDevice == null || networkDelay == null) {
+            let incomplete = (sourceDevice == null || destDevice == null || networkDelay == null);
+            if (sourceDevice == null) {
+                console.warn(`Device ${source.currentCore.device} not found.`);
+            }
+            if (destDevice == null) {
+                console.warn(`Device ${dest.currentCore.device} not found.`);
+            }
+            if (networkDelay == null) {
+                console.warn(`Could not find a network delay from device ${source.currentCore.device} to device ${dest.currentCore.device}`);
+            }
+            
+            if (incomplete) {
                 return null;
-            } else {
+            }
+            else {
                 return [sourceDevice, destDevice, networkDelay];
             }
         } else {

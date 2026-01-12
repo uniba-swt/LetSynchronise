@@ -295,6 +295,33 @@ class Utility {
         return sorted;
     }
     
+    // Entity comparison function.
+    static CompareEntityLetStartTime(a, b) {
+        return a.letStartTime - b.letStartTime;
+    }
+    
+    // Event chain instance comparison function.
+    static CompareChainInstance(a, b) {
+        if (a.chainName < b.chainName) { return -1; }
+        if (a.chainName > b.chainName) { return 1; }
+        
+        // Sort instances of the same event chain by their instance number.
+        return a.instance - b.instance;
+    }
+    
+    // Dependency instance comparison function.
+    static CompareDependencyInstanceByReceiveEvent(a, b) {
+        return a.receiveEvent.timestamp - b.receiveEvent.timestamp;
+    }
+    
+    // Dependency instance comparison function.
+    static CompareDependencyInstanceBySendAndReceiveEvents(a, b) {
+        const sendComparison = a.sendEvent.timestamp - b.sendEvent.timestamp;
+        
+        // Sort instances of the same send event timestamps by their receive event timestamps
+        return sendComparison === 0 ? Utility.CompareDependencyInstanceByReceiveEvent(a, b) : sendComparison;
+    }
+    
 }
 
 Utility.Interval = class {

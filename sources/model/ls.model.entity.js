@@ -175,27 +175,7 @@ class ModelEntity {
             }
         }
 
-        this.getAllTaskInstances().then(entities => {
-            const delays = entities.filter(entity => entity.type !== 'task');
-
-            for (const delay of delays) {
-                if (delay.name === data.name) {
-                    if (!delay.dependency.includes(data.dependency)) {
-                        delay.dependency += `, ${data.dependency}`;
-                        delay.value = [...delay.value, ...data.value];
-
-                        delay.value.sort((first, second) => first.letStartTime - second.letStartTime);
-                        delay.value.forEach((instance, index) => instance.instance = index);
-
-                        return this.database.putObject(Model.EntityInstancesStoreName, delay);
-                    }
-                    
-                    return;
-                }
-            }
-
-			return this.database.putObject(Model.EntityInstancesStoreName, data);
-        })
+        return this.database.putObject(Model.EntityInstancesStoreName, data);
     }
     
     createAllDelayInstances(dependency, encapsulationDelays, networkDelays, decapsulationDelays) {

@@ -278,7 +278,7 @@ class ViewNetworkDelay {
     }
 
     updateDeviceSelector(devices) {
-        const filteredDevices = devices.filter(device => Object.keys(device.delays).length > 0).sort();
+        const filteredDevices = devices.filter(device => device.delays != null && Object.keys(device.delays).length > 0).sort();
 
         const sourceElement = d3.select(this.sourceField);
         const destElement = d3.select(this.destField);
