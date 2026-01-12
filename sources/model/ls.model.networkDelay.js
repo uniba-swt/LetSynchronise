@@ -85,7 +85,8 @@ class ModelNetworkDelay {
         const allNetworkDelays = await this.getAllNetworkDelays();
         
         for (const networkDelay of allNetworkDelays) {
-            if (!allDeveices.includes(networkDelay.source) || !allDeveices.includes(networkDelay.dest)) {
+            if (networkDelay.source != null && !allDeveices.includes(networkDelay.source)
+                    || networkDelay.dest != null && !allDeveices.includes(networkDelay.dest)) {
                 await this.deleteNetworkDelay(networkDelay.name);
             }
         }
