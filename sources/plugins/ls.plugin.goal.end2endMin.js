@@ -311,7 +311,7 @@ class PluginGoalEnd2EndMin {
             await Plugin.CreateTaskInstances(task, makespan, executionTiming);
         }
         const schedule = await Plugin.GetSchedule();
-        const allTasksInstances = await schedule['promiseAllTasksInstances'];
+        const allTasksInstances = await schedule['promiseAllEntitiesInstances'];
         const schedulingResult = scheduler.Algorithm(cores, allTasksInstances, makespan, [...taskSet]);
         
         return [schedulingResult, allTasksInstances];
