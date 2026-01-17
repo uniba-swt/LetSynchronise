@@ -15,7 +15,7 @@ class ControllerEntity {
         this._view = view;
 
         // Register the handlers when setting the view.
-        this._view.registerSubmitHandler(this.handleCreateTask);
+        this._view.registerSubmitHandler(this.handleCreateEntity);
         this._view.registerDeleteHandler(this.handleDeleteTask);
         this._view.registerGetCoreHandler(this.handleGetCore);
     }
@@ -100,13 +100,13 @@ class ControllerEntity {
     
     // Handler for creating a task.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
-    handleCreateTask = (taskParameters) => {
-        this.model.createTask(taskParameters);
+    handleCreateEntity = (taskParameters) => {
+        this.model.createEntity(taskParameters);
     }
     
     // Handler for deleting a task.
     handleDeleteTask = (name) => {
-        this.model.deleteTask(name);
+        this.model.deleteEntity(name);
     }
     
     // Handler for getting the details of a core.

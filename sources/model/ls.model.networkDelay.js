@@ -10,6 +10,7 @@ class ModelNetworkDelay {
 
     constructor() { }
     
+    
     // -----------------------------------------------------
     // Registration of callbacks from the controller
     
@@ -17,6 +18,7 @@ class ModelNetworkDelay {
         this.updateNetworkDelays = callback;
     }
 
+    
     // -----------------------------------------------------
     // Registration of model database
     
@@ -41,32 +43,15 @@ class ModelNetworkDelay {
     // Class methods
     
     createNetworkDelay(networkDelay) {
-        this.getAllNetworkDelays()
-            .then(delays => {
-                const existingDelay = delays.find(delay => delay.name === networkDelay.name);
-
-                if (existingDelay) {
-                    existingDelay.bcdt = networkDelay.bcdt;
-                    existingDelay.acdt = networkDelay.acdt;
-                    existingDelay.wcdt = networkDelay.wcdt;
-                    existingDelay.distribution = networkDelay.distribution;
-
-                    return existingDelay
-                } else {
-                    return networkDelay;
-                }
-            })
-            .then(result => this.database.putObject(Model.NetworkDelayStoreName, result))
+        this.database.putObject(Model.NetworkDelayStoreName, networkDelay)
             .then(result => this.refreshViews())
             .then(result => this.notifyChanges());
     }
     
-
     deleteNetworkDelay(delay) {
         return this.database.deleteObject(Model.NetworkDelayStoreName, delay)
             .then(result => this.refreshViews())
             .then(result => this.notifyChanges());
-
     }
 
     async getNetworkDelay(source, dest) {

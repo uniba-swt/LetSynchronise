@@ -17,6 +17,7 @@ class Model {
     
     constructor() { }
     
+    
     // -----------------------------------------------------
     // Static constants.
 

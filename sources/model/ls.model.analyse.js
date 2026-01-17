@@ -34,6 +34,7 @@ class ModelAnalyse {
         this.modelEventChain = modelEventChain;
     }
 
+    
     // -----------------------------------------------------
     // Class methods
     

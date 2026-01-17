@@ -55,7 +55,7 @@ class ModelDependency {
     createDependency(dependency) {
         // Store dependency in Database
         return this.database.putObject(Model.DependencyStoreName, dependency)
-            .then(() => this.refreshViews());
+            .then(result => this.refreshViews());
     }
 
     generateRandomDependency(tasks, sourceIndex, destinationIndex) {
@@ -68,14 +68,14 @@ class ModelDependency {
         const destinationTaskInput = destinationTaskInputs[Utility.RandomInteger(0, null, destinationTaskInputs.length - 1)];
         
         return this.createDependency({
-            'name'       : `dep-${tasks[sourceIndex].name}→${tasks[destinationIndex].name}`,
-            'source'     : {
-                'port'   : sourceTaskOutput,
-                'task'   : sourceTask.name
+            'name'        : `dep-${tasks[sourceIndex].name}→${tasks[destinationIndex].name}`,
+            'source'      : {
+                'port'    : sourceTaskOutput,
+                'task'    : sourceTask.name
             },
-            'destination': {
-                'port'   : destinationTaskInput,
-                'task'   : destinationTask.name
+            'destination' : {
+                'port'    : destinationTaskInput,
+                'task'    : destinationTask.name
             }
         });
     }
@@ -93,28 +93,30 @@ class ModelDependency {
         return Promise.all(dependencies);
     }
     
-    // TODO
-    createDelayDependency(dependency, delayType) {
-        if (delayType === 'encapsulation') {
-            return {
-                'source': {'task': dependency.source.task, 'port': dependency.source.port},
-                'destination': {'task': `${dependency.source.task} => ${dependency.destination.task} ${delayType} delay`, 'port': dependency.destination.port}
-            }
-        } else if (delayType === 'network') {
-            return {
-                'source': {'task': `${dependency.source.task} => ${dependency.destination.task} encapsulation delay`, 'port': dependency.source.port},
-                'destination': {'task': `${dependency.source.task} => ${dependency.destination.task} ${delayType} delay`, 'port': dependency.destination.port}
-            }
-        } else if (delayType === 'decapsulation') {
-            return {
-                'source': {'task': `${dependency.source.task} => ${dependency.destination.task} network delay`, 'port': dependency.source.port},
-                'destination': {'task': `${dependency.source.task} => ${dependency.destination.task} ${delayType} delay`, 'port': dependency.destination.port}
-            }
-        } else {
-            return {
-                'source': {'task': `${dependency.source.task} => ${dependency.destination.task} decapsulation delay`, 'port': dependency.source.port},
-                'destination': {'task': dependency.destination.task, 'port': dependency.destination.port}
-            }
+    static CreateDelayDependencyParameters(dependency, delayType) {
+        switch (delayType) {
+            case ModelEntity.EncapsulationName:
+                return {
+                    'source'      : {'task': dependency.source.task, 'port': dependency.source.port},
+                    'destination' : {'task': `${dependency.source.task} => ${dependency.destination.task} ${ModelEntity.EncapsulationName} delay`, 'port': dependency.destination.port}
+                };
+                
+            case ModelEntity.NetworkName:
+                return {
+                    'source'      : {'task': `${dependency.source.task} => ${dependency.destination.task} ${ModelEntity.EncapsulationName} delay`, 'port': dependency.source.port},
+                    'destination' : {'task': `${dependency.source.task} => ${dependency.destination.task} ${ModelEntity.NetworkName} delay`, 'port': dependency.destination.port}
+                };
+                
+            case ModelEntity.DecapsulationName:
+                return {
+                    'source'      : {'task': `${dependency.source.task} => ${dependency.destination.task} ${ModelEntity.NetworkName} delay`, 'port': dependency.source.port},
+                    'destination' : {'task': `${dependency.source.task} => ${dependency.destination.task} ${ModelEntity.DecapsulationName} delay`, 'port': dependency.destination.port}
+                };
+            default:
+                return {
+                    'source'      : {'task': `${dependency.source.task} => ${dependency.destination.task} ${ModelEntity.DecapsulationName} delay`, 'port': dependency.source.port},
+                    'destination' : {'task': dependency.destination.task, 'port': dependency.destination.port}
+                };
         }
     }
     
@@ -153,14 +155,14 @@ class ModelDependency {
                 .filter(dependency => (dependency.source.task == sourceDependency.destination.task)));
     }
     
-    // Validate task dependencies against system and task inputs and outputs.
+    // Validate entity dependencies against system and entity inputs and outputs.
     async validate() {
         // Get all the available inputs and outputs.
         let allSources = { };
         let allDestinations = { };
-        (await this.modelEntity.getAllTasks()).map(task => {
-            allSources[task.name] = task.outputs;
-            allDestinations[task.name] = task.inputs;
+        (await this.modelEntity.getAllEntities()).map(entity => {
+            allSources[entity.name] = entity.outputs;
+            allDestinations[entity.name] = entity.inputs;
         });
 
         allSources[Model.SystemInterfaceName] = (await this.modelInterface.getAllInputs()).map(port => port.name);
@@ -170,11 +172,9 @@ class ModelDependency {
         let dependenciesToRemove = [];
         const allDependencies = await this.getAllDependencies();
         for (const dependency of allDependencies) {
-            if (!allSources.hasOwnProperty(dependency.source.task)
-                  || !allDestinations.hasOwnProperty(dependency.destination.task)) {
+            if (!allSources.hasOwnProperty(dependency.source.task) || !allDestinations.hasOwnProperty(dependency.destination.task)) {
                 dependenciesToRemove.push(dependency);
-            } else if (!allSources[dependency.source.task].includes(dependency.source.port)
-                         || !allDestinations[dependency.destination.task].includes(dependency.destination.port)) {
+            } else if (!allSources[dependency.source.task].includes(dependency.source.port) || !allDestinations[dependency.destination.task].includes(dependency.destination.port)) {
                 dependenciesToRemove.push(dependency);
             }
         }

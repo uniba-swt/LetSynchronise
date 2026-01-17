@@ -92,14 +92,9 @@ class ModelSchedule {
     
     // Create all instances of all tasks within the makespan.
     createAllTaskInstances(makespan, executionTiming) {
-        const promiseAllTasksInstances = this.modelEntity.getAllTasks()
-            .then(tasks => Promise.all(tasks.map(task => {
-                if (task.type === "task") {
-                    this.createTaskInstances(task, makespan, executionTiming);
-                }
-                })))
+        return this.modelEntity.getAllTasks()
+            .then(tasks => Promise.all(tasks.map(task => this.createTaskInstances(task, makespan, executionTiming))))
             .then(result => this.database.getAllObjects(Model.EntityInstancesStoreName));
-        return promiseAllTasksInstances;
     }
     
     // Create a single dependency instance.
@@ -316,15 +311,15 @@ class ModelSchedule {
     }
     
     deleteSchedule() {
-        // Delete all task, dependency, and event chain instances.
+        // Delete all entity, dependency, and event chain instances.
         return this.database.deleteSchedule();
     }
     
     // Get task schedule for given makespan.
     getSchedule() {
         return {
-            'promiseAllTasks': this.modelEntity.getAllTasks(),
-            'promiseAllTasksInstances': this.database.getAllObjects(Model.EntityInstancesStoreName),
+            'promiseAllEntities': this.modelEntity.getAllEntities(),
+            'promiseAllEntitiesInstances': this.modelEntity.getAllEntitiesInstances(),
             'promiseAllDependenciesInstances': this.modelDependency.getAllDependencyInstances(),
             'promiseAllEventChainInstances': this.modelEventChain.getAllEventChainsInstances()
         };
@@ -395,7 +390,7 @@ class ModelSchedule {
                     if (devicesAndNetworkDelay) {
                         // Do not add duplicate network delays.
                     
-                        const encapsulationDelayInstance = ModelEntity.CreateDelayInstance(
+                        const encapsulationDelayInstance = ModelEntity.CreateDelayEntityInstanceParameters(
                             encapsulationDelayInstances.length,
                             sourceInstance.letEndTime,
                             encapsulationDelayTime,
@@ -405,11 +400,11 @@ class ModelSchedule {
                         );
                         if (!ModelSchedule.NetworkDelayInstanceIsDuplicate(encapsulationDelayInstances, encapsulationDelayInstance)) {
                             encapsulationDelayInstances.unshift(encapsulationDelayInstance);
-                            const encapDependency = this.modelDependency.createDelayDependency(currentDependency, 'encapsulation');
+                            const encapDependency = ModelDependency.CreateDelayDependencyParameters(currentDependency, ModelEntity.EncapsulationName);
                             instances.unshift(this.createDependencyInstance(encapDependency, sourceInstance, encapsulationDelayInstances[0]));
                         }
                         
-                        const networkDelayInstance = ModelEntity.CreateDelayInstance(
+                        const networkDelayInstance = ModelEntity.CreateDelayEntityInstanceParameters(
                             networkDelayInstances.length,
                             encapsulationDelayInstances[0].letEndTime,
                             networkDelayTime,
@@ -419,11 +414,11 @@ class ModelSchedule {
                         );
                         if (!ModelSchedule.NetworkDelayInstanceIsDuplicate(networkDelayInstances, networkDelayInstance)) {
                             networkDelayInstances.unshift(networkDelayInstance);
-                            const netDependency = this.modelDependency.createDelayDependency(currentDependency, 'network');
+                            const netDependency = ModelDependency.CreateDelayDependencyParameters(currentDependency, ModelEntity.NetworkName);
                             instances.unshift(this.createDependencyInstance(netDependency, encapsulationDelayInstances[0], networkDelayInstances[0]));
                         }
 
-                        const decapsulationDelayInstance = ModelEntity.CreateDelayInstance(
+                        const decapsulationDelayInstance = ModelEntity.CreateDelayEntityInstanceParameters(
                             decapsulationDelayInstances.length,
                             networkDelayInstances[0].letEndTime,
                             decapsulationDelayTime,
@@ -433,11 +428,11 @@ class ModelSchedule {
                         );
                         if (!ModelSchedule.NetworkDelayInstanceIsDuplicate(decapsulationDelayInstances, decapsulationDelayInstance)) {
                             decapsulationDelayInstances.unshift(decapsulationDelayInstance);
-                            const decapDependency = this.modelDependency.createDelayDependency(currentDependency, 'decapsulation');
+                            const decapDependency = ModelDependency.CreateDelayDependencyParameters(currentDependency, ModelEntity.DecapsulationName);
                             instances.unshift(this.createDependencyInstance(decapDependency, networkDelayInstances[0], decapsulationDelayInstances[0]));
                         }
 
-                        const destDependency = this.modelDependency.createDelayDependency(currentDependency);
+                        const destDependency = ModelDependency.CreateDelayDependencyParameters(currentDependency);
                         instances.unshift(this.createDependencyInstance(destDependency, decapsulationDelayInstances[0], destInstance));
                     } else {
                         instances.unshift(this.createDependencyInstance(currentDependency, sourceInstance, destInstance));
@@ -454,7 +449,7 @@ class ModelSchedule {
                     decapsulationDelayInstances.sort(Utility.CompareEntityLetStartTime);
                     decapsulationDelayInstances.forEach((instance, index) => instance.instance = index);
                     
-                    instancesPromises.push(this.modelEntity.createAllDelayInstances(currentDependency, encapsulationDelayInstances, networkDelayInstances, decapsulationDelayInstances));
+                    instancesPromises.push(this.modelEntity.createAllDelayEntityInstances(currentDependency, encapsulationDelayInstances, networkDelayInstances, decapsulationDelayInstances));
                 }
 
                 instances.sort(Utility.CompareDependencyInstanceBySendAndReceiveEvents);

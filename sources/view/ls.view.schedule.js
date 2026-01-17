@@ -23,12 +23,12 @@ class ViewSchedule {
     currentEventChainInstance = null;
 
     relatedEventChainInstances = null;
-    lastClickedTaskInstance = null;
+    lastClickedentityInstance = null;
 
     dependencyAnalysisResults = null;
     hasDependencyAnalysisResults = false;
 
-    scheduleTooltip = null;
+    entityTooltip = null;
     dependencyTooltip = null;
     
     svgOrigin = 0;
@@ -57,7 +57,7 @@ class ViewSchedule {
 
         this.schedule = d3.select('#view-schedule');
         this.dependencies = d3.select('#view-schedule-dependencies-menu');
-        this.scheduleTooltip = this.root.querySelector('#view-schedule-task-tooltip');
+        this.entityTooltip = this.root.querySelector('#view-schedule-entity-tooltip');
         this.dependencyTooltip = this.root.querySelector('#view-schedule-dependency-tooltip');
         
         // Zoom
@@ -406,7 +406,7 @@ class ViewSchedule {
         return true;
     }
     
-    // Callback for the task model to notify us of changes to the task set.
+    // Callback for the entity model to notify us of changes to the task set.
     notifyChanges() {
         this.updateButton.classList.remove('btn-primary');
         this.updateButton.classList.add('btn-danger');
@@ -416,26 +416,27 @@ class ViewSchedule {
     // Draw the entire schedule.
     async updateSchedule(promiseSchedule) {
         const schedule = await promiseSchedule;
-        const taskParametersSet = await schedule['promiseAllTasks'];
-        const tasksInstances = await schedule['promiseAllTasksInstances'];
+        const entityParametersSet = await schedule['promiseAllEntities'];
+        const entitiesInstances = await schedule['promiseAllEntitiesInstances'];
         const dependenciesSet = await schedule['promiseAllDependenciesInstances'];
         const eventChainInstances = await schedule['promiseAllEventChainInstances'];
 
-        if (taskParametersSet.length < 1) {
+        if (entityParametersSet.length < 1) {
             this.prologue = 0;
             this.hyperPeriod = 0;
         } else {
+            const taskParametersSet = entityParametersSet.filter(parameters => parameters.type === 'task');
             this.updatePrologue(taskParametersSet);
             this.updateHyperPeriod(taskParametersSet);
         }
         
         // Draw new task schedule.
-        const {svgElement, scale, taskIndices, coreIndices} = this.drawSchedule(tasksInstances);
+        const {svgElement, scale, entityIndices, coreIndices} = this.drawSchedule(entitiesInstances);
         
         // Draw communication dependencies.
         this.hasDependencyAnalysisResults = false;
         this.dependencyAnalysisResults = { };
-        this.drawDependencies(svgElement, scale, taskIndices, dependenciesSet);
+        this.drawDependencies(svgElement, scale, entityIndices, dependenciesSet);
         
         // Update list of event chains.
         this.updateEventChains(eventChainInstances);
@@ -443,20 +444,18 @@ class ViewSchedule {
     
     // Compute prologue of the schedule and display it.
     updatePrologue(taskParametersSet) {
-        const initialOffsets = taskParametersSet.filter(taskParameters => taskParameters.type === 'task')
-        .map(taskParameters => taskParameters.period).flat();
+        const initialOffsets = taskParametersSet.map(taskParameters => taskParameters.initialOffset).flat();
         this.prologue = Utility.MaxOfArray(initialOffsets) / Utility.MsToNs;
     }
     
     // Compute the hyper-period of the schedule and display it.
     updateHyperPeriod(taskParametersSet) {
-        const periods = taskParametersSet.filter(taskParameters => taskParameters.type === 'task')
-        .map(taskParameters => taskParameters.period).flat();
+        const periods = taskParametersSet.map(taskParameters => taskParameters.period).flat();
         this.hyperPeriod = Utility.LeastCommonMultipleOfArray(periods) / Utility.MsToNs;
     }
     
-    // Draw just the tasks and their instances.
-    drawSchedule(tasksInstances) {
+    // Draw just the entities and their instances.
+    drawSchedule(entitiesInstances) {
         // Create function to scale the data along the x-axis of fixed-length
         const scale =
         d3.scaleLinear()
@@ -467,21 +466,23 @@ class ViewSchedule {
         this.schedule.selectAll('*').remove();
         const svgElement = this.schedule.append('svg');
 
-        const sortedEntities = Utility.SortEntities(tasksInstances);
+        const sortedEntities = Utility.SortEntities(entitiesInstances);
         
-        // Draw the task instances.
-        let taskIndices = { };
+        // Draw the entity instances.
+        let entityIndices = { };
         let coreIndices = { };
-        for (const [index, taskInstances] of sortedEntities.entries()) {
-            this.drawTaskInstances(taskInstances, svgElement, scale, index);
-            taskIndices[taskInstances.name] = index;
+        for (const [index, entityInstances] of sortedEntities.entries()) {
+            this.drawEntityInstances(entityInstances, svgElement, scale, index);
+            entityIndices[entityInstances.name] = index;
 
-            if (taskInstances.type === 'task') {
-                for (const instance of taskInstances.value) {
-                    for (const interval of instance.executionIntervals) {
-                        if (coreIndices[interval.core] === undefined) {
-                            coreIndices[interval.core] = Object.keys(coreIndices).length;
-                        }
+            if (entityInstances.type !== 'task') {
+                continue;
+            }
+            
+            for (const instance of entityInstances.value) {
+                for (const interval of instance.executionIntervals) {
+                    if (coreIndices[interval.core] === undefined) {
+                        coreIndices[interval.core] = Object.keys(coreIndices).length;
                     }
                 }
             }
@@ -496,12 +497,12 @@ class ViewSchedule {
         svgElement
             .attr('viewBox', [this.svgOrigin, 0, svgWidth, svgHeight]);
         
-        return {svgElement: svgElement, scale: scale, taskIndices: taskIndices, coreIndices: coreIndices};
+        return {svgElement: svgElement, scale: scale, entityIndices: entityIndices, coreIndices: coreIndices};
     }
 
-    // Draw just the instances of a given task.
-    drawTaskInstances(taskInstances, svgElement, scale, index) {
-        const tooltip = this.scheduleTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
+    // Draw just the instances of a given entity.
+    drawEntityInstances(entityInstances, svgElement, scale, index) {
+        const tooltip = this.entityTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
 
         const group =
         svgElement.append('g')
@@ -513,9 +514,9 @@ class ViewSchedule {
         group.append('g')
                .attr('transform', `translate(0, ${index * View.EntityHeight + View.SvgPadding})`);
 
-        // Add the task's name, inputs, and outputs
+        // Add the entity's name, inputs, and outputs
         textInfo.append('text')
-                  .text(`Task: ${taskInstances.name}`);
+                  .text((entityInstances.type == 'task' ? 'Task: ' : '') + entityInstances.name);
 
         // -----------------------------
         // Group for graphical information
@@ -523,121 +524,113 @@ class ViewSchedule {
         group.append('g')
                .attr('transform', `translate(0, ${index * View.EntityHeight + 2.5 * View.SvgPadding})`);
         
-        const instances = taskInstances.value;
+        const instances = entityInstances.value;
         if (instances.length == 0) {
             return;
         }
 
-        const firstPeriodStartTime = instances[0].periodStartTime;
-        const lastPeriodDuration = instances[instances.length - 1].periodEndTime - instances[instances.length - 1].periodStartTime;
+        if (entityInstances.type === "task") {
+            const firstPeriodStartTime = instances[0].periodStartTime;
+            const lastPeriodDuration = instances[instances.length - 1].periodEndTime - instances[instances.length - 1].periodStartTime;
 
-        // Add horizontal line for the task's initial offset
-        graphInfo.append('line')
-                   .attr('x1', 0)
-                   .attr('x2', scale(firstPeriodStartTime))
-                   .attr('y1', View.BarHeight + View.BarMargin)
-                   .attr('y2', View.BarHeight + View.BarMargin)
-                   .attr('class', 'initialOffset');
-        
-        // Add vertical line at the start of the initial offset
-        graphInfo.append('line')
-                   .attr('x1', 0)
-                   .attr('x2', 0)
-                   .attr('y1', View.BarHeight + View.TickHeight + View.BarMargin)
-                   .attr('y2', `0`)
-                   .attr('class', 'boundary');
-        
-        // Add horizontal line for the task's periods
-        graphInfo.append('line')
-                   .attr('x1', scale(firstPeriodStartTime))
-                   .attr('x2', scale(this.makespan * Utility.MsToNs + lastPeriodDuration))
-                   .attr('y1', View.BarHeight + View.BarMargin)
-                   .attr('y2', View.BarHeight + View.BarMargin)
-                   .attr('class', 'period');
+            // Add horizontal line for the task's initial offset
+            graphInfo.append('line')
+                       .attr('x1', 0)
+                       .attr('x2', scale(firstPeriodStartTime))
+                       .attr('y1', View.BarHeight + View.BarMargin)
+                       .attr('y2', View.BarHeight + View.BarMargin)
+                       .attr('class', 'initialOffset');
+            
+            // Add vertical line at the start of the initial offset
+            graphInfo.append('line')
+                       .attr('x1', 0)
+                       .attr('x2', 0)
+                       .attr('y1', View.BarHeight + View.TickHeight + View.BarMargin)
+                       .attr('y2', `0`)
+                       .attr('class', 'boundary');
+            
+            // Add horizontal line for the task's periods
+            graphInfo.append('line')
+                       .attr('x1', scale(firstPeriodStartTime))
+                       .attr('x2', scale(this.makespan * Utility.MsToNs + lastPeriodDuration))
+                       .attr('y1', View.BarHeight + View.BarMargin)
+                       .attr('y2', View.BarHeight + View.BarMargin)
+                       .attr('class', 'period');
+        }
 
         for (const instance of instances) {
-            // Add the task's LET duration
-
-            if (taskInstances.name.includes('encapsulation')) {
-                graphInfo.append('rect').attr('class', 'sender')
-            }
-
+            // Add the entity's LET duration
             graphInfo.append('rect')
-                       .attr('id', `${taskInstances.name}-${instance.instance}`)
+                       .attr('id', `${entityInstances.name}-${instance.instance}`)
                        .attr('x', scale(instance.letStartTime))
                        .attr('width', scale(instance.letEndTime - instance.letStartTime))
                        .attr('height', View.BarHeight)
                        .attr('class', () => {
-                        if (taskInstances.name.includes('encapsulation')) {
-                            return 'sender'
-                        }
-                        if (taskInstances.name.includes('decapsulation')) {
-                            return 'receiver'
-                        }
-                        if (taskInstances.name.includes('network')) {
-                            return 'network'
-                        }
-                       })
-                      .on('mouseover', () => {
-                        const title = `<b>${taskInstances.name}</b> instance ${instance.instance}`;
-                        let periodInterval = ''
-                        if (!taskInstances.name.includes('delay')) {
-                            periodInterval = `Period interval: [${Utility.FormatTimeString(instance.periodStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.periodEndTime / Utility.MsToNs, 2)}]ms`;
-                        }
-                        const letInterval = taskInstances.type === 'task' ? 
-                            `LET interval: [${Utility.FormatTimeString(instance.letStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.letEndTime / Utility.MsToNs, 2)}]ms`
-                            : `Execution interval: [${Utility.FormatTimeString(instance.letStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.letEndTime / Utility.MsToNs, 2)}]ms`;;
-                        const executionTime = `Total execution time: ${Utility.FormatTimeString(instance.executionTime / Utility.MsToNs, 2)}ms`;
-                        tooltip.innerHTML = !taskInstances.name.includes('delay') ? 
-                            `${title} <br/> ${letInterval} <br/> ${periodInterval} <br/> ${executionTime}` 
-                            : `${title} <br/> ${letInterval} <br/> ${executionTime}`;
-                        tooltip.style.visibility = 'visible';
+                            switch (entityInstances.type) {
+                                case ModelEntity.EncapsulationName: return 'sender';
+                                case ModelEntity.NetworkName: return 'network';
+                                case ModelEntity.DecapsulationName: return 'receiver';
+                                default: return;
+                            }
                       })
-                      .on('mousemove', (event) => {
+                     .on('mouseover', () => {
+                         const title = `<b>${entityInstances.name}</b> instance ${instance.instance}`;
+                         const executionTime = `Total execution time: ${Utility.FormatTimeString(instance.executionTime / Utility.MsToNs, 2)}ms`;
+                         if (entityInstances.type === 'task') {
+                             const periodInterval = `Period interval: [${Utility.FormatTimeString(instance.periodStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.periodEndTime / Utility.MsToNs, 2)}]ms`;
+                             const letInterval = `LET interval: [${Utility.FormatTimeString(instance.letStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.letEndTime / Utility.MsToNs, 2)}]ms`;
+                             tooltip.innerHTML = `${title} <br/> ${letInterval} <br/> ${periodInterval} <br/> ${executionTime}`;
+                         } else {
+                             const executionInterval = `Execution interval: [${Utility.FormatTimeString(instance.letStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.letEndTime / Utility.MsToNs, 2)}]ms`;
+                             tooltip.innerHTML = `${title} <br/> ${executionInterval} <br/> ${executionTime}`;
+                         }
+                        tooltip.style.visibility = 'visible';
+                     })
+                     .on('mousemove', (event) => {
                         const [pointerX, pointerY] = d3.pointer(event, window);
                         tooltip.style.top = `${pointerY - 5.4 * View.BarHeight}px`;
                         tooltip.style.left = `${pointerX}px`;
-                      })
-                      .on('mouseout', () => {
-                        tooltip.style.visibility = 'hidden';
-                      })
-                      .on('click', () => {
-                        this.updateRelatedEventChains(taskInstances.name, instance.instance);
-                      });
+                     })
+                     .on('mouseout', () => {
+                         tooltip.style.visibility = 'hidden';
+                     })
+                     .on('click', () => {
+                        this.updateRelatedEventChains(entityInstances.name, instance.instance);
+                     });
 
-            if (taskInstances.type === "task") {
+            if (entityInstances.type === "task") {
                 // Add the task's execution times
                 const executionIntervals = instance.executionIntervals.map(interval => Utility.Interval.FromJson(interval));
                 for (const interval of executionIntervals) {
                     graphInfo.append('rect')
-                            .attr('x', scale(interval.startTime))
-                            .attr('y', View.BarHeight - View.ExecutionHeight)
-                            .attr('width', scale(interval.duration))
-                            .attr('height', View.ExecutionHeight)
-                            .attr('class', 'time')
-                            .on('mouseover', () => {
-                            const core = `Core ${interval.core}`;
-                            const executionInterval = `Execution interval: [${Utility.FormatTimeString(interval.startTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString((interval.startTime + interval.duration) / Utility.MsToNs, 2)}]ms`;
-                            tooltip.innerHTML = `${core} <br/> ${executionInterval}`;
-                            tooltip.style.visibility = 'visible';
-                            })
-                            .on('mousemove', (event) => {
-                            const [pointerX, pointerY] = d3.pointer(event, window);
-                            tooltip.style.top = `${pointerY - 3 * View.BarHeight}px`;
-                            tooltip.style.left = `${pointerX}px`;
-                            })
-                            .on('mouseout', () => {
-                            tooltip.style.visibility = 'hidden';
-                            });
+                               .attr('x', scale(interval.startTime))
+                               .attr('y', View.BarHeight - View.ExecutionHeight)
+                               .attr('width', scale(interval.duration))
+                               .attr('height', View.ExecutionHeight)
+                               .attr('class', 'time')
+                             .on('mouseover', () => {
+                                const core = `Core ${interval.core}`;
+                                const executionInterval = `Execution interval: [${Utility.FormatTimeString(interval.startTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString((interval.startTime + interval.duration) / Utility.MsToNs, 2)}]ms`;
+                                tooltip.innerHTML = `${core} <br/> ${executionInterval}`;
+                                tooltip.style.visibility = 'visible';
+                             })
+                             .on('mousemove', (event) => {
+                                const [pointerX, pointerY] = d3.pointer(event, window);
+                                tooltip.style.top = `${pointerY - 3 * View.BarHeight}px`;
+                                tooltip.style.left = `${pointerX}px`;
+                             })
+                             .on('mouseout', () => {
+                                tooltip.style.visibility = 'hidden';
+                             });
                 }
                 
                 // Add vertical line at the start of the period
                 graphInfo.append('line')
-                        .attr('x1', scale(instance.periodStartTime))
-                        .attr('x2', scale(instance.periodStartTime))
-                        .attr('y1', View.BarHeight + View.TickHeight + View.BarMargin)
-                        .attr('y2', 0)
-                        .attr('class', 'boundary');
+                           .attr('x1', scale(instance.periodStartTime))
+                           .attr('x2', scale(instance.periodStartTime))
+                           .attr('y1', View.BarHeight + View.TickHeight + View.BarMargin)
+                           .attr('y2', 0)
+                           .attr('class', 'boundary');
             }
 
         }
@@ -649,9 +642,9 @@ class ViewSchedule {
           .tickFormat(d => d / Utility.MsToNs);
         
         graphInfo.append('g')
-                 .attr('transform', `translate(0, ${View.BarHeight + 2 * View.TickHeight})`)
-                 .call(xAxis)
-                 .call(g => g.select('.domain').remove());
+                   .attr('transform', `translate(0, ${View.BarHeight + 2 * View.TickHeight})`)
+                   .call(xAxis)
+                   .call(g => g.select('.domain').remove());
     }
     
     // Draw the total system load at the bottom of the schedule.
@@ -660,7 +653,7 @@ class ViewSchedule {
             return;
         }
     
-        const tooltip = this.scheduleTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
+        const tooltip = this.entityTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
 
         const group =
         svgElement.append('g')
@@ -706,26 +699,26 @@ class ViewSchedule {
                     const coreIndex = coreIndices[interval.core];
                     
                     graphInfo.append('rect')
-                                .attr('x', scale(interval.startTime))
-                                .attr('y', View.BarHeight - (coreIndex + 1) * View.ExecutionHeight)
-                                .attr('width', scale(interval.duration))
-                                .attr('height', View.ExecutionHeight)
-                                .attr('class', 'time')
-                                .on('mouseover', () => {
+                               .attr('x', scale(interval.startTime))
+                               .attr('y', View.BarHeight - (coreIndex + 1) * View.ExecutionHeight)
+                               .attr('width', scale(interval.duration))
+                               .attr('height', View.ExecutionHeight)
+                               .attr('class', 'time')
+                             .on('mouseover', () => {
                                 const title = `<b>${taskInstances.name}</b> instance ${instance.instance}`;
                                 const core = `Core ${interval.core}`;
                                 const executionInterval = `Execution interval: [${Utility.FormatTimeString(interval.startTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString((interval.startTime + interval.duration) / Utility.MsToNs, 2)}]ms`;
                                 tooltip.innerHTML = `${title} <br/> ${core} <br/> ${executionInterval}`;
                                 tooltip.style.visibility = 'visible';
-                                })
-                                .on('mousemove', (event) => {
+                             })
+                             .on('mousemove', (event) => {
                                 const [pointerX, pointerY] = d3.pointer(event, window);
                                 tooltip.style.top = `${pointerY - 4.3 * View.BarHeight}px`;
                                 tooltip.style.left = `${pointerX}px`;
-                                })
-                                .on('mouseout', () => {
+                             })
+                             .on('mouseout', () => {
                                 tooltip.style.visibility = 'hidden';
-                                });
+                             });
                 }
             }
         }
@@ -737,13 +730,13 @@ class ViewSchedule {
           .tickFormat(d => d / Utility.MsToNs);
         
         graphInfo.append('g')
-                 .attr('transform', `translate(0, ${View.BarHeight + 2 * View.TickHeight})`)
-                 .call(xAxis)
-                 .call(g => g.select('.domain').remove());
+                   .attr('transform', `translate(0, ${View.BarHeight + 2 * View.TickHeight})`)
+                   .call(xAxis)
+                   .call(g => g.select('.domain').remove());
     }
     
-    // Draw all dependencies between the task instances.
-    drawDependencies(svgElement, scale, taskIndices, dependenciesSet) {
+    // Draw all dependencies between the entity instances.
+    drawDependencies(svgElement, scale, entityIndices, dependenciesSet) {
         const dependencyNames = dependenciesSet.map(dependencies => dependencies.name);
         this.dependencies.selectAll('*').remove();
         
@@ -755,7 +748,7 @@ class ViewSchedule {
 
         let svgGroups = [ ];
         for (const dependencies of dependenciesSet) {
-            dependencies.value.forEach(dependency => this.drawDependency(svgElement, scale, taskIndices, dependencies.name, dependency));
+            dependencies.value.forEach(dependency => this.drawDependency(svgElement, scale, entityIndices, dependencies.name, dependency));
 
             svgGroups.push(...dependencies.value.map(dependency => svgElement.select(`path#${dependencies.name}-${dependency.instance}`)));
                         
@@ -809,7 +802,7 @@ class ViewSchedule {
     }
     
     // Draw just the given dependency.
-    drawDependency(svgElement, scale, taskIndices, dependencyName, dependency) {
+    drawDependency(svgElement, scale, entityIndices, dependencyName, dependency) {
         const yOffset = 0.5 * View.BarHeight + 2.5 * View.SvgPadding;
         const xOffset = 20;
         const tooltip = this.dependencyTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
@@ -825,7 +818,7 @@ class ViewSchedule {
         this.dependencyAnalysisResults[dependencyId] = `<b>${dependencyName}</b> instance ${dependency.instance}:<br/>${sendPortName} ${View.ArrowSeparator} ${receivePortName}`
         const analysisResults = this.dependencyAnalysisResults;      // Need to create local reference so that it can be accessed inside the mouse event handlers.
         
-        // Create dangling arrows if one of the tasks is Model.SystemInterfaceName
+        // Create dangling arrows if one of the entities is Model.SystemInterfaceName
         // Need an additional y-offset
         const adjustedSendEntityHeight = (sendEvent.task == Model.SystemInterfaceName) ? -0.4 * View.EntityHeight : 0;
         const adjustedReceiveEntityHeight = (receiveEvent.task == Model.SystemInterfaceName) ? 0.4 * View.EntityHeight : 0 ;
@@ -844,12 +837,11 @@ class ViewSchedule {
         }
         // Create the arrow
         const points = [
-            { x: sendEvent.timestamp,                y: yOffset + taskIndices[sendEvent.task] * View.EntityHeight + adjustedSendEntityHeight },
-            { x: sendEvent.timestamp + xOffset,      y: yOffset + taskIndices[sendEvent.task] * View.EntityHeight + adjustedSendEntityHeight },
-            { x: receiveEvent.timestamp - xOffset,   y: yOffset + taskIndices[receiveEvent.task] * View.EntityHeight + adjustedReceiveEntityHeight },
-            { x: receiveEvent.timestamp,             y: yOffset + taskIndices[receiveEvent.task] * View.EntityHeight + adjustedReceiveEntityHeight }
+            { x: sendEvent.timestamp,                y: yOffset + entityIndices[sendEvent.task] * View.EntityHeight + adjustedSendEntityHeight },
+            { x: sendEvent.timestamp + xOffset,      y: yOffset + entityIndices[sendEvent.task] * View.EntityHeight + adjustedSendEntityHeight },
+            { x: receiveEvent.timestamp - xOffset,   y: yOffset + entityIndices[receiveEvent.task] * View.EntityHeight + adjustedReceiveEntityHeight },
+            { x: receiveEvent.timestamp,             y: yOffset + entityIndices[receiveEvent.task] * View.EntityHeight + adjustedReceiveEntityHeight }
         ]
-        //console.log(sendEvent, receiveEvent, points, taskIndices)
 
         let line = d3.line()
                      .x((point) => point.x)
@@ -887,17 +879,17 @@ class ViewSchedule {
             // Flatten the event chain instance information
             this.eventChainInstances[instanceName] = { };
             this.eventChainInstances[instanceName]['dependencies'] = [ ];
-            this.eventChainInstances[instanceName]['taskNames'] = new Set();
-            this.eventChainInstances[instanceName]['tasks'] = new Set();
+            this.eventChainInstances[instanceName]['entityNames'] = new Set();
+            this.eventChainInstances[instanceName]['entities'] = new Set();
             for (const dependency of eventChainInstance.generator()) {
                 this.eventChainInstances[instanceName]['dependencies'].push(this.schedule.select(`path#${dependency.name}-${dependency.instance}`));
-                this.eventChainInstances[instanceName]['taskNames'].add(`#${dependency.receiveEvent.task}-${dependency.receiveEvent.taskInstance}`);
-                this.eventChainInstances[instanceName]['taskNames'].add(`#${dependency.sendEvent.task}-${dependency.sendEvent.taskInstance}`);
+                this.eventChainInstances[instanceName]['entityNames'].add(`#${dependency.receiveEvent.task}-${dependency.receiveEvent.taskInstance}`);
+                this.eventChainInstances[instanceName]['entityNames'].add(`#${dependency.sendEvent.task}-${dependency.sendEvent.taskInstance}`);
             }
-            for (const taskName of this.eventChainInstances[instanceName]['taskNames']) {
-                const element = this.schedule.select(`rect${taskName}`);
+            for (const entityName of this.eventChainInstances[instanceName]['entityNames']) {
+                const element = this.schedule.select(`rect${entityName}`);
                 if (element.node() != null) {
-                    this.eventChainInstances[instanceName]['tasks'].add(element);
+                    this.eventChainInstances[instanceName]['entities'].add(element);
                 }
             }
 
@@ -943,8 +935,8 @@ class ViewSchedule {
                 dependency.node().classList.remove('eventChainVisible');
             }
         
-            for (const task of this.currentEventChainInstance.tasks) {
-                task.node().classList.remove('eventChainVisible');
+            for (const entity of this.currentEventChainInstance.entities) {
+                entity.node().classList.remove('eventChainVisible');
             }
         }
     
@@ -957,20 +949,20 @@ class ViewSchedule {
             const instanceName = `${eventChainName}-${instance}`;
             this.currentEventChainInstance = this.eventChainInstances[instanceName];
 
-            // Update SVG style of dependencies and tasks
+            // Update SVG style of dependencies and entities
             for (const dependency of this.currentEventChainInstance.dependencies) {
                 dependency.node().classList.add('eventChainVisible');
             }
         
-            for (const task of this.currentEventChainInstance.tasks) {
-                task.node().classList.add('eventChainVisible');
+            for (const entity of this.currentEventChainInstance.entities) {
+                entity.node().classList.add('eventChainVisible');
             }
         }
     }
     
-    // Highlight all the event chain instances in the schedule that involve the given task instance.
-    updateRelatedEventChains(taskName, taskInstance) {
-        const taskInstanceName = `#${taskName}-${taskInstance}`;
+    // Highlight all the event chain instances in the schedule that involve the given entity instance.
+    updateRelatedEventChains(entityName, entityInstance) {
+        const entityInstanceName = `#${entityName}-${entityInstance}`;
     
         // Clear the SVG style of the current related event chain instances.
         if (this.relatedEventChainInstances != null) {
@@ -979,24 +971,24 @@ class ViewSchedule {
                     dependency.node().classList.remove('relatedEventChainVisible');
                 }
             
-                for (const task of eventChain.tasks) {
-                    task.node().classList.remove('relatedEventChainVisible');
+                for (const entity of eventChain.entities) {
+                    entity.node().classList.remove('relatedEventChainVisible');
                 }
             }
         }
         
-        if (this.lastClickedTaskInstance == taskInstanceName) {
-            this.lastClickedTaskInstance = null;
+        if (this.lastClickedEntityInstance == entityInstanceName) {
+            this.lastClickedEntityInstance = null;
             this.relatedEventChainInstances = null;
             return;
         }
-        this.lastClickedTaskInstance = taskInstanceName;
+        this.lastClickedEntityInstance = entityInstanceName;
         
-        // Find the event chains that go through the given task instance.
+        // Find the event chains that go through the given entity instance.
         this.relatedEventChainInstances = [ ];
         const eventChains = Object.values(this.eventChainInstances).filter(eventChain => typeof eventChain === 'object');
         for (const eventChain of eventChains) {
-            if (eventChain.taskNames.has(this.lastClickedTaskInstance)) {
+            if (eventChain.entityNames.has(this.lastClickedEntityInstance)) {
                 this.relatedEventChainInstances.push(eventChain);
             }
         }
@@ -1012,8 +1004,8 @@ class ViewSchedule {
                 dependency.node().classList.add('relatedEventChainVisible');
             }
         
-            for (const task of eventChain.tasks) {
-                task.node().classList.add('relatedEventChainVisible');
+            for (const entity of eventChain.entities) {
+                entity.node().classList.add('relatedEventChainVisible');
             }
         }
     }

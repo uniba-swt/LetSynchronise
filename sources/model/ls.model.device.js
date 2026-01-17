@@ -13,6 +13,7 @@ class ModelDevice {
     
     static get Default() { return {'name': 'Default', 'speedup': 1}; }
     
+    
     // -----------------------------------------------------
     // Registration of callbacks from the controller
     
@@ -24,6 +25,7 @@ class ModelDevice {
         this.updateDevicesDelay = callback;
     }
 
+    
     // -----------------------------------------------------
     // Registration of model database
     

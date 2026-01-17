@@ -16,6 +16,14 @@ class ModelEntity {
     
     
     // -----------------------------------------------------
+    // Static constants.
+    
+    static get EncapsulationName()      { return 'encapsulation'; }
+    static get NetworkName()            { return 'network'; }
+    static get DecapsulationName()      { return 'decapsulation'; }
+    
+    
+    // -----------------------------------------------------
     // Registration of callbacks from the controller
 
     registerUpdateCoreSelectorCallback(callback) {
@@ -62,31 +70,8 @@ class ModelEntity {
     // -----------------------------------------------------
     // Class methods
 
-    async createTask(parameters) {
-        if (parameters.type == "task") {
-            // Delete dependencies that relied on task ports that no longer exist.
-            let dependenciesToRemove = [];
-            let dependencies = await this.modelDependency.getAllDependencies();
-            for (const dependency of dependencies) {
-                // Check whether the dependency destination is this task.
-                if (dependency.destination.task == parameters.name) {
-                    // Check whether the task port still exists.
-                    if (parameters.inputs.some(input => (input == dependency.destination.port)) == false) {
-                        dependenciesToRemove.push(dependency);
-                    }
-                }
-
-                // Check whether the dependency source is this task.
-                if (dependency.source.task == parameters.name) {
-                    // Check whether the task port still exists.
-                    if (parameters.outputs.some(output => (output == dependency.source.port)) == false) {
-                        dependenciesToRemove.push(dependency);
-                    } 
-                }
-            }
-        }
-
-        // Store task parameters into Database
+    createEntity(parameters) {
+        // Store entity parameters into Database.
         return this.database.putObject(Model.EntityStoreName, parameters)
             .then(result => this.refreshViews())
             .then(result => this.notifyChanges());
@@ -113,7 +98,7 @@ class ModelEntity {
         const bcet = Utility.RandomInteger(0, null, wcet).toPrecision(5) / 1;
         const acet = (wcet + bcet) / 2;
         
-        return this.createTask({
+        return this.createEntity({
             'type'            : 'task',
             'name'            : `t${i}`,
             'priority'        : null,
@@ -131,26 +116,36 @@ class ModelEntity {
         });
     }
     
-    getAllTasks() {
+    getAllEntities() {
         return this.database.getAllObjects(Model.EntityStoreName);
     }
+
+    getEntity(entity) {
+        return this.database.getObject(Model.EntityStoreName, entity);
+    }
     
-    getTask(task) {
-        return this.database.getObject(Model.EntityStoreName, task);
+    getAllEntitiesInstances() {
+        return this.database.getAllObjects(Model.EntityInstancesStoreName);
+    }
+    
+    getAllTasks() {
+        return this.getAllEntities()
+            .then(result => result.filter(entity => entity.type == 'task'));
     }
     
     getAllTaskInstances() {
-        return this.database.getAllObjects(Model.EntityInstancesStoreName);
+        return this.getAllEntityinstances()
+            .then(result => result.filter(instance => instance.type == 'task'));
     }
 
-    deleteTask(name) {
+    deleteEntity(name) {
         return this.database.deleteObject(Model.EntityStoreName, name)
             .then(result => this.database.deleteObject(Model.EntityInstancesStoreName, name))
             .then(result => this.refreshViews())
             .then(result => this.notifyChanges());
     }
 
-    static CreateDelayInstance(instance, sourceEndTime, executionTime, sourceDevice, destDevice, dependency) {
+    static CreateDelayEntityInstanceParameters(instance, sourceEndTime, executionTime, sourceDevice, destDevice, dependency) {
         return {
             'instance'          : instance,
             'letStartTime'      : sourceEndTime,
@@ -162,55 +157,42 @@ class ModelEntity {
         };
     }
     
-    createDelayInstances(dependency, type, delays) {
+    createDelayEntityInstance(dependency, type, delays) {
         let delayType = type.toLowerCase();
-        let data = { }
-
-        if (delayType === 'encapsulation' || delayType === 'network' || delayType === 'decapsulation') {
-            data = {
-                'name': `${dependency.source.task} => ${dependency.destination.task} ${delayType} delay`,
-                'type': delayType,
-                'dependency': dependency.name,
-                'value': delays
-            }
+        
+        switch (delayType) {
+            case ModelEntity.EncapsulationName:
+            case ModelEntity.NetworkName:
+            case ModelEntity.DecapsulationName:
+            return this.database.putObject(Model.EntityInstancesStoreName, {
+                'name'       : `${dependency.source.task} => ${dependency.destination.task} ${delayType} delay`,
+                'type'       : delayType,
+                'dependency' : dependency.name,
+                'value'      : delays
+            });
+        default:
+            return null;
         }
-
-        return this.database.putObject(Model.EntityInstancesStoreName, data);
     }
     
-    createAllDelayInstances(dependency, encapsulationDelays, networkDelays, decapsulationDelays) {
+    createAllDelayEntityInstances(dependency, encapsulationDelays, networkDelays, decapsulationDelays) {
     	return Promise.all([
-			this.createDelayInstances(dependency, 'encapsulation', encapsulationDelays),
-			this.createDelayInstances(dependency, 'network', networkDelays),
-			this.createDelayInstances(dependency, 'decapsulation', decapsulationDelays)
+			this.createDelayEntityInstance(dependency, ModelEntity.EncapsulationName, encapsulationDelays),
+			this.createDelayEntityInstance(dependency, ModelEntity.NetworkName, networkDelays),
+			this.createDelayEntityInstance(dependency, ModelEntity.DecapsulationName, decapsulationDelays)
     	]);
     }
-    
-    // TODO
-    deleteDelay(name) {
-        if (name) {
-            const encapsulation = `${name.source.task} => ${name.destination.task} encapsulation delay`;
-            const network = `${name.source.task} => ${name.destination.task} network delay`;
-            const decapsulation = `${name.source.task} => ${name.destination.task} decapsulation delay`;
-    
-            return this.database.deleteObject(Model.EntityInstancesStoreName, encapsulation)
-                .then(result => this.database.deleteObject(Model.EntityInstancesStoreName, network))
-                .then(result => this.database.deleteObject(Model.EntityInstancesStoreName, decapsulation));
-        }
-    }
 
-    async deleteAllDelayInstances() {
-        const allInstances = await this.getAllTaskInstances();
-        let fileteredDelays = [ ];
-        fileteredDelays = allInstances.filter(instance => instance.name.includes("delay"));
-
-        return Promise.all(fileteredDelays.map(delay => this.database.deleteObject(Model.EntityInstancesStoreName, delay.name)));
+    deleteAllDelayEntityInstances() {
+        return this.getAllEntitiesInstances()
+            .then(result => result.filter(instance => instance.type == ModelEntity.EncapsulationName || instance.type == ModelEntity.NetworkName || instance.type == ModelEntity.DecapsulationName))
+            .then(result => Promise.all(result.map(delay => this.database.deleteObject(Model.EntityInstancesStoreName, delay.name))));
     }
     
-    // Validate the tasks against the platform
+    // Validate the entities against the platform.
     async validate() {
         const allCores = (await this.modelCore.getAllCores()).map(core => core.name);
-        const allTasks = (await this.getAllTasks()).filter(task => task.type === 'task');
+        const allTasks = await this.getAllTasks();
         
         let changedTasks = [];
         let invalidTasks = [];
@@ -236,10 +218,7 @@ class ModelEntity {
     
     refreshViews() {
         return Promise.all([this.getAllTasks(), this.modelCore.getAllCores()])
-            .then(([tasks, cores]) => {
-                const filteredTasks = tasks.filter(task => task.type === 'task');
-                this.updateTasks(filteredTasks, cores)
-            })
+            .then(([tasks, cores]) => this.updateTasks(tasks, cores))
             .then(result => this.clearPreview())
             .then(result => this.modelCore.getAllCores())
             .then(result => this.updateCoreSelector(result))
