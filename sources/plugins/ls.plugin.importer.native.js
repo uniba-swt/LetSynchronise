@@ -85,25 +85,25 @@ class PluginImporterNative {
         const outputs = system[Model.SystemOutputStoreName];
         const entities = system[Model.EntityStoreName];
         if (dependency.source.entity == Model.SystemInterfaceName) {
-            let systemInterface = inputs === undefined ? null : inputs.find(dependency.source.port);
-            if (systemInterface === null) {
+            let systemInterface = inputs ? inputs.find(input => input.name == dependency.source.port) : null;
+            if (systemInterface == null) {
                 return `File to import has task dependency "${dependency.name}" that uses a non-existent "${Model.SystemInterfaceName}.${dependency.source.port}" port.`
             }
          } else {
-            let entity = entities.find(dependency.source.entity);
-            if (entity === null || !entity.outputs.includes(dependency.source.port)) {
+            let entity = entities ? entities.find(entity => entity.name == dependency.source.entity) : null;
+            if (entity == null || !entity.outputs.includes(dependency.source.port)) {
                 return `File to import has task dependency "${dependency.name}" that uses a non-existent "${destination.source.entity}.${dependency.source.port}" port.`
             }
         }
         
         if (dependency.destination.entity == Model.SystemInterfaceName) {
-            let systemInterface = outputs === undefined ? null : outputs.find(dependency.destination.port);
+            let systemInterface = outputs ? outputs.find(output => output.name == dependency.destination.port) : null;
             if (systemInterface === null) {
                 return `File to import has task dependency "${dependency.name}" that uses a non-existent "${Model.SystemInterfaceName}.${dependency.destination.port}" port.`
             }
          } else {
-            let entity = entities.find(dependency.destination.entity);
-            if (entity === null || !entity.inputs.includes(dependency.destination.port)) {
+            let entity = entities ? entities.find(entity => entity.name == dependency.destination.entity) : null;
+            if (entity == null || !entity.inputs.includes(dependency.destination.port)) {
                 return `File to import has task dependency "${dependency.name}" that uses a non-existent "${dependency.destination.entity}.${dependency.destination.port}" port.`
             }
          }
