@@ -28,7 +28,7 @@ class PluginGoalEnd2EndMinMC {
 
         for (const device of system['DeviceStore']) {
             if (!device['delays']) {
-                alert(`Please add protocol delay for ${device['name']}`);
+                alert(`Please add protocol delays for ${device['name']}`);
                 return false;
             }
         } 

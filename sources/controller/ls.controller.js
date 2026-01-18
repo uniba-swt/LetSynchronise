@@ -8,7 +8,6 @@ class Controller {
     controllerMemory = null;
     controllerInterface = null;
     controllerEntity = null;
-    controllerRandomTasks = null;
     controllerDependency = null;
     controllerEventChain = null;
     controllerConstraint = null;
@@ -46,7 +45,6 @@ class Controller {
                 `  ${this.controllerMemory}, `,
                 `  ${this.controllerInterface}, `,
                 `  ${this.controllerEntity}, `,
-                `  ${this.controllerRandomTasks}, `,
                 `  ${this.controllerDependency}, `,
                 `  ${this.controllerEventChain},`,
                 `  ${this.controllerConstraint},`,

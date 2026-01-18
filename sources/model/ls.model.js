@@ -44,7 +44,7 @@ class Model {
             'memories',
             'inputs',
             'outputs',
-            'tasks',
+            'entities',
             'dependencies',
             'eventChains',
             'constraints',

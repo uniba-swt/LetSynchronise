@@ -77,8 +77,8 @@ class Chain {
         return this.successor.last;
     }
     
-    get sourceTask() {
-        return this.segment.source.task;
+    get sourceEntity() {
+        return this.segment.source.entity;
     }
     
     // Generator function to visit each segment in the chain
@@ -101,7 +101,7 @@ class Chain {
     }
     
     startsWith(source) {
-        return (this.segment.source.task == source.task
+        return (this.segment.source.entity == source.entity
                 && this.segment.source.port == source.port);
     }
 

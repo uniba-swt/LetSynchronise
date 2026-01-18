@@ -41,7 +41,7 @@ class ControllerDependency {
     set modelEntity(modelEntity) {
         this._modelEntity = modelEntity;
         
-        // Register the model task with the model.
+        // Register the model entity with the model.
         this._model.registerModelEntity(this._modelEntity);
     }
     
@@ -86,8 +86,8 @@ class ControllerDependency {
     
     // Handler for creating input/output dependency.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
-    handleCreateDependency = (taskDependency) => {
-        this.model.createDependency(taskDependency);
+    handleCreateDependency = (entityDependency) => {
+        this.model.createDependency(entityDependency);
     }
     
     // Handler for deleting input/output dependency.

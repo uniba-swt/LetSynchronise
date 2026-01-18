@@ -809,8 +809,8 @@ class ViewSchedule {
         
         const sendEvent = dependency.sendEvent;
         const receiveEvent = dependency.receiveEvent;
-        let sendPortName = Utility.TaskPorts(sendEvent.task, [sendEvent.port]);
-        let receivePortName = Utility.TaskPorts(receiveEvent.task, [receiveEvent.port]);
+        let sendPortName = Utility.EntityPorts(sendEvent.entity, [sendEvent.port]);
+        let receivePortName = Utility.EntityPorts(receiveEvent.entity, [receiveEvent.port]);
         sendEvent.timestamp = scale(sendEvent.timestamp);
         receiveEvent.timestamp = scale(receiveEvent.timestamp);
         
@@ -820,27 +820,27 @@ class ViewSchedule {
         
         // Create dangling arrows if one of the entities is Model.SystemInterfaceName
         // Need an additional y-offset
-        const adjustedSendEntityHeight = (sendEvent.task == Model.SystemInterfaceName) ? -0.4 * View.EntityHeight : 0;
-        const adjustedReceiveEntityHeight = (receiveEvent.task == Model.SystemInterfaceName) ? 0.4 * View.EntityHeight : 0 ;
+        const adjustedSendEntityHeight = (sendEvent.entity == Model.SystemInterfaceName) ? -0.4 * View.EntityHeight : 0;
+        const adjustedReceiveEntityHeight = (receiveEvent.entity == Model.SystemInterfaceName) ? 0.4 * View.EntityHeight : 0 ;
         
         // Change the name and timestamp of the system event
-        if (sendEvent.task == Model.SystemInterfaceName) {
-            sendEvent.task = receiveEvent.task;
+        if (sendEvent.entity == Model.SystemInterfaceName) {
+            sendEvent.entity = receiveEvent.entity;
             sendEvent.timestamp = receiveEvent.timestamp;
             sendPortName = sendEvent.port;
         }
         
-        if (receiveEvent.task == Model.SystemInterfaceName) {
-            receiveEvent.task = sendEvent.task;
+        if (receiveEvent.entity == Model.SystemInterfaceName) {
+            receiveEvent.entity = sendEvent.entity;
             receiveEvent.timestamp = sendEvent.timestamp;
             receivePortName = receiveEvent.port;
         }
         // Create the arrow
         const points = [
-            { x: sendEvent.timestamp,                y: yOffset + entityIndices[sendEvent.task] * View.EntityHeight + adjustedSendEntityHeight },
-            { x: sendEvent.timestamp + xOffset,      y: yOffset + entityIndices[sendEvent.task] * View.EntityHeight + adjustedSendEntityHeight },
-            { x: receiveEvent.timestamp - xOffset,   y: yOffset + entityIndices[receiveEvent.task] * View.EntityHeight + adjustedReceiveEntityHeight },
-            { x: receiveEvent.timestamp,             y: yOffset + entityIndices[receiveEvent.task] * View.EntityHeight + adjustedReceiveEntityHeight }
+            { x: sendEvent.timestamp,                y: yOffset + entityIndices[sendEvent.entity] * View.EntityHeight + adjustedSendEntityHeight },
+            { x: sendEvent.timestamp + xOffset,      y: yOffset + entityIndices[sendEvent.entity] * View.EntityHeight + adjustedSendEntityHeight },
+            { x: receiveEvent.timestamp - xOffset,   y: yOffset + entityIndices[receiveEvent.entity] * View.EntityHeight + adjustedReceiveEntityHeight },
+            { x: receiveEvent.timestamp,             y: yOffset + entityIndices[receiveEvent.entity] * View.EntityHeight + adjustedReceiveEntityHeight }
         ]
 
         let line = d3.line()
@@ -883,8 +883,8 @@ class ViewSchedule {
             this.eventChainInstances[instanceName]['entities'] = new Set();
             for (const dependency of eventChainInstance.generator()) {
                 this.eventChainInstances[instanceName]['dependencies'].push(this.schedule.select(`path#${dependency.name}-${dependency.instance}`));
-                this.eventChainInstances[instanceName]['entityNames'].add(`#${dependency.receiveEvent.task}-${dependency.receiveEvent.taskInstance}`);
-                this.eventChainInstances[instanceName]['entityNames'].add(`#${dependency.sendEvent.task}-${dependency.sendEvent.taskInstance}`);
+                this.eventChainInstances[instanceName]['entityNames'].add(`#${dependency.receiveEvent.entity}-${dependency.receiveEvent.entityInstance}`);
+                this.eventChainInstances[instanceName]['entityNames'].add(`#${dependency.sendEvent.entity}-${dependency.sendEvent.entityInstance}`);
             }
             for (const entityName of this.eventChainInstances[instanceName]['entityNames']) {
                 const element = this.schedule.select(`rect${entityName}`);

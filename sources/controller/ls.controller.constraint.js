@@ -38,7 +38,7 @@ class ControllerConstraint {
     set modelEventChain(modelEventChain) {
         this._modelEventChain = modelEventChain;
         
-        // Register the model task with the model.
+        // Register the model event chain with the model.
         this._model.registerModelEventChain(this._modelEventChain);
     }
     

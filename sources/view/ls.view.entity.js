@@ -670,10 +670,10 @@ class ViewEntity {
                 .text(`WCET, ACET, BCET: ${taskParameters.wcet / Utility.MsToNs}, ${taskParameters.acet / Utility.MsToNs}, ${taskParameters.bcet / Utility.MsToNs}`);
         textInfo.append('text')
                 .attr('dy', '2.6em')
-                .text(`Inputs: ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.inputs)}`);
+                .text(`Inputs: ${Utility.FormatEntityPorts(taskParameters.name, taskParameters.inputs)}`);
         textInfo.append('text')
                 .attr('dy', '3.9em')
-                .text(`Outputs: ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.outputs)}`);
+                .text(`Outputs: ${Utility.FormatEntityPorts(taskParameters.name, taskParameters.outputs)}`);
 
         // Add the task's priority, execution time distribution, and core
         textInfo.append('text')
@@ -811,7 +811,7 @@ class ViewEntity {
     }
         
     formatTaskParametersInfo(taskParameters) {
-        return `${taskParameters.name}: priority = ${taskParameters.priority}, initial offset = ${taskParameters.initialOffset}, activation offset = ${taskParameters.activationOffset}, duration = ${taskParameters.duration}, period = ${taskParameters.period}, inputs = ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.inputs)}, outputs = ${Utility.FormatTaskPorts(taskParameters.name, taskParameters.outputs)}, wcet = ${taskParameters.wcet}, acet = ${taskParameters.acet}, bcet = ${taskParameters.bcet}, distribution = ${taskParameters.distribution}`;
+        return `${taskParameters.name}: priority = ${taskParameters.priority}, initial offset = ${taskParameters.initialOffset}, activation offset = ${taskParameters.activationOffset}, duration = ${taskParameters.duration}, period = ${taskParameters.period}, inputs = ${Utility.FormatEntityPorts(taskParameters.name, taskParameters.inputs)}, outputs = ${Utility.FormatEntityPorts(taskParameters.name, taskParameters.outputs)}, wcet = ${taskParameters.wcet}, acet = ${taskParameters.acet}, bcet = ${taskParameters.bcet}, distribution = ${taskParameters.distribution}`;
     }
     
     toString() {

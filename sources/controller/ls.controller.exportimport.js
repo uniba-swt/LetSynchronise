@@ -107,7 +107,7 @@ class ControllerExportImport {
     set modelEntity(modelEntity) {
         this._modelEntity = modelEntity;
         
-        // Register the model task with the model.
+        // Register the model entity with the model.
         this._model.registerModelEntity(this._modelEntity);
     }
     

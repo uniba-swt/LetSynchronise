@@ -35,8 +35,8 @@ class PluginMetricEnd2End {
 
     // Compute the end-to-end response time of one event chain instance.
     static Compute(chainInstance) {
-        if (chainInstance.segment.sendEvent.task == Model.SystemInterfaceName
-                && chainInstance.last.segment.receiveEvent.task == Model.SystemInterfaceName) {
+        if (chainInstance.segment.sendEvent.entity == Model.SystemInterfaceName
+                && chainInstance.last.segment.receiveEvent.entity == Model.SystemInterfaceName) {
             const startTime = chainInstance.segment.sendEvent.timestamp;
             const endTime = chainInstance.last.segment.receiveEvent.timestamp;
     

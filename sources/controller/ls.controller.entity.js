@@ -2,6 +2,7 @@
 
 class ControllerEntity {
     _view = null;
+    _viewRandomTasks = null;
     _viewSchedule = null;
     _model = null;
     _modelCore = null;
@@ -16,12 +17,23 @@ class ControllerEntity {
 
         // Register the handlers when setting the view.
         this._view.registerSubmitHandler(this.handleCreateEntity);
-        this._view.registerDeleteHandler(this.handleDeleteTask);
+        this._view.registerDeleteHandler(this.handleDeleteEntity);
         this._view.registerGetCoreHandler(this.handleGetCore);
     }
     
     get view() {
         return this._view;
+    }
+    
+    set viewRandomTasks(viewRandomTasks) {
+        this._viewRandomTasks = viewRandomTasks;
+        
+        // Register the handlers when setting the view.
+        this._viewRandomTasks.registerSubmitHandler(this.handleGenerateRandomTasks);
+    }
+    
+    get viewRandomTasks() {
+        return this._viewRandomTasks;
     }
     
     set viewSchedule(viewSchedule) {
@@ -98,20 +110,29 @@ class ControllerEntity {
     // -----------------------------------------------------
     // Handlers for events from the view to the model
     
-    // Handler for creating a task.
+    // Handler for creating an entity.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
-    handleCreateEntity = (taskParameters) => {
-        this.model.createEntity(taskParameters);
+    handleCreateEntity = (entityParameters) => {
+        this.model.createEntity(entityParameters);
     }
     
-    // Handler for deleting a task.
-    handleDeleteTask = (name) => {
+    // Handler for deleting an entity.
+    handleDeleteEntity = (name) => {
         this.model.deleteEntity(name);
     }
     
     // Handler for getting the details of a core.
     handleGetCore = (name) => {
         return this.modelCore.getCore(name);
+    }
+    
+    // Handler for generating a random task set.
+    handleGenerateRandomTasks = (parameters) => {
+        const elements = ['schedule', 'entities', 'dependencies', 'eventChains', 'constraints']
+        
+        return Plugin.ModelDatabase.deleteSystem(elements)
+            .then(result => this.modelEntity.generateRandomTasks(parameters))
+            .then(result => this.modelDependency.generateRandomDependencies(parameters.numDependencies));
     }
         
     

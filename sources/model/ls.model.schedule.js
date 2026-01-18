@@ -1,6 +1,6 @@
 'use strict';
 
-class ModelSchedule {    
+class ModelSchedule {
     database = null;
 
     modelDevice = null;
@@ -102,26 +102,26 @@ class ModelSchedule {
         return {
             'instance': -1,
             'receiveEvent': {
-                'task': dependency.destination.task,
+                'entity': dependency.destination.entity,
                 'port': dependency.destination.port,
-                'taskInstance': destinationInstance.instance,
+                'entityInstance': destinationInstance.instance,
                 'timestamp': destinationInstance.letStartTime
             },
             'sendEvent': {
-                'task': dependency.source.task,
+                'entity': dependency.source.entity,
                 'port': dependency.source.port,
-                'taskInstance': sourceInstance.instance,
+                'entityInstance': sourceInstance.instance,
                 'timestamp': sourceInstance.letEndTime
             }       
         };
     }
 
-    // Returns the latest LET end time before a given time point from an array of task instances.
-    getLatestLetEndTime(taskInstances, timePoint) {
-        for (let taskIndex = taskInstances.length - 1; taskIndex > -1;  taskIndex--) {
-            const taskInstance = taskInstances[taskIndex];
-            if (taskInstance.letEndTime <= timePoint) {
-                return taskInstance;
+    // Returns the latest LET end time before a given time point from an array of entity instances.
+    getLatestLetEndTime(entityInstances, timePoint) {
+        for (let entityIndex = entityInstances.length - 1; entityIndex > -1;  entityIndex--) {
+            const entityInstance = entityInstances[entityIndex];
+            if (entityInstance.letEndTime <= timePoint) {
+                return entityInstance;
             }
         }
         
@@ -135,16 +135,16 @@ class ModelSchedule {
 
     // Create all instances of a dependency.
     createDependencyInstances(dependency, makespan) {
-        // Get all instances of the source and destination tasks
-        // If one of the tasks is Model.SystemInterfaceName, we duplicate the other task
+        // Get all instances of the source and destination entities
+        // If one of the entities is Model.SystemInterfaceName, we use the timing of the entity for the Model.SystemInterfaceName
         return Promise.all([
-            this.database.getObject(Model.EntityInstancesStoreName, dependency.source.task), 
-            this.database.getObject(Model.EntityInstancesStoreName, dependency.destination.task)
-        ]).then(([sourceTaskInstances, destinationTaskInstances]) => {
+            this.database.getObject(Model.EntityInstancesStoreName, dependency.source.entity), 
+            this.database.getObject(Model.EntityInstancesStoreName, dependency.destination.entity)
+        ]).then(([sourceEntityInstances, destinationEntityInstances]) => {
             let instances = [];
-            if (dependency.source.task == Model.SystemInterfaceName) {
-                // Dependency is system input --> task
-                const destinationInstances = destinationTaskInstances ? destinationTaskInstances.value : 0;
+            if (dependency.source.entity == Model.SystemInterfaceName) {
+                // Dependency is system input --> entity
+                const destinationInstances = destinationEntityInstances ? destinationEntityInstances.value : 0;
                 
                 if (destinationInstances.length > 0) {
 					const numberOfInstances = destinationInstances.length - (destinationInstances[destinationInstances.length - 1].letStartTime > makespan);
@@ -154,9 +154,9 @@ class ModelSchedule {
 						instances.unshift(this.createDependencyInstance(dependency, {instance: destinationInstance.instance, letEndTime: destinationInstance.letStartTime}, destinationInstance));
 					}
                 }
-            } else if (dependency.destination.task == Model.SystemInterfaceName) {
-                // Dependency is task --> system output
-                const sourceInstances = sourceTaskInstances ? sourceTaskInstances.value : 0;
+            } else if (dependency.destination.entity == Model.SystemInterfaceName) {
+                // Dependency is entity --> system output
+                const sourceInstances = sourceEntityInstances ? sourceEntityInstances.value : 0;
                 
                 if (sourceInstances.length > 0) {
 					const numberOfInstances = sourceInstances.length - (sourceInstances[sourceInstances.length - 1].letEndTime > makespan);
@@ -167,9 +167,9 @@ class ModelSchedule {
 					}
                 }
             } else {
-                // Dependency is task --> task
-                const sourceInstances = sourceTaskInstances ? sourceTaskInstances.value : 0;
-                const destinationInstances = destinationTaskInstances ? destinationTaskInstances.value : 0;
+                // Dependency is entity --> entity
+                const sourceInstances = sourceEntityInstances ? sourceEntityInstances.value : 0;
+                const destinationInstances = destinationEntityInstances ? destinationEntityInstances.value : 0;
 
                 if (destinationInstances.length > 0) {
 					const numberOfInstances = destinationInstances.length - (destinationInstances[destinationInstances.length - 1].letStartTime > makespan);
@@ -215,7 +215,7 @@ class ModelSchedule {
             let updatedChainInstances = [];
             for (const chainInstance of chainInstances) {
 
-                const nextEventInstances = this.getSpecificDependencyInstances(filteredInstances, segment, chainInstance.last.segment.receiveEvent.taskInstance);
+                const nextEventInstances = this.getSpecificDependencyInstances(filteredInstances, segment, chainInstance.last.segment.receiveEvent.entityInstance);
                 for (const nextEventInstance of nextEventInstances) {
                     let chainInstanceCopy = chainInstance.copy;
                     chainInstanceCopy.last.successor = new ChainInstance(null, nextEventInstance);
@@ -238,18 +238,18 @@ class ModelSchedule {
                                   .map(instance => { return { 'name': dependency.name, ...instance }; }));
     }
 
-    getSpecificDependencyInstances(dependencyInstances, dependency, taskInstance) {
-        // Task instance of currentEventInstance.receiveEvent and nextEventInstances.sendEvent have to match.
+    getSpecificDependencyInstances(dependencyInstances, dependency, entityInstance) {
+        // Entity instance of currentEventInstance.receiveEvent and nextEventInstances.sendEvent have to match.
         return this.getDependencyInstances(dependencyInstances, dependency)
-                   .filter(dependencyInstance => (dependencyInstance.sendEvent.taskInstance == taskInstance));
+                   .filter(dependencyInstance => (dependencyInstance.sendEvent.entityInstance == entityInstance));
     }
     
     // Creates all event chains that go from the constraint's source port to its destination port.
     // Each event chain is linear with no branching.
     // Event chains are found via backwards reachability from the constraint's destination port.
-    // Assumes that a task's destination port can be reached by any of the task's source ports.
+    // Assumes that an entity's destination port can be reached by any of the entity's source ports.
     createInferredEventChains(allDependencies, name, source, destination) {
-        const predecessorDependencies = this.getPredecessorDependencies(allDependencies, destination.task);
+        const predecessorDependencies = this.getPredecessorDependencies(allDependencies, destination.entity);
         let chains = predecessorDependencies.map(dependency => new Chain(dependency));
 
         let completeChains = [];
@@ -265,7 +265,7 @@ class ModelSchedule {
 
                 // Event chain is still incomplete, so add predecessors.
                 // Limitation: Ignore feedback loops.
-                const predecessorDependencies = this.getPredecessorDependencies(allDependencies, chain.sourceTask)
+                const predecessorDependencies = this.getPredecessorDependencies(allDependencies, chain.sourceEntity)
                                                     .filter(predecessorDependency => !chain.includes(predecessorDependency));
                 for (const predecessorDependency of predecessorDependencies) {
                    let newChain = new Chain(predecessorDependency);
@@ -280,8 +280,8 @@ class ModelSchedule {
         return completeChains;
     }
 
-    getPredecessorDependencies(dependencies, task) {
-        return dependencies.filter(dependency => (dependency.destination.task == task));
+    getPredecessorDependencies(dependencies, entity) {
+        return dependencies.filter(dependency => (dependency.destination.entity == entity));
     }
     
     createAllInferredEventChains() {
@@ -334,14 +334,14 @@ class ModelSchedule {
         ]).then(async ([dependencyInstances, dependencies]) => {
             const filteredDependencies = dependencyInstances.filter(instance =>
                                             instance.value.length > 0
-                                            && instance.value[0].sendEvent.task !== Model.SystemInterfaceName
-                                            && instance.value[0].receiveEvent.task !== Model.SystemInterfaceName);
+                                            && instance.value[0].sendEvent.entity !== Model.SystemInterfaceName
+                                            && instance.value[0].receiveEvent.entity !== Model.SystemInterfaceName);
             
             let instancesPromises = [ ];
             for (const dependency of filteredDependencies) {
                 const currentDependency = dependencies.find(item => dependency.name === item.name)
-                const sourceInstances = await this.database.getObject(Model.EntityInstancesStoreName, dependency.value[0].sendEvent.task);
-                const destInstances = await this.database.getObject(Model.EntityInstancesStoreName, dependency.value[0].receiveEvent.task);
+                const sourceInstances = await this.database.getObject(Model.EntityInstancesStoreName, dependency.value[0].sendEvent.entity);
+                const destInstances = await this.database.getObject(Model.EntityInstancesStoreName, dependency.value[0].receiveEvent.entity);
                 
                 let instances = [ ];
                 let encapsulationDelayInstances = [ ];

@@ -41,7 +41,6 @@ controller.controllerNetworkDelay = new ControllerNetworkDelay();
 controller.controllerMemory = new ControllerMemory();
 controller.controllerInterface = new ControllerInterface();
 controller.controllerEntity = new ControllerEntity();
-controller.controllerRandomTasks = new ControllerRandomTasks();
 controller.controllerDependency = new ControllerDependency();
 controller.controllerEventChain = new ControllerEventChain();
 controller.controllerConstraint = new ControllerConstraint();
@@ -88,6 +87,7 @@ controller.controllerInterface.modelEventChain = model.modelEventChain;
 controller.controllerInterface.modelConstraint = model.modelConstraint;
 
 controller.controllerEntity.view = view.viewEntity;
+controller.controllerEntity.viewRandomTasks = view.viewRandomTasks;
 controller.controllerEntity.viewSchedule = view.viewSchedule;
 controller.controllerEntity.model = model.modelEntity;
 controller.controllerEntity.modelCore = model.modelCore;
@@ -95,10 +95,6 @@ controller.controllerEntity.modelNetworkDelay = model.modelNetworkDelay;
 controller.controllerEntity.modelDependency = model.modelDependency;
 controller.controllerEntity.modelEventChain = model.modelEventChain;
 controller.controllerEntity.modelSchedule = model.modelSchedule;
-
-controller.controllerRandomTasks.view = view.viewRandomTasks;
-controller.controllerRandomTasks.modelEntity = model.modelEntity;
-controller.controllerRandomTasks.modelDependency = model.modelDependency;
 
 controller.controllerDependency.view = view.viewDependency;
 controller.controllerDependency.model = model.modelDependency;

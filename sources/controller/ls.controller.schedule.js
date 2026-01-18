@@ -55,7 +55,7 @@ class ControllerSchedule {
     set modelDevice(modelDevice) {
         this._modelDevice = modelDevice;
         
-        // Register the model task with the model.
+        // Register the model device with the model.
         this._model.registerModelDevice(this._modelDevice);
     }
     
@@ -75,7 +75,7 @@ class ControllerSchedule {
     set modelEntity(modelEntity) {
         this._modelEntity = modelEntity;
         
-        // Register the model task with the model.
+        // Register the model entity with the model.
         this._model.registerModelEntity(this._modelEntity);
     }
     

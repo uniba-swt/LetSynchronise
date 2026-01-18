@@ -119,7 +119,7 @@ class ModelEventChain {
         return this.database.deleteAllObjects(Model.EventChainInstanceStoreName);
     }
 
-    // Validate event chains against task dependencies.
+    // Validate event chains against entity dependencies.
     validate() {
         return this.getAllEventChains()
             .then(allEventChains => allEventChains.forEach(eventChain => {

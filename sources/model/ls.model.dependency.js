@@ -97,25 +97,25 @@ class ModelDependency {
         switch (delayType) {
             case ModelEntity.EncapsulationName:
                 return {
-                    'source'      : {'task': dependency.source.task, 'port': dependency.source.port},
-                    'destination' : {'task': `${dependency.source.task} => ${dependency.destination.task} ${ModelEntity.EncapsulationName} delay`, 'port': dependency.destination.port}
+                    'source'      : {'entity': dependency.source.entity, 'port': dependency.source.port},
+                    'destination' : {'entity': `${dependency.source.entity} => ${dependency.destination.entity} ${ModelEntity.EncapsulationName} delay`, 'port': dependency.destination.port}
                 };
                 
             case ModelEntity.NetworkName:
                 return {
-                    'source'      : {'task': `${dependency.source.task} => ${dependency.destination.task} ${ModelEntity.EncapsulationName} delay`, 'port': dependency.source.port},
-                    'destination' : {'task': `${dependency.source.task} => ${dependency.destination.task} ${ModelEntity.NetworkName} delay`, 'port': dependency.destination.port}
+                    'source'      : {'entity': `${dependency.source.entity} => ${dependency.destination.entity} ${ModelEntity.EncapsulationName} delay`, 'port': dependency.source.port},
+                    'destination' : {'entity': `${dependency.source.entity} => ${dependency.destination.entity} ${ModelEntity.NetworkName} delay`, 'port': dependency.destination.port}
                 };
                 
             case ModelEntity.DecapsulationName:
                 return {
-                    'source'      : {'task': `${dependency.source.task} => ${dependency.destination.task} ${ModelEntity.NetworkName} delay`, 'port': dependency.source.port},
-                    'destination' : {'task': `${dependency.source.task} => ${dependency.destination.task} ${ModelEntity.DecapsulationName} delay`, 'port': dependency.destination.port}
+                    'source'      : {'entity': `${dependency.source.entity} => ${dependency.destination.entity} ${ModelEntity.NetworkName} delay`, 'port': dependency.source.port},
+                    'destination' : {'entity': `${dependency.source.entity} => ${dependency.destination.entity} ${ModelEntity.DecapsulationName} delay`, 'port': dependency.destination.port}
                 };
             default:
                 return {
-                    'source'      : {'task': `${dependency.source.task} => ${dependency.destination.task} ${ModelEntity.DecapsulationName} delay`, 'port': dependency.source.port},
-                    'destination' : {'task': dependency.destination.task, 'port': dependency.destination.port}
+                    'source'      : {'entity': `${dependency.source.entity} => ${dependency.destination.entity} ${ModelEntity.DecapsulationName} delay`, 'port': dependency.source.port},
+                    'destination' : {'entity': dependency.destination.entity, 'port': dependency.destination.port}
                 };
         }
     }
@@ -147,12 +147,12 @@ class ModelDependency {
     getSuccessorDependencies(name) {
         const promiseDependency = this.getDependency(name);
         const promiseAllDependencies = promiseDependency.then(sourceDependency => {
-            return (sourceDependency.destination.task == Model.SystemInterfaceName) ? [] : this.getAllDependencies();
+            return (sourceDependency.destination.entity == Model.SystemInterfaceName) ? [] : this.getAllDependencies();
         });
         
         return Promise.all([promiseDependency, promiseAllDependencies])
             .then(([sourceDependency, allDependencies]) => allDependencies
-                .filter(dependency => (dependency.source.task == sourceDependency.destination.task)));
+                .filter(dependency => (dependency.source.entity == sourceDependency.destination.entity)));
     }
     
     // Validate entity dependencies against system and entity inputs and outputs.
@@ -172,9 +172,9 @@ class ModelDependency {
         let dependenciesToRemove = [];
         const allDependencies = await this.getAllDependencies();
         for (const dependency of allDependencies) {
-            if (!allSources.hasOwnProperty(dependency.source.task) || !allDestinations.hasOwnProperty(dependency.destination.task)) {
+            if (!allSources.hasOwnProperty(dependency.source.entity) || !allDestinations.hasOwnProperty(dependency.destination.entity)) {
                 dependenciesToRemove.push(dependency);
-            } else if (!allSources[dependency.source.task].includes(dependency.source.port) || !allDestinations[dependency.destination.task].includes(dependency.destination.port)) {
+            } else if (!allSources[dependency.source.entity].includes(dependency.source.port) || !allDestinations[dependency.destination.entity].includes(dependency.destination.port)) {
                 dependenciesToRemove.push(dependency);
             }
         }

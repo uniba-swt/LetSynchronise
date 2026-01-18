@@ -86,19 +86,19 @@ class PluginGoalEnd2EndMin {
             let eventChainSuccessor = eventChain;
             
             // Record the task at the start of the chain.
-            if (eventChainSuccessor.segment.source.task != Model.SystemInterfaceName) {
-                eventChainFlattened.push(eventChainSuccessor.segment.source.task);
+            if (eventChainSuccessor.segment.source.entity != Model.SystemInterfaceName) {
+                eventChainFlattened.push(eventChainSuccessor.segment.source.entity);
             }
             
             // Traverse the segments in the event chain and record the tasks.
             while (true) {
-                if (eventChainSuccessor.segment.destination.task != Model.SystemInterfaceName) {
-                    eventChainFlattened.push(eventChainSuccessor.segment.destination.task);
+                if (eventChainSuccessor.segment.destination.entity != Model.SystemInterfaceName) {
+                    eventChainFlattened.push(eventChainSuccessor.segment.destination.entity);
                 }
                 
-                if (eventChainSuccessor.segment.source.task != Model.SystemInterfaceName
-                        && eventChainSuccessor.segment.destination.task != Model.SystemInterfaceName) {
-                    taskDependencies.push([eventChainSuccessor.segment.source.task, eventChainSuccessor.segment.destination.task]);
+                if (eventChainSuccessor.segment.source.entity != Model.SystemInterfaceName
+                        && eventChainSuccessor.segment.destination.entity != Model.SystemInterfaceName) {
+                    taskDependencies.push([eventChainSuccessor.segment.source.entity, eventChainSuccessor.segment.destination.entity]);
                 }
                 
                 if (eventChainSuccessor.successor == undefined) {

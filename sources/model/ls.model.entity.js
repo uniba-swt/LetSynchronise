@@ -1,10 +1,10 @@
 'use strict';
 
 class ModelEntity {
-    updateCoreSelector = null;          // Callback to function in ls.view.task
-    updateTasks = null;                 // Callback to function in ls.view.task
-    revalidateTaskParameters = null;    // Callback to function in ls.view.task
-    clearPreview = null;                // Callback to function in ls.view.task
+    updateCoreSelector = null;          // Callback to function in ls.view.entity
+    updateTasks = null;                 // Callback to function in ls.view.entity
+    revalidateTaskParameters = null;    // Callback to function in ls.view.entity
+    clearPreview = null;                // Callback to function in ls.view.entity
     notifyChanges = null;               // Callback to function in ls.view.schedule
 
     database = null;
@@ -165,7 +165,7 @@ class ModelEntity {
             case ModelEntity.NetworkName:
             case ModelEntity.DecapsulationName:
             return this.database.putObject(Model.EntityInstancesStoreName, {
-                'name'       : `${dependency.source.task} => ${dependency.destination.task} ${delayType} delay`,
+                'name'       : `${dependency.source.entity} => ${dependency.destination.entity} ${delayType} delay`,
                 'type'       : delayType,
                 'dependency' : dependency.name,
                 'value'      : delays
@@ -189,7 +189,7 @@ class ModelEntity {
             .then(result => Promise.all(result.map(delay => this.database.deleteObject(Model.EntityInstancesStoreName, delay.name))));
     }
     
-    // Validate the entities against the platform.
+    // Validate the tasks against the platform.
     async validate() {
         const allCores = (await this.modelCore.getAllCores()).map(core => core.name);
         const allTasks = await this.getAllTasks();
