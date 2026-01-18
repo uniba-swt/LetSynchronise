@@ -482,8 +482,8 @@ class ModelSchedule {
 
     getDelays(source, dest, network, executionTiming) {
         return [ModelSchedule.GetDelayTime(Object.values(source.delays)[0], executionTiming),
-               ModelSchedule.GetDelayTime(Object.values(dest.delays)[0], executionTiming),
-               ModelSchedule.GetDelayTime(network, executionTiming)];
+                ModelSchedule.GetDelayTime(network, executionTiming),
+                ModelSchedule.GetDelayTime(Object.values(dest.delays)[0], executionTiming)];
     }
     
     static GetDelayTime(delay, executionTiming) {
