@@ -158,8 +158,11 @@ class ModelEntity {
     }
     
     createDelayEntityInstance(dependency, type, delays) {
-        let delayType = type.toLowerCase();
-        
+        if (delays == null || delays.length == 0) {
+            return null;
+        }
+
+        const delayType = type.toLowerCase();
         switch (delayType) {
             case ModelEntity.EncapsulationName:
             case ModelEntity.NetworkName:

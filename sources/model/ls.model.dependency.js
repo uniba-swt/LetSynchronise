@@ -128,7 +128,7 @@ class ModelDependency {
         return this.database.getAllObjects(Model.DependencyStoreName);
     }
     
-    getAllDependencyInstances() {
+    getAllDependenciesInstances() {
         return this.database.getAllObjects(Model.DependencyInstancesStoreName);
     }
 

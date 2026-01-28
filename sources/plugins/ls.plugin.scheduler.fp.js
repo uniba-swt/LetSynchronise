@@ -38,8 +38,6 @@ class PluginSchedulerFp {
     // Preemptive, fixed-priority, multicore, no task migration.
     // Preempts the core that will idle the earliest.
     static Algorithm(cores, tasksInstances, makespan, tasksParameters) {
-        // Input params would also need to include comm instances & netowrk instances. Update all occurrence of task instances to include them. Comm instances would be on the same as the taks(assumtions)
-        // Netowkr execution won't be restricted by the core ytet.
         // Do nothing if the task set is empty.
         if (tasksInstances.length == 0) {
             return { 'schedulable': true, 'message': 'No tasks to schedule' };
@@ -73,11 +71,10 @@ class PluginSchedulerFp {
         // Task instances with the same priority and/or LET start time are selected based on the
         // earliest LET end time, otherwise selected arbitrarily.
         while (true) {
-            // Track the earliest time that a task preemption may occur on each core.
-            let coreNextPreemptionTime = { };
+            // Track the earliest time that a task preemption may occur.
+            let nextSchedulerEventTime = 2 * makespan;
             let coreChosenTask = { };
             for (const core of cores) {
-                coreNextPreemptionTime[core.name] = 2 * makespan;
                 coreChosenTask[core.name] = { 'number': null, 'instance': null, 'priority': null };
             }
 
@@ -94,7 +91,10 @@ class PluginSchedulerFp {
                 let availableCore = taskInstance.currentCore;
                 if (availableCore == null) {
                     for (const core of cores) {
-                        if (availableCore == null || coreCurrentTime[core.name] < coreCurrentTime[availableCore]) {
+                        if (availableCore == null 
+                                || coreChosenTask[core.name].number == null && (coreCurrentTime[core.name] < coreCurrentTime[availableCore])
+                                || coreChosenTask[core.name].number != null && (coreCurrentTime[core.name] < taskInstance.letStartTime && taskInstance.letStartTime < coreChosenTask[core.name].instance.letStartTime)
+                        ) {
                             availableCore = core.name;
                         }
                     }
@@ -120,8 +120,6 @@ class PluginSchedulerFp {
                 const higherPriority = ((bothTasksActivated || bothTasksNotActivated && sameActivationTime) 
                                          && (taskPriority > coreChosenTask[taskCore.name].priority
                                               || (taskPriority == coreChosenTask[taskCore.name].priority && taskInstance.letEndTime <= coreChosenTask[taskCore.name].instance.letEndTime)));
-                                                // Add so it includes delays. HEre and the lines below
-
                 
                 // Update the chosenTask instance with taskInstance if any of the following 4 conditions are true:
                 // 1. No task instance has been chosen.
@@ -136,14 +134,17 @@ class PluginSchedulerFp {
                 }
                 
                 // Find the latest time that the next scheduling decision has to be made.
-                // Equal to the minimum LET start time of all higher-priority task instances.
+                // Equal to the minimum LET start time of all higher-priority task instances, 
+                // or the minimum LET end time of all task instances to ensure that the 
+                // chosen cores are not preoccupied too far in advance.
                 const noPreviousChosenTask = (previousChosenTask.number == null || previousChosenTask.instance == null);
                 if (!noPreviousChosenTask && previousChosenTask.priority > coreChosenTask[taskCore.name].priority) {
-                    coreNextPreemptionTime[taskCore.name] = Math.min(coreNextPreemptionTime[taskCore.name], previousChosenTask.instance.letStartTime);
+                    nextSchedulerEventTime = Math.min(nextSchedulerEventTime, previousChosenTask.instance.letStartTime);
                 }
                 if (taskPriority > coreChosenTask[taskCore.name].priority) {
-                    coreNextPreemptionTime[taskCore.name] = Math.min(coreNextPreemptionTime[taskCore.name], taskInstance.letStartTime);
+                    nextSchedulerEventTime = Math.min(nextSchedulerEventTime, taskInstance.letStartTime);
                 }
+                nextSchedulerEventTime = Math.min(nextSchedulerEventTime, taskInstance.letEndTime);
             }
             
             // Advance the chosen task instances on each core.
@@ -165,7 +166,7 @@ class PluginSchedulerFp {
                 // 3. Chosen task instance has not been acitvated for execution.
                 if (!noPreemptedTask && noChosenTask || higherPriority || notActivated) {
                     if (!noChosenTask && notActivated) {
-                        coreNextPreemptionTime[core.name] = coreChosenTask[core.name].instance.letStartTime;
+                        nextSchedulerEventTime = Math.min(nextSchedulerEventTime, coreChosenTask[core.name].instance.letStartTime);
                     }
                     coreChosenTask[core.name] = lastPreemptedTask;
                 } else {
@@ -176,6 +177,11 @@ class PluginSchedulerFp {
                     
                     if (noChosenTask) {
                         // No task to execute on this core.
+                        continue;
+                    }
+                    
+                    if (nextSchedulerEventTime < coreChosenTask[core.name].instance.letStartTime) {
+                        // Too early to start executing task instances from the future.
                         continue;
                     }
 
@@ -197,18 +203,18 @@ class PluginSchedulerFp {
                     const message = `Could not schedule enough time for task ${tasksInstances[coreChosenTask[core.name].number].name}, instance ${coreChosenTask[core.name].instance.instance} on core ${core.name}!`;
                     return { 'schedulable': false, 'message': message };
                 }
-                if (executionTimeEnd <= coreNextPreemptionTime[core.name]) {
+                if (executionTimeEnd <= nextSchedulerEventTime) {
                     this.AddExecutionInterval(coreChosenTask[core.name].instance.executionIntervals, coreCurrentTime[core.name], executionTimeEnd, core.name);
                     coreChosenTask[core.name].instance.remainingExecutionTime = 0;
                 } else {
-                    this.AddExecutionInterval(coreChosenTask[core.name].instance.executionIntervals, coreCurrentTime[core.name], coreNextPreemptionTime[core.name], core.name);
-                    const duration = coreNextPreemptionTime[core.name] - coreCurrentTime[core.name];
+                    this.AddExecutionInterval(coreChosenTask[core.name].instance.executionIntervals, coreCurrentTime[core.name], nextSchedulerEventTime, core.name);
+                    const duration = nextSchedulerEventTime - coreCurrentTime[core.name];
                     coreChosenTask[core.name].instance.remainingExecutionTime -= duration * core.speedup;
                     corePreemptedTasksQueue[core.name].push(coreChosenTask[core.name]);
                 }
                 
                 // Advance the current time to after the task has finished executing or the next task preemption, whichever occurs earlier.
-                coreCurrentTime[core.name] = Math.min(executionTimeEnd, coreNextPreemptionTime[core.name]);
+                coreCurrentTime[core.name] = Math.min(executionTimeEnd, nextSchedulerEventTime);
             }
             
             // Terminate when all task instances have been scheduled.

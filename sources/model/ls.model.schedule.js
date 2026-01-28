@@ -126,6 +126,7 @@ class ModelSchedule {
         }
         
         return {
+            'instance': -1,
             'periodStartTime': 0,
             'letStartTime': 0,
             'letEndTime': 0,
@@ -167,6 +168,8 @@ class ModelSchedule {
 					}
                 }
             } else {
+                // TODO: create network delays here instead
+
                 // Dependency is entity --> entity
                 const sourceInstances = sourceEntityInstances ? sourceEntityInstances.value : 0;
                 const destinationInstances = destinationEntityInstances ? destinationEntityInstances.value : 0;
@@ -204,18 +207,16 @@ class ModelSchedule {
     // Creates all instances of an event chain from the given dependencyInstances.
     // Each event chain instance is linear with no branching.
     // Event chain instances are found via forward reachability from the event chain's starting dependency.
-    createEventChainInstances(dependencyInstances, chain) {
-        const filteredInstances = dependencyInstances;
-        
+    createEventChainInstances(dependencyInstances, chain) {        
         let nextSegment = chain.generator();
-        const startDependencies = this.getDependencyInstances(filteredInstances, nextSegment.next().value);
+        const startDependencies = this.getDependencyInstances(dependencyInstances, nextSegment.next().value);
         let chainInstances = startDependencies.map(dependency => new ChainInstance(chain.name, dependency));
 
         for (const segment of nextSegment) {
             let updatedChainInstances = [];
             for (const chainInstance of chainInstances) {
 
-                const nextEventInstances = this.getSpecificDependencyInstances(filteredInstances, segment, chainInstance.last.segment.receiveEvent.entityInstance);
+                const nextEventInstances = this.getSpecificDependencyInstances(dependencyInstances, segment, chainInstance.last.segment.receiveEvent.entityInstance);
                 for (const nextEventInstance of nextEventInstances) {
                     let chainInstanceCopy = chainInstance.copy;
                     chainInstanceCopy.last.successor = new ChainInstance(null, nextEventInstance);
@@ -320,7 +321,7 @@ class ModelSchedule {
         return {
             'promiseAllEntities': this.modelEntity.getAllEntities(),
             'promiseAllEntitiesInstances': this.modelEntity.getAllEntitiesInstances(),
-            'promiseAllDependenciesInstances': this.modelDependency.getAllDependencyInstances(),
+            'promiseAllDependenciesInstances': this.modelDependency.getAllDependenciesInstances(),
             'promiseAllEventChainInstances': this.modelEventChain.getAllEventChainsInstances()
         };
     }
@@ -329,66 +330,54 @@ class ModelSchedule {
     // All task-to-core/device allocations need to be known.
     createAllNetworkDelayInstances(executionTiming) {
         return Promise.all([
-            this.modelDependency.getAllDependencyInstances(),
-            this.modelDependency.getAllDependencies()
-        ]).then(async ([dependencyInstances, dependencies]) => {
-            const filteredDependencies = dependencyInstances.filter(instance =>
-                                            instance.value.length > 0
-                                            && instance.value[0].sendEvent.entity !== Model.SystemInterfaceName
-                                            && instance.value[0].receiveEvent.entity !== Model.SystemInterfaceName);
+            this.modelDependency.getAllDependencies(),
+            this.modelEntity.getAllEntitiesInstances()
+        ]).then(async ([dependencies, entitiesInstances]) => {
+            const filteredDependencies = dependencies.filter(dependency => 
+                dependency.source.entity !== Model.SystemInterfaceName 
+                && dependency.destination.entity !== Model.SystemInterfaceName);
             
             let instancesPromises = [ ];
             for (const dependency of filteredDependencies) {
-                const currentDependency = dependencies.find(item => dependency.name === item.name)
-                const sourceInstances = await this.database.getObject(Model.EntityInstancesStoreName, dependency.value[0].sendEvent.entity);
-                const destInstances = await this.database.getObject(Model.EntityInstancesStoreName, dependency.value[0].receiveEvent.entity);
-                
-                let instances = [ ];
+                const sourceInstances = entitiesInstances.find(instances => instances.name == dependency.source.entity);
+                const destinationInstances = entitiesInstances.find(instances => instances.name == dependency.destination.entity);
+
+                let newDependencyValues = [ ];
                 let encapsulationDelayInstances = [ ];
                 let networkDelayInstances = [ ];
                 let decapsulationDelayInstances = [ ];
 
-                for (let destIndex = destInstances.value.length - 1; destIndex > -1; destIndex--) {
-                    const destInstance = destInstances.value[destIndex];
-                    let sourceInstance = this.getLatestLetEndTime(sourceInstances.value, destInstance.letStartTime)
+                for (let destIndex = destinationInstances.value.length - 1; destIndex > -1; destIndex--) {
+                    const destInstance = destinationInstances.value[destIndex];
+                    let sourceInstanceCandidates = sourceInstances.value;
+                    let sourceInstance = null;
 
-                    if (sourceInstance.instance == -1) {
-                        continue;
-                    }
-
+                    let devicesAndNetworkDelay = null;
                     let sourceDevice = null;
                     let destDevice = null;
                     let networkDelay = null;
-                    let devicesAndNetworkDelay = await this.getDevicesAndNetworkDelay(sourceInstance, destInstance);
                     let encapsulationDelayTime = null;
                     let networkDelayTime = null;
                     let decapsulationDelayTime = null;
+                    while (true) {
+                        let oldSourceInstance = sourceInstance;
+                        sourceInstance = this.getLatestLetEndTime(sourceInstanceCandidates, destInstance.letStartTime);
+                        devicesAndNetworkDelay = await this.getDevicesAndNetworkDelay(sourceInstance.currentCore, destInstance.currentCore);
+                        if (devicesAndNetworkDelay == null || oldSourceInstance == sourceInstance) {
+                            break;
+                        }
 
-                    while (devicesAndNetworkDelay) {
                         [sourceDevice, destDevice, networkDelay] = devicesAndNetworkDelay;
                         [encapsulationDelayTime, networkDelayTime, decapsulationDelayTime] = this.getDelays(sourceDevice, destDevice, networkDelay, executionTiming);
                         const totalDelay = encapsulationDelayTime + networkDelayTime + decapsulationDelayTime;
-                
-                        let newSourceInstance = this.getLatestLetEndTime(sourceInstances.value, destInstance.letStartTime - totalDelay);
-                
-                        if (sourceInstance.instance !== newSourceInstance.instance ) {
-                            devicesAndNetworkDelay = await this.getDevicesAndNetworkDelay(newSourceInstance, destInstance);
-                            sourceInstance = newSourceInstance;
-                        } else {
-                            if (newSourceInstance.currentCore.device == destInstance.currentCore.device) {
-                                devicesAndNetworkDelay = null;
-                            }
-                            
-                            break;
+                        if (totalDelay > (destInstance.letStartTime - sourceInstance.letEndTime)) {
+                            sourceInstanceCandidates = sourceInstanceCandidates.slice(0, sourceInstance.instance);
                         }
                     }
 
-                    if (sourceInstance.instance == -1) {
-                        continue;
-                    }
-
                     if (devicesAndNetworkDelay) {
-                        // Do not add duplicate network delays.
+                        // Only create unique delay entities.
+                        // Create dependencies that go through the network.
                     
                         const encapsulationDelayInstance = ModelEntity.CreateDelayEntityInstanceParameters(
                             encapsulationDelayInstances.length,
@@ -396,12 +385,12 @@ class ModelSchedule {
                             encapsulationDelayTime,
                             sourceDevice,
                             destDevice, 
-                            currentDependency
+                            dependency
                         );
                         if (!ModelSchedule.NetworkDelayInstanceIsDuplicate(encapsulationDelayInstances, encapsulationDelayInstance)) {
                             encapsulationDelayInstances.unshift(encapsulationDelayInstance);
-                            const encapDependency = ModelDependency.CreateDelayDependencyParameters(currentDependency, ModelEntity.EncapsulationName);
-                            instances.unshift(this.createDependencyInstance(encapDependency, sourceInstance, encapsulationDelayInstances[0]));
+                            const encapDependency = ModelDependency.CreateDelayDependencyParameters(dependency, ModelEntity.EncapsulationName);
+                            newDependencyValues.unshift(this.createDependencyInstance(encapDependency, sourceInstance, encapsulationDelayInstances[0]));
                         }
                         
                         const networkDelayInstance = ModelEntity.CreateDelayEntityInstanceParameters(
@@ -410,12 +399,12 @@ class ModelSchedule {
                             networkDelayTime,
                             sourceDevice,
                             destDevice, 
-                            currentDependency
+                            dependency
                         );
                         if (!ModelSchedule.NetworkDelayInstanceIsDuplicate(networkDelayInstances, networkDelayInstance)) {
                             networkDelayInstances.unshift(networkDelayInstance);
-                            const netDependency = ModelDependency.CreateDelayDependencyParameters(currentDependency, ModelEntity.NetworkName);
-                            instances.unshift(this.createDependencyInstance(netDependency, encapsulationDelayInstances[0], networkDelayInstances[0]));
+                            const netDependency = ModelDependency.CreateDelayDependencyParameters(dependency, ModelEntity.NetworkName);
+                            newDependencyValues.unshift(this.createDependencyInstance(netDependency, encapsulationDelayInstances[0], networkDelayInstances[0]));
                         }
 
                         const decapsulationDelayInstance = ModelEntity.CreateDelayEntityInstanceParameters(
@@ -424,42 +413,39 @@ class ModelSchedule {
                             decapsulationDelayTime,
                             sourceDevice,
                             destDevice, 
-                            currentDependency
+                            dependency
                         );
                         if (!ModelSchedule.NetworkDelayInstanceIsDuplicate(decapsulationDelayInstances, decapsulationDelayInstance)) {
                             decapsulationDelayInstances.unshift(decapsulationDelayInstance);
-                            const decapDependency = ModelDependency.CreateDelayDependencyParameters(currentDependency, ModelEntity.DecapsulationName);
-                            instances.unshift(this.createDependencyInstance(decapDependency, networkDelayInstances[0], decapsulationDelayInstances[0]));
+                            const decapDependency = ModelDependency.CreateDelayDependencyParameters(dependency, ModelEntity.DecapsulationName);
+                            newDependencyValues.unshift(this.createDependencyInstance(decapDependency, networkDelayInstances[0], decapsulationDelayInstances[0]));
                         }
 
-                        const destDependency = ModelDependency.CreateDelayDependencyParameters(currentDependency);
-                        instances.unshift(this.createDependencyInstance(destDependency, decapsulationDelayInstances[0], destInstance));
+                        const destDependency = ModelDependency.CreateDelayDependencyParameters(dependency);
+                        newDependencyValues.unshift(this.createDependencyInstance(destDependency, decapsulationDelayInstances[0], destInstance));
                     } else {
-                        instances.unshift(this.createDependencyInstance(currentDependency, sourceInstance, destInstance));
+                        // Create dependency that doesn't go through the network.
+                        newDependencyValues.unshift(this.createDependencyInstance(dependency, sourceInstance, destInstance));
                     }                        
                 }
 
-                if (encapsulationDelayInstances.length > 0 && networkDelayInstances.length > 0 && decapsulationDelayInstances.length > 0) {
-                    encapsulationDelayInstances.sort(Utility.CompareEntityLetStartTime);
-                    encapsulationDelayInstances.forEach((instance, index) => instance.instance = index);
-                    
-                    networkDelayInstances.sort(Utility.CompareEntityLetStartTime);
-                    networkDelayInstances.forEach((instance, index) => instance.instance = index);
-
-                    decapsulationDelayInstances.sort(Utility.CompareEntityLetStartTime);
-                    decapsulationDelayInstances.forEach((instance, index) => instance.instance = index);
-                    
-                    instancesPromises.push(this.modelEntity.createAllDelayEntityInstances(currentDependency, encapsulationDelayInstances, networkDelayInstances, decapsulationDelayInstances));
-                }
-
-                instances.sort(Utility.CompareDependencyInstanceBySendAndReceiveEvents);
-                instances.forEach((instance, index) => instance.instance = index);
+                encapsulationDelayInstances.sort(Utility.CompareEntityLetStartTime);
+                encapsulationDelayInstances.forEach((instance, index) => instance.instance = index);
+                networkDelayInstances.sort(Utility.CompareEntityLetStartTime);
+                networkDelayInstances.forEach((instance, index) => instance.instance = index);
+                decapsulationDelayInstances.sort(Utility.CompareEntityLetStartTime);
+                decapsulationDelayInstances.forEach((instance, index) => instance.instance = index);
                 
-                const newDependencyInstance = this.database.putObject(Model.DependencyInstancesStoreName, {
-                    'name': currentDependency.name, 
-                    'value': instances
+                instancesPromises.push(this.modelEntity.createAllDelayEntityInstances(dependency, encapsulationDelayInstances, networkDelayInstances, decapsulationDelayInstances));
+
+                newDependencyValues.sort(Utility.CompareDependencyInstanceBySendAndReceiveEvents);
+                newDependencyValues.forEach((instance, index) => instance.instance = index);
+                
+                const newDependencyInstances = this.database.putObject(Model.DependencyInstancesStoreName, {
+                    'name': dependency.name, 
+                    'value': newDependencyValues
                 });
-                instancesPromises.push(newDependencyInstance);
+                instancesPromises.push(newDependencyInstances);
             }
             
             return Promise.all(instancesPromises);
@@ -497,36 +483,29 @@ class ModelSchedule {
         }
     }
 
-    async getDevicesAndNetworkDelay(source, dest) {
-        if (dest.currentCore != null && source.currentCore != null
-                && dest.currentCore.device != null && source.currentCore.device != null
-                && dest.currentCore.device !== source.currentCore.device) {
+    async getDevicesAndNetworkDelay(sourceCore, destCore) {
+        if (destCore != null && sourceCore != null
+                && destCore.device != null && sourceCore.device != null
+                && destCore.device !== sourceCore.device) {
             const [sourceDevice, destDevice, networkDelay] = await Promise.all([
-                this.modelDevice.getDevice(source.currentCore.device),
-                this.modelDevice.getDevice(dest.currentCore.device),
-                this.modelNetworkDelay.getNetworkDelay(source.currentCore.device, dest.currentCore.device)
+                this.modelDevice.getDevice(sourceCore.device),
+                this.modelDevice.getDevice(destCore.device),
+                this.modelNetworkDelay.getNetworkDelay(sourceCore.device, destCore.device)
             ]);
 
-            let incomplete = (sourceDevice == null || destDevice == null || networkDelay == null);
-            if (sourceDevice == null) {
-                console.warn(`Device ${source.currentCore.device} not found.`);
-            }
-            if (destDevice == null) {
-                console.warn(`Device ${dest.currentCore.device} not found.`);
-            }
-            if (networkDelay == null) {
-                console.warn(`Could not find a network delay from device ${source.currentCore.device} to device ${dest.currentCore.device}`);
-            }
-            
-            if (incomplete) {
+            let warnings = "";
+            if (sourceDevice == null) warnings += `Device ${sourceCore.device} not found. `;
+            if (destDevice == null) warnings += `Device ${destCore.device} not found. `;
+            if (networkDelay == null) warnings += `Could not find a network delay from device ${sourceCore.device} to device ${destCore.device}.`;
+            if (warnings !== "") {
+                console.warn(warnings);
                 return null;
             }
-            else {
-                return [sourceDevice, destDevice, networkDelay];
-            }
-        } else {
-            return null;
+
+            return [sourceDevice, destDevice, networkDelay];
         }
+        
+        return null;
     }
     
     toString() {
