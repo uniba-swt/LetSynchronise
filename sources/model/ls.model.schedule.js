@@ -311,21 +311,6 @@ class ModelSchedule {
                  .forEach(chain => this.createEventChainInstances(allDependencyInstances, chain)));
     }
     
-    deleteSchedule() {
-        // Delete all entity, dependency, and event chain instances.
-        return this.database.deleteSchedule();
-    }
-    
-    // Get task schedule for given makespan.
-    getSchedule() {
-        return {
-            'promiseAllEntities': this.modelEntity.getAllEntities(),
-            'promiseAllEntitiesInstances': this.modelEntity.getAllEntitiesInstances(),
-            'promiseAllDependenciesInstances': this.modelDependency.getAllDependenciesInstances(),
-            'promiseAllEventChainInstances': this.modelEventChain.getAllEventChainsInstances()
-        };
-    }
-    
     // Create all network delay instances from all dependency instances.
     // All task-to-core/device allocations need to be known.
     createAllNetworkDelayInstances(executionTiming) {
@@ -343,10 +328,16 @@ class ModelSchedule {
                 const destinationInstances = entitiesInstances.find(instances => instances.name == dependency.destination.entity);
 
                 let newDependencyValues = [ ];
-                let encapsulationDelayInstances = [ ];
-                let networkDelayInstances = [ ];
-                let decapsulationDelayInstances = [ ];
+                let encapsulationEntityInstances = [ ];
+                let networkEntityInstances = [ ];
+                let decapsulationEntityInstances = [ ];
 
+                // Cache of the already generated encapsulation, network, and decapsulation delays.
+                // Key: String representation of the source entity instance, source device, and destination device. See "cacheName".
+                let cachedDelays = { };
+
+                // For each destination entity instance, find the latest source entity instance whose output can arrive on time, taking
+                // communication delays into account. Every pair of source-destination instance may have different combinations of communication delays.
                 for (let destIndex = destinationInstances.value.length - 1; destIndex > -1; destIndex--) {
                     const destInstance = destinationInstances.value[destIndex];
                     let sourceInstanceCandidates = sourceInstances.value;
@@ -362,15 +353,23 @@ class ModelSchedule {
                     while (true) {
                         let oldSourceInstance = sourceInstance;
                         sourceInstance = this.getLatestLetEndTime(sourceInstanceCandidates, destInstance.letStartTime);
+
                         devicesAndNetworkDelay = await this.getDevicesAndNetworkDelay(sourceInstance.currentCore, destInstance.currentCore);
                         if (devicesAndNetworkDelay == null || oldSourceInstance == sourceInstance) {
                             break;
                         }
-
                         [sourceDevice, destDevice, networkDelay] = devicesAndNetworkDelay;
-                        [encapsulationDelayTime, networkDelayTime, decapsulationDelayTime] = this.getDelays(sourceDevice, destDevice, networkDelay, executionTiming);
-                        const totalDelay = encapsulationDelayTime + networkDelayTime + decapsulationDelayTime;
-                        if (totalDelay > (destInstance.letStartTime - sourceInstance.letEndTime)) {
+
+                        // For randomly generated delays, we need to cache the generated communication delays for each pair of source-destination entity instances
+                        // in order to get consistent results when querying the same pair of entity instances.
+                        const cacheName = `${sourceInstances.name}${sourceInstance.instance}_${sourceDevice.name}_${destDevice.name}`;
+                        if (cachedDelays[cacheName] == undefined) {
+                            cachedDelays[cacheName] = this.getDelays(sourceDevice, destDevice, networkDelay, executionTiming);
+                        }
+                        [encapsulationDelayTime, networkDelayTime, decapsulationDelayTime] = cachedDelays[cacheName];
+
+                        const communicationDelay = encapsulationDelayTime + networkDelayTime + decapsulationDelayTime;
+                        if (communicationDelay > (destInstance.letStartTime - sourceInstance.letEndTime)) {
                             sourceInstanceCandidates = sourceInstanceCandidates.slice(0, sourceInstance.instance);
                         }
                     }
@@ -379,64 +378,64 @@ class ModelSchedule {
                         // Only create unique delay entities.
                         // Create dependencies that go through the network.
                     
-                        const encapsulationDelayInstance = ModelEntity.CreateDelayEntityInstanceParameters(
-                            encapsulationDelayInstances.length,
+                        const encapsulationEntityInstance = ModelEntity.CreateDelayEntityInstanceParameters(
+                            encapsulationEntityInstances.length,
                             sourceInstance.letEndTime,
                             encapsulationDelayTime,
                             sourceDevice,
                             destDevice, 
                             dependency
                         );
-                        if (!ModelSchedule.NetworkDelayInstanceIsDuplicate(encapsulationDelayInstances, encapsulationDelayInstance)) {
-                            encapsulationDelayInstances.unshift(encapsulationDelayInstance);
+                        if (!ModelSchedule.NetworkDelayInstanceIsDuplicate(encapsulationEntityInstances, encapsulationEntityInstance)) {
+                            encapsulationEntityInstances.unshift(encapsulationEntityInstance);
                             const encapDependency = ModelDependency.CreateDelayDependencyParameters(dependency, ModelEntity.EncapsulationName);
-                            newDependencyValues.unshift(this.createDependencyInstance(encapDependency, sourceInstance, encapsulationDelayInstances[0]));
+                            newDependencyValues.unshift(this.createDependencyInstance(encapDependency, sourceInstance, encapsulationEntityInstances[0]));
                         }
                         
-                        const networkDelayInstance = ModelEntity.CreateDelayEntityInstanceParameters(
-                            networkDelayInstances.length,
-                            encapsulationDelayInstances[0].letEndTime,
+                        const networkEntityInstance = ModelEntity.CreateDelayEntityInstanceParameters(
+                            networkEntityInstances.length,
+                            encapsulationEntityInstances[0].letEndTime,
                             networkDelayTime,
                             sourceDevice,
                             destDevice, 
                             dependency
                         );
-                        if (!ModelSchedule.NetworkDelayInstanceIsDuplicate(networkDelayInstances, networkDelayInstance)) {
-                            networkDelayInstances.unshift(networkDelayInstance);
-                            const netDependency = ModelDependency.CreateDelayDependencyParameters(dependency, ModelEntity.NetworkName);
-                            newDependencyValues.unshift(this.createDependencyInstance(netDependency, encapsulationDelayInstances[0], networkDelayInstances[0]));
+                        if (!ModelSchedule.NetworkDelayInstanceIsDuplicate(networkEntityInstances, networkEntityInstance)) {
+                            networkEntityInstances.unshift(networkEntityInstance);
+                            const networkDependency = ModelDependency.CreateDelayDependencyParameters(dependency, ModelEntity.NetworkName);
+                            newDependencyValues.unshift(this.createDependencyInstance(networkDependency, encapsulationEntityInstances[0], networkEntityInstances[0]));
                         }
 
-                        const decapsulationDelayInstance = ModelEntity.CreateDelayEntityInstanceParameters(
-                            decapsulationDelayInstances.length,
-                            networkDelayInstances[0].letEndTime,
+                        const decapsulationEntityInstance = ModelEntity.CreateDelayEntityInstanceParameters(
+                            decapsulationEntityInstances.length,
+                            networkEntityInstances[0].letEndTime,
                             decapsulationDelayTime,
                             sourceDevice,
                             destDevice, 
                             dependency
                         );
-                        if (!ModelSchedule.NetworkDelayInstanceIsDuplicate(decapsulationDelayInstances, decapsulationDelayInstance)) {
-                            decapsulationDelayInstances.unshift(decapsulationDelayInstance);
+                        if (!ModelSchedule.NetworkDelayInstanceIsDuplicate(decapsulationEntityInstances, decapsulationEntityInstance)) {
+                            decapsulationEntityInstances.unshift(decapsulationEntityInstance);
                             const decapDependency = ModelDependency.CreateDelayDependencyParameters(dependency, ModelEntity.DecapsulationName);
-                            newDependencyValues.unshift(this.createDependencyInstance(decapDependency, networkDelayInstances[0], decapsulationDelayInstances[0]));
+                            newDependencyValues.unshift(this.createDependencyInstance(decapDependency, networkEntityInstances[0], decapsulationEntityInstances[0]));
                         }
 
                         const destDependency = ModelDependency.CreateDelayDependencyParameters(dependency);
-                        newDependencyValues.unshift(this.createDependencyInstance(destDependency, decapsulationDelayInstances[0], destInstance));
+                        newDependencyValues.unshift(this.createDependencyInstance(destDependency, decapsulationEntityInstances[0], destInstance));
                     } else {
                         // Create dependency that doesn't go through the network.
                         newDependencyValues.unshift(this.createDependencyInstance(dependency, sourceInstance, destInstance));
                     }                        
                 }
 
-                encapsulationDelayInstances.sort(Utility.CompareEntityLetStartTime);
-                encapsulationDelayInstances.forEach((instance, index) => instance.instance = index);
-                networkDelayInstances.sort(Utility.CompareEntityLetStartTime);
-                networkDelayInstances.forEach((instance, index) => instance.instance = index);
-                decapsulationDelayInstances.sort(Utility.CompareEntityLetStartTime);
-                decapsulationDelayInstances.forEach((instance, index) => instance.instance = index);
+                encapsulationEntityInstances.sort(Utility.CompareEntityLetStartTime);
+                encapsulationEntityInstances.forEach((instance, index) => instance.instance = index);
+                networkEntityInstances.sort(Utility.CompareEntityLetStartTime);
+                networkEntityInstances.forEach((instance, index) => instance.instance = index);
+                decapsulationEntityInstances.sort(Utility.CompareEntityLetStartTime);
+                decapsulationEntityInstances.forEach((instance, index) => instance.instance = index);
                 
-                instancesPromises.push(this.modelEntity.createAllDelayEntityInstances(dependency, encapsulationDelayInstances, networkDelayInstances, decapsulationDelayInstances));
+                instancesPromises.push(this.modelEntity.createAllDelayEntityInstances(dependency, encapsulationEntityInstances, networkEntityInstances, decapsulationEntityInstances));
 
                 newDependencyValues.sort(Utility.CompareDependencyInstanceBySendAndReceiveEvents);
                 newDependencyValues.forEach((instance, index) => instance.instance = index);
@@ -506,6 +505,21 @@ class ModelSchedule {
         }
         
         return null;
+    }
+
+    deleteSchedule() {
+        // Delete all entity, dependency, and event chain instances.
+        return this.database.deleteSchedule();
+    }
+    
+    // Get task schedule for given makespan.
+    getSchedule() {
+        return {
+            'promiseAllEntities': this.modelEntity.getAllEntities(),
+            'promiseAllEntitiesInstances': this.modelEntity.getAllEntitiesInstances(),
+            'promiseAllDependenciesInstances': this.modelDependency.getAllDependenciesInstances(),
+            'promiseAllEventChainInstances': this.modelEventChain.getAllEventChainsInstances()
+        };
     }
     
     toString() {
