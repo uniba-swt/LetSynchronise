@@ -98,23 +98,23 @@ class ModelDependency {
             case ModelEntity.EncapsulationName:
                 return {
                     'source'      : {'entity': dependency.source.entity, 'port': dependency.source.port},
-                    'destination' : {'entity': `${dependency.source.entity} => ${dependency.destination.entity} ${ModelEntity.EncapsulationName} delay`, 'port': dependency.destination.port}
+                    'destination' : {'entity': `${dependency.source.entity} → ${dependency.destination.entity} ${ModelEntity.EncapsulationName} delay`, 'port': dependency.destination.port}
                 };
                 
             case ModelEntity.NetworkName:
                 return {
-                    'source'      : {'entity': `${dependency.source.entity} => ${dependency.destination.entity} ${ModelEntity.EncapsulationName} delay`, 'port': dependency.source.port},
-                    'destination' : {'entity': `${dependency.source.entity} => ${dependency.destination.entity} ${ModelEntity.NetworkName} delay`, 'port': dependency.destination.port}
+                    'source'      : {'entity': `${dependency.source.entity} → ${dependency.destination.entity} ${ModelEntity.EncapsulationName} delay`, 'port': dependency.source.port},
+                    'destination' : {'entity': `${dependency.source.entity} → ${dependency.destination.entity} ${ModelEntity.NetworkName} delay`, 'port': dependency.destination.port}
                 };
                 
             case ModelEntity.DecapsulationName:
                 return {
-                    'source'      : {'entity': `${dependency.source.entity} => ${dependency.destination.entity} ${ModelEntity.NetworkName} delay`, 'port': dependency.source.port},
-                    'destination' : {'entity': `${dependency.source.entity} => ${dependency.destination.entity} ${ModelEntity.DecapsulationName} delay`, 'port': dependency.destination.port}
+                    'source'      : {'entity': `${dependency.source.entity} → ${dependency.destination.entity} ${ModelEntity.NetworkName} delay`, 'port': dependency.source.port},
+                    'destination' : {'entity': `${dependency.source.entity} → ${dependency.destination.entity} ${ModelEntity.DecapsulationName} delay`, 'port': dependency.destination.port}
                 };
             default:
                 return {
-                    'source'      : {'entity': `${dependency.source.entity} => ${dependency.destination.entity} ${ModelEntity.DecapsulationName} delay`, 'port': dependency.source.port},
+                    'source'      : {'entity': `${dependency.source.entity} → ${dependency.destination.entity} ${ModelEntity.DecapsulationName} delay`, 'port': dependency.source.port},
                     'destination' : {'entity': dependency.destination.entity, 'port': dependency.destination.port}
                 };
         }

@@ -168,7 +168,7 @@ class ModelEntity {
             case ModelEntity.NetworkName:
             case ModelEntity.DecapsulationName:
             return this.database.putObject(Model.EntityInstancesStoreName, {
-                'name'       : `${dependency.source.entity} => ${dependency.destination.entity} ${delayType} delay`,
+                'name'       : `${dependency.source.entity} → ${dependency.destination.entity} ${delayType} delay`,
                 'type'       : delayType,
                 'dependency' : dependency.name,
                 'value'      : delays

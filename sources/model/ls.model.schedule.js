@@ -168,8 +168,6 @@ class ModelSchedule {
 					}
                 }
             } else {
-                // TODO: create network delays here instead
-
                 // Dependency is entity --> entity
                 const sourceInstances = sourceEntityInstances ? sourceEntityInstances.value : 0;
                 const destinationInstances = destinationEntityInstances ? destinationEntityInstances.value : 0;
@@ -203,7 +201,7 @@ class ModelSchedule {
             .then(dependencies => Promise.all(dependencies.map(dependency => this.createDependencyInstances(dependency, makespan))));
     }
     
-    // TOOD: Extend to support SL-LET network delays.
+    // TOOD: Extend to support SL-LET communication delays.
     // Creates all instances of an event chain from the given dependencyInstances.
     // Each event chain instance is linear with no branching.
     // Event chain instances are found via forward reachability from the event chain's starting dependency.
@@ -311,8 +309,8 @@ class ModelSchedule {
                  .forEach(chain => this.createEventChainInstances(allDependencyInstances, chain)));
     }
     
-    // Create all network delay instances from all dependency instances.
-    // All task-to-core/device allocations need to be known.
+    // Create all communication delay instances from all dependency instances.
+    // All task-to-core/device allocations need to be known, which may require scheduling to be performed beforehand.
     createAllNetworkDelayInstances(executionTiming) {
         return Promise.all([
             this.modelDependency.getAllDependencies(),
