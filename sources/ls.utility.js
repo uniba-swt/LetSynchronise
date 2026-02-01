@@ -281,16 +281,10 @@ class Utility {
         // Group the netowrk delays together based on the receiver task.
         let tasks = entities.filter(entity => entity.type === 'task').sort();
         for (const task of tasks) {
-            const encapsulationDelays = entities.filter(entity => entity.name.endsWith(`${task.name} ${ModelEntity.EncapsulationName} delay`));
-            sorted = [...sorted, ...encapsulationDelays];
-            
+            const encapsulationDelays = entities.filter(entity => entity.name.endsWith(`${task.name} ${ModelEntity.EncapsulationName} delay`));            
             const networkDelays = entities.filter(entity => entity.name.endsWith(`${task.name} ${ModelEntity.NetworkName} delay`));
-            sorted = [...sorted, ...networkDelays];
-
             const decapsulationDelays = entities.filter(entity => entity.name.endsWith(`${task.name} ${ModelEntity.DecapsulationName} delay`));
-            sorted = [...sorted, ...decapsulationDelays];
-
-            sorted.push(task);
+            sorted.push(...encapsulationDelays, ...networkDelays, ...decapsulationDelays, task);
         }
 
         return sorted;

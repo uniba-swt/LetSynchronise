@@ -99,30 +99,6 @@ class ModelDatabase {
             }
         });
     }
-
-    getAllObjectsWithKeys(storeName) {
-        return new Promise((resolve, reject) => {
-            const objectStore = this.getObjectStore(storeName, 'readonly', reject);
-            const items = [];
-    
-            const cursorRequest = objectStore.openCursor();
-    
-            cursorRequest.onsuccess = function(event) {
-                const cursor = event.target.result;
-                if (cursor) {
-                    items.push({ id: cursor.key, ...cursor.value });
-                    cursor.continue();
-                } else {
-                    resolve(items);
-                }
-            };
-    
-            cursorRequest.onerror = function(event) {
-                reject(event.target.error);
-            };
-        });
-    }
-    
     
     deleteObject(storeName, index, promiseResolve, promiseReject) {
         return new Promise((resolve, reject) => {

@@ -59,9 +59,9 @@ class PluginSchedulerEdf {
         let taskInstanceIndices = new Array(tasksInstances.length).fill(0);
         
         // For all task instances, set their remaining execution times.
-        tasksInstances.forEach(taskInstances => {
+        tasksInstances.forEach(taskInstances => 
             taskInstances.value.forEach(instance => instance.remainingExecutionTime = instance.executionTime)
-        });
+        );
         
         // Schedule all the task instances in chronological (LET start time) and
         // earliest deadline order.

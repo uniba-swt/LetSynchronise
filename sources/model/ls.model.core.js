@@ -108,7 +108,7 @@ class ModelCore {
     refreshViews() {
         return this.getAllCores()
             .then(cores => this.updateCores(cores))
-            .then(devices => this.modelDevice.getAllDevices())
+            .then(result => this.modelDevice.getAllDevices())
             .then(devices => this.updateDeviceSelector(devices))
             .then(result => this.modelEntity.validate());
     }

@@ -502,6 +502,8 @@ class ViewSchedule {
 
     // Draw just the instances of a given entity.
     drawEntityInstances(entityInstances, svgElement, scale, index) {
+        const isTaskInstance = entityInstances.type === "task";
+
         const tooltip = this.entityTooltip;   // Need to create local reference so that it can be accessed inside the mouse event handlers.
 
         const group =
@@ -529,35 +531,6 @@ class ViewSchedule {
             return;
         }
 
-        if (entityInstances.type === "task") {
-            const firstPeriodStartTime = instances[0].periodStartTime;
-            const lastPeriodDuration = instances[instances.length - 1].periodEndTime - instances[instances.length - 1].periodStartTime;
-
-            // Add horizontal line for the task's initial offset
-            graphInfo.append('line')
-                       .attr('x1', 0)
-                       .attr('x2', scale(firstPeriodStartTime))
-                       .attr('y1', View.BarHeight + View.BarMargin)
-                       .attr('y2', View.BarHeight + View.BarMargin)
-                       .attr('class', 'initialOffset');
-            
-            // Add vertical line at the start of the initial offset
-            graphInfo.append('line')
-                       .attr('x1', 0)
-                       .attr('x2', 0)
-                       .attr('y1', View.BarHeight + View.TickHeight + View.BarMargin)
-                       .attr('y2', `0`)
-                       .attr('class', 'boundary');
-            
-            // Add horizontal line for the task's periods
-            graphInfo.append('line')
-                       .attr('x1', scale(firstPeriodStartTime))
-                       .attr('x2', scale(this.makespan * Utility.MsToNs + lastPeriodDuration))
-                       .attr('y1', View.BarHeight + View.BarMargin)
-                       .attr('y2', View.BarHeight + View.BarMargin)
-                       .attr('class', 'period');
-        }
-
         for (const instance of instances) {
             // Add the entity's LET duration
             graphInfo.append('rect')
@@ -576,7 +549,7 @@ class ViewSchedule {
                      .on('mouseover', () => {
                          const title = `<b>${entityInstances.name}</b> instance ${instance.instance}`;
                          const executionTime = `Total execution time: ${Utility.FormatTimeString(instance.executionTime / Utility.MsToNs, 2)}ms`;
-                         if (entityInstances.type === 'task') {
+                         if (isTaskInstance) {
                              const periodInterval = `Period interval: [${Utility.FormatTimeString(instance.periodStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.periodEndTime / Utility.MsToNs, 2)}]ms`;
                              const letInterval = `LET interval: [${Utility.FormatTimeString(instance.letStartTime / Utility.MsToNs, 2)}, ${Utility.FormatTimeString(instance.letEndTime / Utility.MsToNs, 2)}]ms`;
                              tooltip.innerHTML = `${title} <br/> ${letInterval} <br/> ${periodInterval} <br/> ${executionTime}`;
@@ -598,7 +571,7 @@ class ViewSchedule {
                         this.updateRelatedEventChains(entityInstances.name, instance.instance);
                      });
 
-            if (entityInstances.type === "task") {
+            if (isTaskInstance) {
                 // Add the task's execution times
                 const executionIntervals = instance.executionIntervals.map(interval => Utility.Interval.FromJson(interval));
                 for (const interval of executionIntervals) {
@@ -634,6 +607,10 @@ class ViewSchedule {
             }
 
         }
+
+        if (!isTaskInstance) {
+            return;
+        }
         
         // Create x-axis with correct scale.
         const xAxis =
@@ -645,6 +622,33 @@ class ViewSchedule {
                    .attr('transform', `translate(0, ${View.BarHeight + 2 * View.TickHeight})`)
                    .call(xAxis)
                    .call(g => g.select('.domain').remove());
+
+        const firstPeriodStartTime = instances[0].periodStartTime;
+        const lastPeriodDuration = instances[instances.length - 1].periodEndTime - instances[instances.length - 1].periodStartTime;
+
+        // Add horizontal line for the task's initial offset
+        graphInfo.append('line')
+                    .attr('x1', 0)
+                    .attr('x2', scale(firstPeriodStartTime))
+                    .attr('y1', View.BarHeight + View.BarMargin)
+                    .attr('y2', View.BarHeight + View.BarMargin)
+                    .attr('class', 'initialOffset');
+        
+        // Add vertical line at the start of the initial offset
+        graphInfo.append('line')
+                    .attr('x1', 0)
+                    .attr('x2', 0)
+                    .attr('y1', View.BarHeight + View.TickHeight + View.BarMargin)
+                    .attr('y2', `0`)
+                    .attr('class', 'boundary');
+        
+        // Add horizontal line for the task's periods
+        graphInfo.append('line')
+                    .attr('x1', scale(firstPeriodStartTime))
+                    .attr('x2', scale(this.makespan * Utility.MsToNs + lastPeriodDuration))
+                    .attr('y1', View.BarHeight + View.BarMargin)
+                    .attr('y2', View.BarHeight + View.BarMargin)
+                    .attr('class', 'period');
     }
     
     // Draw the total system load at the bottom of the schedule.

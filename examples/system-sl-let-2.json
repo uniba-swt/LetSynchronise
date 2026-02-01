@@ -1,0 +1,2257 @@
+{
+	"DeviceStore": [
+		{
+			"name": "d1",
+			"speedup": 1,
+			"delays": {
+				"tcp": {
+					"bcdt": 200000,
+					"acdt": 250000,
+					"wcdt": 300000,
+					"distribution": "Normal"
+				}
+			}
+		},
+		{
+			"name": "d2",
+			"speedup": 1,
+			"delays": {
+				"udp": {
+					"bcdt": 10000,
+					"acdt": 50000,
+					"wcdt": 100000,
+					"distribution": "Normal"
+				}
+			}
+		},
+		{
+			"name": "d3",
+			"speedup": 1,
+			"delays": {
+				"tcp": {
+					"bcdt": 10000,
+					"acdt": 50000,
+					"wcdt": 100000,
+					"distribution": "Normal"
+				}
+			}
+		}
+	],
+	"CoreStore": [
+		{
+			"name": "c1",
+			"speedup": 1,
+			"device": "d1"
+		},
+		{
+			"name": "c2",
+			"speedup": 1,
+			"device": "d2"
+		},
+		{
+			"name": "c3",
+			"speedup": 1,
+			"device": "d3"
+		}
+	],
+	"MemoryStore": [],
+	"NetworkDelayStore": [
+		{
+			"name": "d2-to-d1",
+			"source": "d2",
+			"dest": "d1",
+			"bcdt": 100000,
+			"acdt": 500000,
+			"wcdt": 3000000,
+			"distribution": "Normal"
+		},
+		{
+			"name": "d2-to-d3",
+			"source": "d2",
+			"dest": "d3",
+			"bcdt": 100000,
+			"acdt": 500000,
+			"wcdt": 3000000,
+			"distribution": "Normal"
+		},
+		{
+			"name": "d3-to-d1",
+			"source": "d3",
+			"dest": "d1",
+			"bcdt": 100000,
+			"acdt": 200000,
+			"wcdt": 300000,
+			"distribution": "Normal"
+		},
+		{
+			"name": "d3-to-d2",
+			"source": "d3",
+			"dest": "d2",
+			"bcdt": 100000,
+			"acdt": 200000,
+			"wcdt": 300000,
+			"distribution": "Normal"
+		}
+	],
+	"SystemInputStore": [
+		{
+			"name": "SystemInput"
+		}
+	],
+	"SystemOutputStore": [
+		{
+			"name": "SystemOutput"
+		}
+	],
+	"EntityStore": [
+		{
+			"name": "task_a",
+			"type": "task",
+			"priority": 1,
+			"initialOffset": 1000000,
+			"activationOffset": 0,
+			"duration": 500000,
+			"period": 2000000,
+			"inputs": [
+				"in"
+			],
+			"outputs": [
+				"out"
+			],
+			"wcet": 500000,
+			"acet": 500000,
+			"bcet": 500000,
+			"distribution": "Uniform",
+			"core": "c1"
+		},
+		{
+			"name": "task_a2",
+			"type": "task",
+			"priority": 1,
+			"initialOffset": 1000000,
+			"activationOffset": 0,
+			"duration": 500000,
+			"period": 4000000,
+			"inputs": [
+				"in"
+			],
+			"outputs": [
+				"out"
+			],
+			"wcet": 500000,
+			"acet": 500000,
+			"bcet": 500000,
+			"distribution": "Uniform",
+			"core": "c2"
+		},
+		{
+			"name": "task_b",
+			"type": "task",
+			"priority": 1,
+			"initialOffset": 1000000,
+			"activationOffset": 0,
+			"duration": 500000,
+			"period": 2000000,
+			"inputs": [
+				"in"
+			],
+			"outputs": [
+				"out"
+			],
+			"wcet": 500000,
+			"acet": 500000,
+			"bcet": 500000,
+			"distribution": "Uniform",
+			"core": null
+		},
+		{
+			"name": "task_c",
+			"type": "task",
+			"priority": 0,
+			"initialOffset": 0,
+			"activationOffset": 0,
+			"duration": 1000000,
+			"period": 2000000,
+			"inputs": [
+				"in1",
+				"in2"
+			],
+			"outputs": [
+				"out"
+			],
+			"wcet": 1000000,
+			"acet": 1000000,
+			"bcet": 1000000,
+			"distribution": "Weibull",
+			"core": "c1"
+		}
+	],
+	"DependencyStore": [
+		{
+			"name": "delta",
+			"source": {
+				"entity": "task_c",
+				"port": "out"
+			},
+			"destination": {
+				"entity": "__system",
+				"port": "SystemOutput"
+			}
+		},
+		{
+			"name": "gamma",
+			"source": {
+				"entity": "task_b",
+				"port": "out"
+			},
+			"destination": {
+				"entity": "task_c",
+				"port": "in2"
+			}
+		},
+		{
+			"name": "theta",
+			"source": {
+				"entity": "__system",
+				"port": "SystemInput"
+			},
+			"destination": {
+				"entity": "task_b",
+				"port": "in"
+			}
+		}
+	],
+	"ConstraintInstancesStore": [],
+	"DependencyInstancesStore": [
+		{
+			"name": "delta",
+			"value": [
+				{
+					"instance": 0,
+					"receiveEvent": {
+						"entity": "__system",
+						"port": "SystemOutput",
+						"entityInstance": 0,
+						"timestamp": 1000000
+					},
+					"sendEvent": {
+						"entity": "task_c",
+						"port": "out",
+						"entityInstance": 0,
+						"timestamp": 1000000
+					}
+				},
+				{
+					"instance": 1,
+					"receiveEvent": {
+						"entity": "__system",
+						"port": "SystemOutput",
+						"entityInstance": 1,
+						"timestamp": 3000000
+					},
+					"sendEvent": {
+						"entity": "task_c",
+						"port": "out",
+						"entityInstance": 1,
+						"timestamp": 3000000
+					}
+				},
+				{
+					"instance": 2,
+					"receiveEvent": {
+						"entity": "__system",
+						"port": "SystemOutput",
+						"entityInstance": 2,
+						"timestamp": 5000000
+					},
+					"sendEvent": {
+						"entity": "task_c",
+						"port": "out",
+						"entityInstance": 2,
+						"timestamp": 5000000
+					}
+				},
+				{
+					"instance": 3,
+					"receiveEvent": {
+						"entity": "__system",
+						"port": "SystemOutput",
+						"entityInstance": 3,
+						"timestamp": 7000000
+					},
+					"sendEvent": {
+						"entity": "task_c",
+						"port": "out",
+						"entityInstance": 3,
+						"timestamp": 7000000
+					}
+				},
+				{
+					"instance": 4,
+					"receiveEvent": {
+						"entity": "__system",
+						"port": "SystemOutput",
+						"entityInstance": 4,
+						"timestamp": 9000000
+					},
+					"sendEvent": {
+						"entity": "task_c",
+						"port": "out",
+						"entityInstance": 4,
+						"timestamp": 9000000
+					}
+				},
+				{
+					"instance": 5,
+					"receiveEvent": {
+						"entity": "__system",
+						"port": "SystemOutput",
+						"entityInstance": 5,
+						"timestamp": 11000000
+					},
+					"sendEvent": {
+						"entity": "task_c",
+						"port": "out",
+						"entityInstance": 5,
+						"timestamp": 11000000
+					}
+				}
+			]
+		},
+		{
+			"name": "gamma",
+			"value": [
+				{
+					"instance": 0,
+					"receiveEvent": {
+						"entity": "task_c",
+						"port": "in2",
+						"entityInstance": 0,
+						"timestamp": 0
+					},
+					"sendEvent": {
+						"entity": "task_b",
+						"port": "out",
+						"entityInstance": -1,
+						"timestamp": 0
+					}
+				},
+				{
+					"instance": 1,
+					"receiveEvent": {
+						"entity": "task_b → task_c encapsulation delay",
+						"port": "in2",
+						"entityInstance": 0,
+						"timestamp": 1500000
+					},
+					"sendEvent": {
+						"entity": "task_b",
+						"port": "out",
+						"entityInstance": 0,
+						"timestamp": 1500000
+					}
+				},
+				{
+					"instance": 2,
+					"receiveEvent": {
+						"entity": "task_b → task_c network delay",
+						"port": "in2",
+						"entityInstance": 0,
+						"timestamp": 1565707
+					},
+					"sendEvent": {
+						"entity": "task_b → task_c encapsulation delay",
+						"port": "out",
+						"entityInstance": 0,
+						"timestamp": 1565707
+					}
+				},
+				{
+					"instance": 3,
+					"receiveEvent": {
+						"entity": "task_b → task_c decapsulation delay",
+						"port": "in2",
+						"entityInstance": 0,
+						"timestamp": 1755318
+					},
+					"sendEvent": {
+						"entity": "task_b → task_c network delay",
+						"port": "out",
+						"entityInstance": 0,
+						"timestamp": 1755318
+					}
+				},
+				{
+					"instance": 4,
+					"receiveEvent": {
+						"entity": "task_c",
+						"port": "in2",
+						"entityInstance": 1,
+						"timestamp": 2000000
+					},
+					"sendEvent": {
+						"entity": "task_b → task_c decapsulation delay",
+						"port": "out",
+						"entityInstance": 0,
+						"timestamp": 1995226
+					}
+				},
+				{
+					"instance": 5,
+					"receiveEvent": {
+						"entity": "task_c",
+						"port": "in2",
+						"entityInstance": 2,
+						"timestamp": 4000000
+					},
+					"sendEvent": {
+						"entity": "task_b → task_c decapsulation delay",
+						"port": "out",
+						"entityInstance": 0,
+						"timestamp": 1995226
+					}
+				},
+				{
+					"instance": 6,
+					"receiveEvent": {
+						"entity": "task_b → task_c encapsulation delay",
+						"port": "in2",
+						"entityInstance": 1,
+						"timestamp": 3500000
+					},
+					"sendEvent": {
+						"entity": "task_b",
+						"port": "out",
+						"entityInstance": 1,
+						"timestamp": 3500000
+					}
+				},
+				{
+					"instance": 7,
+					"receiveEvent": {
+						"entity": "task_b → task_c network delay",
+						"port": "in2",
+						"entityInstance": 1,
+						"timestamp": 3554298
+					},
+					"sendEvent": {
+						"entity": "task_b → task_c encapsulation delay",
+						"port": "out",
+						"entityInstance": 1,
+						"timestamp": 3554298
+					}
+				},
+				{
+					"instance": 8,
+					"receiveEvent": {
+						"entity": "task_b → task_c decapsulation delay",
+						"port": "in2",
+						"entityInstance": 1,
+						"timestamp": 5074786
+					},
+					"sendEvent": {
+						"entity": "task_b → task_c network delay",
+						"port": "out",
+						"entityInstance": 1,
+						"timestamp": 5074786
+					}
+				},
+				{
+					"instance": 9,
+					"receiveEvent": {
+						"entity": "task_c",
+						"port": "in2",
+						"entityInstance": 3,
+						"timestamp": 6000000
+					},
+					"sendEvent": {
+						"entity": "task_b → task_c decapsulation delay",
+						"port": "out",
+						"entityInstance": 1,
+						"timestamp": 5324725
+					}
+				},
+				{
+					"instance": 10,
+					"receiveEvent": {
+						"entity": "task_b → task_c encapsulation delay",
+						"port": "in2",
+						"entityInstance": 2,
+						"timestamp": 5500000
+					},
+					"sendEvent": {
+						"entity": "task_b",
+						"port": "out",
+						"entityInstance": 2,
+						"timestamp": 5500000
+					}
+				},
+				{
+					"instance": 11,
+					"receiveEvent": {
+						"entity": "task_b → task_c network delay",
+						"port": "in2",
+						"entityInstance": 2,
+						"timestamp": 5561987
+					},
+					"sendEvent": {
+						"entity": "task_b → task_c encapsulation delay",
+						"port": "out",
+						"entityInstance": 2,
+						"timestamp": 5561987
+					}
+				},
+				{
+					"instance": 12,
+					"receiveEvent": {
+						"entity": "task_b → task_c decapsulation delay",
+						"port": "in2",
+						"entityInstance": 2,
+						"timestamp": 5771742
+					},
+					"sendEvent": {
+						"entity": "task_b → task_c network delay",
+						"port": "out",
+						"entityInstance": 2,
+						"timestamp": 5771742
+					}
+				},
+				{
+					"instance": 13,
+					"receiveEvent": {
+						"entity": "task_c",
+						"port": "in2",
+						"entityInstance": 4,
+						"timestamp": 8000000
+					},
+					"sendEvent": {
+						"entity": "task_b → task_c decapsulation delay",
+						"port": "out",
+						"entityInstance": 2,
+						"timestamp": 6020174
+					}
+				},
+				{
+					"instance": 14,
+					"receiveEvent": {
+						"entity": "task_b → task_c encapsulation delay",
+						"port": "in2",
+						"entityInstance": 3,
+						"timestamp": 9500000
+					},
+					"sendEvent": {
+						"entity": "task_b",
+						"port": "out",
+						"entityInstance": 4,
+						"timestamp": 9500000
+					}
+				},
+				{
+					"instance": 15,
+					"receiveEvent": {
+						"entity": "task_b → task_c network delay",
+						"port": "in2",
+						"entityInstance": 3,
+						"timestamp": 9561418
+					},
+					"sendEvent": {
+						"entity": "task_b → task_c encapsulation delay",
+						"port": "out",
+						"entityInstance": 3,
+						"timestamp": 9561418
+					}
+				},
+				{
+					"instance": 16,
+					"receiveEvent": {
+						"entity": "task_b → task_c decapsulation delay",
+						"port": "in2",
+						"entityInstance": 3,
+						"timestamp": 9724391
+					},
+					"sendEvent": {
+						"entity": "task_b → task_c network delay",
+						"port": "out",
+						"entityInstance": 3,
+						"timestamp": 9724391
+					}
+				},
+				{
+					"instance": 17,
+					"receiveEvent": {
+						"entity": "task_c",
+						"port": "in2",
+						"entityInstance": 5,
+						"timestamp": 10000000
+					},
+					"sendEvent": {
+						"entity": "task_b → task_c decapsulation delay",
+						"port": "out",
+						"entityInstance": 3,
+						"timestamp": 9973331
+					}
+				}
+			]
+		},
+		{
+			"name": "theta",
+			"value": [
+				{
+					"instance": 0,
+					"receiveEvent": {
+						"entity": "task_b",
+						"port": "in",
+						"entityInstance": 0,
+						"timestamp": 1000000
+					},
+					"sendEvent": {
+						"entity": "__system",
+						"port": "SystemInput",
+						"entityInstance": 0,
+						"timestamp": 1000000
+					}
+				},
+				{
+					"instance": 1,
+					"receiveEvent": {
+						"entity": "task_b",
+						"port": "in",
+						"entityInstance": 1,
+						"timestamp": 3000000
+					},
+					"sendEvent": {
+						"entity": "__system",
+						"port": "SystemInput",
+						"entityInstance": 1,
+						"timestamp": 3000000
+					}
+				},
+				{
+					"instance": 2,
+					"receiveEvent": {
+						"entity": "task_b",
+						"port": "in",
+						"entityInstance": 2,
+						"timestamp": 5000000
+					},
+					"sendEvent": {
+						"entity": "__system",
+						"port": "SystemInput",
+						"entityInstance": 2,
+						"timestamp": 5000000
+					}
+				},
+				{
+					"instance": 3,
+					"receiveEvent": {
+						"entity": "task_b",
+						"port": "in",
+						"entityInstance": 3,
+						"timestamp": 7000000
+					},
+					"sendEvent": {
+						"entity": "__system",
+						"port": "SystemInput",
+						"entityInstance": 3,
+						"timestamp": 7000000
+					}
+				},
+				{
+					"instance": 4,
+					"receiveEvent": {
+						"entity": "task_b",
+						"port": "in",
+						"entityInstance": 4,
+						"timestamp": 9000000
+					},
+					"sendEvent": {
+						"entity": "__system",
+						"port": "SystemInput",
+						"entityInstance": 4,
+						"timestamp": 9000000
+					}
+				},
+				{
+					"instance": 5,
+					"receiveEvent": {
+						"entity": "task_b",
+						"port": "in",
+						"entityInstance": 5,
+						"timestamp": 11000000
+					},
+					"sendEvent": {
+						"entity": "__system",
+						"port": "SystemInput",
+						"entityInstance": 5,
+						"timestamp": 11000000
+					}
+				}
+			]
+		}
+	],
+	"EventChainInstancesStore": [
+		{
+			"segment": {
+				"name": "theta",
+				"instance": 0,
+				"receiveEvent": {
+					"entity": "task_b",
+					"port": "in",
+					"entityInstance": 0,
+					"timestamp": 1000000
+				},
+				"sendEvent": {
+					"entity": "__system",
+					"port": "SystemInput",
+					"entityInstance": 0,
+					"timestamp": 1000000
+				}
+			},
+			"name": "EventChain2-0",
+			"successor": {
+				"segment": {
+					"name": "gamma",
+					"instance": 1,
+					"receiveEvent": {
+						"entity": "task_b → task_c encapsulation delay",
+						"port": "in2",
+						"entityInstance": 0,
+						"timestamp": 1500000
+					},
+					"sendEvent": {
+						"entity": "task_b",
+						"port": "out",
+						"entityInstance": 0,
+						"timestamp": 1500000
+					}
+				},
+				"successor": {
+					"segment": {
+						"name": "gamma",
+						"instance": 2,
+						"receiveEvent": {
+							"entity": "task_b → task_c network delay",
+							"port": "in2",
+							"entityInstance": 0,
+							"timestamp": 1565707
+						},
+						"sendEvent": {
+							"entity": "task_b → task_c encapsulation delay",
+							"port": "out",
+							"entityInstance": 0,
+							"timestamp": 1565707
+						}
+					},
+					"successor": {
+						"segment": {
+							"name": "gamma",
+							"instance": 3,
+							"receiveEvent": {
+								"entity": "task_b → task_c decapsulation delay",
+								"port": "in2",
+								"entityInstance": 0,
+								"timestamp": 1755318
+							},
+							"sendEvent": {
+								"entity": "task_b → task_c network delay",
+								"port": "out",
+								"entityInstance": 0,
+								"timestamp": 1755318
+							}
+						},
+						"successor": {
+							"segment": {
+								"name": "gamma",
+								"instance": 4,
+								"receiveEvent": {
+									"entity": "task_c",
+									"port": "in2",
+									"entityInstance": 1,
+									"timestamp": 2000000
+								},
+								"sendEvent": {
+									"entity": "task_b → task_c decapsulation delay",
+									"port": "out",
+									"entityInstance": 0,
+									"timestamp": 1995226
+								}
+							},
+							"successor": {
+								"segment": {
+									"name": "delta",
+									"instance": 1,
+									"receiveEvent": {
+										"entity": "__system",
+										"port": "SystemOutput",
+										"entityInstance": 1,
+										"timestamp": 3000000
+									},
+									"sendEvent": {
+										"entity": "task_c",
+										"port": "out",
+										"entityInstance": 1,
+										"timestamp": 3000000
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"segment": {
+				"name": "theta",
+				"instance": 0,
+				"receiveEvent": {
+					"entity": "task_b",
+					"port": "in",
+					"entityInstance": 0,
+					"timestamp": 1000000
+				},
+				"sendEvent": {
+					"entity": "__system",
+					"port": "SystemInput",
+					"entityInstance": 0,
+					"timestamp": 1000000
+				}
+			},
+			"name": "EventChain2-1",
+			"successor": {
+				"segment": {
+					"name": "gamma",
+					"instance": 1,
+					"receiveEvent": {
+						"entity": "task_b → task_c encapsulation delay",
+						"port": "in2",
+						"entityInstance": 0,
+						"timestamp": 1500000
+					},
+					"sendEvent": {
+						"entity": "task_b",
+						"port": "out",
+						"entityInstance": 0,
+						"timestamp": 1500000
+					}
+				},
+				"successor": {
+					"segment": {
+						"name": "gamma",
+						"instance": 2,
+						"receiveEvent": {
+							"entity": "task_b → task_c network delay",
+							"port": "in2",
+							"entityInstance": 0,
+							"timestamp": 1565707
+						},
+						"sendEvent": {
+							"entity": "task_b → task_c encapsulation delay",
+							"port": "out",
+							"entityInstance": 0,
+							"timestamp": 1565707
+						}
+					},
+					"successor": {
+						"segment": {
+							"name": "gamma",
+							"instance": 3,
+							"receiveEvent": {
+								"entity": "task_b → task_c decapsulation delay",
+								"port": "in2",
+								"entityInstance": 0,
+								"timestamp": 1755318
+							},
+							"sendEvent": {
+								"entity": "task_b → task_c network delay",
+								"port": "out",
+								"entityInstance": 0,
+								"timestamp": 1755318
+							}
+						},
+						"successor": {
+							"segment": {
+								"name": "gamma",
+								"instance": 5,
+								"receiveEvent": {
+									"entity": "task_c",
+									"port": "in2",
+									"entityInstance": 2,
+									"timestamp": 4000000
+								},
+								"sendEvent": {
+									"entity": "task_b → task_c decapsulation delay",
+									"port": "out",
+									"entityInstance": 0,
+									"timestamp": 1995226
+								}
+							},
+							"successor": {
+								"segment": {
+									"name": "delta",
+									"instance": 2,
+									"receiveEvent": {
+										"entity": "__system",
+										"port": "SystemOutput",
+										"entityInstance": 2,
+										"timestamp": 5000000
+									},
+									"sendEvent": {
+										"entity": "task_c",
+										"port": "out",
+										"entityInstance": 2,
+										"timestamp": 5000000
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"segment": {
+				"name": "theta",
+				"instance": 1,
+				"receiveEvent": {
+					"entity": "task_b",
+					"port": "in",
+					"entityInstance": 1,
+					"timestamp": 3000000
+				},
+				"sendEvent": {
+					"entity": "__system",
+					"port": "SystemInput",
+					"entityInstance": 1,
+					"timestamp": 3000000
+				}
+			},
+			"name": "EventChain2-2",
+			"successor": {
+				"segment": {
+					"name": "gamma",
+					"instance": 6,
+					"receiveEvent": {
+						"entity": "task_b → task_c encapsulation delay",
+						"port": "in2",
+						"entityInstance": 1,
+						"timestamp": 3500000
+					},
+					"sendEvent": {
+						"entity": "task_b",
+						"port": "out",
+						"entityInstance": 1,
+						"timestamp": 3500000
+					}
+				},
+				"successor": {
+					"segment": {
+						"name": "gamma",
+						"instance": 7,
+						"receiveEvent": {
+							"entity": "task_b → task_c network delay",
+							"port": "in2",
+							"entityInstance": 1,
+							"timestamp": 3554298
+						},
+						"sendEvent": {
+							"entity": "task_b → task_c encapsulation delay",
+							"port": "out",
+							"entityInstance": 1,
+							"timestamp": 3554298
+						}
+					},
+					"successor": {
+						"segment": {
+							"name": "gamma",
+							"instance": 8,
+							"receiveEvent": {
+								"entity": "task_b → task_c decapsulation delay",
+								"port": "in2",
+								"entityInstance": 1,
+								"timestamp": 5074786
+							},
+							"sendEvent": {
+								"entity": "task_b → task_c network delay",
+								"port": "out",
+								"entityInstance": 1,
+								"timestamp": 5074786
+							}
+						},
+						"successor": {
+							"segment": {
+								"name": "gamma",
+								"instance": 9,
+								"receiveEvent": {
+									"entity": "task_c",
+									"port": "in2",
+									"entityInstance": 3,
+									"timestamp": 6000000
+								},
+								"sendEvent": {
+									"entity": "task_b → task_c decapsulation delay",
+									"port": "out",
+									"entityInstance": 1,
+									"timestamp": 5324725
+								}
+							},
+							"successor": {
+								"segment": {
+									"name": "delta",
+									"instance": 3,
+									"receiveEvent": {
+										"entity": "__system",
+										"port": "SystemOutput",
+										"entityInstance": 3,
+										"timestamp": 7000000
+									},
+									"sendEvent": {
+										"entity": "task_c",
+										"port": "out",
+										"entityInstance": 3,
+										"timestamp": 7000000
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"segment": {
+				"name": "theta",
+				"instance": 2,
+				"receiveEvent": {
+					"entity": "task_b",
+					"port": "in",
+					"entityInstance": 2,
+					"timestamp": 5000000
+				},
+				"sendEvent": {
+					"entity": "__system",
+					"port": "SystemInput",
+					"entityInstance": 2,
+					"timestamp": 5000000
+				}
+			},
+			"name": "EventChain2-3",
+			"successor": {
+				"segment": {
+					"name": "gamma",
+					"instance": 10,
+					"receiveEvent": {
+						"entity": "task_b → task_c encapsulation delay",
+						"port": "in2",
+						"entityInstance": 2,
+						"timestamp": 5500000
+					},
+					"sendEvent": {
+						"entity": "task_b",
+						"port": "out",
+						"entityInstance": 2,
+						"timestamp": 5500000
+					}
+				},
+				"successor": {
+					"segment": {
+						"name": "gamma",
+						"instance": 11,
+						"receiveEvent": {
+							"entity": "task_b → task_c network delay",
+							"port": "in2",
+							"entityInstance": 2,
+							"timestamp": 5561987
+						},
+						"sendEvent": {
+							"entity": "task_b → task_c encapsulation delay",
+							"port": "out",
+							"entityInstance": 2,
+							"timestamp": 5561987
+						}
+					},
+					"successor": {
+						"segment": {
+							"name": "gamma",
+							"instance": 12,
+							"receiveEvent": {
+								"entity": "task_b → task_c decapsulation delay",
+								"port": "in2",
+								"entityInstance": 2,
+								"timestamp": 5771742
+							},
+							"sendEvent": {
+								"entity": "task_b → task_c network delay",
+								"port": "out",
+								"entityInstance": 2,
+								"timestamp": 5771742
+							}
+						},
+						"successor": {
+							"segment": {
+								"name": "gamma",
+								"instance": 13,
+								"receiveEvent": {
+									"entity": "task_c",
+									"port": "in2",
+									"entityInstance": 4,
+									"timestamp": 8000000
+								},
+								"sendEvent": {
+									"entity": "task_b → task_c decapsulation delay",
+									"port": "out",
+									"entityInstance": 2,
+									"timestamp": 6020174
+								}
+							},
+							"successor": {
+								"segment": {
+									"name": "delta",
+									"instance": 4,
+									"receiveEvent": {
+										"entity": "__system",
+										"port": "SystemOutput",
+										"entityInstance": 4,
+										"timestamp": 9000000
+									},
+									"sendEvent": {
+										"entity": "task_c",
+										"port": "out",
+										"entityInstance": 4,
+										"timestamp": 9000000
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"segment": {
+				"name": "theta",
+				"instance": 4,
+				"receiveEvent": {
+					"entity": "task_b",
+					"port": "in",
+					"entityInstance": 4,
+					"timestamp": 9000000
+				},
+				"sendEvent": {
+					"entity": "__system",
+					"port": "SystemInput",
+					"entityInstance": 4,
+					"timestamp": 9000000
+				}
+			},
+			"name": "EventChain2-4",
+			"successor": {
+				"segment": {
+					"name": "gamma",
+					"instance": 14,
+					"receiveEvent": {
+						"entity": "task_b → task_c encapsulation delay",
+						"port": "in2",
+						"entityInstance": 3,
+						"timestamp": 9500000
+					},
+					"sendEvent": {
+						"entity": "task_b",
+						"port": "out",
+						"entityInstance": 4,
+						"timestamp": 9500000
+					}
+				},
+				"successor": {
+					"segment": {
+						"name": "gamma",
+						"instance": 15,
+						"receiveEvent": {
+							"entity": "task_b → task_c network delay",
+							"port": "in2",
+							"entityInstance": 3,
+							"timestamp": 9561418
+						},
+						"sendEvent": {
+							"entity": "task_b → task_c encapsulation delay",
+							"port": "out",
+							"entityInstance": 3,
+							"timestamp": 9561418
+						}
+					},
+					"successor": {
+						"segment": {
+							"name": "gamma",
+							"instance": 16,
+							"receiveEvent": {
+								"entity": "task_b → task_c decapsulation delay",
+								"port": "in2",
+								"entityInstance": 3,
+								"timestamp": 9724391
+							},
+							"sendEvent": {
+								"entity": "task_b → task_c network delay",
+								"port": "out",
+								"entityInstance": 3,
+								"timestamp": 9724391
+							}
+						},
+						"successor": {
+							"segment": {
+								"name": "gamma",
+								"instance": 17,
+								"receiveEvent": {
+									"entity": "task_c",
+									"port": "in2",
+									"entityInstance": 5,
+									"timestamp": 10000000
+								},
+								"sendEvent": {
+									"entity": "task_b → task_c decapsulation delay",
+									"port": "out",
+									"entityInstance": 3,
+									"timestamp": 9973331
+								}
+							},
+							"successor": {
+								"segment": {
+									"name": "delta",
+									"instance": 5,
+									"receiveEvent": {
+										"entity": "__system",
+										"port": "SystemOutput",
+										"entityInstance": 5,
+										"timestamp": 11000000
+									},
+									"sendEvent": {
+										"entity": "task_c",
+										"port": "out",
+										"entityInstance": 5,
+										"timestamp": 11000000
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"segment": {
+				"name": "gamma",
+				"instance": 0,
+				"receiveEvent": {
+					"entity": "task_c",
+					"port": "in2",
+					"entityInstance": 0,
+					"timestamp": 0
+				},
+				"sendEvent": {
+					"entity": "task_b",
+					"port": "out",
+					"entityInstance": -1,
+					"timestamp": 0
+				}
+			},
+			"name": "Test-0"
+		},
+		{
+			"segment": {
+				"name": "gamma",
+				"instance": 1,
+				"receiveEvent": {
+					"entity": "task_b → task_c encapsulation delay",
+					"port": "in2",
+					"entityInstance": 0,
+					"timestamp": 1500000
+				},
+				"sendEvent": {
+					"entity": "task_b",
+					"port": "out",
+					"entityInstance": 0,
+					"timestamp": 1500000
+				}
+			},
+			"name": "Test-1"
+		},
+		{
+			"segment": {
+				"name": "gamma",
+				"instance": 10,
+				"receiveEvent": {
+					"entity": "task_b → task_c encapsulation delay",
+					"port": "in2",
+					"entityInstance": 2,
+					"timestamp": 5500000
+				},
+				"sendEvent": {
+					"entity": "task_b",
+					"port": "out",
+					"entityInstance": 2,
+					"timestamp": 5500000
+				}
+			},
+			"name": "Test-10"
+		},
+		{
+			"segment": {
+				"name": "gamma",
+				"instance": 11,
+				"receiveEvent": {
+					"entity": "task_b → task_c network delay",
+					"port": "in2",
+					"entityInstance": 2,
+					"timestamp": 5561987
+				},
+				"sendEvent": {
+					"entity": "task_b → task_c encapsulation delay",
+					"port": "out",
+					"entityInstance": 2,
+					"timestamp": 5561987
+				}
+			},
+			"name": "Test-11"
+		},
+		{
+			"segment": {
+				"name": "gamma",
+				"instance": 12,
+				"receiveEvent": {
+					"entity": "task_b → task_c decapsulation delay",
+					"port": "in2",
+					"entityInstance": 2,
+					"timestamp": 5771742
+				},
+				"sendEvent": {
+					"entity": "task_b → task_c network delay",
+					"port": "out",
+					"entityInstance": 2,
+					"timestamp": 5771742
+				}
+			},
+			"name": "Test-12"
+		},
+		{
+			"segment": {
+				"name": "gamma",
+				"instance": 13,
+				"receiveEvent": {
+					"entity": "task_c",
+					"port": "in2",
+					"entityInstance": 4,
+					"timestamp": 8000000
+				},
+				"sendEvent": {
+					"entity": "task_b → task_c decapsulation delay",
+					"port": "out",
+					"entityInstance": 2,
+					"timestamp": 6020174
+				}
+			},
+			"name": "Test-13"
+		},
+		{
+			"segment": {
+				"name": "gamma",
+				"instance": 14,
+				"receiveEvent": {
+					"entity": "task_b → task_c encapsulation delay",
+					"port": "in2",
+					"entityInstance": 3,
+					"timestamp": 9500000
+				},
+				"sendEvent": {
+					"entity": "task_b",
+					"port": "out",
+					"entityInstance": 4,
+					"timestamp": 9500000
+				}
+			},
+			"name": "Test-14"
+		},
+		{
+			"segment": {
+				"name": "gamma",
+				"instance": 15,
+				"receiveEvent": {
+					"entity": "task_b → task_c network delay",
+					"port": "in2",
+					"entityInstance": 3,
+					"timestamp": 9561418
+				},
+				"sendEvent": {
+					"entity": "task_b → task_c encapsulation delay",
+					"port": "out",
+					"entityInstance": 3,
+					"timestamp": 9561418
+				}
+			},
+			"name": "Test-15"
+		},
+		{
+			"segment": {
+				"name": "gamma",
+				"instance": 16,
+				"receiveEvent": {
+					"entity": "task_b → task_c decapsulation delay",
+					"port": "in2",
+					"entityInstance": 3,
+					"timestamp": 9724391
+				},
+				"sendEvent": {
+					"entity": "task_b → task_c network delay",
+					"port": "out",
+					"entityInstance": 3,
+					"timestamp": 9724391
+				}
+			},
+			"name": "Test-16"
+		},
+		{
+			"segment": {
+				"name": "gamma",
+				"instance": 17,
+				"receiveEvent": {
+					"entity": "task_c",
+					"port": "in2",
+					"entityInstance": 5,
+					"timestamp": 10000000
+				},
+				"sendEvent": {
+					"entity": "task_b → task_c decapsulation delay",
+					"port": "out",
+					"entityInstance": 3,
+					"timestamp": 9973331
+				}
+			},
+			"name": "Test-17"
+		},
+		{
+			"segment": {
+				"name": "gamma",
+				"instance": 2,
+				"receiveEvent": {
+					"entity": "task_b → task_c network delay",
+					"port": "in2",
+					"entityInstance": 0,
+					"timestamp": 1565707
+				},
+				"sendEvent": {
+					"entity": "task_b → task_c encapsulation delay",
+					"port": "out",
+					"entityInstance": 0,
+					"timestamp": 1565707
+				}
+			},
+			"name": "Test-2"
+		},
+		{
+			"segment": {
+				"name": "gamma",
+				"instance": 3,
+				"receiveEvent": {
+					"entity": "task_b → task_c decapsulation delay",
+					"port": "in2",
+					"entityInstance": 0,
+					"timestamp": 1755318
+				},
+				"sendEvent": {
+					"entity": "task_b → task_c network delay",
+					"port": "out",
+					"entityInstance": 0,
+					"timestamp": 1755318
+				}
+			},
+			"name": "Test-3"
+		},
+		{
+			"segment": {
+				"name": "gamma",
+				"instance": 4,
+				"receiveEvent": {
+					"entity": "task_c",
+					"port": "in2",
+					"entityInstance": 1,
+					"timestamp": 2000000
+				},
+				"sendEvent": {
+					"entity": "task_b → task_c decapsulation delay",
+					"port": "out",
+					"entityInstance": 0,
+					"timestamp": 1995226
+				}
+			},
+			"name": "Test-4"
+		},
+		{
+			"segment": {
+				"name": "gamma",
+				"instance": 5,
+				"receiveEvent": {
+					"entity": "task_c",
+					"port": "in2",
+					"entityInstance": 2,
+					"timestamp": 4000000
+				},
+				"sendEvent": {
+					"entity": "task_b → task_c decapsulation delay",
+					"port": "out",
+					"entityInstance": 0,
+					"timestamp": 1995226
+				}
+			},
+			"name": "Test-5"
+		},
+		{
+			"segment": {
+				"name": "gamma",
+				"instance": 6,
+				"receiveEvent": {
+					"entity": "task_b → task_c encapsulation delay",
+					"port": "in2",
+					"entityInstance": 1,
+					"timestamp": 3500000
+				},
+				"sendEvent": {
+					"entity": "task_b",
+					"port": "out",
+					"entityInstance": 1,
+					"timestamp": 3500000
+				}
+			},
+			"name": "Test-6"
+		},
+		{
+			"segment": {
+				"name": "gamma",
+				"instance": 7,
+				"receiveEvent": {
+					"entity": "task_b → task_c network delay",
+					"port": "in2",
+					"entityInstance": 1,
+					"timestamp": 3554298
+				},
+				"sendEvent": {
+					"entity": "task_b → task_c encapsulation delay",
+					"port": "out",
+					"entityInstance": 1,
+					"timestamp": 3554298
+				}
+			},
+			"name": "Test-7"
+		},
+		{
+			"segment": {
+				"name": "gamma",
+				"instance": 8,
+				"receiveEvent": {
+					"entity": "task_b → task_c decapsulation delay",
+					"port": "in2",
+					"entityInstance": 1,
+					"timestamp": 5074786
+				},
+				"sendEvent": {
+					"entity": "task_b → task_c network delay",
+					"port": "out",
+					"entityInstance": 1,
+					"timestamp": 5074786
+				}
+			},
+			"name": "Test-8"
+		},
+		{
+			"segment": {
+				"name": "gamma",
+				"instance": 9,
+				"receiveEvent": {
+					"entity": "task_c",
+					"port": "in2",
+					"entityInstance": 3,
+					"timestamp": 6000000
+				},
+				"sendEvent": {
+					"entity": "task_b → task_c decapsulation delay",
+					"port": "out",
+					"entityInstance": 1,
+					"timestamp": 5324725
+				}
+			},
+			"name": "Test-9"
+		}
+	],
+	"EntityInstancesStore": [
+		{
+			"name": "task_a",
+			"type": "task",
+			"initialOffset": 1000000,
+			"value": [
+				{
+					"instance": 0,
+					"periodStartTime": 1000000,
+					"letStartTime": 1000000,
+					"letEndTime": 1500000,
+					"periodEndTime": 3000000,
+					"executionTime": 500000,
+					"executionIntervals": [
+						{
+							"startTime": 1000000,
+							"endTime": 1500000,
+							"core": "c1"
+						}
+					],
+					"currentCore": {
+						"name": "c1",
+						"speedup": 1,
+						"device": "d1"
+					},
+					"remainingExecutionTime": 0
+				},
+				{
+					"instance": 1,
+					"periodStartTime": 3000000,
+					"letStartTime": 3000000,
+					"letEndTime": 3500000,
+					"periodEndTime": 5000000,
+					"executionTime": 500000,
+					"executionIntervals": [
+						{
+							"startTime": 3000000,
+							"endTime": 3500000,
+							"core": "c1"
+						}
+					],
+					"currentCore": {
+						"name": "c1",
+						"speedup": 1,
+						"device": "d1"
+					},
+					"remainingExecutionTime": 0
+				},
+				{
+					"instance": 2,
+					"periodStartTime": 5000000,
+					"letStartTime": 5000000,
+					"letEndTime": 5500000,
+					"periodEndTime": 7000000,
+					"executionTime": 500000,
+					"executionIntervals": [
+						{
+							"startTime": 5000000,
+							"endTime": 5500000,
+							"core": "c1"
+						}
+					],
+					"currentCore": {
+						"name": "c1",
+						"speedup": 1,
+						"device": "d1"
+					},
+					"remainingExecutionTime": 0
+				},
+				{
+					"instance": 3,
+					"periodStartTime": 7000000,
+					"letStartTime": 7000000,
+					"letEndTime": 7500000,
+					"periodEndTime": 9000000,
+					"executionTime": 500000,
+					"executionIntervals": [
+						{
+							"startTime": 7000000,
+							"endTime": 7500000,
+							"core": "c1"
+						}
+					],
+					"currentCore": {
+						"name": "c1",
+						"speedup": 1,
+						"device": "d1"
+					},
+					"remainingExecutionTime": 0
+				},
+				{
+					"instance": 4,
+					"periodStartTime": 9000000,
+					"letStartTime": 9000000,
+					"letEndTime": 9500000,
+					"periodEndTime": 11000000,
+					"executionTime": 500000,
+					"executionIntervals": [
+						{
+							"startTime": 9000000,
+							"endTime": 9500000,
+							"core": "c1"
+						}
+					],
+					"currentCore": {
+						"name": "c1",
+						"speedup": 1,
+						"device": "d1"
+					},
+					"remainingExecutionTime": 0
+				},
+				{
+					"instance": 5,
+					"periodStartTime": 11000000,
+					"letStartTime": 11000000,
+					"letEndTime": 11500000,
+					"periodEndTime": 13000000,
+					"executionTime": 500000,
+					"executionIntervals": [
+						{
+							"startTime": 11000000,
+							"endTime": 11500000,
+							"core": "c1"
+						}
+					],
+					"currentCore": {
+						"name": "c1",
+						"speedup": 1,
+						"device": "d1"
+					},
+					"remainingExecutionTime": 0
+				}
+			]
+		},
+		{
+			"name": "task_a2",
+			"type": "task",
+			"initialOffset": 1000000,
+			"value": [
+				{
+					"instance": 0,
+					"periodStartTime": 1000000,
+					"letStartTime": 1000000,
+					"letEndTime": 1500000,
+					"periodEndTime": 5000000,
+					"executionTime": 500000,
+					"executionIntervals": [
+						{
+							"startTime": 1000000,
+							"endTime": 1500000,
+							"core": "c2"
+						}
+					],
+					"currentCore": {
+						"name": "c2",
+						"speedup": 1,
+						"device": "d2"
+					},
+					"remainingExecutionTime": 0
+				},
+				{
+					"instance": 1,
+					"periodStartTime": 5000000,
+					"letStartTime": 5000000,
+					"letEndTime": 5500000,
+					"periodEndTime": 9000000,
+					"executionTime": 500000,
+					"executionIntervals": [
+						{
+							"startTime": 5000000,
+							"endTime": 5500000,
+							"core": "c2"
+						}
+					],
+					"currentCore": {
+						"name": "c2",
+						"speedup": 1,
+						"device": "d2"
+					},
+					"remainingExecutionTime": 0
+				},
+				{
+					"instance": 2,
+					"periodStartTime": 9000000,
+					"letStartTime": 9000000,
+					"letEndTime": 9500000,
+					"periodEndTime": 13000000,
+					"executionTime": 500000,
+					"executionIntervals": [
+						{
+							"startTime": 9000000,
+							"endTime": 9500000,
+							"core": "c2"
+						}
+					],
+					"currentCore": {
+						"name": "c2",
+						"speedup": 1,
+						"device": "d2"
+					},
+					"remainingExecutionTime": 0
+				}
+			]
+		},
+		{
+			"name": "task_b",
+			"type": "task",
+			"initialOffset": 1000000,
+			"value": [
+				{
+					"instance": 0,
+					"periodStartTime": 1000000,
+					"letStartTime": 1000000,
+					"letEndTime": 1500000,
+					"periodEndTime": 3000000,
+					"executionTime": 500000,
+					"executionIntervals": [
+						{
+							"startTime": 1000000,
+							"endTime": 1500000,
+							"core": "c3"
+						}
+					],
+					"currentCore": {
+						"name": "c3",
+						"speedup": 1,
+						"device": "d3"
+					},
+					"remainingExecutionTime": 0
+				},
+				{
+					"instance": 1,
+					"periodStartTime": 3000000,
+					"letStartTime": 3000000,
+					"letEndTime": 3500000,
+					"periodEndTime": 5000000,
+					"executionTime": 500000,
+					"executionIntervals": [
+						{
+							"startTime": 3000000,
+							"endTime": 3500000,
+							"core": "c2"
+						}
+					],
+					"currentCore": {
+						"name": "c2",
+						"speedup": 1,
+						"device": "d2"
+					},
+					"remainingExecutionTime": 0
+				},
+				{
+					"instance": 2,
+					"periodStartTime": 5000000,
+					"letStartTime": 5000000,
+					"letEndTime": 5500000,
+					"periodEndTime": 7000000,
+					"executionTime": 500000,
+					"executionIntervals": [
+						{
+							"startTime": 5000000,
+							"endTime": 5500000,
+							"core": "c3"
+						}
+					],
+					"currentCore": {
+						"name": "c3",
+						"speedup": 1,
+						"device": "d3"
+					},
+					"remainingExecutionTime": 0
+				},
+				{
+					"instance": 3,
+					"periodStartTime": 7000000,
+					"letStartTime": 7000000,
+					"letEndTime": 7500000,
+					"periodEndTime": 9000000,
+					"executionTime": 500000,
+					"executionIntervals": [
+						{
+							"startTime": 7000000,
+							"endTime": 7500000,
+							"core": "c2"
+						}
+					],
+					"currentCore": {
+						"name": "c2",
+						"speedup": 1,
+						"device": "d2"
+					},
+					"remainingExecutionTime": 0
+				},
+				{
+					"instance": 4,
+					"periodStartTime": 9000000,
+					"letStartTime": 9000000,
+					"letEndTime": 9500000,
+					"periodEndTime": 11000000,
+					"executionTime": 500000,
+					"executionIntervals": [
+						{
+							"startTime": 9000000,
+							"endTime": 9500000,
+							"core": "c3"
+						}
+					],
+					"currentCore": {
+						"name": "c3",
+						"speedup": 1,
+						"device": "d3"
+					},
+					"remainingExecutionTime": 0
+				},
+				{
+					"instance": 5,
+					"periodStartTime": 11000000,
+					"letStartTime": 11000000,
+					"letEndTime": 11500000,
+					"periodEndTime": 13000000,
+					"executionTime": 500000,
+					"executionIntervals": [
+						{
+							"startTime": 11000000,
+							"endTime": 11500000,
+							"core": "c2"
+						}
+					],
+					"currentCore": {
+						"name": "c2",
+						"speedup": 1,
+						"device": "d2"
+					},
+					"remainingExecutionTime": 0
+				}
+			]
+		},
+		{
+			"name": "task_b → task_c decapsulation delay",
+			"type": "decapsulation",
+			"dependency": "gamma",
+			"value": [
+				{
+					"instance": 0,
+					"letStartTime": 1755318,
+					"letEndTime": 1995226,
+					"executionTime": 239908,
+					"sourceDevice": "d3",
+					"destinationDevice": "d1",
+					"dependency": "gamma"
+				},
+				{
+					"instance": 1,
+					"letStartTime": 5074786,
+					"letEndTime": 5324725,
+					"executionTime": 249939,
+					"sourceDevice": "d2",
+					"destinationDevice": "d1",
+					"dependency": "gamma"
+				},
+				{
+					"instance": 2,
+					"letStartTime": 5771742,
+					"letEndTime": 6020174,
+					"executionTime": 248432,
+					"sourceDevice": "d3",
+					"destinationDevice": "d1",
+					"dependency": "gamma"
+				},
+				{
+					"instance": 3,
+					"letStartTime": 9724391,
+					"letEndTime": 9973331,
+					"executionTime": 248940,
+					"sourceDevice": "d3",
+					"destinationDevice": "d1",
+					"dependency": "gamma"
+				}
+			]
+		},
+		{
+			"name": "task_b → task_c encapsulation delay",
+			"type": "encapsulation",
+			"dependency": "gamma",
+			"value": [
+				{
+					"instance": 0,
+					"letStartTime": 1500000,
+					"letEndTime": 1565707,
+					"executionTime": 65707,
+					"sourceDevice": "d3",
+					"destinationDevice": "d1",
+					"dependency": "gamma"
+				},
+				{
+					"instance": 1,
+					"letStartTime": 3500000,
+					"letEndTime": 3554298,
+					"executionTime": 54298,
+					"sourceDevice": "d2",
+					"destinationDevice": "d1",
+					"dependency": "gamma"
+				},
+				{
+					"instance": 2,
+					"letStartTime": 5500000,
+					"letEndTime": 5561987,
+					"executionTime": 61987,
+					"sourceDevice": "d3",
+					"destinationDevice": "d1",
+					"dependency": "gamma"
+				},
+				{
+					"instance": 3,
+					"letStartTime": 9500000,
+					"letEndTime": 9561418,
+					"executionTime": 61418,
+					"sourceDevice": "d3",
+					"destinationDevice": "d1",
+					"dependency": "gamma"
+				}
+			]
+		},
+		{
+			"name": "task_b → task_c network delay",
+			"type": "network",
+			"dependency": "gamma",
+			"value": [
+				{
+					"instance": 0,
+					"letStartTime": 1565707,
+					"letEndTime": 1755318,
+					"executionTime": 189611,
+					"sourceDevice": "d3",
+					"destinationDevice": "d1",
+					"dependency": "gamma"
+				},
+				{
+					"instance": 1,
+					"letStartTime": 3554298,
+					"letEndTime": 5074786,
+					"executionTime": 1520488,
+					"sourceDevice": "d2",
+					"destinationDevice": "d1",
+					"dependency": "gamma"
+				},
+				{
+					"instance": 2,
+					"letStartTime": 5561987,
+					"letEndTime": 5771742,
+					"executionTime": 209755,
+					"sourceDevice": "d3",
+					"destinationDevice": "d1",
+					"dependency": "gamma"
+				},
+				{
+					"instance": 3,
+					"letStartTime": 9561418,
+					"letEndTime": 9724391,
+					"executionTime": 162973,
+					"sourceDevice": "d3",
+					"destinationDevice": "d1",
+					"dependency": "gamma"
+				}
+			]
+		},
+		{
+			"name": "task_c",
+			"type": "task",
+			"initialOffset": 0,
+			"value": [
+				{
+					"instance": 0,
+					"periodStartTime": 0,
+					"letStartTime": 0,
+					"letEndTime": 1000000,
+					"periodEndTime": 2000000,
+					"executionTime": 1000000,
+					"executionIntervals": [
+						{
+							"startTime": 0,
+							"endTime": 1000000,
+							"core": "c1"
+						}
+					],
+					"currentCore": {
+						"name": "c1",
+						"speedup": 1,
+						"device": "d1"
+					},
+					"remainingExecutionTime": 0
+				},
+				{
+					"instance": 1,
+					"periodStartTime": 2000000,
+					"letStartTime": 2000000,
+					"letEndTime": 3000000,
+					"periodEndTime": 4000000,
+					"executionTime": 1000000,
+					"executionIntervals": [
+						{
+							"startTime": 2000000,
+							"endTime": 3000000,
+							"core": "c1"
+						}
+					],
+					"currentCore": {
+						"name": "c1",
+						"speedup": 1,
+						"device": "d1"
+					},
+					"remainingExecutionTime": 0
+				},
+				{
+					"instance": 2,
+					"periodStartTime": 4000000,
+					"letStartTime": 4000000,
+					"letEndTime": 5000000,
+					"periodEndTime": 6000000,
+					"executionTime": 1000000,
+					"executionIntervals": [
+						{
+							"startTime": 4000000,
+							"endTime": 5000000,
+							"core": "c1"
+						}
+					],
+					"currentCore": {
+						"name": "c1",
+						"speedup": 1,
+						"device": "d1"
+					},
+					"remainingExecutionTime": 0
+				},
+				{
+					"instance": 3,
+					"periodStartTime": 6000000,
+					"letStartTime": 6000000,
+					"letEndTime": 7000000,
+					"periodEndTime": 8000000,
+					"executionTime": 1000000,
+					"executionIntervals": [
+						{
+							"startTime": 6000000,
+							"endTime": 7000000,
+							"core": "c1"
+						}
+					],
+					"currentCore": {
+						"name": "c1",
+						"speedup": 1,
+						"device": "d1"
+					},
+					"remainingExecutionTime": 0
+				},
+				{
+					"instance": 4,
+					"periodStartTime": 8000000,
+					"letStartTime": 8000000,
+					"letEndTime": 9000000,
+					"periodEndTime": 10000000,
+					"executionTime": 1000000,
+					"executionIntervals": [
+						{
+							"startTime": 8000000,
+							"endTime": 9000000,
+							"core": "c1"
+						}
+					],
+					"currentCore": {
+						"name": "c1",
+						"speedup": 1,
+						"device": "d1"
+					},
+					"remainingExecutionTime": 0
+				},
+				{
+					"instance": 5,
+					"periodStartTime": 10000000,
+					"letStartTime": 10000000,
+					"letEndTime": 11000000,
+					"periodEndTime": 12000000,
+					"executionTime": 1000000,
+					"executionIntervals": [
+						{
+							"startTime": 10000000,
+							"endTime": 11000000,
+							"core": "c1"
+						}
+					],
+					"currentCore": {
+						"name": "c1",
+						"speedup": 1,
+						"device": "d1"
+					},
+					"remainingExecutionTime": 0
+				}
+			]
+		}
+	],
+	"EventChainStore": [
+		{
+			"segment": {
+				"name": "theta",
+				"source": {
+					"entity": "__system",
+					"port": "SystemInput"
+				},
+				"destination": {
+					"entity": "task_b",
+					"port": "in"
+				}
+			},
+			"name": "EventChain2",
+			"successor": {
+				"segment": {
+					"name": "gamma",
+					"source": {
+						"entity": "task_b",
+						"port": "out"
+					},
+					"destination": {
+						"entity": "task_c",
+						"port": "in2"
+					}
+				},
+				"successor": {
+					"segment": {
+						"name": "delta",
+						"source": {
+							"entity": "task_c",
+							"port": "out"
+						},
+						"destination": {
+							"entity": "__system",
+							"port": "SystemOutput"
+						}
+					}
+				}
+			}
+		},
+		{
+			"segment": {
+				"name": "gamma",
+				"source": {
+					"entity": "task_b",
+					"port": "out"
+				},
+				"destination": {
+					"entity": "task_c",
+					"port": "in2"
+				}
+			},
+			"name": "Test"
+		}
+	],
+	"ConstraintStore": [
+		{
+			"name": "TestConstraint1",
+			"eventChain": "Test",
+			"relation": "<",
+			"time": 3000000
+		},
+		{
+			"name": "TestConstraint2",
+			"eventChain": "Test",
+			"relation": "<",
+			"time": 3000000
+		},
+		{
+			"name": "TimingConstraint2",
+			"eventChain": "EventChain2",
+			"relation": "<=",
+			"time": 5000000
+		}
+	]
+}
