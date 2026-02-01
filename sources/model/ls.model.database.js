@@ -26,7 +26,7 @@ class ModelDatabase {
                 this.db.createObjectStore(Model.DependencyStoreName, {keyPath: 'name', unique: true});
                 this.db.createObjectStore(Model.DependencyInstancesStoreName, {keyPath: 'name', unique: true});
                 this.db.createObjectStore(Model.EventChainStoreName, {keyPath: 'name', unique: true});
-                this.db.createObjectStore(Model.EventChainInstanceStoreName, {keyPath: 'name', unique: true});
+                this.db.createObjectStore(Model.EventChainInstancesStoreName, {keyPath: 'name', unique: true});
                 this.db.createObjectStore(Model.ConstraintStoreName, {keyPath: 'name', unique: true});
                 this.db.createObjectStore(Model.ConstraintInstancesStoreName, {keyPath: 'name', unique: true});
             }
@@ -164,7 +164,7 @@ class ModelDatabase {
             'schedule'     : [
                                 Model.ConstraintInstancesStoreName,
                                 Model.DependencyInstancesStoreName,
-                                Model.EventChainInstanceStoreName,
+                                Model.EventChainInstancesStoreName,
                                 Model.EntityInstancesStoreName,
                              ]
         };
