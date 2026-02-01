@@ -11,10 +11,9 @@ class PluginSchedulerRm {
     
     // Uses a rate-monotonic algorithm to schedule task executions.
     static async Result(makespan, executionTiming) {
-        // Create instances of tasks, execution times, network delays, data dependencies, and event chains.
+        // Create instances of tasks, execution times, network delays, and event chains.
         await Plugin.DeleteSchedule();
         await Plugin.CreateAllTaskInstances(makespan, executionTiming);
-        await Plugin.CreateAllDependencyAndEventChainInstances();
         
         const scheduleElementSelected = ['schedule'];
         const schedule = await Plugin.DatabaseContentsGet(scheduleElementSelected);
@@ -28,10 +27,9 @@ class PluginSchedulerRm {
             alert(result.message);
         }
         
-        return Plugin.DatabaseContentsDelete(scheduleElementSelected)
-            .then(result => Plugin.DatabaseContentsSet(schedule, scheduleElementSelected))
-            // Network delays can only be generated after tasks have been allocated to cores/devices
-            .then(result => Plugin.CreateAllNetworkDelayInstances(executionTiming));
+        return Plugin.DatabaseContentsSet(schedule, scheduleElementSelected)
+            // Create instances of data dependencies. Network delays can only be generated after tasks have been allocated to cores/devices.
+            .then(result => Plugin.CreateAllDependencyAndEventChainInstances(makespan, executionTiming));
     }
     
     // Preemptive, rate-monotonic, multicore, no task migration.

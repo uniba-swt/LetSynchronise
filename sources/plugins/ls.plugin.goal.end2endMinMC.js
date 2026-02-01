@@ -9,8 +9,8 @@ class PluginGoalEnd2EndMinMC {
     static get Category() { return Plugin.Category.ResponseTime; }
 
     
-    // Triggers an external web tool (https://github.com/mkuo005/end-to-end) to schedule  
-    // task executions.
+    // Triggers an external web tool (https://github.com/mkuo005/end-to-end) to schedule task executions.
+    // Assumes that "no scheduling (identity)" is selected in LetSynchronise to preserve the external web tool's computed schedule.
     static async Result(scheduler, makespan) {
         // Retrieve the LET system.
         const systemElementSelected = ['cores', 'devices', 'networkDelays', 'entities', 'dependencies'];
@@ -51,8 +51,7 @@ class PluginGoalEnd2EndMinMC {
         const scheduleElementSelected = ['schedule'];
         return Plugin.DeleteSchedule()
             .then(result => Plugin.DatabaseContentsSet(optimisedSchedule, scheduleElementSelected))
-            .then(result => Plugin.CreateAllDependencyAndEventChainInstances()
-            .then(result => Plugin.CreateAllNetworkDelayInstances()));
+            .then(result => Plugin.CreateAllDependencyAndEventChainInstances());
     }
 
     // Trigger an external scheduling tool.

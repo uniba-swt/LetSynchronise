@@ -31,10 +31,9 @@ class PluginSchedulerTuDortmund {
         
         // Save the externally computed task schedule and compute the dependency and event chain instances.
         const scheduleElementSelected = ['schedule'];
-        return Plugin.DatabaseContentsDelete(scheduleElementSelected)
-            .then(result => Plugin.DatabaseContentsSet(computedSchedule, scheduleElementSelected))
-            .then(result => Plugin.CreateAllDependencyAndEventChainInstances()
-            .then(result => Plugin.CreateAllNetworkDelayInstances(executionTiming)));
+        return Plugin.DatabaseContentsSet(computedSchedule, scheduleElementSelected)
+            // Create instances of data dependencies. Network delays can only be generated after tasks have been allocated to cores/devices.
+            .then(result => Plugin.CreateAllDependencyAndEventChainInstances(makespan, executionTiming));
     }
 
     // Trigger an external scheduling tool.
