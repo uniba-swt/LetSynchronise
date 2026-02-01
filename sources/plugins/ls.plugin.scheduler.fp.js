@@ -17,7 +17,7 @@ class PluginSchedulerFp {
         
         const systemElementSelected = ['schedule', 'entities'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
-        const tasksInstances = (await system[Model.EntityInstancesStoreName]).filter(entity => entity.type === 'task');
+        const tasksInstances = (await system[Model.EntityInstancesStoreName]).filter(entity => entity.type === 'task' && entity.value.length > 0);
         const tasksParameters = await system[Model.EntityStoreName];
 
         const coreElementSelected = ['cores'];
@@ -142,7 +142,6 @@ class PluginSchedulerFp {
                 if (taskPriority > coreChosenTask[taskCore.name].priority) {
                     nextSchedulerEventTime = Math.min(nextSchedulerEventTime, taskInstance.letStartTime);
                 }
-                nextSchedulerEventTime = Math.min(nextSchedulerEventTime, taskInstance.letEndTime);
             }
             
             // Advance the chosen task instances on each core.
@@ -177,11 +176,6 @@ class PluginSchedulerFp {
                         // No task to execute on this core.
                         continue;
                     }
-                    
-                    if (nextSchedulerEventTime < coreChosenTask[core.name].instance.letStartTime) {
-                        // Too early to start executing task instances from the future.
-                        continue;
-                    }
 
                     // Consider the next instance of the chosen task in the next round of scheduling decisions.
                     taskInstanceIndices[coreChosenTask[core.name].number]++;
@@ -190,9 +184,9 @@ class PluginSchedulerFp {
                     }
                 }
                 
-                // Make sure the current time is not earlier than the chosenTask's LET start time.
+                // Make sure the current time is not earlier than the next task preemption or the chosenTask's LET start time.
                 coreChosenTask[core.name].instance.currentCore = core;
-                coreCurrentTime[core.name] = Math.max(coreCurrentTime[core.name], coreChosenTask[core.name].instance.letStartTime);
+                coreCurrentTime[core.name] = Math.max(coreCurrentTime[core.name], Math.min(nextSchedulerEventTime, coreChosenTask[core.name].instance.letStartTime));
                 
                 // Schedule as much of the chosen task instance's execution time before the next preeemption time.
                 // Create an execution interval for the chosen task instance.
@@ -217,7 +211,7 @@ class PluginSchedulerFp {
             
             // Terminate when all task instances have been scheduled.
             const emptyTaskQueues = Object.values(corePreemptedTasksQueue).reduce((prev, next) => prev && next.length == 0, true);
-            const reachedMakespan = Object.values(coreCurrentTime).reduce((prev, next) => prev && next == makespan, true);
+            const reachedMakespan = Object.values(coreCurrentTime).reduce((prev, next) => prev && next >= makespan, true);
             if (!taskInstanceIndices.some(element => element != null) && emptyTaskQueues
                 || reachedMakespan) {
                 break;
@@ -241,8 +235,8 @@ class PluginSchedulerFp {
         let lastInterval = executionIntervals.pop();
         if (lastInterval.core == coreName && lastInterval.endTime == startTime) {
             // Same core and a coinciding execution boundary
-            lastInterval.endTime = endTime;
-            executionIntervals.push(lastInterval);
+            const executionInterval = new Utility.Interval(lastInterval.startTime, endTime, coreName);
+            executionIntervals.push(executionInterval);
         } else {
             // Disjoint execution boundaries
             executionIntervals.push(lastInterval);

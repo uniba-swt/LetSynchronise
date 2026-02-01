@@ -356,7 +356,7 @@ class ModelSchedule {
     // All task instance-to-core/device allocations need to be known, which may require scheduling to be performed beforehand.
     async createNetworkDelayInstances(sourceEntityInstances, destinationEntityInstances, dependency, makespan, executionTiming) {
         if (destinationEntityInstances.value.length == 0) {
-            return;
+            return [ [], [] ];
         }
         
         const destinationInstances = destinationEntityInstances.value;

@@ -131,7 +131,7 @@ class ControllerEntity {
         const elements = ['schedule', 'entities', 'dependencies', 'eventChains', 'constraints']
         
         return Plugin.ModelDatabase.deleteSystem(elements)
-            .then(result => this.modelEntity.generateRandomTasks(parameters))
+            .then(result => this.model.generateRandomTasks(parameters))
             .then(result => this.modelDependency.generateRandomDependencies(parameters.numDependencies));
     }
         

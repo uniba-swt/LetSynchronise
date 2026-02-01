@@ -17,7 +17,7 @@ class PluginSchedulerRm {
         
         const scheduleElementSelected = ['schedule'];
         const schedule = await Plugin.DatabaseContentsGet(scheduleElementSelected);
-        const tasks = (await schedule[Model.EntityInstancesStoreName]).filter(task => task.type === 'task');
+        const tasks = (await schedule[Model.EntityInstancesStoreName]).filter(task => task.type === 'task' && task.value.length > 0);
 
         const coreElementSelected = ['cores'];
         const cores = (await Plugin.DatabaseContentsGet(coreElementSelected))[Model.CoreStoreName];
@@ -111,9 +111,11 @@ class PluginSchedulerRm {
                 const earlierFutureActivation = !noChosenTask && (coreCurrentTime[taskCore.name] < taskInstance.letStartTime && taskInstance.letStartTime < coreChosenTask[taskCore.name].instance.letStartTime);
                 // * Both the taskInstance and chosenTask are activated at the same time.
                 const sameActivationTime = !noChosenTask && (taskInstance.letStartTime == coreChosenTask[taskCore.name].instance.letStartTime);
-                // * The priority of taskInstance is equal to or higher than the chosenTask, the taskInstance ends its LET at or before that of the chosenTask,
+                // * The priority of taskInstance is either higher than the chosenTask or equal to the chosenTask and ends its LET at or before that of the chosenTask, 
                 //   and both task instances have been activated or both will activate at the same time.
-                const higherPriority = ((bothTasksActivated || bothTasksNotActivated && sameActivationTime) && (taskInstancePeriod <= coreChosenTask[taskCore.name].period) && (taskInstance.letEndTime <= coreChosenTask[taskCore.name].instance.letEndTime));
+                const higherPriority = ((bothTasksActivated || bothTasksNotActivated && sameActivationTime) 
+                                         && (taskInstancePeriod < coreChosenTask[taskCore.name].period
+                                              || (taskInstancePeriod == coreChosenTask[taskCore.name].period && taskInstance.letEndTime <= coreChosenTask[taskCore.name].instance.letEndTime)));
                 
                 // Update the chosenTask instance with taskInstance if any of the following 4 conditions are true:
                 // 1. No task instance has been chosen.
@@ -138,7 +140,6 @@ class PluginSchedulerRm {
                 if (taskInstancePeriod < coreChosenTask[taskCore.name].period) {
                     nextSchedulerEventTime = Math.min(nextSchedulerEventTime, taskInstance.letStartTime);
                 }
-                nextSchedulerEventTime = Math.min(nextSchedulerEventTime, taskInstance.letEndTime);
             }
             
             // Advance the chosen task instances on each core.
@@ -174,11 +175,6 @@ class PluginSchedulerRm {
                         continue;
                     }
 
-                    if (nextSchedulerEventTime < coreChosenTask[core.name].instance.letStartTime) {
-                        // Too early to start executing task instances from the future.
-                        continue;
-                    }
-
                     // Consider the next instance of the chosen task in the next round of scheduling decisions.
                     taskInstanceIndices[coreChosenTask[core.name].number]++;
                     if (taskInstanceIndices[coreChosenTask[core.name].number] == tasks[coreChosenTask[core.name].number].value.length) {
@@ -186,9 +182,9 @@ class PluginSchedulerRm {
                     }
                 }
                 
-                // Make sure the current time is not earlier than the chosenTask's LET start time.
+                // Make sure the current time is not earlier than the next task preemption or the chosenTask's LET start time.
                 coreChosenTask[core.name].instance.currentCore = core;
-                coreCurrentTime[core.name] = Math.max(coreCurrentTime[core.name], coreChosenTask[core.name].instance.letStartTime);
+                coreCurrentTime[core.name] = Math.max(coreCurrentTime[core.name], Math.min(nextSchedulerEventTime, coreChosenTask[core.name].instance.letStartTime));
                 
                 // Schedule as much of the chosen task instance's execution time before the next preeemption time.
                 // Create an execution interval for the chosen task instance.
@@ -213,7 +209,7 @@ class PluginSchedulerRm {
             
             // Terminate when all task instances have been scheduled.
             const emptyTaskQueues = Object.values(corePreemptedTasksQueue).reduce((prev, next) => prev && next.length == 0, true);
-            const reachedMakespan = Object.values(coreCurrentTime).reduce((prev, next) => prev && next == makespan, true);
+            const reachedMakespan = Object.values(coreCurrentTime).reduce((prev, next) => prev && next >= makespan, true);
             if (!taskInstanceIndices.some(element => element != null) && emptyTaskQueues
                 || reachedMakespan) {
                 break;
@@ -237,8 +233,8 @@ class PluginSchedulerRm {
         let lastInterval = executionIntervals.pop();
         if (lastInterval.core == coreName && lastInterval.endTime == startTime) {
             // Same core and a coinciding execution boundary
-            lastInterval.endTime = endTime;
-            executionIntervals.push(lastInterval);
+            const executionInterval = new Utility.Interval(lastInterval.startTime, endTime, coreName);
+            executionIntervals.push(executionInterval);
         } else {
             // Disjoint execution boundaries
             executionIntervals.push(lastInterval);

@@ -71,11 +71,11 @@ class ModelDependency {
             'name'        : `dep-${tasks[sourceIndex].name}→${tasks[destinationIndex].name}`,
             'source'      : {
                 'port'    : sourceTaskOutput,
-                'task'    : sourceTask.name
+                'entity'  : sourceTask.name
             },
             'destination' : {
                 'port'    : destinationTaskInput,
-                'task'    : destinationTask.name
+                'entity'  : destinationTask.name
             }
         });
     }

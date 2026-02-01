@@ -22,7 +22,7 @@ class PluginSchedulerRandom {
         
         const scheduleElementSelected = ['schedule'];
         const schedule = await Plugin.DatabaseContentsGet(scheduleElementSelected);
-        const tasks = (await schedule[Model.EntityInstancesStoreName]).filter(task => task.type === 'task');
+        const tasks = (await schedule[Model.EntityInstancesStoreName]).filter(task => task.type === 'task' && task.value.length > 0);
         
         const coreElementSelected = ['cores'];
         const cores = (await Plugin.DatabaseContentsGet(coreElementSelected))[Model.CoreStoreName];
