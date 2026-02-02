@@ -1,7 +1,7 @@
 # LetSynchronise
 LetSynchronise is an extensible, web-based, open-source (GPL3) framework for modelling, 
-simulating, analysing, and optimising LET-based systems. It
-currently focuses on timing behaviour and does not support the
+simulating, analysing, and optimising systems based on the Logical Execution Time (LET) paradigm. 
+It currently focuses on timing behaviour and does not support the
 modelling of, e.g., functional behaviour, data values, or memory
 usage. The target audience of LetSynchronise is researchers who
 wish to (1) rapidly prototype and experiment with LET scheduling 
@@ -10,15 +10,26 @@ readily accessible, and (3) fairly and accurately reproduce and
 evaluate the results of existing work. 
 
 Paper describing LetSynchronise:
-* [E. Yip and M. M. Y. Kuo. _LetSynchronise: An Open-Source Framework for Analysing and Optimising Logical Execution Time Systems_. CPS-IoT Week, 2023](https://dl.acm.org/doi/10.1145/3576914.3587500)
+* [ E. Yip and M. M. Y. Kuo. 
+    _LetSynchronise: An Open-Source Framework for Analysing and Optimising Logical Execution Time Systems_. 
+    CPS-IoT Week, 2023
+  ](https://doi.org/10.1145/3576914.3587500)
+* [ J. Lee, N. Allen, M. M. Y. Kuo, and E. Yip.
+    _Optimising the Scheduling of System Level Logical Execution Time Systems_.
+    MEMOCODE, 2025
+  ](https://doi.org/10.1145/3742875.3754684)
 
 Original authors:
-* [@eyip002](https://github.com/eyip002): [Eugene Yip](https://www.uni-bamberg.de/swt/team/dr-eugene-yip/)
+* [@eyip002](https://github.com/eyip002): [Eugene Yip](http://eugenuity.com/about.html)
 * [@mkuo005](https://github.com/mkuo005): [Matthew Kuo](http://matthew.kuo.nz)
+
+Contributors:
+* [@lleejamiee](https://github.com/lleejamiee): Jamie Lee
 
 
 ## Dependencies
-* Web browser that supports [indexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) (system database) and [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) (UI settings)
+* Web browser that supports [indexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) (system database) 
+  and [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) (UI settings)
 * [D3 Data-Driven Documents](https://d3js.org): Charting
 * [Bootstrap](https://getbootstrap.com): User interface and layout
 
@@ -49,12 +60,15 @@ via tick boxes.
 > LetSynchronise uses a time base of nanoseconds to avoid floating-point rounding errors.
 
 ### Platform Tab
-* Edit the cores and their speedups
-* Edit the memories and their sizes and access latencies
+* Edit the devices and their protocol delays.
+* Edit the network delays between pairs of devices.
+* Edit the cores and their speedups and associated devices.
+* Edit the memories and their sizes and access latencies.
 
 ### Design Tab
 * Edit the system interface in terms of the environmental inputs and outputs.
 * Edit the system's LET task set, and view each task's parameters diagramatically.
+* Generate a random task set with task dependencies.
 * Edit task communication dependencies among the system interface and tasks.
 
 ### Analyse Tab

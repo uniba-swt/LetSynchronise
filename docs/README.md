@@ -5,6 +5,12 @@ dynamically at run-time. If no core has been defined for the platform, a single-
 assumed and created with the name `Default` and a speedup of `1`. When a task instance 
 is being executed on a core, the core is tagged to the execution interval (`instance.currentCore.name`).
 
+Cores can be assigned to devices that have been defined in the the platform. Devices communicate
+over a network using some protocol. Protocol delays (for data encapsulation and decapsulation) 
+can be defined for each device, and network delays can be defined between pairs of devices.
+If no device has been defined for the platform, all cores are assumed to be on the same 
+device with the name `Default` and a speedup of `1`. 
+
 Memory modules can be defined and edited, but are not yet supported in the Design and Analyse tabs of 
 LetSynchronise. 
 
@@ -127,13 +133,21 @@ This section describes the plugins that have been implemented so far.
 
 ## Goal
 * `ls.plugin.goal.end2endMax.js`: (Multicore) Maximises end-to-end response times by changing 
-  all LET intervals of all tasks to span the entire task period.
+  all LET intervals of all tasks to span their entire task period.
 * `ls.plugin.goal.end2endMin.js`: (Multicore, only EDF and FP) Naive heuristic that iteratively minimises the 
   end-to-end response times of all event chains. Constructs a task dependency task
   and considers tasks based on event chain priority.
-* `ls.plugin.goal.ilp.js`: (Single core, custom scheduler) Simple minimisation of end-to-end response times by 
+* `ls.plugin.goal.ilp.js`: (Multicore, custom scheduler) Simple minimisation of end-to-end response times by 
   formulating the the problem as an Integer Linear Program (ILP). The task set is 
   sent to an [external tool](https://github.com/mkuo005/LET-LP-Scheduler), which 
   constructs the ILP and returns the solution as a new LetSynchronise model.
+* `ls.plugin.goal.end2endMinMC`: (Multicore, custom scheduler) Minimises the communication delay between
+  the tasks of a System-Level LET (SL-LET) system by formulating the problem as an Integer Linear Program (ILP).
+  The task set is sent to an [external tool](...), which constructs the ILP and returns the solution
+  as a new LetSynchronise model.
+* `ls.plugin.goal.minCoreUsage`: (Multicore, custom scheduler) Minimises the number of cores that a 
+  System-Level LET (SL-LET) system needs by formulating the problem as an Integer Linear Program (ILP).
+  The task set is sent to an [external tool](...), which constructs the ILP and returns the solution
+  as a new LetSynchronise model.
 * `ls.plugin.goal.random.js`: (Multicore) Randomises the parameters of all LET tasks. 
   Only for demonstration purposes.
