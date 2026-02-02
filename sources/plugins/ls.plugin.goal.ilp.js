@@ -11,12 +11,13 @@ class PluginGoalIlp {
     // Triggers an external web tool (https://github.com/mkuo005/LET-LP-Scheduler) to create 
     // and solve an ILP formulation of the system to minimise end-to-end response times.
     // Only supports task sets that have been allocated to the same core.
+    // Assumes that "no scheduling (identity)" is selected in LetSynchronise to preserve the external web tool's computed schedule.
     static async Result(scheduler, makespan) {
         // Delete existing schedule.
         await Plugin.DeleteSchedule();
         
         // Retrieve the LET system.
-        const systemElementSelected = ['cores', 'inputs','outputs','tasks','dependencies','eventChains','constraints'];
+        const systemElementSelected = ['cores', 'inputs', 'outputs', 'entities', 'dependencies', 'eventChains', 'constraints'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
         
         // Add the makespan to system so that the ILP Solver can access it.
@@ -32,12 +33,12 @@ class PluginGoalIlp {
         const scheduleElementSelected = ['schedule'];
         return Plugin.DatabaseContentsDelete(scheduleElementSelected)
             .then(result => Plugin.DatabaseContentsSet(optimisedSchedule, scheduleElementSelected))
-            .then(result => Plugin.CreateAllDependencyAndEventChainInstances(makespan));
+            .then(result => Plugin.CreateAllDependencyAndEventChainInstances());
     }
     
     // Trigger an external optimisation tool.
     static async Algorithm(system) {
-        const url = 'http://localhost:8181/'
+        const url = 'http://localhost:8181/ilp'
         return fetch(url, {
             method: 'POST',
             body: JSON.stringify(system),

@@ -11,14 +11,18 @@ class PluginSchedulerRandom {
     
     // Random non-preemptive scheduling of task execution.
     static async Result(makespan, executionTiming) {
-        // Create instances of tasks, execution times, data dependencies, and event chains.
+        // Does not support Systeml-Level LET
+		if (!confirm('SL-LET systems are not supported by this plugin! Proceed with the scheduling?')) {
+			return null;
+		}
+    
+        // Create instances of tasks, execution times, network delays, and event chains.
         await Plugin.DeleteSchedule();
         await Plugin.CreateAllTaskInstances(makespan, executionTiming);
-        await Plugin.CreateAllDependencyAndEventChainInstances(makespan);
         
         const scheduleElementSelected = ['schedule'];
         const schedule = await Plugin.DatabaseContentsGet(scheduleElementSelected);
-        const tasks = await schedule[Model.TaskInstancesStoreName];
+        const tasks = (await schedule[Model.EntityInstancesStoreName]).filter(task => task.type === 'task' && task.value.length > 0);
         
         const coreElementSelected = ['cores'];
         const cores = (await Plugin.DatabaseContentsGet(coreElementSelected))[Model.CoreStoreName];
@@ -28,8 +32,9 @@ class PluginSchedulerRandom {
             alert(result.message);
         }
         
-        return Plugin.DatabaseContentsDelete(scheduleElementSelected)
-            .then(Plugin.DatabaseContentsSet(schedule, scheduleElementSelected));
+        return Plugin.DatabaseContentsSet(schedule, scheduleElementSelected)
+            // Create instances of data dependencies. Network delays can only be generated after tasks have been allocated to cores/devices.
+            .then(result => Plugin.CreateAllDependencyAndEventChainInstances(makespan, executionTiming));
     }
     
     // Non-preemptive random, multicore, no task migration.

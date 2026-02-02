@@ -28,7 +28,7 @@ class PluginImporterNative {
             return null;
         }
             
-        if (!this.ValidateTaskDependencies(system)) {
+        if (!this.ValidateEntityDependencies(system)) {
             return null;
         }
         
@@ -43,22 +43,22 @@ class PluginImporterNative {
         return system;
     }
     
-    static ValidateTaskDependencies(system) {
+    static ValidateEntityDependencies(system) {
         if (system[Model.DependencyStoreName] === undefined) {
             return true;
         }
+        
         const dependencies = system[Model.DependencyStoreName];
-
         if (Object.keys(dependencies).length > 0
                 && system[Model.SystemInputStoreName] === undefined 
                 && system[Model.SystemOutputStoreName] === undefined 
-                && system[Model.TaskStoreName] === undefined) {
-            alert('File to import defines task dependencies but no input/output interface or tasks have been defined.');
+                && system[Model.EntityStoreName] === undefined) {
+            alert('File to import defines task dependencies but no input/output interfaces or tasks have been defined.');
             return false;
         }
         
         for (const dependency of dependencies) {            
-            const validationResult = this.ValidateTaskDependency(dependency, system);
+            const validationResult = this.ValidateEntityDependency(dependency, system);
             if (typeof validationResult == "string") {
                 alert(validationResult);
                 return false;
@@ -68,69 +68,47 @@ class PluginImporterNative {
         return true;
     }
     
-    static ValidateTaskDependency(dependency, system) {
+    static ValidateEntityDependency(dependency, system) {
         if (dependency.name === undefined) {
             return `File to import has a task dependency with a missing name.`;
         }
 
-        if (dependency.source.task === undefined || dependency.source.port === undefined) {
+        if (dependency.source.entity === undefined || dependency.source.port === undefined) {
             return `File to import has task dependency "${dependency.name}" with an undefined source port.`
         }
                 
-        if (dependency.destination.task === undefined || dependency.destination.port === undefined) {
+        if (dependency.destination.entity === undefined || dependency.destination.port === undefined) {
             return `File to import has task dependency "${dependency.name}" with an undefined destination port.`
         }
         
         const inputs = system[Model.SystemInputStoreName];
         const outputs = system[Model.SystemOutputStoreName];
-        const tasks = system[Model.TaskStoreName];
-        if (dependency.source.task == Model.SystemInterfaceName) {
-            let systemInterface = this.GetSystemInterface(dependency.source.port, inputs);
-            if (systemInterface === null) {
+        const entities = system[Model.EntityStoreName];
+        if (dependency.source.entity == Model.SystemInterfaceName) {
+            let systemInterface = inputs ? inputs.find(input => input.name == dependency.source.port) : null;
+            if (systemInterface == null) {
                 return `File to import has task dependency "${dependency.name}" that uses a non-existent "${Model.SystemInterfaceName}.${dependency.source.port}" port.`
             }
          } else {
-            let task = this.GetTask(dependency.source.task, tasks);
-            if (task === null || !task.outputs.includes(dependency.source.port)) {
-                return `File to import has task dependency "${dependency.name}" that uses a non-existent "${destination.source.task}.${dependency.source.port}" port.`
+            let entity = entities ? entities.find(entity => entity.name == dependency.source.entity) : null;
+            if (entity == null || !entity.outputs.includes(dependency.source.port)) {
+                return `File to import has task dependency "${dependency.name}" that uses a non-existent "${destination.source.entity}.${dependency.source.port}" port.`
             }
         }
         
-        if (dependency.destination.task == Model.SystemInterfaceName) {
-            let systemInterface = this.GetSystemInterface(dependency.destination.port, outputs);
+        if (dependency.destination.entity == Model.SystemInterfaceName) {
+            let systemInterface = outputs ? outputs.find(output => output.name == dependency.destination.port) : null;
             if (systemInterface === null) {
                 return `File to import has task dependency "${dependency.name}" that uses a non-existent "${Model.SystemInterfaceName}.${dependency.destination.port}" port.`
             }
          } else {
-            let task = this.GetTask(dependency.destination.task, tasks);
-            if (task === null || !task.inputs.includes(dependency.destination.port)) {
-                return `File to import has task dependency "${dependency.name}" that uses a non-existent "${dependency.destination.task}.${dependency.destination.port}" port.`
+            let entity = entities ? entities.find(entity => entity.name == dependency.destination.entity) : null;
+            if (entity == null || !entity.inputs.includes(dependency.destination.port)) {
+                return `File to import has task dependency "${dependency.name}" that uses a non-existent "${dependency.destination.entity}.${dependency.destination.port}" port.`
             }
          }
          
          return null;
-    }
-    
-    static GetSystemInterface(portName, ports) {
-        if (ports !== undefined) {
-            for (const port of ports) {
-                if (port.name == portName) {
-                    return port;
-                }
-            }
-        }
-        
-        return null;
-    }
-    
-    static GetTask(taskName, tasks) {
-        for (const task of tasks) {
-            if (task.name == taskName) {
-                return task;
-            }
-        }
-        
-        return null;
     }
     
     static ValidateEventChains(system) {

@@ -33,6 +33,7 @@ class ModelConstraint {
         this.modelEventChain = modelEventChain;
     }
     
+    
     // -----------------------------------------------------
     // Class methods
 

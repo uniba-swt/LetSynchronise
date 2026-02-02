@@ -14,10 +14,10 @@ class PluginGoalEnd2EndMin {
     // and contracts the LET intervals based on min/max execution intervals.
     static async Result(scheduler, makespan) {
         // Retrieve the LET system.
-        const systemElementSelected = ['cores', 'tasks', 'eventChains', 'constraints'];
+        const systemElementSelected = ['cores', 'entities', 'eventChains', 'constraints'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
         const cores = await system[Model.CoreStoreName];
-        const tasks = await system[Model.TaskStoreName];
+        const tasks = (await system[Model.EntityStoreName]).filter(task => task.type === 'task');
         const eventChains = await system[Model.EventChainStoreName];
         const constraints = await system[Model.ConstraintStoreName];
         
@@ -36,7 +36,7 @@ class PluginGoalEnd2EndMin {
         // Run iterative optimisation heuristic.
         await this.Algorithm(cores, tasks, graph, scheduler);
 
-        const taskElementSelected = ['tasks'];
+        const taskElementSelected = ['entities'];
         return Plugin.DatabaseContentsDelete(taskElementSelected)
             .then(Plugin.DatabaseContentsSet(system, taskElementSelected));
     }
@@ -86,19 +86,19 @@ class PluginGoalEnd2EndMin {
             let eventChainSuccessor = eventChain;
             
             // Record the task at the start of the chain.
-            if (eventChainSuccessor.segment.source.task != Model.SystemInterfaceName) {
-                eventChainFlattened.push(eventChainSuccessor.segment.source.task);
+            if (eventChainSuccessor.segment.source.entity != Model.SystemInterfaceName) {
+                eventChainFlattened.push(eventChainSuccessor.segment.source.entity);
             }
             
             // Traverse the segments in the event chain and record the tasks.
             while (true) {
-                if (eventChainSuccessor.segment.destination.task != Model.SystemInterfaceName) {
-                    eventChainFlattened.push(eventChainSuccessor.segment.destination.task);
+                if (eventChainSuccessor.segment.destination.entity != Model.SystemInterfaceName) {
+                    eventChainFlattened.push(eventChainSuccessor.segment.destination.entity);
                 }
                 
-                if (eventChainSuccessor.segment.source.task != Model.SystemInterfaceName
-                        && eventChainSuccessor.segment.destination.task != Model.SystemInterfaceName) {
-                    taskDependencies.push([eventChainSuccessor.segment.source.task, eventChainSuccessor.segment.destination.task]);
+                if (eventChainSuccessor.segment.source.entity != Model.SystemInterfaceName
+                        && eventChainSuccessor.segment.destination.entity != Model.SystemInterfaceName) {
+                    taskDependencies.push([eventChainSuccessor.segment.source.entity, eventChainSuccessor.segment.destination.entity]);
                 }
                 
                 if (eventChainSuccessor.successor == undefined) {
@@ -183,7 +183,7 @@ class PluginGoalEnd2EndMin {
         const prologue = Utility.MaxOfArray(initialOffsets);
         const hyperPeriod = Utility.LeastCommonMultipleOfArray(periods);
         const makespan = prologue + hyperPeriod;
-        const executionTiming = 'WCET';
+        const executionTiming = 'Worst Case';
         
         let currentTaskSet = new Set();         // Current set of tasks considered for scheduling.
         let firstTaskInstanceOfInterest = { };  // First task instances that communicate directly according to the task dependency graph.
@@ -311,7 +311,7 @@ class PluginGoalEnd2EndMin {
             await Plugin.CreateTaskInstances(task, makespan, executionTiming);
         }
         const schedule = await Plugin.GetSchedule();
-        const allTasksInstances = await schedule['promiseAllTasksInstances'];
+        const allTasksInstances = await schedule['promiseAllEntitiesInstances'];
         const schedulingResult = scheduler.Algorithm(cores, allTasksInstances, makespan, [...taskSet]);
         
         return [schedulingResult, allTasksInstances];

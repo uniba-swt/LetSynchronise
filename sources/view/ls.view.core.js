@@ -5,6 +5,7 @@ class ViewCore {
     
     nameField = null;
     speedupField = null;
+    deviceField = null;
     
     cores = null;
     
@@ -19,6 +20,7 @@ class ViewCore {
         // Define or edit a core
         this.nameField = this.root.querySelector('#view-platform-core-name');
         this.speedupField = this.root.querySelector('#view-platform-core-speedup');
+        this.deviceField = this.root.querySelector('#view-platform-core-device');
         
         this.submitButton = this.root.querySelector('#submitCore');
         
@@ -45,18 +47,32 @@ class ViewCore {
     set speedup(speedup) {
         this.speedupField.value = speedup;
     }
+
+    get device() {
+        if (this.deviceField.value == null || this.deviceField.value.trim() == ModelDevice.Default.name) {
+            return null;
+        } else {
+            return this.deviceField.value;
+        }
+    }
+    
+    set device(device) {
+        this.deviceField.value = device;
+    }
     
     get coreRaw() {
         return {
             'name': this.name,
-            'speedup': this.speedup
+            'speedup': this.speedup,
+            'device': this.device,
         };
     }
     
     get coreClean() {
         return {
             'name': this.name.trim(),
-            'speedup': Math.abs(parseFloat(this.speedup))
+            'speedup': Math.abs(parseFloat(this.speedup)),
+            'device': this.device == null ? null : this.device.trim(),
         };
     }
     
@@ -97,13 +113,12 @@ class ViewCore {
         this.deleteHandler = handler;
     }
     
-    
     validateCore(core) {
         if (core.name == null || core.name.trim() == '') {
             alert('Core name cannot be blank.');
             return false;
         }
-        if (core.name.trim().toLowerCase() == 'default') {
+        if (core.name.trim().toLowerCase() == ModelCore.Default.name.toLowerCase()) {
             alert(`Core name cannot be "${core.name.trim()}".`);
             return false;
         }
@@ -112,26 +127,12 @@ class ViewCore {
             return false;
         }
         
-        if (core.speedup == null || core.speedup.trim() == '' || isNaN(core.speedup)) {
-            alert('Speedup has to be a decimal number.');
-            return false;
-        }
-        const speedup = parseFloat(core.speedup);
-        if (speedup < 0) {
-            alert('Soeedup cannot be negative.');
-            return false;
-        }
-        const speedupSplit = core.speedup.split('.');
-        if (speedupSplit.length > 1 && speedupSplit[1].length > 2) {
-            alert('Speedup cannot have more than 2 decimal places.');
+        if (!Utility.ValidPositiveDecimal(core.speedup)) {
+            alert('Speedup has to be a positive decimal number.');
             return false;
         }
         
         return true;
-    }
-    
-    updateCoreSelectors(tasks) {
-        // TODO: Implement
     }
             
     updateCores(cores) {
@@ -145,7 +146,8 @@ class ViewCore {
             .data(cores)
             .enter()
             .append('li')
-                .html(core => `<span><b>${core.name}:</b> ${core.speedup}&times; speedup</span> ${Utility.AddDeleteButton(this.ElementIdPrefix, core.name)}`)
+                .html(core => `<span><b>${core.name}:</b> ${core.speedup}&times; speedup (${core.device == null ? ModelDevice.Default.name : core.device})</span> 
+                    ${Utility.AddDeleteButton(this.ElementIdPrefix, core.name)}`)
             .on('click', function(event, data) {
                 thisRef.cores.node().querySelectorAll('li')
                     .forEach((core) => {
@@ -163,6 +165,27 @@ class ViewCore {
     populateParameterForm(core) {
         this.name = core.name;
         this.speedup = core.speedup;
+        this.device = core.device == null ? ModelDevice.Default.name : core.device;
+    }
+    
+    updateDeviceSelector(devices) {
+        devices.sort();
+        
+        let deviceDropdown = d3.select(this.deviceField);
+        
+        deviceDropdown.selectAll('*').remove();
+        deviceDropdown
+            .append('option')
+            .property('selected', true)
+            .attr('value', ModelDevice.Default.name)
+            .text(ModelDevice.Default.name);
+        
+        devices.forEach(device =>
+            deviceDropdown
+                .append('option')
+                .attr('value', device.name)
+                .text(device.name)
+        );
     }
     
     toString() {

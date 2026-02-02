@@ -3,8 +3,9 @@
 class ControllerDependency {
     _view = null;
     _model = null;
-    _modelTask = null;
+    _modelEntity = null;
     _modelInterface = null;
+    _modelCore = null;
     
     constructor() { }
 
@@ -37,15 +38,15 @@ class ControllerDependency {
         return this._model;
     }
 
-    set modelTask(modelTask) {
-        this._modelTask = modelTask;
+    set modelEntity(modelEntity) {
+        this._modelEntity = modelEntity;
         
-        // Register the model task with the model.
-        this._model.registerModelTask(this._modelTask);
+        // Register the model entity with the model.
+        this._model.registerModelEntity(this._modelEntity);
     }
     
-    get modelTask() {
-        return this._modelTask;
+    get modelEntity() {
+        return this._modelEntity;
     }
     
     set modelInterface(modelInterface) {
@@ -69,6 +70,15 @@ class ControllerDependency {
     get modelEventChain() {
         return this._modelEventChain;
     }
+
+    get modelCore() {
+        return this._modelCore;
+    }
+
+    set modelCore(modelCore) {
+        this._modelCore = modelCore;
+        this._model.registerModelCore(this._modelCore);
+    }
     
     
     // -----------------------------------------------------
@@ -76,8 +86,8 @@ class ControllerDependency {
     
     // Handler for creating input/output dependency.
     // Arrow function is used so that 'this' is accessible when the handler is called within the view.
-    handleCreateDependency = (taskDependency) => {
-        this.model.createDependency(taskDependency);
+    handleCreateDependency = (entityDependency) => {
+        this.model.createDependency(entityDependency);
     }
     
     // Handler for deleting input/output dependency.

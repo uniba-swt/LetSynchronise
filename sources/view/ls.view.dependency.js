@@ -70,11 +70,11 @@ class ViewDependency {
         return {
             'name': this.name.trim(),
             'source': {
-                'task': source[0],
+                'entity': source[0],
                 'port': source[1]
             },
             'destination': {
-                'task': destination[0],
+                'entity': destination[0],
                 'port': destination[1]
             }
         };
@@ -141,14 +141,13 @@ class ViewDependency {
             alert('Source and destination of dependency cannot both be from the system.')
             return false;
         }
-                
+        
         return true;
     }
     
     updateDependencySelectors(taskParametersSet, systemInputs, systemOutputs) {
-        const sources = taskParametersSet.map(taskParameters => Utility.TaskPorts(taskParameters.name, taskParameters.outputs)).flat();
-        const destinations = taskParametersSet.map(taskParameters => Utility.TaskPorts(taskParameters.name, taskParameters.inputs)).flat();
-        
+        const sources = taskParametersSet.map(taskParameters => Utility.EntityPorts(taskParameters.name, taskParameters.outputs)).flat();
+        const destinations = taskParametersSet.map(taskParameters => Utility.EntityPorts(taskParameters.name, taskParameters.inputs)).flat();
         // Create list of available sources and destinations
         this.updateTaskDependencyPorts(d3.select(this.sourceField), sources.sort(), systemInputs.sort());
         this.updateTaskDependencyPorts(d3.select(this.destinationField), destinations.sort(), systemOutputs.sort());

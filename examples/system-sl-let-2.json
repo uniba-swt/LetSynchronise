@@ -1,0 +1,244 @@
+{
+	"DeviceStore": [
+		{
+			"name": "d1",
+			"speedup": 1,
+			"delays": {
+				"tcp": {
+					"bcdt": 200000,
+					"acdt": 250000,
+					"wcdt": 300000,
+					"distribution": "Normal"
+				}
+			}
+		},
+		{
+			"name": "d2",
+			"speedup": 1,
+			"delays": {
+				"udp": {
+					"bcdt": 10000,
+					"acdt": 50000,
+					"wcdt": 100000,
+					"distribution": "Normal"
+				}
+			}
+		},
+		{
+			"name": "d3",
+			"speedup": 1,
+			"delays": {
+				"tcp": {
+					"bcdt": 10000,
+					"acdt": 50000,
+					"wcdt": 100000,
+					"distribution": "Normal"
+				}
+			}
+		}
+	],
+	"CoreStore": [
+		{
+			"name": "c1",
+			"speedup": 1,
+			"device": "d1"
+		},
+		{
+			"name": "c2",
+			"speedup": 1,
+			"device": "d2"
+		},
+		{
+			"name": "c3",
+			"speedup": 1,
+			"device": "d3"
+		}
+	],
+	"MemoryStore": [],
+	"NetworkDelayStore": [
+		{
+			"name": "d2-to-d1",
+			"source": "d2",
+			"dest": "d1",
+			"bcdt": 100000,
+			"acdt": 500000,
+			"wcdt": 3000000,
+			"distribution": "Normal"
+		},
+		{
+			"name": "d2-to-d3",
+			"source": "d2",
+			"dest": "d3",
+			"bcdt": 100000,
+			"acdt": 500000,
+			"wcdt": 3000000,
+			"distribution": "Normal"
+		},
+		{
+			"name": "d3-to-d1",
+			"source": "d3",
+			"dest": "d1",
+			"bcdt": 100000,
+			"acdt": 200000,
+			"wcdt": 300000,
+			"distribution": "Normal"
+		},
+		{
+			"name": "d3-to-d2",
+			"source": "d3",
+			"dest": "d2",
+			"bcdt": 100000,
+			"acdt": 200000,
+			"wcdt": 300000,
+			"distribution": "Normal"
+		}
+	],
+	"SystemInputStore": [
+		{
+			"name": "SystemInput"
+		}
+	],
+	"SystemOutputStore": [
+		{
+			"name": "SystemOutput"
+		}
+	],
+	"EntityStore": [
+		{
+			"name": "task_a1",
+			"type": "task",
+			"priority": 1,
+			"initialOffset": 1000000,
+			"activationOffset": 0,
+			"duration": 500000,
+			"period": 2000000,
+			"inputs": [
+				"in"
+			],
+			"outputs": [
+				"out"
+			],
+			"wcet": 500000,
+			"acet": 500000,
+			"bcet": 500000,
+			"distribution": "Uniform",
+			"core": "c1"
+		},
+		{
+			"name": "task_a2",
+			"type": "task",
+			"priority": 1,
+			"initialOffset": 1000000,
+			"activationOffset": 0,
+			"duration": 500000,
+			"period": 4000000,
+			"inputs": [
+				"in"
+			],
+			"outputs": [
+				"out"
+			],
+			"wcet": 500000,
+			"acet": 500000,
+			"bcet": 500000,
+			"distribution": "Uniform",
+			"core": "c2"
+		},
+		{
+			"name": "task_a3",
+			"type": "task",
+			"priority": 1,
+			"initialOffset": 1000000,
+			"activationOffset": 2000000,
+			"duration": 500000,
+			"period": 4000000,
+			"inputs": [
+				"in"
+			],
+			"outputs": [
+				"out"
+			],
+			"wcet": 500000,
+			"acet": 500000,
+			"bcet": 500000,
+			"distribution": "Uniform",
+			"core": "c3"
+		},
+		{
+			"name": "task_b",
+			"type": "task",
+			"priority": 1,
+			"initialOffset": 1000000,
+			"activationOffset": 0,
+			"duration": 500000,
+			"period": 2000000,
+			"inputs": [
+				"in"
+			],
+			"outputs": [
+				"out"
+			],
+			"wcet": 500000,
+			"acet": 500000,
+			"bcet": 500000,
+			"distribution": "Uniform",
+			"core": null
+		},
+		{
+			"name": "task_c",
+			"type": "task",
+			"priority": 0,
+			"initialOffset": 0,
+			"activationOffset": 0,
+			"duration": 1000000,
+			"period": 2000000,
+			"inputs": [
+				"in1",
+				"in2"
+			],
+			"outputs": [
+				"out"
+			],
+			"wcet": 1000000,
+			"acet": 1000000,
+			"bcet": 1000000,
+			"distribution": "Weibull",
+			"core": "c1"
+		}
+	],
+	"DependencyStore": [
+		{
+			"name": "delta",
+			"source": {
+				"entity": "task_c",
+				"port": "out"
+			},
+			"destination": {
+				"entity": "__system",
+				"port": "SystemOutput"
+			}
+		},
+		{
+			"name": "gamma",
+			"source": {
+				"entity": "task_b",
+				"port": "out"
+			},
+			"destination": {
+				"entity": "task_c",
+				"port": "in2"
+			}
+		},
+		{
+			"name": "theta",
+			"source": {
+				"entity": "__system",
+				"port": "SystemInput"
+			},
+			"destination": {
+				"entity": "task_b",
+				"port": "in"
+			}
+		}
+	]
+}

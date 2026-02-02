@@ -172,8 +172,8 @@ class Plugin {
         return this.ModelSchedule.createAllTaskInstances(makespan, executionTiming);
     }
     
-    static CreateAllDependencyAndEventChainInstances(makespan) {
-        return this.ModelSchedule.createAllDependencyAndEventChainInstances(makespan);
+    static CreateAllDependencyAndEventChainInstances(makespan, executionTiming) {
+        return this.ModelSchedule.createAllDependencyAndEventChainInstances(makespan, executionTiming);
     }
     
     static GetSchedule() {

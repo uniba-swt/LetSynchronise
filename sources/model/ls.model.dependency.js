@@ -5,9 +5,10 @@ class ModelDependency {
     updateDependencySelectors = null;      // Callback to function in ls.view.dependency
     
     database = null;
-    modelTask = null;
+    modelEntity = null;
     modelInterface = null;
     modelEventChain = null;
+    modelCore = null;
 
     constructor() { }
     
@@ -31,8 +32,8 @@ class ModelDependency {
         this.database = database;
     }
     
-    registerModelTask(modelTask) {
-        this.modelTask = modelTask;
+    registerModelEntity(modelEntity) {
+        this.modelEntity = modelEntity;
     }
     
     registerModelInterface(modelInterface) {
@@ -42,6 +43,10 @@ class ModelDependency {
     registerModelEventChain(modelEventChain) {
         this.modelEventChain = modelEventChain;
     }
+
+    registerModelCore(modelCore) {
+        this.modelCore = modelCore;
+    }
         
     
     // -----------------------------------------------------
@@ -50,7 +55,69 @@ class ModelDependency {
     createDependency(dependency) {
         // Store dependency in Database
         return this.database.putObject(Model.DependencyStoreName, dependency)
-            .then(this.refreshViews());
+            .then(result => this.refreshViews());
+    }
+
+    generateRandomDependency(tasks, sourceIndex, destinationIndex) {
+        const sourceTask = tasks[sourceIndex];
+        const sourceTaskOutputs = sourceTask.outputs;
+        const sourceTaskOutput = sourceTaskOutputs[Utility.RandomInteger(0, null, sourceTaskOutputs.length - 1)];
+        
+        const destinationTask = tasks[destinationIndex];
+        const destinationTaskInputs = destinationTask.inputs;
+        const destinationTaskInput = destinationTaskInputs[Utility.RandomInteger(0, null, destinationTaskInputs.length - 1)];
+        
+        return this.createDependency({
+            'name'        : `dep-${tasks[sourceIndex].name}→${tasks[destinationIndex].name}`,
+            'source'      : {
+                'port'    : sourceTaskOutput,
+                'entity'  : sourceTask.name
+            },
+            'destination' : {
+                'port'    : destinationTaskInput,
+                'entity'  : destinationTask.name
+            }
+        });
+    }
+    
+    async generateRandomDependencies(numDependencies) {
+        const tasks = await this.modelEntity.getAllTasks();
+        
+        let dependencies = [];
+        for (let i = 0; i < numDependencies; ++i) {
+            const sourceIndex = Utility.RandomInteger(0, null, tasks.length - 1);
+            const destinationIndex = (sourceIndex + Utility.RandomInteger(1, null, tasks.length - 1)) % tasks.length;
+            dependencies.push(this.generateRandomDependency(tasks, sourceIndex, destinationIndex));
+        }
+        
+        return Promise.all(dependencies);
+    }
+    
+    static CreateDelayDependencyParameters(dependency, delayType) {
+        switch (delayType) {
+            case ModelEntity.EncapsulationName:
+                return {
+                    'source'      : {'entity': dependency.source.entity, 'port': dependency.source.port},
+                    'destination' : {'entity': `${dependency.source.entity} → ${dependency.destination.entity} ${ModelEntity.EncapsulationName} delay`, 'port': dependency.destination.port}
+                };
+                
+            case ModelEntity.NetworkName:
+                return {
+                    'source'      : {'entity': `${dependency.source.entity} → ${dependency.destination.entity} ${ModelEntity.EncapsulationName} delay`, 'port': dependency.source.port},
+                    'destination' : {'entity': `${dependency.source.entity} → ${dependency.destination.entity} ${ModelEntity.NetworkName} delay`, 'port': dependency.destination.port}
+                };
+                
+            case ModelEntity.DecapsulationName:
+                return {
+                    'source'      : {'entity': `${dependency.source.entity} → ${dependency.destination.entity} ${ModelEntity.NetworkName} delay`, 'port': dependency.source.port},
+                    'destination' : {'entity': `${dependency.source.entity} → ${dependency.destination.entity} ${ModelEntity.DecapsulationName} delay`, 'port': dependency.destination.port}
+                };
+            default:
+                return {
+                    'source'      : {'entity': `${dependency.source.entity} → ${dependency.destination.entity} ${ModelEntity.DecapsulationName} delay`, 'port': dependency.source.port},
+                    'destination' : {'entity': dependency.destination.entity, 'port': dependency.destination.port}
+                };
+        }
     }
     
     getDependency(name) {
@@ -61,11 +128,10 @@ class ModelDependency {
         return this.database.getAllObjects(Model.DependencyStoreName);
     }
     
-    getAllDependencyInstances() {
+    getAllDependenciesInstances() {
         return this.database.getAllObjects(Model.DependencyInstancesStoreName);
     }
 
-    
     deleteDependency(name) {
         return this.database.deleteObject(Model.DependencyInstancesStoreName, name)
             .then(this.database.deleteObject(Model.DependencyStoreName, name))
@@ -81,22 +147,22 @@ class ModelDependency {
     getSuccessorDependencies(name) {
         const promiseDependency = this.getDependency(name);
         const promiseAllDependencies = promiseDependency.then(sourceDependency => {
-            return (sourceDependency.destination.task == Model.SystemInterfaceName) ? [] : this.getAllDependencies();
+            return (sourceDependency.destination.entity == Model.SystemInterfaceName) ? [] : this.getAllDependencies();
         });
         
         return Promise.all([promiseDependency, promiseAllDependencies])
             .then(([sourceDependency, allDependencies]) => allDependencies
-                .filter(dependency => (dependency.source.task == sourceDependency.destination.task)));
+                .filter(dependency => (dependency.source.entity == sourceDependency.destination.entity)));
     }
     
-    // Validate task dependencies against system and task inputs and outputs.
+    // Validate entity dependencies against system and entity inputs and outputs.
     async validate() {
         // Get all the available inputs and outputs.
         let allSources = { };
         let allDestinations = { };
-        (await this.modelTask.getAllTasks()).map(task => {
-            allSources[task.name] = task.outputs;
-            allDestinations[task.name] = task.inputs;
+        (await this.modelEntity.getAllEntities()).map(entity => {
+            allSources[entity.name] = entity.outputs;
+            allDestinations[entity.name] = entity.inputs;
         });
 
         allSources[Model.SystemInterfaceName] = (await this.modelInterface.getAllInputs()).map(port => port.name);
@@ -106,11 +172,9 @@ class ModelDependency {
         let dependenciesToRemove = [];
         const allDependencies = await this.getAllDependencies();
         for (const dependency of allDependencies) {
-            if (!allSources.hasOwnProperty(dependency.source.task)
-                  || !allDestinations.hasOwnProperty(dependency.destination.task)) {
+            if (!allSources.hasOwnProperty(dependency.source.entity) || !allDestinations.hasOwnProperty(dependency.destination.entity)) {
                 dependenciesToRemove.push(dependency);
-            } else if (!allSources[dependency.source.task].includes(dependency.source.port)
-                         || !allDestinations[dependency.destination.task].includes(dependency.destination.port)) {
+            } else if (!allSources[dependency.source.entity].includes(dependency.source.port) || !allDestinations[dependency.destination.entity].includes(dependency.destination.port)) {
                 dependenciesToRemove.push(dependency);
             }
         }
@@ -122,7 +186,7 @@ class ModelDependency {
     refreshViews() {
         return this.getAllDependencies()
             .then(result => this.updateDependencies(result))
-            .then(result => Promise.all([this.modelTask.getAllTasks(), this.modelInterface.getAllInputs(), this.modelInterface.getAllOutputs()]))
+            .then(result => Promise.all([this.modelEntity.getAllTasks(), this.modelInterface.getAllInputs(), this.modelInterface.getAllOutputs()]))
             .then(([tasks, systemInputs, systemOutputs]) => this.updateDependencySelectors(tasks, systemInputs, systemOutputs))
             .then(result => this.modelEventChain.validate());
     }

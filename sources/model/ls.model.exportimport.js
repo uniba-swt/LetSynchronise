@@ -3,10 +3,12 @@
 class ModelExportImport {
     database = null;
     
+    modelDevice = null;
     modelCore = null;
     modelMemory = null;
+    modelNetworkDelay = null;
     modelInterface = null;
-    modelTask = null;
+    modelEntity = null;
     modelDependency = null;
     modelEventChain = null;
     modelConstraint = null;
@@ -21,6 +23,10 @@ class ModelExportImport {
         this.database = database;
     }
     
+    registerModelDevice(modelDevice) {
+    	this.modelDevice = modelDevice;
+    }
+    
     registerModelCore(modelCore) {
         this.modelCore = modelCore;
     }
@@ -29,12 +35,16 @@ class ModelExportImport {
         this.modelMemory = modelMemory;
     }
 
+	registerModelNetworkDelay(modelNetworkDelay) {
+		this.modelNetworkDelay = modelNetworkDelay;
+	}
+
     registerModelInterface(modelInterface) {
         this.modelInterface = modelInterface;
     }
 
-    registerModelTask(modelTask) {
-        this.modelTask = modelTask;
+    registerModelEntity(modelEntity) {
+        this.modelEntity = modelEntity;
     }
     
     registerModelDependency(modelDependency) {
@@ -78,9 +88,11 @@ class ModelExportImport {
     
     refreshViews() {
         return this.modelInterface.refreshViews()
+        	.then(this.modelDevice.refreshViews())
             .then(this.modelCore.refreshViews())
             .then(this.modelMemory.refreshViews())
-            .then(this.modelTask.refreshViews());
+            .then(this.modelNetworkDelay.refreshViews())
+            .then(this.modelEntity.refreshViews());
     }
     
     

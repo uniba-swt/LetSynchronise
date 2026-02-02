@@ -8,6 +8,38 @@ class Utility {
     static ValidName(name) {
         return (/^([A-Za-z]|_)([A-Za-z0-9]|_)*$/).test(name);
     }
+
+    static ValidInteger(value) {
+        if (Number.isInteger(value)) {
+            return true;
+        }
+        
+        if (value == null || isNaN(value) || typeof value != 'string') {
+            return false;
+        }
+        
+        return (/^-?(\d+)$/).test(value.trim());
+    }
+    
+    static ValidPositiveInteger(value) {
+        return Utility.ValidInteger(value) && parseInt(value) >= 0;
+    }
+    
+    static ValidDecimal(value) {
+        if (typeof value == 'number') {
+            return true;
+        }
+        
+        if (value == null || isNaN(value) || typeof value != 'string') {
+            return false;
+        }
+        
+        return (/^-?(\d+)$/).test(value.trim()) || (/^-?(\d*).(\d+)$/).test(value.trim());
+    }
+    
+    static ValidPositiveDecimal(value) {
+        return Utility.ValidDecimal(value) && parseFloat(value) >= 0;
+    }
     
     static MaxOfArray(array) {
         return array.reduce(function(a, b) {
@@ -80,8 +112,11 @@ class Utility {
         return scale * Math.pow(-Math.log(1 - random), 1 / shape) / upperBound;
     }
     
-    static RandomInteger(min, avg, max, distribution) {
+    static RandomInteger(min, avg, max, distribution = 'Uniform') {
         const range = max - min;
+        if (avg == null) {
+            avg = (max + min) / 2;
+        }
         
         let delta = 0;
         switch (distribution) {
@@ -94,9 +129,12 @@ class Utility {
             case 'Weibull':
                 delta = range * Utility.WeibullSample(1, 2, 3);
                 break;
+            default:
+                console.error(`Unknown distribution: ${distribution}`);
+                break;
         }
         
-        return min + Math.trunc(delta);
+        return min + Math.round(delta);
     }
     
     static FormatTimeString(time, digits) {
@@ -110,33 +148,34 @@ class Utility {
     }
     
 
-    static TaskPorts(taskName, taskPorts) {
-        return taskPorts.map(port => `${taskName}.${port}`);
+    static EntityPorts(entityName, entityPorts) {
+        return entityPorts.map(port => `${entityName}.${port}`);
     }
 
-    static FormatTaskPorts(taskName, taskPorts) {
-        return Utility.TaskPorts(taskName, taskPorts.sort()).join(', ');
+
+    static FormatEntityPorts(entityName, entityPorts) {
+        return Utility.EntityPorts(entityName, entityPorts.sort()).join(', ');
     }
                              
-    static GetTask(taskPort) {
-        return taskPort.split('.')[0];
+    static GetEntity(entityPort) {
+        return entityPort.split('.')[0];
     }
                              
-    static GetPort(taskPort) {
-        return taskPort.split('.')[1];
+    static GetPort(entityPort) {
+        return entityPort.split('.')[1];
     }
     
     static FormatDependencies(rawDependencies) {
         return rawDependencies.map(dependency => { 
-            const sourceFullText = `${dependency.source.task}.${dependency.source.port}`;
+            const sourceFullText = `${dependency.source.entity}.${dependency.source.port}`;
         
-            const sourceText = (dependency.source.task == Model.SystemInterfaceName)
+            const sourceText = (dependency.source.entity == Model.SystemInterfaceName)
                              ? `${dependency.source.port}`
                              : sourceFullText;
 
-            const destinationFullText = `${dependency.destination.task}.${dependency.destination.port}`;
+            const destinationFullText = `${dependency.destination.entity}.${dependency.destination.port}`;
 
-            const destinationText = (dependency.destination.task == Model.SystemInterfaceName)
+            const destinationText = (dependency.destination.entity == Model.SystemInterfaceName)
                                   ? `${dependency.destination.port}`
                                   : destinationFullText;
         
@@ -151,11 +190,11 @@ class Utility {
     }
     
     static FormatDependencyString(dependency) {
-        return  `[${dependency.name}]: ${dependency.source.task}.${dependency.source.port} -> ${dependency.destination.task}.${dependency.destination.port}`;
+        return  `[${dependency.name}]: ${dependency.source.entity}.${dependency.source.port} -> ${dependency.destination.entity}.${dependency.destination.port}`;
     }
 
     static FormatDependencyInstanceString(dependency) {
-        return  `[${dependency.name}]: ${dependency.sendEvent.task}.${dependency.sendEvent.port}(${dependency.sendEvent.taskInstance}) -> ${dependency.receiveEvent.task}.${dependency.receiveEvent.port}(${dependency.receiveEvent.taskInstance})`;
+        return  `[${dependency.name}]: ${dependency.sendEvent.entity}.${dependency.sendEvent.port}(${dependency.sendEvent.entityInstance}) -> ${dependency.receiveEvent.entity}.${dependency.receiveEvent.port}(${dependency.receiveEvent.entityInstance})`;
     }
     
     static SimplifyChains(chains) {
@@ -233,6 +272,49 @@ class Utility {
         }
         
         localStorage.setItem(viewName, JSON.stringify(settings));
+    }
+
+    // Sort the entities and entity instances such that all network delays appear before any task.
+    static SortEntities(entities) {
+        let sorted = [];
+
+        // Group the netowrk delays together based on the receiver task.
+        let tasks = entities.filter(entity => entity.type === 'task').sort();
+        for (const task of tasks) {
+            const encapsulationDelays = entities.filter(entity => entity.name.endsWith(`${task.name} ${ModelEntity.EncapsulationName} delay`));            
+            const networkDelays = entities.filter(entity => entity.name.endsWith(`${task.name} ${ModelEntity.NetworkName} delay`));
+            const decapsulationDelays = entities.filter(entity => entity.name.endsWith(`${task.name} ${ModelEntity.DecapsulationName} delay`));
+            sorted.push(...encapsulationDelays, ...networkDelays, ...decapsulationDelays, task);
+        }
+
+        return sorted;
+    }
+    
+    // Entity comparison function.
+    static CompareEntityLetStartTime(a, b) {
+        return a.letStartTime - b.letStartTime;
+    }
+    
+    // Event chain instance comparison function.
+    static CompareChainInstance(a, b) {
+        if (a.chainName < b.chainName) { return -1; }
+        if (a.chainName > b.chainName) { return 1; }
+        
+        // Sort instances of the same event chain by their instance number.
+        return a.instance - b.instance;
+    }
+    
+    // Dependency instance comparison function.
+    static CompareDependencyInstanceByReceiveEvent(a, b) {
+        return a.receiveEvent.timestamp - b.receiveEvent.timestamp;
+    }
+    
+    // Dependency instance comparison function.
+    static CompareDependencyInstanceBySendAndReceiveEvents(a, b) {
+        const sendComparison = a.sendEvent.timestamp - b.sendEvent.timestamp;
+        
+        // Sort instances of the same send event timestamps by their receive event timestamps
+        return sendComparison === 0 ? Utility.CompareDependencyInstanceByReceiveEvent(a, b) : sendComparison;
     }
     
 }

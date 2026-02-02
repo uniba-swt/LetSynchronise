@@ -4,7 +4,8 @@ class ControllerCore {
     _view = null;
     _viewSchedule = null;
     _model = null;
-    _modelTask = null;
+    _modelEntity = null;
+    _modelDevice = null;
     
     constructor() { }
 
@@ -33,6 +34,7 @@ class ControllerCore {
         
         // Register the handlers when setting the model.
         this._model.registerUpdateCoresCallback(this.callbackUpdateCores);
+        this._model.registerUpdateDeviceSelectorCallback(this.callbackUpdateDeviceSelector)
         this._model.registerNotifyChangesCallback(this.callbackNotifyChanges);
 
         // Hack to populate the View with cores once the database is ready
@@ -45,15 +47,25 @@ class ControllerCore {
         return this._model;
     }
     
-    set modelTask(modelTask) {
-        this._modelTask = modelTask;
+    set modelEntity(modelEntity) {
+        this._modelEntity = modelEntity;
         
-        // Register the model task with the model.
-        this._model.registerModelTask(this._modelTask);
+        // Register the model entity with the model.
+        this._model.registerModelEntity(this._modelEntity);
     }
     
-    get modelTask() {
-        return this._modelTask;
+    get modelEntity() {
+        return this._modelEntity;
+    }
+
+    set modelDevice(modelDevice) {
+        this._modelDevice = modelDevice;
+        
+        this._model.registerModelDevice(this._modelDevice);
+    }
+
+    get modelDevice() {
+        return this._modelDevice;
     }
     
     
@@ -79,6 +91,11 @@ class ControllerCore {
     // Callback for updating the displayed cores.
     callbackUpdateCores = (cores) => {
         this.view.updateCores(cores);
+    }
+
+    // Callback for updating the displayed device selector.
+    callbackUpdateDeviceSelector = (devices) => {
+        this.view.updateDeviceSelector(devices);
     }
     
     // Callback for notifying the schedule view that cores have changed.

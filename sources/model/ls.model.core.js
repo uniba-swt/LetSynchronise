@@ -2,20 +2,27 @@
 
 class ModelCore {
     updateCores = null;                 // Callback to function in ls.view.core
+    updateDeviceSelector = null;
     notifyChanges = null;               // Callback to function in ls.view.schedule
 
     database = null;
-    modeltask = null;
+    modelEntity = null;
+    modelDevice = null;
 
     constructor() { }
     
     static get Default() { return {'name': 'Default', 'speedup': 1}; }
+    
     
     // -----------------------------------------------------
     // Registration of callbacks from the controller
     
     registerUpdateCoresCallback(callback) {
         this.updateCores = callback;
+    }
+
+    registerUpdateDeviceSelectorCallback(callback) {
+        this.updateDeviceSelector = callback;
     }
     
     registerNotifyChangesCallback(callback) {
@@ -30,9 +37,14 @@ class ModelCore {
         this.database = database;
     }
 
-    registerModelTask(modelTask) {
-        this.modelTask = modelTask;
+    registerModelEntity(modelEntity) {
+        this.modelEntity = modelEntity;
     }
+
+    registerModelDevice(modelDevice) {
+        this.modelDevice = modelDevice;
+    }
+    
     
     // -----------------------------------------------------
     // Class methods
@@ -40,8 +52,14 @@ class ModelCore {
     createCore(core) {
         // Store core in Database
         return this.database.putObject(Model.CoreStoreName, core)
-            .then(this.refreshViews())
-            .then(this.notifyChanges());
+            .then(result => this.refreshViews())
+            .then(result => this.notifyChanges());
+    }
+    
+    // Saves the changes to an existing core, without forcing the view to refresh.
+    saveChangedCore(core) {
+        return this.database.putObject(Model.CoreStoreName, core)
+            .then(result => this.notifyChanges());
     }
     
     getCore(name) {
@@ -66,13 +84,33 @@ class ModelCore {
     
     deleteCore(name) {
         return this.database.deleteObject(Model.CoreStoreName, name)
-            .then(this.refreshViews());
+            .then(result => this.refreshViews())
+            .then(result => this.notifyChanges());
+    }
+    
+    // Validate cores against devices.
+    async validate() {
+        const allDeveices = (await this.modelDevice.getAllDevices()).map(device => device.name);
+        const allCores = await this.getAllCores();
+        
+        let changedCores = [];
+        for (const core of allCores) {
+            if (core.device != null && !allDeveices.includes(core.device)) {
+                core.device = null;
+                changedCores.push(this.saveChangedCore(core));
+            }
+        }
+        
+        return Promise.all(changedCores)
+            .then(result => this.refreshViews());
     }
     
     refreshViews() {
         return this.getAllCores()
-            .then(result => this.updateCores(result))
-            .then(result => this.modelTask.validate());
+            .then(cores => this.updateCores(cores))
+            .then(result => this.modelDevice.getAllDevices())
+            .then(devices => this.updateDeviceSelector(devices))
+            .then(result => this.modelEntity.validate());
     }
     
     toString() {

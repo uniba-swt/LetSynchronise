@@ -2,9 +2,11 @@
 
 class View {
     _viewExportImport = null;
+    _viewDevice = null;
     _viewCore = null;
+    _viewNetworkDelay = null;
     _viewInterface = null;
-    _viewTask = null;
+    _viewEntity = null;
     _viewDependency = null;
     _viewEventChain = null;
     _viewConstraint = null;
@@ -17,7 +19,8 @@ class View {
     
     static get Width()            { return window.innerWidth - 40; }
     static get SvgPadding()       { return 10; }
-    static get TaskHeight()       { return 110; }
+    static get EntityHeight()     { return 110; }
+    static get DelayHeight()      { return 110; }
     static get ExecutionHeight()  { return 10; }
     static get BarHeight()        { return 20; }
     static get BarMargin()        { return 1; }
@@ -31,17 +34,25 @@ class View {
     set viewExportImport(viewExportImport) {
         this._viewExportImport = viewExportImport;
     }
+
+    set viewDevice(viewDevice) {
+        this._viewDevice = viewDevice;
+    }
     
     set viewCore(viewCore) {
         this._viewCore = viewCore;
+    }
+
+    set viewNetworkDelay(viewNetworkDelay) {
+        this._viewNetworkDelay = viewNetworkDelay;
     }
     
     set viewInterface(viewInterface) {
         this._viewInterface = viewInterface;
     }
 
-    set viewTask(viewTask) {
-        this._viewTask = viewTask;
+    set viewEntity(viewEntity) {
+        this._viewEntity = viewEntity;
     }
 
     set viewDependency(viewDependency) {
@@ -63,17 +74,25 @@ class View {
     get viewExportImport() {
         return this._viewExportImport;
     }
+
+    get viewDevice() {
+        return this._viewDevice
+    }
     
     get viewCore() {
         return this._viewCore;
+    }
+
+    get viewNetworkDelay() {
+        return this._viewNetworkDelay;
     }
     
     get viewInterface() {
         return this._viewInterface;
     }
     
-    get viewTask() {
-        return this._viewTask;
+    get viewEntity() {
+        return this._viewEntity;
     }
     
     get viewDependency() {

@@ -92,17 +92,17 @@ class ModelEventChain {
     
     deleteAllEventChains() {
         return this.database.deleteAllObjects(Model.EventChainStoreName)
-            .then(this.database.deleteAllObjects(Model.EventChainInstanceStoreName))
+            .then(this.database.deleteAllObjects(Model.EventChainInstancesStoreName))
             .then(this.refreshViews());
     }
     
     createEventChainInstance(eventChainInstance) {
         // Store event chain instance into Database
-        return this.database.putObject(Model.EventChainInstanceStoreName, eventChainInstance.json);
+        return this.database.putObject(Model.EventChainInstancesStoreName, eventChainInstance.json);
     }
     
     getAllEventChainsInstances() {
-        return this.database.getAllObjects(Model.EventChainInstanceStoreName)
+        return this.database.getAllObjects(Model.EventChainInstancesStoreName)
             .then(allEventChainInstances => allEventChainInstances.map(eventChainInstance => ChainInstance.FromJson(eventChainInstance)));
     }
 
@@ -111,15 +111,15 @@ class ModelEventChain {
         return this.getAllEventChainsInstances()
             .then(allEventChainInstances => allEventChainInstances.filter(eventChainInstance => (eventChainInstance.chainName == name)))
             .then(instancesToDelete => Promise.all(
-                instancesToDelete.map(instance => this.database.deleteObject(Model.EventChainInstanceStoreName, instance.name))
+                instancesToDelete.map(instance => this.database.deleteObject(Model.EventChainInstancesStoreName, instance.name))
             ));
     }
     
     deleteAllEventChainsInstances() {
-        return this.database.deleteAllObjects(Model.EventChainInstanceStoreName);
+        return this.database.deleteAllObjects(Model.EventChainInstancesStoreName);
     }
 
-    // Validate event chains against task dependencies.
+    // Validate event chains against entity dependencies.
     validate() {
         return this.getAllEventChains()
             .then(allEventChains => allEventChains.forEach(eventChain => {

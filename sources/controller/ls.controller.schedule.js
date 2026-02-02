@@ -3,7 +3,9 @@
 class ControllerSchedule {
     _view = null;
     _model = null;
-    _modelTask = null;
+    _modelDevice = null;
+    _modelNetworkDelay = null;
+    _modelEntity = null;
     _modelDependency = null;
     _modelEventChain = null;
     _modelConstraint = null;
@@ -49,16 +51,36 @@ class ControllerSchedule {
     get model() {
         return this._model;
     }
-    
-    set modelTask(modelTask) {
-        this._modelTask = modelTask;
+
+    set modelDevice(modelDevice) {
+        this._modelDevice = modelDevice;
         
-        // Register the model task with the model.
-        this._model.registerModelTask(this._modelTask);
+        // Register the model device with the model.
+        this._model.registerModelDevice(this._modelDevice);
     }
     
-    get modelTask() {
-        return this._modelTask;
+    get modelDevice() {
+        return this._modelDevice;
+    }
+    
+    get modelNetworkDelay() {
+        return this._modelNetworkDelay;
+    }
+    
+    set modelNetworkDelay(modelNetworkDelay) {
+        this._modelNetworkDelay = modelNetworkDelay;
+        this._model.registerModelNetworkDelay(this._modelNetworkDelay);
+    }
+    
+    set modelEntity(modelEntity) {
+        this._modelEntity = modelEntity;
+        
+        // Register the model entity with the model.
+        this._model.registerModelEntity(this._modelEntity);
+    }
+    
+    get modelEntity() {
+        return this._modelEntity;
     }
     
     set modelDependency(modelDependency) {
@@ -111,6 +133,7 @@ class ControllerSchedule {
             const makespan = this.view.schedulingParametersClean.makespan;
             const scheduler = this.view.schedulingParametersClean.scheduler;
             const executionTiming = this.view.schedulingParametersClean.executionTiming;
+
             scheduler.Result(makespan, executionTiming)
                 .then(result => this.callbackGetSchedule(this.model.getSchedule()));
         } else {
@@ -126,7 +149,7 @@ class ControllerSchedule {
         const goal = this.view.optimiserParametersClean.goal;
         goal.Result(scheduler, makespan)
             .then(result => scheduler.Result(makespan, executionTiming))
-            .then(result => this.modelTask.refreshViews())
+            .then(result => this.modelEntity.refreshViews())
             .then(result => this.callbackGetSchedule(this.model.getSchedule()));
     }
     

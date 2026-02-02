@@ -103,15 +103,17 @@ class ViewExportImport {
         let keys = [];
         
         if (this.platformChecked) {
+            keys.push("devices");
             keys.push('cores');
             keys.push('memories');
+            keys.push("networkDelays");
         }
         if (this.inputsOutputsChecked) {
             keys.push("inputs");
             keys.push("outputs");
         }
         if (this.tasksChecked) {
-            keys.push("tasks");
+            keys.push("entities");
         }
         if (this.dependenciesChecked) {
             keys.push("dependencies");

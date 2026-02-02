@@ -3,10 +3,12 @@
 class ControllerExportImport {
     _view = null;
     _model = null;
+    _modelDevice = null;
     _modelCore = null;
     _modelMemory = null;
+    _modelNetworkDelay = null;
     _modelInterface = null;
-    _modelTask = null;
+    _modelEntity = null;
     _modelDependency = null;
     _modelEventChain = null;
     _modelConstraint = null;
@@ -47,15 +49,15 @@ class ControllerExportImport {
         return this._model;
     }
     
-    set modelInterface(modelInterface) {
-        this._modelInterface = modelInterface;
+    set modelDevice(modelDevice) {
+        this._modelDevice = modelDevice;
         
-        // Register the model interface with the model.
-        this._model.registerModelInterface(this._modelInterface);
+        // Register the model device with the model.
+        this._model.registerModelDevice(this._modelDevice);
     }
     
-    get modelCore() {
-        return this._modelCore;
+    get modelDevice() {
+    	return this._modelDevice;
     }
     
     set modelCore(modelCore) {
@@ -65,8 +67,8 @@ class ControllerExportImport {
         this._model.registerModelCore(this._modelCore);
     }
     
-    get modelMemory() {
-        return this._modelMemory;
+    get modelCore() {
+        return this._modelCore;
     }
     
     set modelMemory(modelMemory) {
@@ -75,20 +77,42 @@ class ControllerExportImport {
         // Register the model memory with the model.
         this._model.registerModelMemory(this._modelMemory);
     }
+
+    get modelMemory() {
+        return this._modelMemory;
+    }
+        
+    set modelNetworkDelay(modelNetworkDelay) {
+        this._modelNetworkDelay = modelNetworkDelay;
+        
+        // Register this model network delay with the model.
+        this._model.registerModelNetworkDelay(this._modelNetworkDelay);
+    }
+
+    get modelNetworkDelay() {
+        return this._modelNetworkDelay;
+    }
+    
+    set modelInterface(modelInterface) {
+        this._modelInterface = modelInterface;
+        
+        // Register the model interface with the model.
+        this._model.registerModelInterface(this._modelInterface);
+    }
     
     get modelInterface() {
         return this._modelInterface;
     }
     
-    set modelTask(modelTask) {
-        this._modelTask = modelTask;
+    set modelEntity(modelEntity) {
+        this._modelEntity = modelEntity;
         
-        // Register the model task with the model.
-        this._model.registerModelTask(this._modelTask);
+        // Register the model entity with the model.
+        this._model.registerModelEntity(this._modelEntity);
     }
     
-    get modelTask() {
-        return this._modelTask;
+    get modelEntity() {
+        return this._modelEntity;
     }
     
     set modelDependency(modelDependency) {
@@ -136,7 +160,7 @@ class ControllerExportImport {
 
     // Handler for importing a system
     handleImportSystem = (system, elementsSelected) => {
-    	if (system != null) {
+        if (system != null) {
             this.model.importSystem(system, elementsSelected);
         }
     }

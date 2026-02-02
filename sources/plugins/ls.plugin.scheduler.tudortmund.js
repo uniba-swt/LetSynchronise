@@ -17,7 +17,7 @@ class PluginSchedulerTuDortmund {
         await Plugin.DeleteSchedule();
         
         // Retrieve the LET system.
-        const systemElementSelected = ['cores', 'inputs','outputs','tasks','dependencies','eventChains','constraints'];
+        const systemElementSelected = ['cores', 'inputs','outputs','entities','dependencies','eventChains','constraints'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
         
         // Add the executionTiming to system so that the external tool can access it.
@@ -31,9 +31,9 @@ class PluginSchedulerTuDortmund {
         
         // Save the externally computed task schedule and compute the dependency and event chain instances.
         const scheduleElementSelected = ['schedule'];
-        return Plugin.DatabaseContentsDelete(scheduleElementSelected)
-            .then(result => Plugin.DatabaseContentsSet(computedSchedule, scheduleElementSelected))
-            .then(result => Plugin.CreateAllDependencyAndEventChainInstances(makespan));
+        return Plugin.DatabaseContentsSet(computedSchedule, scheduleElementSelected)
+            // Create instances of data dependencies. Network delays can only be generated after tasks have been allocated to cores/devices.
+            .then(result => Plugin.CreateAllDependencyAndEventChainInstances(makespan, executionTiming));
     }
 
     // Trigger an external scheduling tool.

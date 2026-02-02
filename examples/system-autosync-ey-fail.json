@@ -9,9 +9,10 @@
 			"name": "SystemOutput"
 		}
 	],
-	"TaskStore": [
+	"EntityStore": [
 		{
 			"name": "task_a",
+			"type": "task",
 			"priority": 3,
 			"initialOffset": 0,
 			"activationOffset": 0,
@@ -30,6 +31,7 @@
 		},
 		{
 			"name": "task_b",
+			"type": "task",
 			"priority": 2,
 			"initialOffset": 0,
 			"activationOffset": 0,
@@ -48,6 +50,7 @@
 		},
 		{
 			"name": "task_c",
+			"type": "task",
 			"priority": null,
 			"initialOffset": 0,
 			"activationOffset": 1000000,
@@ -70,55 +73,55 @@
 		{
 			"name": "alpha",
 			"source": {
-				"task": "__system",
+				"entity": "__system",
 				"port": "SystemInput"
 			},
 			"destination": {
-				"task": "task_a",
+				"entity": "task_a",
 				"port": "in"
 			}
 		},
 		{
 			"name": "beta",
 			"source": {
-				"task": "task_a",
+				"entity": "task_a",
 				"port": "out"
 			},
 			"destination": {
-				"task": "task_c",
+				"entity": "task_c",
 				"port": "in1"
 			}
 		},
 		{
 			"name": "delta",
 			"source": {
-				"task": "task_c",
+				"entity": "task_c",
 				"port": "out"
 			},
 			"destination": {
-				"task": "__system",
+				"entity": "__system",
 				"port": "SystemOutput"
 			}
 		},
 		{
 			"name": "gamma",
 			"source": {
-				"task": "task_b",
+				"entity": "task_b",
 				"port": "out"
 			},
 			"destination": {
-				"task": "task_c",
+				"entity": "task_c",
 				"port": "in2"
 			}
 		},
 		{
 			"name": "theta",
 			"source": {
-				"task": "__system",
+				"entity": "__system",
 				"port": "SystemInput"
 			},
 			"destination": {
-				"task": "task_b",
+				"entity": "task_b",
 				"port": "in"
 			}
 		}
@@ -130,13 +133,13 @@
 				{
 					"instance": 0,
 					"receiveEvent": {
-						"task": "task_a",
+						"entity": "task_a",
 						"port": "in",
 						"taskInstance": 0,
 						"timestamp": 0
 					},
 					"sendEvent": {
-						"task": "__system",
+						"entity": "__system",
 						"port": "SystemInput",
 						"taskInstance": 0,
 						"timestamp": 0
@@ -145,13 +148,13 @@
 				{
 					"instance": 1,
 					"receiveEvent": {
-						"task": "task_a",
+						"entity": "task_a",
 						"port": "in",
 						"taskInstance": 1,
 						"timestamp": 3000000
 					},
 					"sendEvent": {
-						"task": "__system",
+						"entity": "__system",
 						"port": "SystemInput",
 						"taskInstance": 1,
 						"timestamp": 3000000
@@ -165,13 +168,13 @@
 				{
 					"instance": 0,
 					"receiveEvent": {
-						"task": "task_c",
+						"entity": "task_c",
 						"port": "in1",
 						"taskInstance": 0,
 						"timestamp": 1000000
 					},
 					"sendEvent": {
-						"task": "task_a",
+						"entity": "task_a",
 						"port": "out",
 						"taskInstance": -1,
 						"timestamp": 0
@@ -180,13 +183,13 @@
 				{
 					"instance": 1,
 					"receiveEvent": {
-						"task": "task_c",
+						"entity": "task_c",
 						"port": "in1",
 						"taskInstance": 1,
 						"timestamp": 3000000
 					},
 					"sendEvent": {
-						"task": "task_a",
+						"entity": "task_a",
 						"port": "out",
 						"taskInstance": 0,
 						"timestamp": 1500000
@@ -195,13 +198,13 @@
 				{
 					"instance": 2,
 					"receiveEvent": {
-						"task": "task_c",
+						"entity": "task_c",
 						"port": "in1",
 						"taskInstance": 2,
 						"timestamp": 5000000
 					},
 					"sendEvent": {
-						"task": "task_a",
+						"entity": "task_a",
 						"port": "out",
 						"taskInstance": 1,
 						"timestamp": 4500000
@@ -215,13 +218,13 @@
 				{
 					"instance": 0,
 					"receiveEvent": {
-						"task": "__system",
+						"entity": "__system",
 						"port": "SystemOutput",
 						"taskInstance": 0,
 						"timestamp": 2000000
 					},
 					"sendEvent": {
-						"task": "task_c",
+						"entity": "task_c",
 						"port": "out",
 						"taskInstance": 0,
 						"timestamp": 2000000
@@ -230,13 +233,13 @@
 				{
 					"instance": 1,
 					"receiveEvent": {
-						"task": "__system",
+						"entity": "__system",
 						"port": "SystemOutput",
 						"taskInstance": 1,
 						"timestamp": 4000000
 					},
 					"sendEvent": {
-						"task": "task_c",
+						"entity": "task_c",
 						"port": "out",
 						"taskInstance": 1,
 						"timestamp": 4000000
@@ -245,13 +248,13 @@
 				{
 					"instance": 2,
 					"receiveEvent": {
-						"task": "__system",
+						"entity": "__system",
 						"port": "SystemOutput",
 						"taskInstance": 2,
 						"timestamp": 6000000
 					},
 					"sendEvent": {
-						"task": "task_c",
+						"entity": "task_c",
 						"port": "out",
 						"taskInstance": 2,
 						"timestamp": 6000000
@@ -265,13 +268,13 @@
 				{
 					"instance": 0,
 					"receiveEvent": {
-						"task": "task_c",
+						"entity": "task_c",
 						"port": "in2",
 						"taskInstance": 0,
 						"timestamp": 1000000
 					},
 					"sendEvent": {
-						"task": "task_b",
+						"entity": "task_b",
 						"port": "out",
 						"taskInstance": -1,
 						"timestamp": 0
@@ -280,13 +283,13 @@
 				{
 					"instance": 1,
 					"receiveEvent": {
-						"task": "task_c",
+						"entity": "task_c",
 						"port": "in2",
 						"taskInstance": 1,
 						"timestamp": 3000000
 					},
 					"sendEvent": {
-						"task": "task_b",
+						"entity": "task_b",
 						"port": "out",
 						"taskInstance": 0,
 						"timestamp": 2000000
@@ -295,13 +298,13 @@
 				{
 					"instance": 2,
 					"receiveEvent": {
-						"task": "task_c",
+						"entity": "task_c",
 						"port": "in2",
 						"taskInstance": 2,
 						"timestamp": 5000000
 					},
 					"sendEvent": {
-						"task": "task_b",
+						"entity": "task_b",
 						"port": "out",
 						"taskInstance": 1,
 						"timestamp": 4000000
@@ -315,13 +318,13 @@
 				{
 					"instance": 0,
 					"receiveEvent": {
-						"task": "task_b",
+						"entity": "task_b",
 						"port": "in",
 						"taskInstance": 0,
 						"timestamp": 0
 					},
 					"sendEvent": {
-						"task": "__system",
+						"entity": "__system",
 						"port": "SystemInput",
 						"taskInstance": 0,
 						"timestamp": 0
@@ -330,13 +333,13 @@
 				{
 					"instance": 1,
 					"receiveEvent": {
-						"task": "task_b",
+						"entity": "task_b",
 						"port": "in",
 						"taskInstance": 1,
 						"timestamp": 2000000
 					},
 					"sendEvent": {
-						"task": "__system",
+						"entity": "__system",
 						"port": "SystemInput",
 						"taskInstance": 1,
 						"timestamp": 2000000
@@ -345,13 +348,13 @@
 				{
 					"instance": 2,
 					"receiveEvent": {
-						"task": "task_b",
+						"entity": "task_b",
 						"port": "in",
 						"taskInstance": 2,
 						"timestamp": 4000000
 					},
 					"sendEvent": {
-						"task": "__system",
+						"entity": "__system",
 						"port": "SystemInput",
 						"taskInstance": 2,
 						"timestamp": 4000000
@@ -360,19 +363,19 @@
 			]
 		}
 	],
-	"EventChainInstanceStore": [
+	"EventChainInstancesStore": [
 		{
 			"segment": {
 				"name": "alpha",
 				"instance": 0,
 				"receiveEvent": {
-					"task": "task_a",
+					"entity": "task_a",
 					"port": "in",
 					"taskInstance": 0,
 					"timestamp": 0
 				},
 				"sendEvent": {
-					"task": "__system",
+					"entity": "__system",
 					"port": "SystemInput",
 					"taskInstance": 0,
 					"timestamp": 0
@@ -384,13 +387,13 @@
 					"name": "beta",
 					"instance": 1,
 					"receiveEvent": {
-						"task": "task_c",
+						"entity": "task_c",
 						"port": "in1",
 						"taskInstance": 1,
 						"timestamp": 3000000
 					},
 					"sendEvent": {
-						"task": "task_a",
+						"entity": "task_a",
 						"port": "out",
 						"taskInstance": 0,
 						"timestamp": 1500000
@@ -401,13 +404,13 @@
 						"name": "delta",
 						"instance": 1,
 						"receiveEvent": {
-							"task": "__system",
+							"entity": "__system",
 							"port": "SystemOutput",
 							"taskInstance": 1,
 							"timestamp": 4000000
 						},
 						"sendEvent": {
-							"task": "task_c",
+							"entity": "task_c",
 							"port": "out",
 							"taskInstance": 1,
 							"timestamp": 4000000
@@ -421,13 +424,13 @@
 				"name": "alpha",
 				"instance": 1,
 				"receiveEvent": {
-					"task": "task_a",
+					"entity": "task_a",
 					"port": "in",
 					"taskInstance": 1,
 					"timestamp": 3000000
 				},
 				"sendEvent": {
-					"task": "__system",
+					"entity": "__system",
 					"port": "SystemInput",
 					"taskInstance": 1,
 					"timestamp": 3000000
@@ -439,13 +442,13 @@
 					"name": "beta",
 					"instance": 2,
 					"receiveEvent": {
-						"task": "task_c",
+						"entity": "task_c",
 						"port": "in1",
 						"taskInstance": 2,
 						"timestamp": 5000000
 					},
 					"sendEvent": {
-						"task": "task_a",
+						"entity": "task_a",
 						"port": "out",
 						"taskInstance": 1,
 						"timestamp": 4500000
@@ -456,13 +459,13 @@
 						"name": "delta",
 						"instance": 2,
 						"receiveEvent": {
-							"task": "__system",
+							"entity": "__system",
 							"port": "SystemOutput",
 							"taskInstance": 2,
 							"timestamp": 6000000
 						},
 						"sendEvent": {
-							"task": "task_c",
+							"entity": "task_c",
 							"port": "out",
 							"taskInstance": 2,
 							"timestamp": 6000000
@@ -476,13 +479,13 @@
 				"name": "theta",
 				"instance": 0,
 				"receiveEvent": {
-					"task": "task_b",
+					"entity": "task_b",
 					"port": "in",
 					"taskInstance": 0,
 					"timestamp": 0
 				},
 				"sendEvent": {
-					"task": "__system",
+					"entity": "__system",
 					"port": "SystemInput",
 					"taskInstance": 0,
 					"timestamp": 0
@@ -494,13 +497,13 @@
 					"name": "gamma",
 					"instance": 1,
 					"receiveEvent": {
-						"task": "task_c",
+						"entity": "task_c",
 						"port": "in2",
 						"taskInstance": 1,
 						"timestamp": 3000000
 					},
 					"sendEvent": {
-						"task": "task_b",
+						"entity": "task_b",
 						"port": "out",
 						"taskInstance": 0,
 						"timestamp": 2000000
@@ -511,13 +514,13 @@
 						"name": "delta",
 						"instance": 1,
 						"receiveEvent": {
-							"task": "__system",
+							"entity": "__system",
 							"port": "SystemOutput",
 							"taskInstance": 1,
 							"timestamp": 4000000
 						},
 						"sendEvent": {
-							"task": "task_c",
+							"entity": "task_c",
 							"port": "out",
 							"taskInstance": 1,
 							"timestamp": 4000000
@@ -531,13 +534,13 @@
 				"name": "theta",
 				"instance": 1,
 				"receiveEvent": {
-					"task": "task_b",
+					"entity": "task_b",
 					"port": "in",
 					"taskInstance": 1,
 					"timestamp": 2000000
 				},
 				"sendEvent": {
-					"task": "__system",
+					"entity": "__system",
 					"port": "SystemInput",
 					"taskInstance": 1,
 					"timestamp": 2000000
@@ -549,13 +552,13 @@
 					"name": "gamma",
 					"instance": 2,
 					"receiveEvent": {
-						"task": "task_c",
+						"entity": "task_c",
 						"port": "in2",
 						"taskInstance": 2,
 						"timestamp": 5000000
 					},
 					"sendEvent": {
-						"task": "task_b",
+						"entity": "task_b",
 						"port": "out",
 						"taskInstance": 1,
 						"timestamp": 4000000
@@ -566,13 +569,13 @@
 						"name": "delta",
 						"instance": 2,
 						"receiveEvent": {
-							"task": "__system",
+							"entity": "__system",
 							"port": "SystemOutput",
 							"taskInstance": 2,
 							"timestamp": 6000000
 						},
 						"sendEvent": {
-							"task": "task_c",
+							"entity": "task_c",
 							"port": "out",
 							"taskInstance": 2,
 							"timestamp": 6000000
@@ -586,13 +589,13 @@
 				"name": "gamma",
 				"instance": 0,
 				"receiveEvent": {
-					"task": "task_c",
+					"entity": "task_c",
 					"port": "in2",
 					"taskInstance": 0,
 					"timestamp": 1000000
 				},
 				"sendEvent": {
-					"task": "task_b",
+					"entity": "task_b",
 					"port": "out",
 					"taskInstance": -1,
 					"timestamp": 0
@@ -605,13 +608,13 @@
 				"name": "gamma",
 				"instance": 1,
 				"receiveEvent": {
-					"task": "task_c",
+					"entity": "task_c",
 					"port": "in2",
 					"taskInstance": 1,
 					"timestamp": 3000000
 				},
 				"sendEvent": {
-					"task": "task_b",
+					"entity": "task_b",
 					"port": "out",
 					"taskInstance": 0,
 					"timestamp": 2000000
@@ -624,13 +627,13 @@
 				"name": "gamma",
 				"instance": 2,
 				"receiveEvent": {
-					"task": "task_c",
+					"entity": "task_c",
 					"port": "in2",
 					"taskInstance": 2,
 					"timestamp": 5000000
 				},
 				"sendEvent": {
-					"task": "task_b",
+					"entity": "task_b",
 					"port": "out",
 					"taskInstance": 1,
 					"timestamp": 4000000
@@ -639,9 +642,10 @@
 			"name": "Test-2"
 		}
 	],
-	"TaskInstancesStore": [
+	"EntityInstancesStore": [
 		{
 			"name": "task_a",
+			"type": "task",
 			"initialOffset": 0,
 			"value": [
 				{
@@ -676,6 +680,7 @@
 		},
 		{
 			"name": "task_b",
+			"type": "task",
 			"initialOffset": 0,
 			"value": [
 				{
@@ -724,6 +729,7 @@
 		},
 		{
 			"name": "task_c",
+			"type": "task",
 			"initialOffset": 0,
 			"value": [
 				{
@@ -776,11 +782,11 @@
 			"segment": {
 				"name": "alpha",
 				"source": {
-					"task": "__system",
+					"entity": "__system",
 					"port": "SystemInput"
 				},
 				"destination": {
-					"task": "task_a",
+					"entity": "task_a",
 					"port": "in"
 				}
 			},
@@ -789,11 +795,11 @@
 				"segment": {
 					"name": "beta",
 					"source": {
-						"task": "task_a",
+						"entity": "task_a",
 						"port": "out"
 					},
 					"destination": {
-						"task": "task_c",
+						"entity": "task_c",
 						"port": "in1"
 					}
 				},
@@ -801,11 +807,11 @@
 					"segment": {
 						"name": "delta",
 						"source": {
-							"task": "task_c",
+							"entity": "task_c",
 							"port": "out"
 						},
 						"destination": {
-							"task": "__system",
+							"entity": "__system",
 							"port": "SystemOutput"
 						}
 					}
@@ -816,11 +822,11 @@
 			"segment": {
 				"name": "theta",
 				"source": {
-					"task": "__system",
+					"entity": "__system",
 					"port": "SystemInput"
 				},
 				"destination": {
-					"task": "task_b",
+					"entity": "task_b",
 					"port": "in"
 				}
 			},
@@ -829,11 +835,11 @@
 				"segment": {
 					"name": "gamma",
 					"source": {
-						"task": "task_b",
+						"entity": "task_b",
 						"port": "out"
 					},
 					"destination": {
-						"task": "task_c",
+						"entity": "task_c",
 						"port": "in2"
 					}
 				},
@@ -841,11 +847,11 @@
 					"segment": {
 						"name": "delta",
 						"source": {
-							"task": "task_c",
+							"entity": "task_c",
 							"port": "out"
 						},
 						"destination": {
-							"task": "__system",
+							"entity": "__system",
 							"port": "SystemOutput"
 						}
 					}
@@ -856,11 +862,11 @@
 			"segment": {
 				"name": "gamma",
 				"source": {
-					"task": "task_b",
+					"entity": "task_b",
 					"port": "out"
 				},
 				"destination": {
-					"task": "task_c",
+					"entity": "task_c",
 					"port": "in2"
 				}
 			},

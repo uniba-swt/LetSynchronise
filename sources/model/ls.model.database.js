@@ -15,16 +15,18 @@ class ModelDatabase {
         dbOpenRequest.onupgradeneeded = function(event) {
             this.db = event.target.result;
             if (event.oldVersion < 1) {
+                this.db.createObjectStore(Model.DeviceStoreName, {keyPath: 'name', unique: true});
                 this.db.createObjectStore(Model.CoreStoreName, {keyPath: 'name', unique: true});
                 this.db.createObjectStore(Model.MemoryStoreName, {keyPath: 'name', unique: true});
+                this.db.createObjectStore(Model.NetworkDelayStoreName, {keyPath: 'name', unique: true});
                 this.db.createObjectStore(Model.SystemInputStoreName, {keyPath: 'name', unique: true});
                 this.db.createObjectStore(Model.SystemOutputStoreName, {keyPath: 'name', unique: true});
-                this.db.createObjectStore(Model.TaskStoreName, {keyPath: 'name', unique: true});
-                this.db.createObjectStore(Model.TaskInstancesStoreName, {keyPath:'name', unique: true});
+                this.db.createObjectStore(Model.EntityStoreName, {keyPath: 'name', unique: true});
+                this.db.createObjectStore(Model.EntityInstancesStoreName, {keyPath:'name', unique: true});
                 this.db.createObjectStore(Model.DependencyStoreName, {keyPath: 'name', unique: true});
                 this.db.createObjectStore(Model.DependencyInstancesStoreName, {keyPath: 'name', unique: true});
                 this.db.createObjectStore(Model.EventChainStoreName, {keyPath: 'name', unique: true});
-                this.db.createObjectStore(Model.EventChainInstanceStoreName, {keyPath: 'name', unique: true});
+                this.db.createObjectStore(Model.EventChainInstancesStoreName, {keyPath: 'name', unique: true});
                 this.db.createObjectStore(Model.ConstraintStoreName, {keyPath: 'name', unique: true});
                 this.db.createObjectStore(Model.ConstraintInstancesStoreName, {keyPath: 'name', unique: true});
             }
@@ -125,19 +127,21 @@ class ModelDatabase {
     
     getObjectStoreNames(elements) {
         const elementMap = {
+            'devices'      : Model.DeviceStoreName,
             'cores'        : Model.CoreStoreName,
             'memories'     : Model.MemoryStoreName,
+            'networkDelays': Model.NetworkDelayStoreName,
             'inputs'       : Model.SystemInputStoreName,
             'outputs'      : Model.SystemOutputStoreName,
-            'tasks'        : Model.TaskStoreName,
+            'entities'     : Model.EntityStoreName,
             'dependencies' : Model.DependencyStoreName,
             'eventChains'  : Model.EventChainStoreName,
             'constraints'  : Model.ConstraintStoreName,
             'schedule'     : [
                                 Model.ConstraintInstancesStoreName,
                                 Model.DependencyInstancesStoreName,
-                                Model.EventChainInstanceStoreName,
-                                Model.TaskInstancesStoreName
+                                Model.EventChainInstancesStoreName,
+                                Model.EntityInstancesStoreName,
                              ]
         };
         
@@ -186,6 +190,7 @@ class ModelDatabase {
 
         return Promise.all(importPromises);
     }
+    
     
     // Schedule delete.
 
