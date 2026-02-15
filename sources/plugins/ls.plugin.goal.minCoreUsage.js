@@ -9,7 +9,7 @@ class PluginGoalMinimiseCoreUsage {
     static get Category() { return Plugin.Category.ResponseTime; }
 
     
-    // Triggers an external web tool (https://github.com/mkuo005/end-to-end) to schedule task executions.
+    // Triggers an external web tool (https://github.com/mkuo005/LET-LP-Scheduler) to schedule task executions.
     // Assumes that "no scheduling (identity)" is selected in LetSynchronise to preserve the external web tool's computed schedule.
     static async Result(scheduler, makespan) {
         // Retrieve the LET system.
