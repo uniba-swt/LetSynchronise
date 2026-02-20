@@ -13,7 +13,7 @@ class PluginGoalMinimiseCoreUsage {
     // Assumes that "no scheduling (identity)" is selected in LetSynchronise to preserve the external web tool's computed schedule.
     static async Result(scheduler, makespan) {
         // Retrieve the LET system.
-        const systemElementSelected = ['cores', 'entities', 'schedule'];
+        const systemElementSelected = ['cores', 'devices', 'networkDelays', 'entities', 'schedule'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);
 
         if (Object.keys(system['CoreStore']).length < 1) {
