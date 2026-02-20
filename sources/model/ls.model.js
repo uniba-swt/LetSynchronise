@@ -32,7 +32,7 @@ class Model {
     static get DependencyStoreName()          { return 'DependencyStore'; }
     static get DependencyInstancesStoreName() { return 'DependencyInstancesStore'; }
     static get EventChainStoreName()          { return 'EventChainStore'; }
-    static get EventChainInstancesStoreName()  { return 'EventChainInstancesStore'; }
+    static get EventChainInstancesStoreName() { return 'EventChainInstancesStore'; }
     static get ConstraintStoreName()          { return 'ConstraintStore'; }
     static get ConstraintInstancesStoreName() { return 'ConstraintInstancesStore'; }
     
