@@ -2,7 +2,7 @@
 
 class PluginGoalMinimiseCoreUsage {
     // Plug-in Metadata
-    static get Name()     { return 'Minimise Core Usage (WCET)'; }
+    static get Name()     { return 'Minimise Core Usage (WCET, ILP)'; }
     static get Author()   { return 'Jamie Lee'; }
     static get Type()     { return Plugin.Type.Goal; }
     static get Platform() { return Plugin.Platform.MultiCore; }
