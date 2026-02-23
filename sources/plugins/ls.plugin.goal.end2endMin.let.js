@@ -1,8 +1,8 @@
 'use strict';
 
-class PluginGoalIlp {
+class PluginGoalEnd2EndMinLet {
     // Plug-in Metadata
-    static get Name()     { return 'Minimise End-to-End Response Times (ILP)'; }
+    static get Name()     { return 'Minimise End-to-End Response Times (LET, ILP)'; }
     static get Author()   { return 'Matthew Kuo'; }
     static get Type()     { return Plugin.Type.Goal; }
     static get Platform() { return Plugin.Platform.MultiCore; }

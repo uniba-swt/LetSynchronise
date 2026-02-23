@@ -1,8 +1,8 @@
 'use strict';
 
-class PluginGoalEnd2EndMinMC {
+class PluginGoalEnd2EndMinSlLet {
     // Plug-in Metadata
-    static get Name()     { return 'Minimise End-to-End Response Time (WCET, ILP)'; }
+    static get Name()     { return 'Minimise End-to-End Response Times (SL-LET, ILP)'; }
     static get Author()   { return 'Jamie Lee'; }
     static get Type()     { return Plugin.Type.Goal; }
     static get Platform() { return Plugin.Platform.MultiCore; }

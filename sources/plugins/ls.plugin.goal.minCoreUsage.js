@@ -1,8 +1,8 @@
 'use strict';
 
-class PluginGoalMinimiseCoreUsage {
+class PluginGoalMinCoreUsage {
     // Plug-in Metadata
-    static get Name()     { return 'Minimise Core Usage (WCET, ILP)'; }
+    static get Name()     { return 'Minimise Core Usage (ILP)'; }
     static get Author()   { return 'Jamie Lee'; }
     static get Type()     { return Plugin.Type.Goal; }
     static get Platform() { return Plugin.Platform.MultiCore; }

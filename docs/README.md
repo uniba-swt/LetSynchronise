@@ -137,11 +137,11 @@ This section describes the plugins that have been implemented so far.
 * `ls.plugin.goal.end2endMin.js`: (Multicore, only EDF and FP) Naive heuristic that iteratively minimises the 
   end-to-end response times of all event chains. Constructs a task dependency task
   and considers tasks based on event chain priority.
-* `ls.plugin.goal.ilp.js`: (Multicore, custom scheduler) Simple minimisation of end-to-end response times by 
+* `ls.plugin.goal.end2endMin.let.js`: (Multicore, custom scheduler) Simple minimisation of end-to-end response times by 
   formulating the the problem as an Integer Linear Program (ILP). The task set is 
   sent to an [external tool](https://github.com/mkuo005/LET-LP-Scheduler), which 
   constructs the ILP and returns the solution as a new LetSynchronise model.
-* `ls.plugin.goal.end2endMinMC`: (Multicore, custom scheduler) Minimises the communication delay between
+* `ls.plugin.goal.end2endMin.slLet`: (Multicore, custom scheduler) Minimises the communication delay between
   the tasks of a System-Level LET (SL-LET) system by formulating the problem as an Integer Linear Program (ILP).
   The task set is sent to an [external tool](https://github.com/mkuo005/LET-LP-Scheduler), which constructs the ILP and returns the solution
   as a new LetSynchronise model.

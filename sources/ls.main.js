@@ -161,9 +161,9 @@ Plugin.Register(PluginSchedulerTuDortmund);
 Plugin.Register(PluginGoalRandom);
 Plugin.Register(PluginGoalEnd2EndMax);
 Plugin.Register(PluginGoalEnd2EndMin);
-Plugin.Register(PluginGoalIlp);
-Plugin.Register(PluginGoalMinimiseCoreUsage);
-Plugin.Register(PluginGoalEnd2EndMinMC);
+Plugin.Register(PluginGoalEnd2EndMinLet);
+Plugin.Register(PluginGoalEnd2EndMinSlLet);
+Plugin.Register(PluginGoalMinCoreUsage);
 view.viewSchedule.updateOptimiserPluginSelectors();
 
 console.info(Plugin.ToString());
