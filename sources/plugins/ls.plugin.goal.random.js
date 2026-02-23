@@ -10,6 +10,10 @@ class PluginGoalRandom {
 
     
     static async Result(scheduler, makespan) {
+    	if (typeof scheduler.Algorithm !== 'function') {
+		  alert("Please choose a scheduler.");
+		}
+		
         const taskElementSelected = ['entities'];
         const system = await Plugin.DatabaseContentsGet(taskElementSelected);
         let tasks = (system[Model.EntityStoreName]).filter(entity => entity.type === 'task');
