@@ -12,6 +12,11 @@ class PluginGoalEnd2EndMinSlLet {
     // Triggers an external web tool (https://github.com/mkuo005/LET-LP-Scheduler) to schedule task executions.
     // Assumes that "no scheduling (identity)" is selected in LetSynchronise to preserve the external web tool's computed schedule.
     static async Result(scheduler, makespan) {
+		if (typeof scheduler.Algorithm === 'function') {
+			alert("Please do not choose a scheduler.");
+			return null;
+		}
+		
         // Retrieve the LET system.
         const systemElementSelected = ['cores', 'devices', 'networkDelays', 'entities', 'dependencies'];
         const system = await Plugin.DatabaseContentsGet(systemElementSelected);

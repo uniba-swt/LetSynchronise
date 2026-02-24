@@ -11,7 +11,8 @@ class PluginGoalRandom {
     
     static async Result(scheduler, makespan) {
     	if (typeof scheduler.Algorithm !== 'function') {
-		  alert("Please choose a scheduler.");
+			alert("Please choose a scheduler.");
+			return null;
 		}
 		
         const taskElementSelected = ['entities'];
@@ -21,7 +22,8 @@ class PluginGoalRandom {
         this.Algorithm(tasks);
         
         return Plugin.DatabaseContentsDelete(taskElementSelected)
-            .then(Plugin.DatabaseContentsSet(system, taskElementSelected));
+            .then(result => Plugin.DatabaseContentsSet(system, taskElementSelected))
+            .then(result => true);
     }
     
     // Randomises the task activation offsets and durations.

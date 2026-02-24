@@ -14,7 +14,8 @@ class PluginGoalEnd2EndMin {
     // and contracts the LET intervals based on min/max execution intervals.
     static async Result(scheduler, makespan) {
     	if (typeof scheduler.Algorithm !== 'function') {
-		  alert("Please choose a scheduler.");
+			alert("Please choose a scheduler.");
+			return null;
 		}
     
         // Retrieve the LET system.
@@ -42,7 +43,8 @@ class PluginGoalEnd2EndMin {
 
         const taskElementSelected = ['entities'];
         return Plugin.DatabaseContentsDelete(taskElementSelected)
-            .then(Plugin.DatabaseContentsSet(system, taskElementSelected));
+            .then(result => Plugin.DatabaseContentsSet(system, taskElementSelected))
+            .then(result => true);
     }
     
     static ValidTaskCoreAllocations(cores, tasks) {

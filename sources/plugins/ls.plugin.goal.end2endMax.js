@@ -12,7 +12,8 @@ class PluginGoalEnd2EndMax {
     // Updates the task parameters to maximise end-to-end reponse times.
     static async Result(scheduler, makespan) {
 		if (typeof scheduler.Algorithm !== 'function') {
-		  alert("Please choose a scheduler.");
+			alert("Please choose a scheduler.");
+			return null;
 		}
     
         const taskElementSelected = ['entities'];
@@ -22,7 +23,8 @@ class PluginGoalEnd2EndMax {
         this.Algorithm(tasks);
 
         return Plugin.DatabaseContentsDelete(taskElementSelected)
-            .then(Plugin.DatabaseContentsSet(system, taskElementSelected));
+            .then(result => Plugin.DatabaseContentsSet(system, taskElementSelected))
+            .then(result => true);
     }
     
     // Parameter "tasks" is a copy of a reference to an object.

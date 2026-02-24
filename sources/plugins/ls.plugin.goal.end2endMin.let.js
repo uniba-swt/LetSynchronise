@@ -12,6 +12,11 @@ class PluginGoalEnd2EndMinLet {
     // and solve an ILP formulation of the system to minimise end-to-end response times.
     // Assumes that "no scheduling (identity)" is selected in LetSynchronise to preserve the external web tool's computed schedule.
     static async Result(scheduler, makespan) {
+		if (typeof scheduler.Algorithm === 'function') {
+			alert("Please do not choose a scheduler.");
+			return null;
+		}
+    
         // Delete existing schedule.
         await Plugin.DeleteSchedule();
         
