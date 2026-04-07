@@ -157,8 +157,8 @@ class PluginSchedulerEdf {
                 // 2. Preempted task instance has the same or higher priority than the chosen task instance.
                 // 3. Chosen task instance has not been acitvated for execution.
                 if (!noPreemptedTask && noChosenTask || higherPriority || notActivated) {
-                    if (!noChosenTask && notActivated) {
-                        nextSchedulerEventTime = coreChosenTask[core.name].instance.letStartTime;
+                    if (notActivated) {
+                        nextSchedulerEventTime = Math.min(nextSchedulerEventTime, coreChosenTask[core.name].instance.letStartTime);
                     }
                     coreChosenTask[core.name] = lastPreemptedTask;
                 } else {
@@ -184,17 +184,25 @@ class PluginSchedulerEdf {
                     }
                 }
                 
-                // Make sure the current time is not earlier than the next task preemption or the chosenTask's LET start time.
+                // Ensure that the current time is not earlier than the next task preemption or the chosenTask's LET start time.
                 coreChosenTask[core.name].instance.currentCore = core;
                 coreCurrentTime[core.name] = Math.max(coreCurrentTime[core.name], Math.min(nextSchedulerEventTime, coreChosenTask[core.name].instance.letStartTime));
                 
-                // Schedule as much of the chosen task instance's execution time before the next preeemption time.
-                // Create an execution interval for the chosen task instance.
+                // Abort the entire scheduling if the chosen task cannot finish its execution in its LET.
                 const executionTimeEnd = coreCurrentTime[core.name] + this.ExecutionTimeOnCore(coreChosenTask[core.name].instance);
                 if (executionTimeEnd > coreChosenTask[core.name].instance.letEndTime) {
                     const message = `Could not schedule enough time for task ${tasksInstances[coreChosenTask[core.name].number].name}, instance ${coreChosenTask[core.name].instance.instance} on core ${core.name}!`;
                     return { 'schedulable': false, 'message': message };
                 }
+
+                // If the next scheduling decision is earlier than the current time, do nothing.
+                if (nextSchedulerEventTime <= coreCurrentTime[core.name]) {
+                    corePreemptedTasksQueue[core.name].push(coreChosenTask[core.name]);
+                    continue;
+                }
+
+                // Schedule as much of the chosen task instance's execution time before the next preeemption time.
+                // Create an execution interval for the chosen task instance.
                 if (executionTimeEnd <= nextSchedulerEventTime) {
                     this.AddExecutionInterval(coreChosenTask[core.name].instance.executionIntervals, coreCurrentTime[core.name], executionTimeEnd, core.name);
                     coreChosenTask[core.name].instance.remainingExecutionTime = 0;

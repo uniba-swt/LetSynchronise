@@ -79,12 +79,12 @@ class PluginSchedulerRandom {
             // Select a random core. Before execution, chosenTask.instance.currentCore stores the
             // core decided by the designer. During execution, chosenTask.instance.currentCore stores the last
             // core decided by the scheduler, e.g., to support task migration.
-            chosenTask.instance.currentCore = cores[Math.floor(Math.random() * cores.length)];
+            chosenTask.instance.currentCore = cores[Utility.RandomInteger(0, null, cores.length - 1)];
             
-            // Make sure the current time is not earlier than the chosen task instance's LET start time.
+            // Ensure that the current time is not earlier than the next task preemption or the chosenTask's LET start time.
             coreCurrentTime[chosenTask.instance.currentCore.name] = Math.max(coreCurrentTime[chosenTask.instance.currentCore.name], chosenTask.instance.letStartTime);
             
-            // Make sure the chosen task instance finishes its execution in its LET.
+            // Abort the entire scheduling if the chosen task cannot finish its execution in its LET.
             const nextTime = coreCurrentTime[chosenTask.instance.currentCore.name] + this.ExecutionTimeOnCore(chosenTask.instance);
             if (nextTime > chosenTask.instance.letEndTime) {
                 const message = `Could not schedule enough time for task ${tasks[chosenTask.number].name}, instance ${chosenTask.instance.instance} on core ${chosenTask.instance.currentCore.name}!`;
