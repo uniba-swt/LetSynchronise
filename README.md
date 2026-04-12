@@ -1,4 +1,7 @@
 # LetSynchronise
+
+![Schedule](https://github.com/user-attachments/assets/eb30b087-69e1-400a-80cd-3ba4f9d97815)
+
 LetSynchronise is an extensible, web-based, open-source (GPL3) framework for modelling, 
 simulating, analysing, and optimising systems based on the Logical Execution Time (LET) paradigm. 
 It currently focuses on timing behaviour and does not support the
@@ -9,7 +12,9 @@ policies and optimisations, (2) make solutions and benchmarks
 readily accessible, and (3) fairly and accurately reproduce and 
 evaluate the results of existing work. 
 
-Paper describing LetSynchronise:
+![EventChains](https://github.com/user-attachments/assets/3474355a-285b-4461-803e-b4b1578e0803)
+
+Papers describing LetSynchronise:
 * [ E. Yip and M. M. Y. Kuo. 
     _LetSynchronise: An Open-Source Framework for Analysing and Optimising Logical Execution Time Systems_. 
     CPS-IoT Week, 2023
